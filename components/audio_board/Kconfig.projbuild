@@ -1,0 +1,15 @@
+menu "Audio HAL"
+
+choice CUSTOMER_AUDIO_BOARD
+    prompt "Audio board"
+    default SEVETEST30_BOARD
+    help
+        Select an audio board to use with the ESP-ADF
+
+config SEVETEST30_BOARD
+    bool "sevetest30"
+
+endchoice
+
+endmenu
+
