@@ -28,7 +28,6 @@
 #define TCA6416A_IO_RESET GPIO_NUM_2 // TCA6416A的复位信号输入
 
 // 下面列出TCA6416A中一些对sevetest30工程具有价值的寄存器，您可以添加需要的寄存器,详细信息可参考TCA6416A规格书
-
 // 两个输入值寄存器，只读有效
 #define TCA6416A_IN1 0x00
 #define TCA6416A_IN2 0x01

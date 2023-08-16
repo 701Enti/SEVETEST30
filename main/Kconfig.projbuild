@@ -1,0 +1,97 @@
+menu "sevetest30 Configuration"
+
+config WIFI_SSID
+    string "WiFi SSID"
+	default ""
+	help
+		SSID (network name) for the example to connect to.
+
+config WIFI_PASSWORD
+    string "WiFi Password"
+	default ""
+	help
+		WiFi password (WPA or WPA2) for the example to use.
+		Can be left blank if the network has no security set.
+
+    
+
+
+config NTP_SERVER_0
+    string "the first ntp server name"
+    default "ntp.aliyun.com"
+    help
+        the first ntp server name
+
+config NTP_SERVER_1
+    string "the second ntp server name"
+    default "ntp1.aliyun.com"
+    help
+        the second ntp server name
+
+config NTP_SERVER_2
+    string "the third ntp server name"
+    default "ntp2.aliyun.com"
+    help
+        the third ntp server name
+
+
+
+config BAIDU_ACCESS_KEY
+    string "Baidu speech access key ID"
+    default ""
+    help
+        Baidu speech Access key ID
+
+config BAIDU_SECRET_KEY
+    string "Baidu speech access secret"
+    default ""
+    help
+        Baidu speech Access secret
+
+
+
+config IP_138_TOKEN
+    string " ip138 position access token"
+    default ""
+    help
+        you could get a free token if you haven't had it , just click "https://user.ip138.com/ip/"
+
+  
+        
+
+config WEATHER_API_KEY
+    string "weather server access keyID"
+    default ""
+    help
+        you could get a free keyID if you haven't had it , just click "https://dev.qweather.com/"
+
+choice WEATHER_API_URL
+        prompt "weather server access keyID"
+        default WEATHER_API_FREE_URL
+        help
+          Need replace the default host name "devapi.qweather.com" with "api.qweather.com" if you pay for a Qweather VIP keyID
+    
+    config WEATHER_API_FREE_URL
+        bool "free_url"
+
+    config WEATHER_API_VIP_URL
+        bool "vip_url"
+    
+endchoice
+
+
+
+config BAT_STOP_VOLTAGE
+    int "set the min of battery voltage - mV"
+    default "3300"
+    help
+        the battery voltage which lets system force power to turn off
+
+config BAT_FULL_VOLTAGE
+    int "set the max of battery voltage - mV"
+    default "4200"
+    help
+        the battery voltage which lets system stop charge
+
+
+endmenu
