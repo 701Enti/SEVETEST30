@@ -143,6 +143,8 @@ void refresh_weather_data()
 }
 
 //初始化系统时间数据,sntp方式,只要调用一次，每在周期时间（默认1小时）后再一次自动调整
+//调用这个函数后，系统需要等待NTP服务器响应，因此天气数据不会在跳出函数后就完成更新
+//测试发现默认使用的NTP需要调用完成后3到4秒完成更新
 void init_time_data_sntp()
 {
   //调整方式参考了官方文档 https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
@@ -465,9 +467,13 @@ void transform_real_time_weather_data()
     // 存储到 real_time_weather_data
 
     //传来的是字符型，因为后续分析需要，转换成整型存储起来
+    //weather_UI_1
     sscanf(cjson_temp->valuestring,"%d",&real_time_weather_data.temp);
     sscanf(cjson_icon->valuestring,"%d",&real_time_weather_data.icon);
+    //weather_UI_2
+    sscanf(cjson_humidity->valuestring,"%d",&real_time_weather_data.humidity);
 
+    
     // real_time_weather_data.obsTime = cjson_obsTime->type;
     // real_time_weather_data.feelsLike = cjson_feelsLike->type;
     // real_time_weather_data.text = cjson_text->type;
@@ -475,7 +481,7 @@ void transform_real_time_weather_data()
     // real_time_weather_data.windDir = cjson_windDir->type;
     // real_time_weather_data.windScale = cjson_windScale->type;
     // real_time_weather_data.windSpeed = cjson_windSpeed->type;
-    // real_time_weather_data.humidity = cjson_humidity->type;
+    
     // real_time_weather_data.precip = cjson_precip->type;
     // real_time_weather_data.pressure = cjson_pressure->type;
     // real_time_weather_data.vis = cjson_vis->type;

@@ -17,54 +17,39 @@
 #include <math.h>
 #include <esp_random.h>
 
-#define HIGH_TEMP 50 //高温的阈值
-#define COMFORT_TEMP 26//舒适的阈值
-#define LOW_TEMP 2//低温的阈值
-#define PUBLIC_TEMP 20 //公共除数，这个除数希望使得温度与三个阈值间的差值能够被片面平等地映射到 0 - 1之间，因此，在合理范围，它始终应该大于温度与任何三个阈值间的差值
-
 #define LOW_TEMP_MULTIPLE 20 //低于BLUE_TEMP多少倍将达到设定的最高白色亮度
 
 bool weather_change_flag = 0;
 
-// 将温度数据体现颜色上
-// 摄氏温度+最大允许亮度值+三个变量存储高温，舒适，低温趋近程度，按顺序默认是 R G B三个分量,换顺序可以让温度越高越显示蓝色
+// 将温度数据体现颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
+// 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G B三个分量 0 - (value_max)
 // 以下函数是比较低级的数据可视化，对数据效果有很大损耗
 // 我们通过temp-26并获取绝对值，来得到temp与26的差值，再映射到0-1之间并用1去减它，
 // 再乘上 value_max 得到绿色分量的值，这样越接近26，绿色分量的值更大，更显示绿色
-// 而对于红色则是用temp-50，蓝色则用temp-2，按相同算法。
-
-// 如果是低于2摄氏度，则颜色为白色，低温程度显示到白色的亮度上，如果高于50，始终为红色，但是不会体现在红色亮度上。
-// 为了颜色的合理与均匀，我们不得不设50和26和2摄氏度作为R G B 分界阈值，损失2摄氏度以下可视化的机会，当然，这可以通过宏定义修改
+// 而对于红色则是用temp-40，蓝色则用temp-12，按相同算法。
+// 如果是低于12摄氏度，则颜色始终为纯白色，如果高于40，始终为纯红色。
+// 为了颜色的合理与均匀，我们不得不设40和26和12摄氏度作为R G B 分界阈值，损失12摄氏度以下可视化的机会，当然，这可以通过Kconfig修改
 void temp_to_color(int temp,uint8_t value_max,uint8_t *high,uint8_t *comfort,uint8_t *low){
-
     //如果在自由变化范围
-    if (temp >= LOW_TEMP && temp <= HIGH_TEMP)
+    if (temp >= CONFIG_LOW_TEMP && temp <= CONFIG_HIGH_TEMP)
     {
-        *high = abs(temp - HIGH_TEMP);
-        *high = (1 - *high / PUBLIC_TEMP) * value_max;
+        *high = abs(temp - CONFIG_HIGH_TEMP);
+        *high = (1 - *high / CONFIG_PUBLIC_DIVISOR) * value_max;
 
-        *comfort = abs(temp - COMFORT_TEMP);
-        *comfort = (1 - *comfort / PUBLIC_TEMP) * value_max;
+        *comfort = abs(temp - CONFIG_COMFORT_TEMP);
+        *comfort = (1 - *comfort / CONFIG_PUBLIC_DIVISOR) * value_max;
 
-        *low = abs(temp - LOW_TEMP);
-        *low = (1 - *low / PUBLIC_TEMP) * value_max;
+        *low = abs(temp - CONFIG_LOW_TEMP);
+        *low = (1 - *low / CONFIG_PUBLIC_DIVISOR) * value_max;
     }
-
-    //极端高温
-    if (temp > HIGH_TEMP)
+    //高温
+    if (temp > CONFIG_HIGH_TEMP)
         *high = value_max;//只写入R
-       
     //低温
-    if (temp < LOW_TEMP){
-        uint8_t white_value = 0;
-        white_value = 1 + abs(temp - LOW_TEMP) / LOW_TEMP / 20 * value_max; // 加1是为了防止颜色值为0不显示数据
-        if (white_value > value_max)
-            white_value = value_max;
-
+    if (temp < CONFIG_LOW_TEMP){
+        uint8_t white_value = value_max;
         *high = white_value;
-
         *comfort = white_value;
-
         *low = white_value;
     }
 }

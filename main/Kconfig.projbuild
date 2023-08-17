@@ -57,8 +57,6 @@ config IP_138_TOKEN
         you could get a free token if you haven't had it , just click "https://user.ip138.com/ip/"
 
   
-        
-
 config WEATHER_API_KEY
     string "weather server access keyID"
     default ""
@@ -79,19 +77,29 @@ choice WEATHER_API_URL
     
 endchoice
 
-
-
-config BAT_STOP_VOLTAGE
-    int "set the min of battery voltage - mV"
-    default "3300"
+config HIGH_TEMP
+    int "highest temperature"
+    default 40
     help
-        the battery voltage which lets system force power to turn off
+        what's the highest temperature in your living place,may be 40 degrees Celsius,please enter degree centigrade.
 
-config BAT_FULL_VOLTAGE
-    int "set the max of battery voltage - mV"
-    default "4200"
+config LOW_TEMP
+    int "lowest temperature"
+    default 12
     help
-        the battery voltage which lets system stop charge
+        what's the lowest temperature in your living place,may be 12 degrees Celsius,please enter degree centigrade.
 
+config COMFORT_TEMP
+    int "comfortable temperature"
+    default 26
+    help
+        what's the comfortable temperature do you think,may be 26 degrees Celsius,please enter degree centigrade.
+
+config PUBLIC_DIVISOR
+    int "public divisor"
+    default 20
+    help
+        A common divisor that wants the difference between temperature and the three thresholds to be partially and equally mapped to 0-1, 
+        so that it should always be greater than the difference between temperature and any three thresholds to a reasonable extent
 
 endmenu

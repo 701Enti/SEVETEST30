@@ -2,7 +2,7 @@
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-//       该文件对于硬件的配置连接完全针对sevetest30,使用前请参考兼容性问题
+//       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
 // 邮箱：   3044963040@qq.com
 // github: https://github.com/701Enti
 // bilibili账号: 701Enti
@@ -21,11 +21,6 @@ systemtime_t systemtime_data;
 battery_data_t battery_data;
 
 esp_adc_cal_characteristics_t adc_chars;
-
-//电池电量平均滤波选取的队列电量元素个数,这将会影响电量平滑度和采集延迟
-#define BAT_FILTER_ELEMENT_NUMBER 20
-
-uint16_t battery_filter_buf [BAT_FILTER_ELEMENT_NUMBER] = {0};
 
 // 刷新缓存的系统时间，该函数需要频繁调用，以同步地获取不断改变的系统时间(初始化NTP矫正函数在 sevetest30_IWEDA.h)
 void refresh_time_data()
@@ -140,44 +135,18 @@ void refresh_time_data()
     }
 }
 
-// 刷新缓存的电池数据，包括电池电压，电量百分比，充电状态，该函数需要频繁调用，以同步地获取不断改变的电池电压
+// 刷新缓存的电池数据，包括电池电压，充电状态，该函数需要频繁调用，以同步地获取不断改变的电池电压
 void refresh_battery_data(){
 
     const char *TAG = "refresh_battery_data";
 
+    //实时电压
     uint32_t raw  = adc1_get_raw(ADC1_CHANNEL_8);
     battery_data.voltage = esp_adc_cal_raw_to_voltage(raw,&adc_chars) * 2;//sevetest30硬件设计中，检测端电压为实际电压一半
     
     //充电状态
-    if(ext_io_value_data.charge_SIGN == 0)battery_data.charge_flag = true;
-    if(ext_io_value_data.finished_SIGN == 0)battery_data.finished_flag = true;
-    if(ext_io_value_data.charge_SIGN == ext_io_value_data.finished_SIGN)ESP_LOGI(TAG,"充电状态反馈异常");
-
-    //电量滤波与计算 
-
-    if(CONFIG_BAT_FULL_VOLTAGE <= CONFIG_BAT_STOP_VOLTAGE){
-      ESP_LOGI(TAG,"错误的电池电压设置");
-      battery_data.percentage = 404; 
-      return;
-    }
-    //测量的是端电压，由于充电时电池内部的化学反应会导致电压跳变，因此这里使用平均滤波简单地平衡电量百分比(电量精确到十分位，保存时乘上了10)
-    static int16_t i = 0;   
-    if(i != BAT_FILTER_ELEMENT_NUMBER)
-    {
-      //正在积累计算平均值使用的数据
-      battery_filter_buf[i] = (battery_data.voltage - CONFIG_BAT_STOP_VOLTAGE) * 1000 / (CONFIG_BAT_FULL_VOLTAGE - CONFIG_BAT_STOP_VOLTAGE);
-      i++;
-    }
-    else
-    {
-     //全部相加
-     for(i=BAT_FILTER_ELEMENT_NUMBER-1;i>=0;i--)
-          battery_data.percentage += battery_filter_buf[i];
-     //除以总数，取平均值
-     battery_data.percentage /= BAT_FILTER_ELEMENT_NUMBER; 
-     i = 0;
-    }
-    ESP_LOGI("ME","%d",battery_data.percentage);
+    battery_data.charge_flag   = ! ext_io_value_data.charge_SIGN;// 正在充电信号 0有效
+    battery_data.finished_flag = ! ext_io_value_data.finished_SIGN;// 充电完成信号 0有效
 }
 
 //初始化电池ADC电压监测硬件,ADC方式,开机只要调用一次
