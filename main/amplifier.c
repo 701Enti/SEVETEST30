@@ -7,7 +7,8 @@
 // bilibili账号: 701Enti
 // 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.10
 
-#include <driver/i2c.h>
+#include "driver/i2c.h"
+#include "esp_log.h"
 #include "amplifier.h"
 #include "sevetest30_BusConf.h"
 #include "sevetest30_gpio.h"
@@ -16,7 +17,9 @@
 //音频功放设置，是否静音(true/false)，是否掉电(true/false)，音量 取值为 0-24
 void amplifier_set(bool mute,bool sd,uint8_t volume){
  uint8_t buf [1] = {volume*STEP_VOL};
+ esp_err_t err = ESP_OK;
  ext_io_value_data.ns4268_MUTE = mute ;
  ext_io_value_data.ns4268_SD = sd ;
- i2c_master_write_to_device(I2C_MASTER_NUM,DP_ADD,buf,sizeof(buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+ err = i2c_master_write_to_device(I2C_MASTER_NUM,DP_ADD,buf,sizeof(buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+ if(err!=ESP_OK)ESP_LOGI("amplifier_set","与TPL0401B通讯时发现问题 描述： %s",esp_err_to_name(err));
 }
