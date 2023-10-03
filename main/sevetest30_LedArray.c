@@ -14,7 +14,7 @@
 
 // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
 // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
-// 邮箱：   3044963040@qq.com
+// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
 // bilibili账号: 701Enti
 // 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.13
@@ -629,15 +629,11 @@ void color_compound(uint8_t line_sw)
 	}
 }
 
-
-// ESPIDFv4.4 支持
-
 //灯板阵列配置，自动根据group_sw进行0和1通道一同分组切换，group_sw表示组别，0-5
 //为每两行分组是为支持压缩显示提高效率
 void ledarray_set_and_write(uint8_t group_sw){
 	if(group_sw>VERTICAL_LED_NUMBER/2-1)return;
   
-    //ESP IDFv4.4 配置选择
     rmt_config_t config0 = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[group_sw*2+0], 0); // 使用默认通道配置模板，通道0
     rmt_config_t config1 = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[group_sw*2+1], 1); // 使用默认通道配置模板，通道1，
 	config0.clk_div = 2;  //修改配置模板成员，设定计数器频率到40MHz，如果频率不适配，是无法运行的
@@ -665,74 +661,13 @@ void ledarray_set_and_write(uint8_t group_sw){
 	strip0->refresh(strip0, 100);//刷新	（灯带选择 超时时间）
 	strip1->refresh(strip1, 100); 
 
+    gpio_reset_pin(ledarray_gpio_info[group_sw*2+0]);
+    gpio_reset_pin(ledarray_gpio_info[group_sw*2+1]);
 
-  //经过我们的测试，引入引脚配置，led_strip_rmt_ws2812.c的clear,del函数，通道删除，控制器重载，内存重载，此处未能够取消IO与rmt通道的绑定性连接
-  //导致所有灯组都接收rmt下两个独立通道发送的任何数据,尽管这不属于它们，这形成了严重的显示问题。
-  //由于这个库是我们由v5.1到v4.4的兼容性移植，我们发现在v5.1这种绑定可以通过调用删除或重载类的函数解除，因此移植时亦想故技重施
-  //当然，可以索性自行强制解除，这足够高效便捷，完全可以运行成功，不过这可能是非法的。
-  //同时我们提供v5.1的独立sevetest30_LedArray库函数，经过测试应该可以使用
-  //这主要是我对ESPIDF使用过于生疏导致的，请求大家的指教！
-  gpio_reset_pin(ledarray_gpio_info[group_sw*2+0]);
-  gpio_reset_pin(ledarray_gpio_info[group_sw*2+1]);
-
-  //删除通道准备下次选择发送
-  rmt_driver_uninstall(config0.channel);
-  rmt_driver_uninstall(config1.channel);
+    //删除通道准备下次选择发送
+    rmt_driver_uninstall(config0.channel);
+    rmt_driver_uninstall(config1.channel);
 }
-
-
-// //ESP IDFv5.1 选择 
-// // 灯板阵列配置，自动根据group_sw进行0和1通道一同分组切换，group_sw表示组别，0-5
-// // 为每两行分组是为支持压缩显示提高效率
-// void ledarray_set_and_write(uint8_t group_sw)
-// {
-//  //ESP IDFv5.1 配置选择
-//  // RMT通道
-//  rmt_channel_handle_t led_chan[2] = {NULL}; // 不需要数据反馈
-//  rmt_tx_channel_config_t tx_chan_config = {
-// 	 .clk_src = RMT_CLK_SRC_DEFAULT,		// 时钟源
-// 	 .mem_block_symbols = 128,			// 专用内存块大小 步长64
-//   .resolution_hz = RMT_RESOLUTION_HZ, // 分辨率
-// 	 .trans_queue_depth = 10,				// 允许后台事务数量
-//   .flags.invert_out = false,          // 信号不反转
-//   .flags.with_dma = false,            // 不需要DMA
-//  };
-//  // 编码器
-//  rmt_encoder_handle_t led_encoder[2] = {NULL};
-//  led_strip_encoder_config_t encoder_config = {
-//  	.resolution = RMT_RESOLUTION_HZ,
-//  };
-
-// 	static bool flag = 0;//已经写入过 标识
-// 	if(group_sw>VERTICAL_LED_NUMBER/2-1)return;
-// 	// 载入
-// 	for (uint8_t i = 0; i < 2; i++)
-// 	{ 
-// 	    tx_chan_config.gpio_num = ledarray_gpio_info[i+group_sw*2];//确定选择的IO
-
-// 		if(flag){
-// 			rmt_disable(led_chan[i]);
-// 			rmt_del_channel(led_chan[i]);//修改参数，删除通道
-// 		}	
-// 		else
-// 		rmt_new_led_strip_encoder(&encoder_config, &led_encoder[i]);
-
-// 		rmt_new_tx_channel(&tx_chan_config, &led_chan[i]);
-// 		rmt_enable(led_chan[i]); // 使能RMT
-// 	}
-// 	flag = 1; 
-// 	//写入
-// 	rmt_transmit_config_t tx_config = {
-// 		.loop_count = 0, // 不使用重复发送
-// 	};
-// 	for (uint8_t i = 0; i < 2; i++){
-// 		color_compound(group_sw*2+i+1);//合成
-       
-// 		rmt_transmit(led_chan[i], led_encoder[i],compound_result,sizeof(compound_result), &tx_config);
-// 		vTaskDelay(pdMS_TO_TICKS(10));//强制进行发送等待
-// 	}   
-// }
-
 
 //RGB亮度调制  导入r g b数值地址+亮度
 void ledarray_intensity_change(uint8_t *r,uint8_t *g,uint8_t *b,uint8_t intensity){

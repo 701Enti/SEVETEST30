@@ -1,16 +1,3 @@
-// 该文件被701Enti改动，修改的原代码会进行注释，原例程是pipeline_baidu_speech_mp3，归属于ESP-ADF
-// 修改：1 将BAIDU_TTS_ENDPOINT TTS_TEXT等定义为外部变量以支持其他程序,他们将仅更改为相同名字但是小写字母的变量
-//      2 将 app_main(void) 更改为 TTS_service
-//      3 在se30工程中添加同名头文件声明一些变量和函数方便外部调用
-// 官方例程连接：https://github.com/espressif/esp-adf/tree/master/examples/cloud_services/pipeline_baidu_speech_mp3
-// ESPADF官方文档 ：https://espressif-docs.readthedocs-hosted.com/projects/esp-adf/zh_CN/latest/get-started/index.html
-// 敬告：文件本体不包含HTTP请求和I2S驱动程序，MP3解码程序等等，而是使用了Espressif官方提供的pipeline_baidu_speech_mp3例程文件,非常感谢
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 邮箱：   3044963040@qq.com
-// github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.26
-
 /* Play MP3 Stream from Baidu Text to Speech service
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
@@ -19,6 +6,15 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+// 该文件被701Enti添加。利用ESP32S3的WIFI和I2S模块使用百度文字转语音TTS实现进一步语音处理，原例程是pipeline_baidu_speech_mp3
+// 官方例程连接：https://github.com/espressif/esp-adf/tree/master/examples/cloud_services/pipeline_baidu_speech_mp3
+// 敬告：使用了Espressif官方提供的pipeline_baidu_speech_mp3例程文件,非常感谢Espressif
+// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+// 邮箱：   hi_701enti@yeah.net
+// github: https://github.com/701Enti
+// bilibili账号: 701Enti
+// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.26
+
 #include <sys/time.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -49,6 +45,10 @@
 #else
 #include "tcpip_adapter.h"
 #endif
+
+#include "api_baiduTTS.h"
+#include "sevetest30_IWEDA.h"
+#include "amplifier.h"
 
 static const char *TAG = "BAIDU_SPEECH_EXAMPLE";
 
@@ -83,42 +83,16 @@ int _http_stream_event_handle(http_stream_event_msg_t *msg)
     return ESP_OK;
 }
 
-void app_main(void)
-{
-    esp_log_level_set("*", ESP_LOG_INFO);
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
-    esp_log_level_set("HTTP_STREAM", ESP_LOG_DEBUG);
-
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES) {
-        // NVS partition was truncated and needs to be erased
-        // Retry nvs_flash_init
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
-    ESP_ERROR_CHECK(esp_netif_init());
-#else
-    tcpip_adapter_init();
-#endif
-
-    ESP_LOGI(TAG, "[ 0 ] Start and wait for Wi-Fi network");
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-    periph_wifi_cfg_t wifi_cfg = {
-        .ssid = CONFIG_WIFI_SSID,
-        .password = CONFIG_WIFI_PASSWORD,
-    };
-    esp_periph_handle_t wifi_handle = periph_wifi_init(&wifi_cfg);
-    esp_periph_start(set, wifi_handle);
-    periph_wifi_wait_for_connected(wifi_handle, portMAX_DELAY);
-
-    audio_pipeline_handle_t pipeline;
-    audio_element_handle_t http_stream_reader, i2s_stream_writer, mp3_decoder;
-
-    ESP_LOGI(TAG, "[ 1 ] Start audio codec chip");
+void init_i2c_and_audio_device(){
     audio_board_handle_t board_handle = audio_board_init();
     audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
+    amplifier_set(0);
+}
+
+void tts_service()
+{
+    audio_pipeline_handle_t pipeline;
+    audio_element_handle_t http_stream_reader, i2s_stream_writer, mp3_decoder;
 
     ESP_LOGI(TAG, "[2.0] Create audio pipeline for playback");
     audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
@@ -162,7 +136,7 @@ void app_main(void)
     audio_pipeline_set_listener(pipeline, evt);
 
     ESP_LOGI(TAG, "[4.2] Listening event from peripherals");
-    audio_event_iface_set_listener(esp_periph_set_get_event_iface(set), evt);
+    audio_event_iface_set_listener(esp_periph_set_get_event_iface(se30_periph_set_handle), evt);
 
     ESP_LOGI(TAG, "[ 5 ] Start audio_pipeline");
     audio_pipeline_run(pipeline);
@@ -211,8 +185,8 @@ void app_main(void)
     audio_pipeline_remove_listener(pipeline);
 
     /* Stop all periph before removing the listener */
-    esp_periph_set_stop_all(set);
-    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(set), evt);
+    esp_periph_set_stop_all(se30_periph_set_handle);
+    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(se30_periph_set_handle), evt);
 
     /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
     audio_event_iface_destroy(evt);
@@ -223,5 +197,5 @@ void app_main(void)
     audio_element_deinit(i2s_stream_writer);
     audio_element_deinit(mp3_decoder);
 
-    esp_periph_set_destroy(set);
+    esp_periph_set_destroy(se30_periph_set_handle);
 }
