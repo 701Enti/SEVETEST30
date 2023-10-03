@@ -66,7 +66,9 @@
         "freertos.h": "c",
         "task.h": "c",
         "cdefs.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "headphone_detect.h": "c",
+        "i2c_bus.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

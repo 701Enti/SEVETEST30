@@ -1,11 +1,11 @@
-// 该文件由701Enti编写，包含一些sevetest30的网络方式环境数据获取（IWEDA），包含 时间 天气 经纬度 公网IP 地区 降水预警 等数据的快捷获取函数
+// 该文件由701Enti编写，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 附加：1 对于 和风天气+ESP32 通过zlib解压gzip数据可以参考这位大佬的博客，甚有帮助非常感谢：https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
 //      2  github - zlib项目 链接 https://github.com/madler/zlib
 //      3  和风天气API开发文档：   https://dev.qweather.com/docs/api
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// 邮箱：   3044963040@qq.com
+// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
 // bilibili账号: 701Enti
 // 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.30
@@ -14,6 +14,7 @@
 #define _SEVETEST30_IWEDA_H_
 #endif
 
+#include "esp_peripherals.h"
 #include "esp_err.h"
 #include "stdbool.h"
 
@@ -88,6 +89,7 @@ typedef struct ip_position
 }ip_position;
 
 //有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
+extern esp_periph_set_handle_t se30_periph_set_handle;
 
 extern char http_get_out_buf[HTTP_BUF_MAX]; // 输出数据缓存
 extern char http_get_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
@@ -110,11 +112,6 @@ void refresh_position_data();
 void refresh_weather_data();
 
 void init_time_data_sntp();
-
-
-
-
-
 
 void http_send_get_request(bool *flag);
 
