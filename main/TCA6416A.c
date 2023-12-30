@@ -10,13 +10,6 @@
 //       3 请注意外部引脚模式设置，错误的配置可能导致您的设备损坏，我们不建议修改这些默认配置 
 //       4 对于设计现实的不同，您可以更改结构体成员变量名，但是必须确保对应的IO次序不变如 P00 P01 P02 P03 以此类推
 //         同时成员变量名是上级程序识别操作引脚的关键，如果需要使用其上级程序而不仅仅是TCA6416A库函数，结构体成员变量名不应该随意修改，对当前硬件的更新必须修改上层调用
-// 电路特性： l(x)为红外发射 1有效 s(x)为红外发射接收 0表示接收到红外信号
-//           opt3001_INT为环境光中断信号，有效电平自由配置
-//           charge_SIGN finished_SIGN为充电信号，0有效
-//           ns4268_SD 功放使能   1有效
-//           ns4268_MUTE 功放静音 1有效
-//           hpin  耳机已插入信号  1表示检测到耳机插入
-//           addr ADDR引脚电平，用于设置主机地址
 // 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
 // bilibili账号: 701Enti
@@ -27,17 +20,20 @@
 #include "driver/i2c.h"
 #include "esp_log.h"
 
-
 uint8_t TCA6416A_data_buf[3] = {0x00,0x00,0x00};//缓存寄存器地址与数据 {reg + data}
 
 /// GPIO输入输出模式设置，同时保存模式数据，初始化用
 void TCA6416A_mode_set(TCA6416A_mode_t *pTCA6416Amode)
-{
-  
+{  
   const char *TAG = "TCA6416A_mode_set";
   esp_err_t err = ESP_OK;
 
-  uint8_t data1 = 0x00, data2 = 0x00; // 临时数据缓存
+  if (pTCA6416Amode == NULL){
+    ESP_LOGE(TAG,"无法处理的空指针");
+    return;
+  } 
+
+  uint8_t data1 = NULL, data2 = NULL; // 临时数据缓存
   bool *p; // 定义指针变量，指向成员变量地址 
 
   //确定设备地址
@@ -59,7 +55,7 @@ void TCA6416A_mode_set(TCA6416A_mode_t *pTCA6416Amode)
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_MODE1, TCA6416A_data_buf[1] = data1, TCA6416A_data_buf[2] = data2;
   err = i2c_master_write_to_device(I2C_NUM_0, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
-  if(err!=ESP_OK)ESP_LOGI(TAG,"与TCA6416A通讯时发现问题 描述： %s",esp_err_to_name(err));
+  if(err!=ESP_OK)ESP_LOGE(TAG,"与TCA6416A通讯时发现问题 描述： %s",esp_err_to_name(err));
 }
 
 // GPIO引脚数据交互服务，一次性全更新、写入，根据引脚模式配置以读写操作，以下是我一些肤浅的思路
@@ -67,13 +63,17 @@ void TCA6416A_mode_set(TCA6416A_mode_t *pTCA6416Amode)
 // 读：直接读出两个寄存器的值，映射到value结构体中，我们之后显然只关心读出“只读的”输入引脚数据，读出的“只写的”输出引脚数据是无效的，对于我们的程序毫无意义，之后也不会理会
 // 读数据由传入的结构体地址对应的结构体中按成员直接回读
 void TCA6416A_gpio_service(TCA6416A_value_t *pTCA6416Avalue)
-{
-
+{  
   const char *TAG = "TCA6416A_gpio_service";
   esp_err_t err = ESP_OK;
 
+  if (pTCA6416Avalue == NULL){
+    ESP_LOGE(TAG,"无法处理的空指针");
+    return;
+  } 
+
   bool *p; // 定义指针变量，指向成员变量地址
-  uint8_t data1 = 0x00, data2 = 0x00; // 临时数据缓存
+  uint8_t data1 = NULL, data2 = NULL; // 临时数据缓存
 
   //确定设备地址 
   uint8_t i2c_add = 0x20;
@@ -112,5 +112,5 @@ void TCA6416A_gpio_service(TCA6416A_value_t *pTCA6416Avalue)
     if (i >= 8) *p = data2 >> (i - 8) & 0x01; // 不断取出位移后data1最低位
   }
 
-  if(err!=ESP_OK)ESP_LOGI(TAG,"与TCA6416A通讯时发现问题 描述： %s",esp_err_to_name(err));
+  if(err!=ESP_OK)ESP_LOGE(TAG,"与TCA6416A通讯时发现问题 描述： %s",esp_err_to_name(err));
 }

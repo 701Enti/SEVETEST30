@@ -32,6 +32,7 @@
 #include "esp_peripherals.h"
 #include "periph_wifi.h"
 #include "board.h"
+#include "board_ctrl.h"
 #include "esp_http_client.h"
 #include "cjson.h"
 #include "audio_idf_version.h"
@@ -41,7 +42,6 @@
 #include "tcpip_adapter.h"
 #endif
 
-esp_periph_set_handle_t se30_periph_set_handle;
 
 char http_get_out_buf[HTTP_BUF_MAX] = {0}; // 输出数据缓存
 char http_get_url_buf[HTTP_BUF_MAX] = {0}; // url缓存,留着调用时候可以用
@@ -50,8 +50,8 @@ char *ip_address;//公网IP
 char *get_headers_key = NULL;//请求头 - 键
 char *get_headers_value = NULL;//请求头 - 值
 
-Real_time_weather real_time_weather_data;
-ip_position ip_position_data;
+Real_time_weather *real_time_weather_data;
+ip_position *ip_position_data;
 
 // 通用网络连接函数 SSID：网络名称 password: wifi密码
 esp_err_t wifi_connect(char *ssid, char *password)
@@ -96,7 +96,7 @@ void refresh_position_data()
   //获取公网IP
   Task_comp_flag = false;
   sprintf(http_get_url_buf,GET_IP_ADDRESS_API);
-  xTaskCreate(&http_send_get_request,"http_send_get_request", 8192,&Task_comp_flag,5,NULL);
+  xTaskCreatePinnedToCore(&http_send_get_request,"http_send_get_request", 8192,&Task_comp_flag,HTTP_TASK_PRIO,NULL,HTTP_TASK_CORE);
   while (!Task_comp_flag);
   transform_ip_address();
 
@@ -105,11 +105,11 @@ void refresh_position_data()
   get_headers_key  = "token";
   get_headers_value = CONFIG_IP_138_TOKEN;
   snprintf(http_get_url_buf,HTTP_BUF_MAX,IP_POSITION_API,ip_address); // 确定请求URL
-  xTaskCreate(&http_send_get_request,"http_send_get_request", 8192,&Task_comp_flag,5,NULL); // 启动http传输任务,GET方式
+  xTaskCreatePinnedToCore(&http_send_get_request,"http_send_get_request", 8192,&Task_comp_flag,HTTP_TASK_PRIO,NULL,HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!Task_comp_flag);
   transform_postcode();
 
-  //ip_position_data.postcode = "343100";//调试用
+  //ip_position_data.postcode = "343100";//调试用,并将上面这块注释来避免调试时的花费
 
   // 通过邮政编码获取经纬度以进行城市搜索
   // 原因有三点
@@ -118,15 +118,15 @@ void refresh_position_data()
   // 3.邮政编码大概率直接对应一个县或区，并且IP138API网页还可找到一个免费还不用鉴权的"行政区划"查询服务，会返回一个经纬度，这是GeoAPI支持的搜索关键词
   //  免费还不用鉴权的行政区划查询服务，支持多种关键词搜索： https://quhua.ipchaxun.com/
   Task_comp_flag = false;
-  snprintf(http_get_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API, ip_position_data.postcode);          // 确定请求URL
-  xTaskCreate(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag, 5, NULL); // 启动http传输任务,GET方式
+  snprintf(http_get_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API, ip_position_data->postcode);          // 确定请求URL
+  xTaskCreatePinnedToCore(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag,HTTP_TASK_PRIO, NULL,HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!Task_comp_flag);
   transform_lng_lat();
 
   // 城市搜索，获取locationID
   Task_comp_flag = false;
-  snprintf(http_get_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data.lng, ip_position_data.lat, CONFIG_WEATHER_API_KEY);
-  xTaskCreate(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag, 5, NULL); // 启动http传输任务,GET方式
+  snprintf(http_get_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data->lng, ip_position_data->lat, CONFIG_WEATHER_API_KEY);
+  xTaskCreatePinnedToCore(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL,HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!Task_comp_flag);
   transform_locationID();
 }  
@@ -135,14 +135,14 @@ void refresh_position_data()
 void refresh_weather_data()
 {
   bool Task_comp_flag = false;// 任务是否完成标识
-  snprintf(http_get_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data.id, CONFIG_WEATHER_API_KEY); // 确定请求URL
-  xTaskCreate(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag, 5, NULL);           // 启动http传输任务,GET方式
+  snprintf(http_get_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data->id, CONFIG_WEATHER_API_KEY); // 确定请求URL
+  xTaskCreatePinnedToCore(&http_send_get_request, "http_send_get_request", 8192, &Task_comp_flag,HTTP_TASK_PRIO, NULL,HTTP_TASK_CORE);           // 启动http传输任务,GET方式
   while (!Task_comp_flag);
   transform_real_time_weather_data();
 }
 
-//初始化系统时间数据,sntp方式,只要调用一次，每在周期时间（默认1小时）后再一次自动调整
-//调用这个函数后，系统需要等待NTP服务器响应，因此天气数据不会在跳出函数后就完成更新
+//初始化系统时间数据,sntp方式
+//调用这个函数后，系统需要等待NTP服务器响应
 //测试发现默认使用的NTP需要调用完成后3到4秒完成更新
 void init_time_data_sntp()
 {
@@ -158,11 +158,12 @@ void init_time_data_sntp()
 
 
 
+
 // 通过流方式发送GET请求，需要通过FreeRTOS启动任务，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束），
 // 输出会保存到 http_get_out_buf，本函数不提供任何实时解码，特殊API参考手册将在外部进行解析前预处理
 // 如果服务器响应的数据使用chunked编码发送或gzip压缩等传输处理，不会发生报错，并且这是在设计考虑范围之内的，
 // 如果出现响应数据无法解析的问题，考虑解码方式是否对应合理，本库中包含对gzip的便捷解压支持函数
-// 有效的分析方式是通过手机对API抓包，参考详细响应的消息头，极少数API文档也许不会提供这些信息
+// 有效的分析方式是通过抓包，参考详细响应的消息头，极少数API文档也许不会提供这些信息
 void http_send_get_request(bool *flag)
 {
     while (1)
@@ -187,7 +188,7 @@ void http_send_get_request(bool *flag)
         esp_err_t err_flag = esp_http_client_open(http_handle, 0); // get请求无需额外添加报文数据
         if (err_flag != ESP_OK)
         {
-            ESP_LOGI(TAG, "请求连接服务器时出现问题 -> %s", pURL);
+            ESP_LOGE(TAG, "请求连接服务器时出现问题 -> %s", pURL);
             esp_http_client_cleanup(http_handle); // 释放数据缓存
             *flag = true;
             vTaskDelete(NULL);                    // 终止任务
@@ -205,9 +206,9 @@ void http_send_get_request(bool *flag)
         if (status != 200)
         {
             if (esp_http_client_is_chunked_response(http_handle) == true)
-                ESP_LOGI(TAG, "不正常的响应 -> %d 本次传输使用chunked编码通讯", status);
+                ESP_LOGE(TAG, "不正常的响应 -> %d 本次传输使用chunked编码通讯", status);
             else
-                ESP_LOGI(TAG, "不正常的响应 -> %d 共接收到 -> %d", status, len);
+                ESP_LOGE(TAG, "不正常的响应 -> %d 共接收到 -> %d", status, len);
             esp_http_client_cleanup(http_handle); // 释放数据缓存
             *flag = true;
             vTaskDelete(NULL); // 终止任务
@@ -260,7 +261,7 @@ void gzip_decompress(void *input, void *output, int len)
     flag = inflateInit2(&stream_config, ZLIB_WINDOW_MAX); // 传入参数
     if (flag != Z_OK)
     {
-        ESP_LOGI(TAG, "配置解压参数时出错");
+        ESP_LOGE(TAG, "配置解压参数时出错");
         return;
     }
 
@@ -275,7 +276,7 @@ void gzip_decompress(void *input, void *output, int len)
             break;
         else if (flag != Z_OK)
         {
-            ESP_LOGI(TAG, "解压数据时出现问题，在 %lx -> %lx 时", stream_config.total_in, stream_config.total_out);
+            ESP_LOGE(TAG, "解压数据时出现问题，在 %lx -> %lx 时", stream_config.total_in, stream_config.total_out);
             return;
         }
     }
@@ -285,6 +286,10 @@ void gzip_decompress(void *input, void *output, int len)
     // 最后一件事，在输出末尾添加结束标识以便识别
     ((char *)output)[stream_config.total_out] = '\0';
 }
+
+
+
+
 //解析返回的IP地址数据，保存到ip_address
 void transform_ip_address(){
 
@@ -375,7 +380,7 @@ void transform_postcode(){
     cJSON *cjson_data = cJSON_GetObjectItem(root_data, "data"); 
     
     cJSON *cjson_postcode = cJSON_GetArrayItem(cjson_data, 5);
-    ip_position_data.postcode = cjson_postcode->valuestring;
+    ip_position_data->postcode = cjson_postcode->valuestring;
    
     ESP_LOGI(TAG, "解析完毕,获取到IP归属地邮政编码 %s",cjson_postcode->valuestring);
 
@@ -396,10 +401,10 @@ void transform_lng_lat(){
   cJSON *cjson_lng = cJSON_GetObjectItem(cjson_results_root,"lng");
   cJSON *cjson_lat = cJSON_GetObjectItem(cjson_results_root,"lat");
 
-  ip_position_data.lng = cjson_lng->valuestring;
-  ip_position_data.lat = cjson_lat->valuestring;
+  ip_position_data->lng = cjson_lng->valuestring;
+  ip_position_data->lat = cjson_lat->valuestring;
   
-  ESP_LOGI(TAG,"获取到归属地 经度为%s 纬度为%s",ip_position_data.lng,ip_position_data.lat);
+  ESP_LOGI(TAG,"获取到归属地 经度为%s 纬度为%s",ip_position_data->lng,ip_position_data->lat);
 // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
 }
 //解析locationID数据,保存到ip_position_data,同时会进一步完善ip_position_data数据
@@ -420,17 +425,17 @@ void transform_locationID(){
   cJSON *cjson_adm1 = cJSON_GetObjectItem(cjson_location_root,"adm1");
   cJSON *cjson_country = cJSON_GetObjectItem(cjson_location_root,"country");
 
-  ip_position_data.country = cjson_country->valuestring;  
-  ip_position_data.adm1 = cjson_adm1->valuestring;
-  ip_position_data.adm2 = cjson_adm2->valuestring;
-  ip_position_data.name = cjson_name->valuestring;
-  ip_position_data.id = cjson_id->valuestring;
+  ip_position_data->country = cjson_country->valuestring;  
+  ip_position_data->adm1 = cjson_adm1->valuestring;
+  ip_position_data->adm2 = cjson_adm2->valuestring;
+  ip_position_data->name = cjson_name->valuestring;
+  ip_position_data->id = cjson_id->valuestring;
 
   
 
-  ESP_LOGI(TAG,"获取到locationID %s",ip_position_data.id);
-  ESP_LOGI(TAG,"详细地址：%s - %s - %s  - %s ",ip_position_data.country,ip_position_data.adm1,
-                                                 ip_position_data.adm2,ip_position_data.name);
+  ESP_LOGI(TAG,"获取到locationID %s",ip_position_data->id);
+  ESP_LOGI(TAG,"详细地址：%s - %s - %s  - %s ",ip_position_data->country,ip_position_data->adm1,
+                                                 ip_position_data->adm2,ip_position_data->name);
 // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
 
 }
@@ -467,10 +472,10 @@ void transform_real_time_weather_data()
 
     //传来的是字符型，因为后续分析需要，转换成整型存储起来
     //weather_UI_1
-    sscanf(cjson_temp->valuestring,"%d",&real_time_weather_data.temp);
-    sscanf(cjson_icon->valuestring,"%d",&real_time_weather_data.icon);
+    sscanf(cjson_temp->valuestring,"%d",&real_time_weather_data->temp);
+    sscanf(cjson_icon->valuestring,"%d",&real_time_weather_data->icon);
     //weather_UI_2
-    sscanf(cjson_humidity->valuestring,"%d",&real_time_weather_data.humidity);
+    sscanf(cjson_humidity->valuestring,"%d",&real_time_weather_data->humidity);
 
     
     // real_time_weather_data.obsTime = cjson_obsTime->type;

@@ -1,12 +1,4 @@
-/* Play MP3 Stream from Baidu Text to Speech service
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-// 该文件被701Enti添加。利用ESP32S3的WIFI和I2S模块使用百度文字转语音TTS实现进一步语音处理，原例程是pipeline_baidu_speech_mp3
+// 该文件来自ESPIDF示例程序，被701Enti基于修改，原例程是pipeline_baidu_speech_mp3
 // 官方例程连接：https://github.com/espressif/esp-adf/tree/master/examples/cloud_services/pipeline_baidu_speech_mp3
 // 敬告：使用了Espressif官方提供的pipeline_baidu_speech_mp3例程文件,非常感谢Espressif
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
@@ -21,8 +13,7 @@
 #include "freertos/task.h"
 
 #include "esp_log.h"
-#include "esp_wifi.h"
-#include "nvs_flash.h"
+#include "board_ctrl.h"
 #include "sdkconfig.h"
 #include "audio_element.h"
 #include "audio_pipeline.h"
@@ -48,12 +39,11 @@
 
 #include "api_baiduTTS.h"
 #include "sevetest30_IWEDA.h"
-#include "amplifier.h"
 
 static const char *TAG = "BAIDU_SPEECH_EXAMPLE";
 
 #define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"
-#define TTS_TEXT "欢迎使用乐鑫音频平台，想了解更多方案信息请联系我们"
+#define TTS_TEXT "美好皆于不懈尝试之中热爱终在不断追逐之下嗨这里是701 Entire"
 
 static char *baidu_access_token = NULL;
 static char request_data[1024];
@@ -77,16 +67,10 @@ int _http_stream_event_handle(http_stream_event_msg_t *msg)
         return ESP_FAIL;
     }
 
-    int data_len = snprintf(request_data, 1024, "lan=zh&cuid=ESP32&ctp=1&tok=%s&tex=%s", baidu_access_token, TTS_TEXT);
+    int data_len = snprintf(request_data, 1024, "lan=zh&cuid=ESP32&ctp=1&per=1&vol=15&tok=%s&tex=%s", baidu_access_token, TTS_TEXT);
     esp_http_client_set_post_field(http_client, request_data, data_len);
     esp_http_client_set_method(http_client, HTTP_METHOD_POST);
     return ESP_OK;
-}
-
-void init_i2c_and_audio_device(){
-    audio_board_handle_t board_handle = audio_board_init();
-    audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
-    amplifier_set(0);
 }
 
 void tts_service()
@@ -101,14 +85,14 @@ void tts_service()
 
     ESP_LOGI(TAG, "[2.1] Create http stream to read data");
     http_stream_cfg_t http_cfg = HTTP_STREAM_CFG_DEFAULT();
-    http_cfg.event_handle = _http_stream_event_handle;
+    // http_cfg.event_handle = _http_stream_event_handle;
     http_cfg.type = AUDIO_STREAM_READER;
     http_stream_reader = http_stream_init(&http_cfg);
 
     ESP_LOGI(TAG, "[2.2] Create i2s stream to write data to codec chip");
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
     i2s_cfg.type = AUDIO_STREAM_WRITER;
-    i2s_cfg.i2s_config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    i2s_cfg.i2s_config.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT;
     i2s_stream_writer = i2s_stream_init(&i2s_cfg);
 
 
@@ -126,7 +110,8 @@ void tts_service()
     audio_pipeline_link(pipeline, &link_tag[0], 3);
 
     ESP_LOGI(TAG, "[2.6] Set up  uri (http as http_stream, mp3 as mp3 decoder, and default output is i2s)");
-    audio_element_set_uri(http_stream_reader, BAIDU_TTS_ENDPOINT);
+    char* url="http://m8.music.126.net/20231224152552/97cc4c74abd551efaa78c3d6e81c35c6/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/3288995250/d7eb/3128/2753/61f560bf05e0d68b9b30c6fe6c4bc4e3.mp3";
+    audio_element_set_uri(http_stream_reader, url);
 
     ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
@@ -141,7 +126,7 @@ void tts_service()
     ESP_LOGI(TAG, "[ 5 ] Start audio_pipeline");
     audio_pipeline_run(pipeline);
 
-    i2s_stream_set_clk(i2s_stream_writer, 16000, 16, 1);
+    i2s_stream_set_clk(i2s_stream_writer, 44100, 16, 2);
 
     while (1) {
         audio_event_iface_msg_t msg;
@@ -197,5 +182,5 @@ void tts_service()
     audio_element_deinit(i2s_stream_writer);
     audio_element_deinit(mp3_decoder);
 
-    esp_periph_set_destroy(se30_periph_set_handle);
+    // esp_periph_set_destroy(se30_periph_set_handle);
 }
