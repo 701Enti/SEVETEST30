@@ -77,7 +77,7 @@ void refresh_time_data()
     break;
 
     default:
-        ESP_LOGI(TAG,"无法判断的数据 %s",week_buf);
+        ESP_LOGE(TAG,"无法判断的数据 %s",week_buf);
         systemtime_data.week = 0;
     break;
     }
@@ -130,7 +130,7 @@ void refresh_time_data()
     break;
 
     default:
-       ESP_LOGI(TAG,"无法判断的数据 %s",month_buf);
+       ESP_LOGE(TAG,"无法判断的数据 %s",month_buf);
        systemtime_data.month = 0;
     break;
     }

@@ -1,17 +1,7 @@
 // 该文件由701Enti编写，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢，以下是源文件的声明
-
-    /* RMT example -- RGB LED Strip
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-    */
-
+// 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
 // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
 // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
 // 邮箱：   hi_701enti@yeah.net
@@ -238,13 +228,20 @@ const uint8_t sign_se30[872] = { 0X00,0X18,0X18,0X00,0X0C,0X00,0X00,0X1B,
 };
 
 //SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，或者切换每行WS2812数据传输IO口，务必修改这个数组内的值满足需求
-const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = {4, 5, 6, 7, 17, 18, 8, 38, 39, 40, 41, 42}; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
+const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = {4, 5, 6, 7, 17, 18, 8, 42 ,41 , 40, 39, 38}; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
 
-// 以下函数将数据存储到缓冲区，不包含发送
-// 三色分离方式 起始坐标xy,图案横向宽度值,应该等于字模实际宽度（已定义的：FIGURE-数字 LETTER-字母 CHINESE-汉字），
-// 导入字模，sizeof()获取数据长度，颜色RGB
-// change控制显示亮度，0-100%
-// 为了支持动画效果，允许起始坐标可以没有范围甚至为负数
+
+
+
+/// @brief RGB三色分离方式绘制,只支持单色绘制                                             
+/// @brief 取模方式请参考头文件
+/// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param breadth 图案宽度（已定义的：FIGURE-数字 LETTER-字母 CHINESE-汉字）
+/// @param p       导入字模指针
+/// @param byte_number 总数据长度 
+/// @param in_color 注入颜色 （RGB）
+/// @param change   亮度调整（1-100）
 void separation_draw(int16_t x, int16_t y, uint8_t breadth,uint8_t *p, uint8_t byte_number, uint8_t in_color[3],uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0; // xy的增加量
@@ -253,7 +250,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth,uint8_t *p, uint8_t b
 	int16_t sx = 0;			// 临时存储选定的横坐标
 	bool flag = 0;			// 该像素是否需要点亮
 	if (p == NULL){
-		ESP_LOGI("separation_draw","输入了无法处理的空指针");
+		ESP_LOGE("separation_draw","输入了无法处理的空指针");
 		return;
 	}
     
@@ -292,16 +289,24 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth,uint8_t *p, uint8_t b
 	}
 }
 
-// 彩色图像直显方式 起始坐标xy 导入字模(请选择带数据头的图案数据，长宽会自动获取)
+
+//  起始坐标xy 导入字模(请选择带数据头的图案数据，长宽会自动获取)
 //change控制显示亮度，0-100%
 // 为了支持动画效果，允许起始坐标可以没有范围甚至为负数
+
+/// @brief RGB彩色图像直显方式，自动获取图像头参数                                              
+/// @brief 取模方式请参考头文件
+/// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param p        导入图像指针
+/// @param change   亮度调整（1-100）
 void direct_draw(int16_t x, int16_t y,uint8_t *p,uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0;				  // xy的增加量
 	uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
 	int16_t sx = 0;						  // 临时存储选定的横坐标
 	if (p == NULL){
-		ESP_LOGI("direct_draw","输入了无法处理的空指针");
+		ESP_LOGE("direct_draw","输入了无法处理的空指针");
 		return;
 	}
 	// 获取图案长宽数据
@@ -345,9 +350,12 @@ void direct_draw(int16_t x, int16_t y,uint8_t *p,uint8_t change)
 	}
 }
 
-//  生成一个矩形字模,横向长度1-LINE_LED_NUMBER,纵向长度1-VERTICAL_LED_NUMBER
-// 返回指针指向数据区首地址，可以直接当字模用，
-// p-0x01 指向 entire_byte_num 的值，用于支持显示函数，表示总数据字节数
+
+/// @brief 生成一个矩形字模
+/// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
+/// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
+/// @return 直接当作字模载入separation_draw 
+/// @return 返回值 - 0x01指向 entire_byte_num 的值，用于支持显示函数，表示总数据字节数
 uint8_t *rectangle(uint8_t breadth, uint8_t length)
 {
 	uint8_t  x_byte_num = 1,entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
@@ -360,21 +368,12 @@ uint8_t *rectangle(uint8_t breadth, uint8_t length)
 	x_byte_num = ceil(breadth * 1.0 / 8.0);
     entire_byte_num = sizeof(uint8_t)*x_byte_num*length;
 
-    // //我们要的内存区域大小是一个变量，不好用数组，用内存分配，效果应该差不多,但是效率出奇的低，这是引用内存申请一般的弊端，没法用，并且malloc并不被认可是稳定安全的方式
-    // p = (uint8_t*)malloc(entire_byte_num+1);
-    // if (p == NULL)return p;//得到空指针，申请失败，结束函数
-	// pT1 = p + 0x01;//存储一下获取到数据的起始地址
-    // memset(p,0x00,entire_byte_num+1);//初始化一波
-    // *p = entire_byte_num;
-
-    //这种情况索性直接用个数足够大的数组，不仅无需关心free问题，速度可以快几倍，因为数组也等效于一个指针，使用非常轻松.总字节entire_byte_num还是可以被显示函数识别，不会产生多加载数组空白区域的显示问题
 	static uint8_t rectangle_data[RECTANGLE_SIZE_MAX] =  {0x00};
 	for (int i=0;i<RECTANGLE_SIZE_MAX;i++) 
 	    rectangle_data[i] = 0x00;//为使用过的rectangle_data全部置零
 	p =  rectangle_data;
 	pT1 = p + 0x01;//获取到数据的起始地址
 	*p = entire_byte_num;//装载entire_byte_num，其实就是rectangle_data[0] = entire_byte_num;
-
 
 	// 先进行全图填充
 	flag = 1;
@@ -452,7 +451,7 @@ void print_number(int16_t x,int16_t y,int8_t figure,uint8_t color[3],uint8_t cha
 
  }
  if (p == NULL){
-		ESP_LOGI("print_number","输入了0-9之外的数字");
+		ESP_LOGE("print_number","输入了0-9之外的数字");
 		return;
   }
   separation_draw(x,y,FIGURE,p,sizeof(matrix_7),color,change);//因为，数字字模数据大小一样，随便输入一个字模就可以
@@ -629,6 +628,9 @@ void color_compound(uint8_t line_sw)
 	}
 }
 
+
+
+
 //灯板阵列配置，自动根据group_sw进行0和1通道一同分组切换，group_sw表示组别，0-5
 //为每两行分组是为支持压缩显示提高效率
 void ledarray_set_and_write(uint8_t group_sw){
@@ -647,8 +649,8 @@ void ledarray_set_and_write(uint8_t group_sw){
     //安装 ws2812控制
 	led_strip_config_t strip_config0=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)config0.channel);
     led_strip_config_t strip_config1=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)config1.channel);
-    led_strip_t *strip0=led_strip_new_rmt_ws2812(&strip_config0);
-    led_strip_t *strip1=led_strip_new_rmt_ws2812(&strip_config1);
+    led_strip_t* strip0=led_strip_new_rmt_ws2812(&strip_config0);
+    led_strip_t* strip1=led_strip_new_rmt_ws2812(&strip_config1);
   
 	color_compound(group_sw*2+1);//合成通道0数据  
 	for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
@@ -658,8 +660,8 @@ void ledarray_set_and_write(uint8_t group_sw){
     for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
 		strip1->set_pixel(strip1,j/3,compound_result[j+1],compound_result[j+0],compound_result[j+2]);//写入 数据存放地址 数据索引 R G B
 
-	strip0->refresh(strip0, 100);//刷新	（灯带选择 超时时间）
-	strip1->refresh(strip1, 100); 
+	strip0->refresh(strip0, 10);//刷新	（灯带选择 超时时间）
+	strip1->refresh(strip1, 10); 
 
     gpio_reset_pin(ledarray_gpio_info[group_sw*2+0]);
     gpio_reset_pin(ledarray_gpio_info[group_sw*2+1]);
@@ -669,15 +671,17 @@ void ledarray_set_and_write(uint8_t group_sw){
     rmt_driver_uninstall(config1.channel);
 }
 
+
+
 //RGB亮度调制  导入r g b数值地址+亮度
 void ledarray_intensity_change(uint8_t *r,uint8_t *g,uint8_t *b,uint8_t intensity){
   //注意，RGB和HSV的取值范围并不一致，标准定义是 R G B 为 0-255  H 为 0-360 S V 为0-1（为了方便计算，这里 S V 映射到 0-100）  
   
   if (*r == 0 && *g == 0 && *b == 0)
-    return;//	倘若 r g b 三个分量值都是0，显然主观上不需要变换，增加明度只会干扰数值
+    return;//	倘若 r g b 三个分量值都是0，显然客观上不需要变换，增加明度只会干扰数值
 
   if (intensity>100){
-	ESP_LOGI("ledarray_intensity_change","错误的亮度数值 %d",intensity);
+	ESP_LOGE("ledarray_intensity_change","错误的亮度数值 %d",intensity);
 	*r = 0x00;
 	*g = 0x00;
 	*b = 0x00;

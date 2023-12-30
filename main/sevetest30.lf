@@ -1,5 +1,5 @@
 [mapping:main]
 archive:libmain.a
 entries:sevetest30_LedArray(noflash)
-entries:sevetest30_IWEDA(noflash)
+entries:mp3_decoder(noflash)
         

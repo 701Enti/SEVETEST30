@@ -56,13 +56,13 @@ void temp_to_color(int temp,uint8_t value_max,uint8_t *high,uint8_t *comfort,uin
 //显示了天气图标(9x9)+温度   起始坐标xy  亮度值0-100%   为0不会任何进行显示操作 始终返回UI主题颜色指针
 void weather_UI_1(int16_t x,int16_t y,uint8_t change){
   weather_change_flag = 0;
-  ESP_LOGI("WEATHER_UI_1","天气代码%d",real_time_weather_data.icon);
-  ESP_LOGI("WEATHER_UI_1","室外温度%d",real_time_weather_data.temp);
+  ESP_LOGI("WEATHER_UI_1","天气代码%d",real_time_weather_data->icon);
+  ESP_LOGI("WEATHER_UI_1","室外温度%d",real_time_weather_data->temp);
 
   //对于天气代码相关问题请参考和风天气 天气代码列表 以下case常量都可以找到对应天气
   //以下图标为sevetest30UI默认定制天气图标（目前2023.8.3更新）适配和风天气目前天气代码 【之后更新可能将图标绘制作为用户自定义个性化的一部分】
   //以下是有亿点长switch判断，准备天气图标
-  switch (real_time_weather_data.icon){
+  switch (real_time_weather_data->icon){
     //正在进行的，多云，晴，大雨等，包括夜晚的
     case 100:{
     const unsigned char gImage_100[251] = {0X00,0X18,0X09,0X00,0X09,0X00,0X00,0X1B,
@@ -1410,19 +1410,19 @@ void weather_UI_1(int16_t x,int16_t y,uint8_t change){
   }
 
   //温度显示 
-  int temp_buf = abs(real_time_weather_data.temp);//因为这里温度只能识别到数字元素，用abs取一下绝对值
+  int temp_buf = abs(real_time_weather_data->temp);//因为这里温度只能识别到数字元素，用abs取一下绝对值
   if (temp_buf>=100){
-    ESP_LOGI("WEATHER_UI_1","不合理的温度绝对值 %d",temp_buf);
+    ESP_LOGE("WEATHER_UI_1","不合理的温度绝对值 %d",temp_buf);
     return;//如果绝对值大于99显示都是问题了，大可能是传错了，退出
   }
 
   uint8_t color[3] = {0};
-  temp_to_color(real_time_weather_data.temp,255,&color[0],&color[1],&color[2]);//数据可以通过颜色可视化
+  temp_to_color(real_time_weather_data->temp,255,&color[0],&color[1],&color[2]);//数据可以通过颜色可视化
 
   if (change != 0)
   {
     // 确定要不要带负号，以及负号位置，它由数字位数决定
-    if (real_time_weather_data.temp < 0)
+    if (real_time_weather_data->temp < 0)
     {
             uint8_t *p = rectangle(2, 1);
             if (temp_buf >= 10)
