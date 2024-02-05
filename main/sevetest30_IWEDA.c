@@ -47,14 +47,14 @@ char http_get_out_buf[HTTP_BUF_MAX] = {0}; // 输出数据缓存
 char http_get_url_buf[HTTP_BUF_MAX] = {0}; // url缓存,留着调用时候可以用
 char *ip_address;//公网IP
 
-char *get_headers_key = NULL;//请求头 - 键
-char *get_headers_value = NULL;//请求头 - 值
-
 Real_time_weather *real_time_weather_data;
 ip_position *ip_position_data;
 
-// 通用网络连接函数 SSID：网络名称 password: wifi密码
-esp_err_t wifi_connect(char *ssid, char *password)
+char *get_headers_key = NULL;
+char *get_headers_value = NULL;
+
+// 通用网络连接函数
+esp_err_t wifi_connect()
 {
     // nvs数据存储初始化检查
     esp_err_t flag = nvs_flash_init();
@@ -75,11 +75,12 @@ esp_err_t wifi_connect(char *ssid, char *password)
     se30_periph_set_handle = esp_periph_set_init(&se30_periph_config);   // 获取运行配置句柄
 
     // 载入wifi信息
-    periph_wifi_cfg_t wifi_config = {
-        .ssid = ssid,
-        .password = password,
+    periph_wifi_cfg_t  periph_wifi_cfg = {
+        .wifi_config.sta.ssid = CONFIG_WIFI_SSID,
+        .wifi_config.sta.password = CONFIG_WIFI_PASSWORD,
     };
-    esp_periph_handle_t wifi_handle = periph_wifi_init(&wifi_config); // 获取wifi配置句柄
+
+    esp_periph_handle_t wifi_handle = periph_wifi_init(&periph_wifi_cfg); // 获取wifi配置句柄
 
     esp_periph_start(se30_periph_set_handle, wifi_handle);                                // 启动连接任务
     return periph_wifi_wait_for_connected(wifi_handle, portMAX_DELAY); // 请求连接
@@ -206,9 +207,10 @@ void http_send_get_request(bool *flag)
         if (status != 200)
         {
             if (esp_http_client_is_chunked_response(http_handle) == true)
-                ESP_LOGE(TAG, "不正常的响应 -> %d 本次传输使用chunked编码通讯", status);
+                ESP_LOGE(TAG, "本次传输响应数据已分块 但是处于不正常的响应状态 -> %d 数据将不会保存", status);
             else
-                ESP_LOGE(TAG, "不正常的响应 -> %d 共接收到 -> %d", status, len);
+                ESP_LOGE(TAG, "不正常的响应状态 -> %d 共接收到 -> %d 数据将不会保存", status, len);
+                
             esp_http_client_cleanup(http_handle); // 释放数据缓存
             *flag = true;
             vTaskDelete(NULL); // 终止任务
@@ -216,7 +218,7 @@ void http_send_get_request(bool *flag)
         else
         {
             if (esp_http_client_is_chunked_response(http_handle) == true)
-                ESP_LOGI(TAG, "连接就绪，响应状态-> %d ,本次传输使用chunked编码通讯", status);
+                ESP_LOGI(TAG, "连接就绪，响应状态-> %d ,本次传输响应数据已分块", status);
             else
                 ESP_LOGI(TAG, "连接就绪，响应状态-> %d ，响应数据共 %d", status, len);
         }

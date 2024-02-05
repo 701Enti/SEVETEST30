@@ -25,20 +25,21 @@
 #pragma once
 
 #include "audio_hal.h"
+#include "driver/i2c.h"
 
 /**
  * @brief Audio Codec Chip Function Definition
  */
-#define FUNC_AUDIO_CODEC_EN       (1)
+#define FUNC_AUDIO_CODEC_EN       (true)
 #define CODEC_ADC_I2S_PORT        (0)
+#define CODEC_DAC_I2S_PORT        (1)
 #define CODEC_ADC_BITS_PER_SAMPLE I2S_BITS_PER_SAMPLE_16BIT
-#define CODEC_ADC_SAMPLE_RATE     (48000)
+#define CODEC_ADC_SAMPLE_RATE     (16000)
 #define RECORD_HARDWARE_AEC       (false)
 #define BOARD_PA_GAIN             (10) /* Power amplifier gain defined by board (dB) */
-
 #define PA_ENABLE_GPIO            -1
 
-#define FUNC_SDCARD_EN            (1)
+#define FUNC_SDCARD_EN            (false)
 #define SDCARD_OPEN_FILE_NUM_MAX  5
 #define SDCARD_INTR_GPIO         -1
 #define ESP_SD_PIN_CLK           -1
@@ -54,7 +55,20 @@
 #define ESP_SD_PIN_CD            -1
 #define ESP_SD_PIN_WP            -1
 
-extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
+#define I2C_PORT   I2C_NUM_0
+#define I2C_SDA_IO GPIO_NUM_48
+#define I2C_SCL_IO GPIO_NUM_47
+
+#define I2S_MCK_IO GPIO_NUM_11;
+#define I2S_BCK_IO GPIO_NUM_12;
+#define I2S_WS_IO  GPIO_NUM_14;
+#define I2S_DAC_DATA_IO GPIO_NUM_13;
+#define I2S_ADC_DATA_IO GPIO_NUM_21;
+
+#define SPI_CS_IO   GPIO_NUM_0;
+#define SPI_MOSI_IO GPIO_NUM_36;
+#define SPI_MISO_IO GPIO_NUM_35;
+#define SPI_SCLK_IO GPIO_NUM_37;
 
 
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
@@ -74,18 +88,27 @@ extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 //数字电位器-音量控制
 #define  AMP_DP_ADD    0x3E  //I2C地址     数字电位器访问地址 这里用的是TPL0401B，它性价比足够高，可以尽量使用完全一样型号的数字电位器，因为这可能涉及通讯时是否需要命令的特殊问题，程序可能不兼容
 #define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送，如TPL0401B需要0x00
-#define  AMP_STEP_VOL  0x05  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
-#define  AMP_VOL_MAX 24      //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
+#define  AMP_STEP_VOL  0x02  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
+#define  AMP_VOL_MAX 100      //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
 
 
 //数字电位器-辅助电压5V 下调控制
 #define  BV_DP_ADD    0x2E  //I2C地址     使用了TPL0401A
 #define  BV_DP_COMMAND 0x00 //操作命令
-#define  BV_STEP_VOL  0x05  //单位步长度
-#define  BV_VOL_MAX 24      //总映射步数
+#define  BV_STEP_VOL  0x02  //单位步长度
+#define  BV_VOL_MAX 100      //总映射步数
+
+//线性马达模块
+#define VIBRA_IN1_IO GPIO_NUM_9
+#define VIBRA_IN2_IO GPIO_NUM_10
+
+//电池接入控制
+#define BAT_IN_CTRL_IO   GPIO_NUM_10
+
+// TCA6416A的中断信号输出
+#define TCA6416A_IO_INT  GPIO_NUM_1
 
 //TCA6416A 控制IO端口次序名称定义
-
 // 默认模式 0=输出模式 1=输入模式
 #define TCA6416A_DEFAULT_CONFIG_MODE   {\
     .p00 = 1,                           \

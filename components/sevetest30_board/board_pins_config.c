@@ -31,14 +31,16 @@
 #include "soc/io_mux_reg.h"
 #include "soc/soc_caps.h"
 
+#include "board_def.h"
+
 static const char *TAG = "SEVETEST30_BOARD";
 
 esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t *i2c_config)
 {
     AUDIO_NULL_CHECK(TAG, i2c_config, return ESP_FAIL);
     if (port == I2C_NUM_0 || port == I2C_NUM_1) {
-        i2c_config->sda_io_num = GPIO_NUM_48;
-        i2c_config->scl_io_num = GPIO_NUM_47;
+        i2c_config->sda_io_num = I2C_SDA_IO;
+        i2c_config->scl_io_num = I2C_SCL_IO;
     } else {
         i2c_config->sda_io_num = -1;
         i2c_config->scl_io_num = -1;
@@ -52,11 +54,11 @@ esp_err_t get_i2s_pins(i2s_port_t port, board_i2s_pin_t *i2s_config)
 {
     AUDIO_NULL_CHECK(TAG, i2s_config, return ESP_FAIL);
     if (port == I2S_NUM_0 || port == I2S_NUM_1) {
-        i2s_config->mck_io_num = GPIO_NUM_11;
-        i2s_config->bck_io_num = GPIO_NUM_12;
-        i2s_config->ws_io_num = GPIO_NUM_14;
-        i2s_config->data_out_num = GPIO_NUM_13;
-        i2s_config->data_in_num = GPIO_NUM_21;
+        i2s_config->mck_io_num = I2S_MCK_IO;
+        i2s_config->bck_io_num = I2S_BCK_IO;
+        i2s_config->ws_io_num  = I2S_WS_IO;
+        i2s_config->data_out_num = I2S_DAC_DATA_IO;
+        i2s_config->data_in_num  = I2S_ADC_DATA_IO;
     } else {
         memset(i2s_config, -1, sizeof(board_i2s_pin_t));
         ESP_LOGE(TAG, "i2s port %d is not supported", port);
@@ -69,15 +71,13 @@ esp_err_t get_spi_pins(spi_bus_config_t *spi_config, spi_device_interface_config
 {
     //获取为字库芯片提供的SPI通讯IO定义
     if(spi_device_interface_config == NULL)return ESP_FAIL;
-    spi_device_interface_config->spics_io_num = GPIO_NUM_0;
+    spi_device_interface_config->spics_io_num = SPI_CS_IO;
     
     if(spi_config == NULL)return ESP_FAIL;
-    spi_config->mosi_io_num = GPIO_NUM_36;
-    spi_config->miso_io_num = GPIO_NUM_35;
-    spi_config->sclk_io_num = GPIO_NUM_37;
-    spi_config->quadwp_io_num = -1;
-    spi_config->quadhd_io_num = -1;
-    
+    spi_config->mosi_io_num = SPI_MOSI_IO;
+    spi_config->miso_io_num = SPI_MISO_IO;
+    spi_config->sclk_io_num = SPI_SCLK_IO;
+
     return ESP_OK;
 }
 
@@ -88,10 +88,10 @@ int8_t get_pa_enable_gpio(void)
 
 int8_t get_vibra_motor_IN1_gpio(void)
 {
-    return GPIO_NUM_9;
+    return VIBRA_IN1_IO;
 }
 
 int8_t get_vibra_motor_IN2_gpio(void)
 {
-    return GPIO_NUM_10;
+    return VIBRA_IN2_IO;
 }

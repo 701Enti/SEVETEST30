@@ -24,5 +24,7 @@ void vibra_motor_init(gpio_num_t in1_gpio,gpio_num_t in2_gpio){
     gpio_set_level(in2_gpio,0);
     //MCPWM_TIMER_0作用MCPWM0A
     mcpwm_init(MCPWM_UNIT_0,MCPWM_TIMER_0,&mcpwm_config);//在MCPWM_UNIT_0上启用MCPWM_TIMER_0
-    mcpwm_set_signal_low(MCPWM_UNIT_0,MCPWM_TIMER_0,MCPWM0A);                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    mcpwm_set_signal_low(MCPWM_UNIT_0,MCPWM_TIMER_0,MCPWM0A);   
+
+    // mcpwm_start(MCPWM_UNIT_0,MCPWM_TIMER_0);                                                                                                                                                                                                                                                                                                                                                                                                                                              
 }

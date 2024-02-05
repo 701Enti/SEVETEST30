@@ -87,9 +87,11 @@ void color_compound(uint8_t line_sw);
 void ledarray_set_and_write(uint8_t group_sw);
 
 
-
-
 //以下是内部私有函数，一般不会在外部调用
+
+void ledarray_init();
+
+void ledarray_deinit();
 
 
 void color_input(int8_t x,int8_t y,uint8_t color[3]);
