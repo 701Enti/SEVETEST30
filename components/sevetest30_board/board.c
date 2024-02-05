@@ -23,12 +23,15 @@
  */
 
 #include "esp_log.h"
+#include "esp_err.h"
 #include "board.h"
 #include "audio_mem.h"
+#include "es8388.h"
 
 static const char *TAG = "SEVETEST30_BOARD";
 
-static audio_board_handle_t board_handle = 0;
+static audio_board_handle_t board_handle = NULL;
+extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 
 audio_board_handle_t audio_board_init(void)
 {
@@ -72,4 +75,22 @@ esp_err_t audio_board_deinit(audio_board_handle_t audio_board)
     audio_free(audio_board);
     board_handle = NULL;
     return ret;
+}
+
+void codec_set_mic_gain(board_ctrl_t *board_ctrl)
+{
+ if (es8388_set_mic_gain(board_ctrl->codec_adc_gain) != ESP_OK)
+ ESP_LOGE("board","设置麦克风增益发现问题");
+}
+
+void codec_config_adc_input(board_ctrl_t *board_ctrl)
+{
+ if (es8388_config_adc_input(board_ctrl->codec_adc_pin) != ESP_OK)
+ ESP_LOGE("board","设置麦克风端口发现问题");
+}
+
+void codec_config_dac_output(board_ctrl_t *board_ctrl)
+{
+ if (es8388_config_dac_output(board_ctrl->codec_dac_pin) != ESP_OK)
+ ESP_LOGE("board","设置音频输出端口发现问题");
 }

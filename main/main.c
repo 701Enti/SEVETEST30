@@ -4,11 +4,11 @@
 // 邮箱：   hi_701enti@yeah.net
 
 
-//      在此，701Enti望代表全体 ESPRESSIF硬件及软件框架的使用者对 乐鑫科技-ESPRESSIF ESP-IDF ESP-ADF ESP-DSP各种框架及相关创作者们 表示由衷感谢
-//      在此，701Enti望代表全体 网易云音乐API的使用者对 网易云音乐 网易云音乐API及相关创作者们 表示由衷感谢
-//      在此，701Enti望代表全体 zlib解压缩库的使用者对 zlib及相关创作者们 表示由衷感谢
-//      在此, 701Enti望代表全体 文心一言-ERNIE-Bot 百度语音识别 百度语音合成TTS支持 等各种API使用者对 百度智能云千帆大模型平台 API服务及相关创作者们表示由衷感谢
-//      在此，701Enti望代表全体 和风天气API 使用者对 和风天气及相关创作者们 表示由衷感谢
+//      在此，望代表全体 ESPRESSIF硬件及软件框架的使用者对 乐鑫科技-ESPRESSIF ESP-IDF ESP-ADF ESP-DSP各种框架及相关创作者们 表示由衷感谢
+//      在此，望代表全体 网易云音乐API的使用者对 网易云音乐 网易云音乐API及相关创作者们 表示由衷感谢
+//      在此，望代表全体 zlib解压缩库的使用者对 zlib及相关创作者们 表示由衷感谢
+//      在此, 望代表全体 文心一言-ERNIE-Bot 百度语音识别 百度语音合成TTS支持 等各种API使用者对 百度智能云千帆大模型平台 API服务及相关创作者们表示由衷感谢
+//      在此，望代表全体 和风天气API 使用者对 和风天气及相关创作者们 表示由衷感谢
 
 
 // github: https://github.com/701Enti
@@ -26,8 +26,8 @@
 
 #include "board_def.h"
 #include "board_ctrl.h"
-#include "api_baiduTTS.h"
 #include "fonts_chip.h"
+#include "audio_hal.h"
 
 #include "sevetest30_IWEDA.h"
 #include "sevetest30_SWEDA.h"
@@ -47,45 +47,49 @@ void fresh_LED(){
 }
 void app_main(void)
 {
-  char *ssid = "CMCC-102";
-  char *password = CONFIG_WIFI_PASSWORD;
-  wifi_connect(ssid, password);
-
- 
-
+  wifi_connect();
+  
   board_device_handle_t board_device_handle;
-  board_ctrl_t board_ctrl = {
+  static board_ctrl_t board_ctrl = {
     .p_ext_io_mode = &ext_io_mode_data,//存储IO模式信息的结构体的地址
     .p_ext_io_value = &ext_io_value_data,//存储IO电平信息的结构体的地址
     .boost_voltage = BV_VOL_MAX,
-    .amplifier_volume =AMP_VOL_MAX,
+    .amplifier_volume = AMP_VOL_MAX,
+    .amplifier_mute = false,
+    .codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START,
+    .codec_mode =  AUDIO_HAL_CODEC_MODE_BOTH, 
+    .codec_adc_gain = MIC_GAIN_MAX,
+    .codec_dac_pin = DAC_OUTPUT_ALL,
+    .codec_dac_volume = 100,
+    .codec_adc_pin = ADC_INPUT_LINPUT1_RINPUT1,
   };
 
     sevetest30_all_board_init(&board_ctrl,&board_device_handle);
   
- init_time_data_sntp();
+//  init_time_data_sntp();
 
-  const char *uri1="http://m7.music.126.net/20240101235954/ea28f6a802dba05bb92aae38c50c8e13/ymusic/035e/045a/0459/44715fce9730587377e3336e3413f69c.mp3";
-  NetEase_music_uri_play(uri1,1);
+  // const char *uri1="http://m801.music.126.net/20240131235843/e01f51a9945a199c29733bd93f7db790/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/31271000729/d21b/e9a7/ccf9/610fb06e731b320af25af6b5d8cb60b0.mp3";
+  // music_uri_play(uri1,1);
 
+  // char *text1 = "The audio data is typically acquired using an input Stream, processed with Codecs and in some cases with Audio Processing functions";
+  // baidu_TTS_cfg_t tts_cfg = BAIDU_TTS_DEFAULT_CONFIG(text1,1);
+  // tts_service_play(&tts_cfg,1);
 
-    TickType_t waketime;
-    waketime = xTaskGetTickCount();
+  baidu_ASR_cfg_t asr_cfg;
+  asr_cfg.rate = ASR_RATE_16K;
+  asr_cfg.stop_threshold = 100;
+  asr_cfg.send_threshold = 20;
+  asr_cfg.record_save_times_max = 100;
+  asr_service_start(&asr_cfg,1);
 
-    for(;;){
-    refresh_time_data();
-    time_UI_2(1,1,1);  
-    for (int i = 1; i < 5; i++){
-      ledarray_set_and_write(i);
-      vTaskDelayUntil(&waketime,pdMS_TO_TICKS(1000)); 
-    }
-  }
-
-
- 
-
-
-
+  //   for(;;){
+  //   refresh_time_data();
+  //   time_UI_2(1,1,1);
+  //    for (int i=0;i<=5;i++){
+  //     ledarray_set_and_write(i);
+  //     vTaskDelay(pdMS_TO_TICKS(10));
+  //    }
+  // }
 
 
 

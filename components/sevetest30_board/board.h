@@ -27,14 +27,16 @@
 
 #include "audio_hal.h"
 #include "board_def.h"
+#include "board_ctrl.h"
 #include "board_pins_config.h"
 #include "esp_peripherals.h"
+#include "esxxx_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
+extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 
 /**
  * @brief Audio board handle
@@ -75,6 +77,10 @@ audio_board_handle_t audio_board_get_handle(void);
  *          others  fail
  */
 esp_err_t audio_board_deinit(audio_board_handle_t audio_board);
+
+void codec_set_mic_gain(board_ctrl_t *board_ctrl);
+void codec_config_adc_input(board_ctrl_t *board_ctrl);
+void codec_config_dac_output(board_ctrl_t *board_ctrl);
 
 #ifdef __cplusplus
 }

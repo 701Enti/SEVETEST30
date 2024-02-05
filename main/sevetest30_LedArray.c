@@ -20,6 +20,7 @@
 
 #include <esp_log.h>
 #include "driver/rmt.h"
+#include "hal/rmt_types.h"
 
 //这是例程中使用的编码库，通过根目录CMakeLists添加 set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/led_strip) 来链接
 #include "led_strip.h"
@@ -230,6 +231,11 @@ const uint8_t sign_se30[872] = { 0X00,0X18,0X18,0X00,0X0C,0X00,0X00,0X1B,
 //SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，或者切换每行WS2812数据传输IO口，务必修改这个数组内的值满足需求
 const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = {4, 5, 6, 7, 17, 18, 8, 42 ,41 , 40, 39, 38}; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
 
+rmt_config_t* rmt_cfg0;
+rmt_config_t* rmt_cfg1;
+
+led_strip_t* strip0 = NULL;
+led_strip_t* strip1 = NULL;
 
 
 
@@ -630,48 +636,94 @@ void color_compound(uint8_t line_sw)
 
 
 
+/// @brief 初始化灯板阵列
+void ledarray_init(){
+    static rmt_config_t rmt_cfg0_buf=RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0],0); // 使用默认通道配置模板，通道0
+    static rmt_config_t rmt_cfg1_buf=RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1],1); // 使用默认通道配置模板，通道1
+	rmt_cfg0_buf.clk_div = 2;  //修改成员，设定计数器分频，如果频率不适配，是无法运行的
+	rmt_cfg1_buf.clk_div = 2;
 
-//灯板阵列配置，自动根据group_sw进行0和1通道一同分组切换，group_sw表示组别，0-5
-//为每两行分组是为支持压缩显示提高效率
-void ledarray_set_and_write(uint8_t group_sw){
-	if(group_sw>VERTICAL_LED_NUMBER/2-1)return;
-  
-    rmt_config_t config0 = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[group_sw*2+0], 0); // 使用默认通道配置模板，通道0
-    rmt_config_t config1 = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[group_sw*2+1], 1); // 使用默认通道配置模板，通道1，
-	config0.clk_div = 2;  //修改配置模板成员，设定计数器频率到40MHz，如果频率不适配，是无法运行的
-	config1.clk_div = 2;
-	rmt_config(&config0); //传输配置参数
-	rmt_config(&config1);
+	rmt_cfg0_buf.tx_config.idle_level = RMT_IDLE_LEVEL_HIGH;
+	rmt_cfg1_buf.tx_config.idle_level = RMT_IDLE_LEVEL_HIGH;
+
+	rmt_config(&rmt_cfg0_buf); //传输配置参数
+	rmt_config(&rmt_cfg1_buf);
     //控制器安装  （通道选择，接收内存块数量（发送模式使用0个），中断标识）
-	rmt_driver_install(config0.channel, 0, 0); 
-	rmt_driver_install(config1.channel, 0, 0);
+	rmt_driver_install(rmt_cfg0_buf.channel, 0, 0); 
+	rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
 
     //安装 ws2812控制
-	led_strip_config_t strip_config0=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)config0.channel);
-    led_strip_config_t strip_config1=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)config1.channel);
-    led_strip_t* strip0=led_strip_new_rmt_ws2812(&strip_config0);
-    led_strip_t* strip1=led_strip_new_rmt_ws2812(&strip_config1);
-  
-	color_compound(group_sw*2+1);//合成通道0数据  
-	for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
-	    strip0->set_pixel(strip0,j/3,compound_result[j+1],compound_result[j+0],compound_result[j+2]);//写入 数据存放地址 数据索引 R G B
-    
-    color_compound(group_sw*2+2);//合成通道1数据
-    for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
-		strip1->set_pixel(strip1,j/3,compound_result[j+1],compound_result[j+0],compound_result[j+2]);//写入 数据存放地址 数据索引 R G B
+	led_strip_config_t strip_cfg0=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)rmt_cfg0_buf.channel);
+    led_strip_config_t strip_cfg1=LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER,(led_strip_dev_t)rmt_cfg1_buf.channel);
+    strip0 = led_strip_new_rmt_ws2812(&strip_cfg0);
+    strip1 = led_strip_new_rmt_ws2812(&strip_cfg1);    
+	
+	rmt_cfg0 = &rmt_cfg0_buf;
+	rmt_cfg1 = &rmt_cfg0_buf;
+ 
+	gpio_reset_pin(ledarray_gpio_info[0]);
+    gpio_reset_pin(ledarray_gpio_info[1]);
 
-	strip0->refresh(strip0, 10);//刷新	（灯带选择 超时时间）
-	strip1->refresh(strip1, 10); 
-
-    gpio_reset_pin(ledarray_gpio_info[group_sw*2+0]);
-    gpio_reset_pin(ledarray_gpio_info[group_sw*2+1]);
-
-    //删除通道准备下次选择发送
-    rmt_driver_uninstall(config0.channel);
-    rmt_driver_uninstall(config1.channel);
+	rmt_tx_stop(0);
+	rmt_tx_stop(1);
 }
 
+/// @brief 重置灯板阵列
+void ledarray_deinit(){
+   strip0->del(strip0);
+   strip0 = NULL;
+   strip1->del(strip1);
+   strip1 = NULL;
+   rmt_driver_uninstall(0);
+   rmt_driver_uninstall(1);
+}
 
+/// @brief 灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化
+/// @param group_sw 选定要刷新的组，每组有两串WS2812,如12行WS2812,共6组,取值为0-5
+void ledarray_set_and_write(uint8_t group_sw){
+	if(group_sw>VERTICAL_LED_NUMBER/2-1){
+		ESP_LOGE("ledarray_set_and_write","输入了不在显示范围的组别");
+		return;
+	}
+
+    if (strip0 == NULL||strip1 == NULL){
+		ledarray_init();
+	}
+
+    //记录了上次调用函数刷新的组的输出IO
+    static gpio_num_t former_select0 = ledarray_gpio_info[0];
+	static gpio_num_t former_select1 = ledarray_gpio_info[1]; 
+
+    //strip0 
+	gpio_reset_pin(former_select0);//解除对上次刷新IO的绑定 
+	color_compound(group_sw*2+1);//合成数据 
+    rmt_set_gpio(0,RMT_MODE_TX,ledarray_gpio_info[group_sw*2+0],false);//绑定要写入的新输出IO
+    for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
+	   strip0->set_pixel(strip0,j/3,compound_result[j+1],compound_result[j+0],compound_result[j+2]);//设置即将刷新的数据
+	rmt_tx_start(0,false);
+    strip0->refresh(strip0, 100);//对现在绑定的IO写入数据
+	rmt_tx_stop(0);
+    former_select0 = ledarray_gpio_info[group_sw*2+0];
+	
+    //strip1
+	gpio_reset_pin(former_select1);//解除对上次刷新IO的绑定 
+    color_compound(group_sw*2+2);//合成数据 
+	rmt_set_gpio(1,RMT_MODE_TX,ledarray_gpio_info[group_sw*2+1],false);//绑定要写入的新输出IO 
+	for(uint8_t j=0;j<LINE_LED_NUMBER*3;j+=3)
+		strip1->set_pixel(strip1,j/3,compound_result[j+1],compound_result[j+0],compound_result[j+2]);//设置即将刷新的数据
+	rmt_tx_start(1,false);
+	strip1->refresh(strip1, 100);//对现在绑定的IO写入数据 
+	rmt_tx_stop(1);	
+    former_select1 = ledarray_gpio_info[group_sw*2+1];
+
+	//上面我们对RMT驱动WS2812阵列的选择其实是强制的
+	//rmt_set_gpio()其实是添加需要发送的IO,不能够切换IO,因为内部调用的可见是 esp_rom_gpio_connect_out_signal();
+	//起初，我们使用 rmt_driver_uninstall() 即直接换一个新的配置可以完美驱动，而反复调用对资源损耗是必然的
+	//而之后优化使用的gpio_reset_pin()只是强制被动地解除之前的IO绑定
+	//调试发现，对刷新一次后的组再次刷新，会出现第一或第二灯绿色无法显示的情况,这可能由于esp_rom_gpio_connect_out_signal();被重复调用
+	//可以监测是否该组被写过，重置RMT即可，在不进行纵列压缩显示下，往往0-5组顺次写入，相比之前可以实现优化目的
+    //上述论断仅调试估测所得，并非实际具体原因
+}
 
 //RGB亮度调制  导入r g b数值地址+亮度
 void ledarray_intensity_change(uint8_t *r,uint8_t *g,uint8_t *b,uint8_t intensity){

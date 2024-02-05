@@ -13,17 +13,10 @@
 #define _SEVETEST30_GPIO_H_
 #endif 
 
-#define BAT_IN_CTRL_GPIO GPIO_NUM_10//电池接入控制
-
-//此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空，请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
-//#define TCA6416A_IO_RESET  GPIO_NUM_X 
-#define TCA6416A_IO_INT   GPIO_NUM_1   // TCA6416A的中断信号输出
 
 #define EXT_IO_READ_INTR_FLAG         (ESP_INTR_FLAG_LEVEL3)
-
-#define EXT_IO_READ_EVT_CORE           (1)
+#define EXT_IO_READ_EVT_CORE           (0)
 #define EXT_IO_READ_EVT_PRIO           (2)
-
 
 
 typedef struct ext_io_ctrl_t

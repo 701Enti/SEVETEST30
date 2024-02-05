@@ -22,7 +22,7 @@
 #define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 
-#define HTTP_TASK_CORE           (1)
+#define HTTP_TASK_CORE           (0)
 #define HTTP_TASK_PRIO           (2)
 
 //各种API的URL参考，字符由%s替代
@@ -105,7 +105,7 @@ extern Real_time_weather *real_time_weather_data;
 
 
 
-esp_err_t wifi_connect(char* ssid,char* password);
+esp_err_t wifi_connect();
 
 
 

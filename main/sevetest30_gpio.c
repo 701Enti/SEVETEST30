@@ -90,14 +90,14 @@ static void tca6416a_int_task(void* arg){
 void sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode,TCA6416A_value_t* p_ext_value)
 {
   gpio_config_t bat_in_ctrl_io_config = { 
-  .pin_bit_mask = 1ULL << BAT_IN_CTRL_GPIO,
+  .pin_bit_mask = 1ULL << BAT_IN_CTRL_IO,
   .mode = GPIO_MODE_OUTPUT,  
   .pull_up_en = GPIO_PULLUP_DISABLE, 
   .pull_down_en =GPIO_PULLDOWN_DISABLE,
   .intr_type =GPIO_INTR_DISABLE,
   };
   gpio_config(&bat_in_ctrl_io_config);//传参
-  gpio_set_level(BAT_IN_CTRL_GPIO,0);//设置IO,初始电平
+  gpio_set_level(BAT_IN_CTRL_IO,0);//设置IO,初始电平
 
   //TCA6416A INT引脚
   gpio_config_t TCA6416A_int_config = { 
@@ -110,12 +110,12 @@ void sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode,TCA6416A_value_t* p_ext_va
   gpio_config(&TCA6416A_int_config);//传参
 
 
-  // //INT中断配置
-  // tca6416a_int_queue = xQueueCreate(10,sizeof(uint32_t));//队列创建
-  // xTaskCreatePinnedToCore(tca6416a_int_task,"tca6416a_int_task",2048,NULL,EXT_IO_READ_EVT_PRIO,NULL,EXT_IO_READ_EVT_CORE);//中断识别任务创建
-  // gpio_install_isr_service(EXT_IO_READ_INTR_FLAG);//安装ISR服务优先级
-  // P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;//将自动读取标志值的地址作为ISR参数进行传输
-  // gpio_isr_handler_add(TCA6416A_IO_INT,tca6416a_int_isr_handler,(void*)P_ext_io_auto_read_flag);//为选定的GPIO添加ISR句柄
+  //INT中断配置
+  tca6416a_int_queue = xQueueCreate(10,sizeof(uint32_t));//队列创建
+  xTaskCreatePinnedToCore(tca6416a_int_task,"tca6416a_int_task",2048,NULL,EXT_IO_READ_EVT_PRIO,NULL,EXT_IO_READ_EVT_CORE);//中断识别任务创建
+  gpio_install_isr_service(EXT_IO_READ_INTR_FLAG);//安装ISR服务优先级
+  P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;//将自动读取标志值的地址作为ISR参数进行传输
+  gpio_isr_handler_add(TCA6416A_IO_INT,tca6416a_int_isr_handler,(void*)P_ext_io_auto_read_flag);//为选定的GPIO添加ISR句柄
 
   // 此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空，请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
 

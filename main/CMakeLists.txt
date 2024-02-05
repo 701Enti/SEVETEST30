@@ -1,6 +1,5 @@
 set(COMPONENT_SRCS
 ./main.c
-./api_baiduTTS.c
 ./sevetest30_BWEDA.c
 ./sevetest30_IWEDA.c
 ./TCA6416A.c
