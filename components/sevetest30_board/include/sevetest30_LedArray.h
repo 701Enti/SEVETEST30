@@ -20,7 +20,7 @@
 #define CHINESE 12                  //中文 12x12
 #define LINE_LED_NUMBER  24         //灯板横向长度（每一根通讯线连接的WS2812数量） 此处“横向”始终表示通讯线延伸方向
 #define VERTICAL_LED_NUMBER 12      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
-
+#define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+0x01)
 #define RECTANGLE_SIZE_MAX 36//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48
 
 //数字 0-9
@@ -33,13 +33,6 @@ extern const uint8_t matrix_6 [7];
 extern const uint8_t matrix_7 [7];
 extern const uint8_t matrix_8 [7];
 extern const uint8_t matrix_9 [7];
-
-//大写字母 A-Z
-
-//小写字母 a-z
-
-//基本汉字（宋体）
-
 
 extern const uint8_t sign_se30[872];
 extern const uint8_t sign_701[872];
@@ -59,7 +52,7 @@ extern uint8_t compound_result[LINE_LED_NUMBER*3];
     //取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
 
-void separation_draw(int16_t x, int16_t y, uint8_t breadth,uint8_t *p, uint8_t byte_number, uint8_t color_in[3],uint8_t change);
+void separation_draw(int16_t x, int16_t y, uint8_t breadth,const uint8_t *p, uint8_t byte_number, uint8_t* color_in,uint8_t change);
 
 
 //彩色图像直显方式 
@@ -69,15 +62,19 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth,uint8_t *p, uint8_t b
    //选择带数据头的图案数据，长宽会自动获取
 
 
-void direct_draw(int16_t x, int16_t y,uint8_t *p,uint8_t change);
+void direct_draw(int16_t x, int16_t y,const uint8_t *p,uint8_t change);
 
+void clean_draw_buf(int8_t y);
 
-uint8_t *rectangle(uint8_t breadth, uint8_t length);
+void progress_draw_buf(int8_t y,float step, uint8_t *color);
 
+uint8_t *rectangle(int8_t breadth, int8_t length);
 
-void print_number(int16_t x,int16_t y,int8_t figure,uint8_t color[3],uint8_t change);
+void print_number(int16_t x,int16_t y,int8_t figure,uint8_t* color,uint8_t change);
 
+void ledarray_init();
 
+void ledarray_deinit();
 
 //以下函数处理上面的函数产生的颜色数据，配置传输数据发送
 
@@ -89,13 +86,9 @@ void ledarray_set_and_write(uint8_t group_sw);
 
 //以下是内部私有函数，一般不会在外部调用
 
-void ledarray_init();
+void color_input(int8_t x, int8_t y, uint8_t* dat);
 
-void ledarray_deinit();
-
-
-void color_input(int8_t x,int8_t y,uint8_t color[3]);
-
+void color_output(int8_t x, int8_t y, uint8_t* dat);
 
 double value_max(double value1,double value2,double value3);
 

@@ -15,6 +15,7 @@
 #endif
 
 #include "esp_peripherals.h"
+#include "esp_http_client.h"
 #include "esp_err.h"
 #include "stdbool.h"
 
@@ -25,16 +26,21 @@
 #define HTTP_TASK_CORE           (0)
 #define HTTP_TASK_PRIO           (2)
 
-//各种API的URL参考，字符由%s替代
+#define ASR_RESULT_TEX_BUF_MAX (4096)
+
+#define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192
+#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000
+
+//各种API的URL，字符由%s替代
 
 //查询IP的API,网上有很多这种
-#define GET_IP_ADDRESS_API "http://myip.ipip.net/s"
+#define GET_IP_ADDRESS_API_URL "http://myip.ipip.net/s"
 
 //IP归属地查询API
-#define IP_POSITION_API "https://api.ip138.com/ip/?ip=%s&datatype=jsonp&callback=find"
+#define IP_POSITION_API_URL "https://api.ip138.com/ip/?ip=%s&datatype=jsonp&callback=find"
 
 //邮政编码查询经纬度API
-#define TO_LNG_LAT_API "https://quhua.ipchaxun.com/api/areas/data?zip=%s"
+#define TO_LNG_LAT_API_URL "https://quhua.ipchaxun.com/api/areas/data?zip=%s"
 
 
 //和风天气GeoAPI(地址ID搜索，使用相同的KEY)
@@ -47,6 +53,11 @@
 #else
 #define WEATHER_API_URL "https://devapi.qweather.com/v7/weather/now?location=%s&key=%s"
 #endif
+
+#define BAIDU_GET_ACCESS_TOKEN_URL "https://aip.baidubce.com/oauth/2.0/token?client_id=%s&client_secret=%s&grant_type=client_credentials"
+
+//百度文心一言 ERNIE-Bot 4.0 API
+#define ERNIE_BOT_4_URL "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=%s"
 
 //和风天气API-实时天气,顺序是在GUI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
 typedef struct Real_time_weather{
@@ -91,40 +102,40 @@ typedef struct ip_position
     char* id;//城市数字ID号码,由于天气查询
 }ip_position;
 
+
 //有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
 
 extern char http_get_out_buf[HTTP_BUF_MAX]; // 输出数据缓存
 extern char http_get_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
 extern char *ip_address;//公网IP
-
-extern char *get_headers_key;//请求头 - 键
-extern char *get_headers_value;//请求头 - 值
+extern char *asr_result_tex;//语音识别结果
 
 extern ip_position *ip_position_data;
 extern Real_time_weather *real_time_weather_data;
 
+//内外部共享函数
 
+void gzip_decompress(void *input,void *output, int len);
 
+int http_check_common_url(const char* url);
+
+int http_check_response_content(esp_http_client_handle_t client_handle);
+
+void http_init_get_request();
+
+void http_get_request_send(bool *flag);
+
+//库定制函数
+
+void asr_data_save_result(char* asr_response);
+
+//外部自由调用功能函数
 esp_err_t wifi_connect();
 
-
+void init_time_data_sntp();
 
 void refresh_position_data();
 
 void refresh_weather_data();
 
-void init_time_data_sntp();
-
-void http_send_get_request(bool *flag);
-
-void gzip_decompress(void *input,void *output, int len);
-
-void transform_ip_address();
-
-void transform_postcode();
-
-void transform_lng_lat();
-
-void transform_locationID();
-
-void transform_real_time_weather_data();
+char *ERNIE_Bot_4_chat_tex_exchange(char *user_content);

@@ -36,17 +36,31 @@ config NTP_SERVER_2
 
 
 
-config BAIDU_ACCESS_KEY
+config BAIDU_SPEECH_ACCESS_KEY
     string "Baidu speech access key ID"
     default ""
     help
         Baidu speech Access key ID
 
-config BAIDU_SECRET_KEY
+config BAIDU_SPEECH_SECRET_KEY
     string "Baidu speech access secret"
     default ""
     help
         Baidu speech Access secret
+
+config BAIDU_ERNIE_BOT_ACCESS_KEY
+    string "Baidu ERNIE-Bot access key ID"
+    default ""
+    help
+        Baidu ERNIE-Bot Access key ID
+        
+config BAIDU_ERNIE_BOT_SECRET_KEY
+    string "Baidu ERNIE-Bot access secret"
+    default ""
+    help
+        Baidu ERNIE-Bot Access secret
+
+
 
 
 
