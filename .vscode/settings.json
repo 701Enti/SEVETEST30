@@ -123,7 +123,15 @@
         "i2s.h": "c",
         "audio_recorder.h": "c",
         "wav_decoder.h": "c",
-        "wav_encoder.h": "c"
+        "wav_encoder.h": "c",
+        "recorder_encoder.h": "c",
+        "esp_netif.h": "c",
+        "filter_resample.h": "c",
+        "os.h": "c",
+        "raw_stream.h": "c",
+        "sevetest30_ledarray.h": "c",
+        "esp_dsp.h": "c",
+        "dsps_fft2r.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

@@ -33,8 +33,9 @@
 #define FUNC_AUDIO_CODEC_EN       (true)
 #define CODEC_ADC_I2S_PORT        (0)
 #define CODEC_DAC_I2S_PORT        (1)
+#define I2S_DMA_BUF_SIZE          (1024)
 #define CODEC_ADC_BITS_PER_SAMPLE I2S_BITS_PER_SAMPLE_16BIT
-#define CODEC_ADC_SAMPLE_RATE     (16000)
+#define CODEC_ADC_SAMPLE_RATE     (48000)
 #define RECORD_HARDWARE_AEC       (false)
 #define BOARD_PA_GAIN             (10) /* Power amplifier gain defined by board (dB) */
 #define PA_ENABLE_GPIO            -1

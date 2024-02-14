@@ -28,7 +28,6 @@ uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
     
     memset(&transaction,0,sizeof(transaction));
     transaction.length = 2*12*8; //12x12字模，每行占用2个Byte,共12行
-    transaction.flags = SPI_TRANS_USE_RXDATA;
     transaction.user = (void*)1;
     transaction.cmd = FONT_READ_CMD;
     transaction.addr = 0x1111;
@@ -38,8 +37,8 @@ uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
     gpio_set_level(interface_config.spics_io_num,1);
 
     if(ret!=ESP_OK)ESP_LOGE("fonts_read_zh_CN_12x","与字库芯片通讯时发现问题 描述： %s",esp_err_to_name(ret));
-    ESP_LOGE("fonts_read_zh_CN_12x"," %d",transaction.rx_data[0]);
-    return &transaction.rx_data[0];
+    // ESP_LOGE("fonts_read_zh_CN_12x"," %d",transaction.rx_data[0]);
+    return transaction.rx_buffer;
 }
 
 

@@ -43,11 +43,9 @@ typedef enum
    BOARD_CTRL_EXT_IO,//根据p_ext_io_mode p_ext_io_value刷新外部IO,如果您没有在之前调整p_ext_io_mode p_ext_io_value的信息，这不会改变EXT_IO任何数值，但是会同步外部IO数据到这两个成员下
 } board_ctrl_select_t;
 
-//控制配置，新定义board_ctrl_t非结构体指针，必须使用static修饰
+//控制配置
 typedef struct board_ctrl_t
 {
-   board_ctrl_select_t board_ctrl_select;
-
    TCA6416A_mode_t *p_ext_io_mode;   // 存储IO模式信息的结构体的地址，数据是保持的
    TCA6416A_value_t *p_ext_io_value; // 存储IO电平信息的结构体的地址，数据是保持的
 
