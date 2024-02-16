@@ -10,6 +10,7 @@
 
 #include <sevetest30_UI.h>
 #include <sevetest30_sound.h>
+#include <sevetest30_touch.h>
 #include <sevetest30_IWEDA.h>
 #include <sevetest30_SWEDA.h>
 #include <sevetest30_LedArray.h>
@@ -18,7 +19,6 @@
 #include <esp_random.h>
 #include <esp_dsp.h>
 #include <audio_mem.h>
-
 #include <board_def.h>
 
 #define LOW_TEMP_MULTIPLE 20 // 低于BLUE_TEMP多少倍将达到设定的最高白色亮度
@@ -16694,4 +16694,20 @@ void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg)
             p = NULL;
         }
     }
+}
+
+/// @brief 主界面，所有UI页面的上层级
+/// @param board_ctrl 主板控制句柄
+void main_UI_1(board_ctrl_t* board_ctrl){
+    if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0){
+        time_UI_1(1,1,1);
+
+    }
+    else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0){
+        time_UI_2(1,1,1);
+
+    }
+
+
+     
 }

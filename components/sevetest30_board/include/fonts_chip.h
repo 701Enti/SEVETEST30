@@ -8,9 +8,19 @@
 // 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.12.9
 
 #pragma once
-
 #include "esp_err.h"
 #include "board_ctrl.h"
+
+#define FONT_SPI_MODE 0 //SPI通讯模式
+#define FONT_SPI_FREQ (1 * 1000000)//SPI通讯频率(单位HZ)
+
+#define FONT_READ_CMD 0x03 //普通读命令码
+#define FONT_READ_COMMAND_BITS 8       //普通读 命令 位长度
+#define FONT_READ_ADDRESS_BITS 8 * 3   //普通读 地址 位长度
+#define FONT_READ_DUMMY_BITS   0       //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
+
+#define FONT_READ_CN_12X_BYTES 12 * 2 //一个12x12中文汉字数据字节数 
+
 
 esp_err_t fonts_chip_init(board_device_handle_t* board_device_handle);
 

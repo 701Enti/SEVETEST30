@@ -19,6 +19,7 @@
 #include "freertos/task.h"
 #include <sevetest30_LedArray.h>
 #include <driver/i2s.h>
+#include "board_ctrl.h"
 
 #define FFT_UI_TASK_CORE (1)     // FFT UI绘制任务核心
 #define FFT_UI_TASK_STACK_SIZE (8*1024)//FFT UI绘制任务堆栈大小
@@ -72,5 +73,9 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change);
 
 void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg);
 
+void main_UI_1(board_ctrl_t* board_ctrl);
+
 //需要创建任务调用的
 void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority);
+
+

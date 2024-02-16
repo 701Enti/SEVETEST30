@@ -67,20 +67,15 @@ void transform_real_time_weather_data();
 // 通用网络连接函数
 esp_err_t wifi_connect()
 {
-    // nvs数据存储初始化检查
-    esp_err_t flag = nvs_flash_init();
-    if (flag == ESP_ERR_NVS_NO_FREE_PAGES)
-    {
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
-        flag = nvs_flash_init();
+        ret = nvs_flash_init();
     }
+    ESP_ERROR_CHECK( ret );
 
 // 初始化TCP/IP协议栈
-#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
     esp_netif_init();
-#else
-    tcpip_adapter_init();
-#endif
 
     // 初始化网络连接
     esp_periph_config_t se30_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG(); // 选择硬件信息

@@ -7,24 +7,42 @@
 // 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.12.17
 
 #include "sevetest30_touch.h"
-#include "driver/mcpwm.h"
 #include "board_pins_config.h"
 
+/// @brief 初始化线性振动马达
+/// @param in1_gpio 驱动信号1 GPIO
+/// @param in2_gpio 驱动信号2 GPIO
 void vibra_motor_init(gpio_num_t in1_gpio,gpio_num_t in2_gpio){
     mcpwm_config_t mcpwm_config;
     mcpwm_config.cmpr_a = 50.0;
     mcpwm_config.cmpr_b = 50.0; 
     mcpwm_config.duty_mode = MCPWM_DUTY_MODE_0;
     mcpwm_config.counter_mode = MCPWM_UP_COUNTER;
-    mcpwm_config.frequency = 240;
+    mcpwm_config.frequency = 230;
+    //驱动信号1引脚绑定
+    mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT,MCPWM0A,in1_gpio);
+    //驱动信号2引脚绑定
+    mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT,MCPWM0B,in2_gpio);
     //初始化
-    mcpwm_gpio_init(MCPWM_UNIT_0,MCPWM0A,in1_gpio);
-    gpio_pad_select_gpio(in2_gpio);
-    gpio_set_direction(in2_gpio,GPIO_MODE_OUTPUT);
-    gpio_set_level(in2_gpio,0);
-    //MCPWM_TIMER_0作用MCPWM0A
-    mcpwm_init(MCPWM_UNIT_0,MCPWM_TIMER_0,&mcpwm_config);//在MCPWM_UNIT_0上启用MCPWM_TIMER_0
-    mcpwm_set_signal_low(MCPWM_UNIT_0,MCPWM_TIMER_0,MCPWM0A);   
+    mcpwm_init(VIBRA_MOTOR_MCPWM_UNIT,VIBRA_MOTOR_MCPWM_TIMER,&mcpwm_config);
+    //设置波形互补和死区时间
+    mcpwm_deadtime_enable(VIBRA_MOTOR_MCPWM_UNIT,VIBRA_MOTOR_MCPWM_TIMER,VIBRA_MOTOR_MCPWM_DT_MODE,VIBRA_MOTOR_MCPWM_RED,VIBRA_MOTOR_MCPWM_FED);
 
-    // mcpwm_start(MCPWM_UNIT_0,MCPWM_TIMER_0);                                                                                                                                                                                                                                                                                                                                                                                                                                              
+    vibra_motor_stop();                                                                                                                                                                                                                                                                                                                                                                                                                                              
+}
+
+/// @brief 修改线性振动马达运行频率
+/// @param frequency 频率(单位HZ)
+void vibra_motor_set_frequency(uint32_t frequency){
+    mcpwm_set_frequency(VIBRA_MOTOR_MCPWM_UNIT,VIBRA_MOTOR_MCPWM_TIMER,frequency);
+}
+
+/// @brief 启动线性振动马达
+void vibra_motor_start(){
+    mcpwm_start(VIBRA_MOTOR_MCPWM_UNIT,VIBRA_MOTOR_MCPWM_TIMER); 
+}
+
+/// @brief 暂停线性振动马达
+void vibra_motor_stop(){
+    mcpwm_stop(VIBRA_MOTOR_MCPWM_UNIT,VIBRA_MOTOR_MCPWM_TIMER);   
 }
