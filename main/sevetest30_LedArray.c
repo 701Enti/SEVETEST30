@@ -1992,7 +1992,7 @@ void clean_draw_buf(int8_t y)
 		color_input(i, y, dat);
 }
 
-/// @brief 渐进指定行的缓存，使得缓存颜色向目标颜色以步进值偏移一步
+/// @brief 渐进指定行的缓存，使得缓存颜色向目标颜色以步进值偏移一步，这只会对绘制状态非活动的区域起作用
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色

@@ -13,11 +13,20 @@
 #include "esp_intr_alloc.h"
 #include "esp_log.h"
 
-#define FONT_READ_CMD 0x03
-#define SPI_ID SPI2_HOST
+uint8_t zh_CN_12x_buf[FONT_READ_CN_12X_BYTES] = {0};
+
 uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
 {
+    memset(zh_CN_12x_buf,255,FONT_READ_CN_12X_BYTES);
+
     spi_transaction_t transaction;
+    memset(&transaction,0,sizeof(transaction));
+
+    transaction.length = FONT_READ_CN_12X_BYTES * 8; //12x12字模，每行占用2个Byte,共12行
+    transaction.cmd = FONT_READ_CMD;
+    transaction.addr = 0x10;
+    transaction.rx_buffer = zh_CN_12x_buf;
+    transaction.tx_buffer = NULL;
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
@@ -25,20 +34,14 @@ uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
 
     //通讯开始
     gpio_set_level(interface_config.spics_io_num,0);
-    
-    memset(&transaction,0,sizeof(transaction));
-    transaction.length = 2*12*8; //12x12字模，每行占用2个Byte,共12行
-    transaction.user = (void*)1;
-    transaction.cmd = FONT_READ_CMD;
-    transaction.addr = 0x1111;
+
     esp_err_t ret = spi_device_polling_transmit(board_device_handle->fonts_chip_handle,&transaction);
    
    //通讯结束
     gpio_set_level(interface_config.spics_io_num,1);
 
     if(ret!=ESP_OK)ESP_LOGE("fonts_read_zh_CN_12x","与字库芯片通讯时发现问题 描述： %s",esp_err_to_name(ret));
-    // ESP_LOGE("fonts_read_zh_CN_12x"," %d",transaction.rx_data[0]);
-    return transaction.rx_buffer;
+    return zh_CN_12x_buf;
 }
 
 
@@ -60,16 +63,19 @@ esp_err_t fonts_chip_init(board_device_handle_t* board_device_handle)
         .flags = SPICOMMON_BUSFLAG_MASTER,
     };
     spi_device_interface_config_t interface_config = {
-        .mode = 3,
-        .clock_speed_hz = SPI_MASTER_FREQ_10M,
+        .command_bits = FONT_READ_COMMAND_BITS,
+        .address_bits = FONT_READ_ADDRESS_BITS,
+        .dummy_bits = FONT_READ_DUMMY_BITS,
+        .mode = FONT_SPI_MODE,
+        .clock_speed_hz = FONT_SPI_FREQ,
         .spics_io_num = -1,
         .queue_size  = 7,
     };
     ret = get_spi_pins(&bus_config,&interface_config);
-    ret = spi_bus_initialize(SPI_ID,&bus_config,SPI_DMA_CH_AUTO);
+    ret = spi_bus_initialize(FONTS_CHIP_SPI_ID,&bus_config,SPI_DMA_CH_AUTO);
 
     //载入字库芯片设备
-    ret = spi_bus_add_device(SPI_ID,&interface_config,&board_device_handle->fonts_chip_handle);
+    ret = spi_bus_add_device(FONTS_CHIP_SPI_ID,&interface_config,&(board_device_handle->fonts_chip_handle));
     gpio_pad_select_gpio(interface_config.spics_io_num);
     ret = gpio_set_direction(interface_config.spics_io_num,GPIO_MODE_OUTPUT);
    return ret;

@@ -33,7 +33,7 @@
 #include "sevetest30_LedArray.h"
 #include "sevetest30_UI.h"
 #include "sevetest30_sound.h"
-
+#include "sevetest30_touch.h"
 #include "TCA6416A.h"
 
 void fresh_LED()
@@ -41,7 +41,7 @@ void fresh_LED()
 }
 void app_main(void)
 {
-  wifi_connect();
+  // wifi_connect();
 
   TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
   TCA6416A_value_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
@@ -53,7 +53,7 @@ void app_main(void)
       .p_ext_io_value = &ext_io_value_data, // 存储IO电平信息的结构体的地址
       .boost_voltage = BV_VOL_MAX,
       .amplifier_volume = 90,
-      .amplifier_mute = false,
+      .amplifier_mute = true,
       .codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START,
       .codec_mode = AUDIO_HAL_CODEC_MODE_BOTH,
       .codec_adc_gain = MIC_GAIN_MAX,
@@ -63,40 +63,70 @@ void app_main(void)
   };
 
   sevetest30_all_board_init(&board_ctrl, &board_device_handle);
-  init_time_data_sntp();
+  // init_time_data_sntp();
 
-  music_FFT_UI_cfg_t UI_cfg = {
-      .fft_i2s_port = CODEC_DAC_I2S_PORT,
-      .x = 1,
-      .y = 1,
-      .change = 3,
-      .width = LINE_LED_NUMBER,
-      .height = VERTICAL_LED_NUMBER,
-      .visual_cfg = {
-          .value_max = 128,
-          .high = FFT_VIEW_DATA_MAX,
-          .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-          .low = FFT_VIEW_DATA_MIN,
-          .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-          .x_multiples = 2,
-          .x_move = 0.5,
-      },
-  };
+  // music_FFT_UI_cfg_t UI_cfg = {
+  //     .fft_i2s_port = CODEC_DAC_I2S_PORT,
+  //     .x = 1,
+  //     .y = 1,
+  //     .change = 3,
+  //     .width = LINE_LED_NUMBER,
+  //     .height = VERTICAL_LED_NUMBER,
+  //     .visual_cfg = {
+  //         .value_max = 128,
+  //         .high = FFT_VIEW_DATA_MAX,
+  //         .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+  //         .low = FFT_VIEW_DATA_MIN,
+  //         .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+  //         .x_multiples = 2,
+  //         .x_move = 0.5,
+  //     },
+  // };
 
-  esp_log_level_set("gpio", ESP_LOG_NONE);
+  // esp_log_level_set("gpio", ESP_LOG_NONE);
+
+  bluetooth_connect();
 
   // uint8_t color[3] = {255,255,255};
   // separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
   // for (int i = 0; i <= 5; i++)
   //   ledarray_set_and_write(i);
 
+  //   for(;;){
+  //   if (ext_io_ctrl.auto_read_INT == true){
+  //   ext_io_ctrl.auto_read_INT = false;
+  //   ext_io_value_service();    
+  //   }
+  //       refresh_time_data();
+  //      uint8_t color[3]={0,0,0};
+  //    main_UI_1(&board_ctrl);
+  //   for (int i = 0; i <= 5; i++)
+  //     {
+  //       ledarray_set_and_write(i);
+  //       progress_draw_buf(i * 2 + 1,1,color);
+  //       progress_draw_buf(i * 2 + 2,1,color);
+  //     }
+  // }
 
-  // const char *url1 = "http://m701.music.126.net/20240214001133/9ff239b15f32e4b40fbc498a235d08fc/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/31271000729/d21b/e9a7/ccf9/610fb06e731b320af25af6b5d8cb60b0.mp3";
+    
+
+  //   for(;;){
+  //   vibra_motor_start();
+  //   vTaskDelay(pdMS_TO_TICKS(500));
+  //   vibra_motor_stop();
+  //   vTaskDelay(pdMS_TO_TICKS(500));       
+  //  }
+
+
+
+
+  // const char *url1 = "";
   // // 检查资源可用性
   // if (http_check_common_url(url1) == ESP_OK)
   // {
   //   music_url_play(url1, 1);
   //   vTaskDelay(pdMS_TO_TICKS(500));
+
   //   music_FFT_UI_start(&UI_cfg,1);
     
   //   uint8_t color[3] = {0};
@@ -180,16 +210,8 @@ void app_main(void)
   //    }
   // }
 
-  // tts_service();
 
-  // for(;;){
-  //   if (ext_io_ctrl.auto_read_INT == true){
-  //   ext_io_ctrl.auto_read_INT = false;
-  //   ext_io_value_service();
-  //   ESP_LOGI("ME","自动读取触发");
-  //   }
-  // vTaskDelay(pdMS_TO_TICKS(1000));
-  // }
+
 
   // init_time_data_sntp();
 

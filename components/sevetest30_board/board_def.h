@@ -1,31 +1,22 @@
-/*
- * ESPRESSIF MIT License
- *
- * Copyright (c) 2019 <ESPRESSIF SYSTEMS (SHANGHAI) CO., LTD>
- *
- * Permission is hereby granted for use on all ESPRESSIF SYSTEMS products, in which case,
- * it is free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished
- * to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
 
 #pragma once
 
 #include "audio_hal.h"
 #include "driver/i2c.h"
+
+//蓝牙配置
+#define BLE_DEVICE_NAME               "SEVETEST30" //蓝牙设备名称
+#define BLE_DEVICE_APPEARANCE_VALUE    0x0100      //蓝牙设备外观特征值(类别：0x004 外观特征值取值范围：0x0100 to 0x013F  0x0100-Generic Clock)
+#define BLE_SERVICE_UUID_16BITS        0x00ff      //16bits服务UUID
+#define BLE_CONNECT_SLAVE_LATENCY       0          //从设备连接延迟事件数，在IOS系统中最大限制为4，安卓系统需最大限制根据版本和制造商
+#define BLE_CONNECT_MIN_INTERVAL        0x10       //最小连接间隔 0x10 *1.25ms = 20ms,不同系统存在限制规范
+#define BLE_CONNECT_MAX_INTERVAL        0x20       //最大连接间隔  0x20*1.25ms = 40ms,不同系统存在限制规范
+#define BLE_CONNECT_TIMEOUT             400        //连接超时       400*10ms = 4000ms
+#define BLE_GATTS_CHAR_VAL_LEN_MAX      500        //特征值存储最大长度
+#define BLE_PREPARE_BUF_SIZE_MAX        1024       //写入准备缓存最大大小
+
+#define BLE_SERVICE_UUID_BASE(UUID_16BITS){0xfb,0x34,0x9b,0x5f,0x80,0x00,0x00,0x80,0x00,0x10,0x00,(UUID_16BITS >> 8),UUID_16BITS,0x00,0x00,0x00,}//完整服务UUID,包含 基本UUID + 16bits服务UUID
+
 
 /**
  * @brief Audio Codec Chip Function Definition
@@ -70,7 +61,7 @@
 #define SPI_MOSI_IO GPIO_NUM_36;
 #define SPI_MISO_IO GPIO_NUM_35;
 #define SPI_SCLK_IO GPIO_NUM_37;
-
+#define FONTS_CHIP_SPI_ID SPI2_HOST
 
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
         .adc_input  = AUDIO_HAL_ADC_INPUT_LINE1,        \
@@ -109,25 +100,30 @@
 // TCA6416A的中断信号输出
 #define TCA6416A_IO_INT  GPIO_NUM_1
 
+
+
+
 //TCA6416A 控制IO端口次序名称定义
 // 默认模式 0=输出模式 1=输入模式
-#define TCA6416A_DEFAULT_CONFIG_MODE   {\
+// 默认关闭 闹钟中断 充电标识信号 红外发射 红外接收
+
+#define TCA6416A_DEFAULT_CONFIG_MODE   {\  
     .p00 = 1,                           \
     .p01 = 0,                           \
     .p02 = 1,                           \
-    .p03 = 1,                           \
-    .p04 = 1,                           \
+    .p03 = 0,                           \
+    .p04 = 0,                           \
     .p05 = 0,                           \
-    .p06 = 1,                           \
-    .p07 = 1,                           \
+    .p06 = 0,                           \
+    .p07 = 0,                           \
     .p10 = 0,                           \
     .p11 = 1,                           \
     .p12 = 1,                           \
     .p13 = 1,                           \
     .p14 = 1,                           \
     .p15 = 0,                           \
-    .p16 = 1,                           \
-    .p17 = 1,                           \
+    .p16 = 0,                           \
+    .p17 = 0,                           \
     .addr=0,                            \
 }
 
