@@ -2,6 +2,10 @@
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+///----注意：控制数据只有在完成sevetest30_board_ctrl工作之后，才会保存到board_ctrl_buf缓存中，如果果您只是外部定义了一个board_ctrl_t类型变量存储您的更改，
+//     但是没有调用sevetest30_board_ctrl,board_ctrl_buf缓存数据将不会更新,而系统缓存的位置是board_ctrl_buf，而不是您自己定义的外部缓存，
+///    意味着系统比如蓝牙读取，读到的数据将不是更新的数据，所以如果您要进行控制数据更改，务必保证sevetest30_board_ctrl工作进行了
+///    如果只是单纯希望修改控制数据可以调用board_status_get直接获取系统缓存结构体指针进行修改，这样其他API读到数据将是更新的数据,但是只有sevetest30_board_ctrl被调用，硬件才会与控制数据同步
 // 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
 // bilibili账号: 701Enti
@@ -13,8 +17,15 @@
 #include "driver/i2c.h"
 #include "esp_log.h"
 #include "sevetest30_touch.h"
+#include "sevetest30_BWEDA.h"
 
 esp_periph_set_handle_t se30_periph_set_handle;
+
+
+///----注意：控制数据只有在完成sevetest30_board_ctrl工作之后，才会保存到board_ctrl_buf缓存中，如果果您只是外部定义了一个board_ctrl_t类型变量存储您的更改，
+//     但是没有调用sevetest30_board_ctrl,board_ctrl_buf缓存数据将不会更新,而系统缓存的位置是board_ctrl_buf，而不是您自己定义的外部缓存，
+///    意味着系统比如蓝牙读取，读到的数据将不是更新的数据，所以如果您要进行控制数据更改，务必保证sevetest30_board_ctrl工作进行了
+///    如果只是单纯希望修改控制数据可以调用board_status_get直接获取系统缓存结构体指针进行修改，这样其他API读到数据将是更新的数据,但是只有sevetest30_board_ctrl被调用，硬件才会与控制数据同步
 board_ctrl_t *board_ctrl_buf = NULL;
 
 void amplifier_set(board_ctrl_t *board_ctrl);
@@ -23,7 +34,17 @@ void codechip_mode_and_status_set(board_ctrl_t *board_ctrl);
 void codechip_volume_set(board_ctrl_t *board_ctrl);
 void board_ctrl_buf_map(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select);
 
-// 全局初始化
+
+/// @brief 获取系统控制缓存结构体指针,应该使用获取的结构体指针，修改参数并以此调用sevetest30_board_ctrl()
+/// @return 控制缓存结构体指针
+board_ctrl_t* board_status_get()
+{
+    return board_ctrl_buf;
+}
+
+/// @brief 全局设备初始化
+/// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
+/// @param board_device_handle 设备句柄，定义board_device_handle_t非指针类型全局变量不进行任何更改，在进行一些活动时将使用其中句柄
 void sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle)
 {
     // 初始化
@@ -36,7 +57,9 @@ void sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
 }
 
-// 全局设备控制
+/// @brief 全局设备控制
+/// @param board_ctrl 调用board_status_get()获取系统控制缓存结构体，进行需要修改后放入
+/// @param ctrl_select 选择控制的对象，这是一个枚举类型
 void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select)
 {
     switch (ctrl_select)
@@ -93,6 +116,7 @@ void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_se
     }
 
     board_ctrl_buf_map(board_ctrl,ctrl_select);
+    sevetest30_ble_attr_value_push();//向蓝牙客户端推送更改
 }
 
 // 设备控制参数缓存映射
@@ -204,6 +228,8 @@ void amplifier_set(board_ctrl_t *board_ctrl)
     }
     esp_err_t err = ESP_OK;
     err = i2c_master_write_to_device(I2C_PORT, AMP_DP_ADD, buf, sizeof(buf), 1000 / portTICK_PERIOD_MS);
+    sevetest30_board_ctrl(board_ctrl,BOARD_CTRL_EXT_IO);
+    
     if (err != ESP_OK)
         ESP_LOGI("amplifier_set", "与音量控制器通讯时发现问题 描述： %s", esp_err_to_name(err));
     else
@@ -228,7 +254,3 @@ void boost_voltage_set(board_ctrl_t *board_ctrl)
         ESP_LOGI("boost_voltage_set", "辅助电压5V已调整");
 }
 
-board_ctrl_t *board_status_get()
-{
-    return board_ctrl_buf;
-}

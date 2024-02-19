@@ -2492,15 +2492,6 @@ void ledarray_set_and_write(uint8_t group_sw)
 	strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
 	rmt_tx_stop(1);
 	former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
-
-	// 上面我们对RMT驱动WS2812阵列的选择其实是强制的
-	// rmt_set_gpio()其实是添加需要发送的IO,不能够切换IO,因为内部调用的可见是 esp_rom_gpio_connect_out_signal();
-	// 起初，我们使用 rmt_driver_uninstall() 即直接换一个新的配置可以完美驱动，而反复调用对资源损耗是必然的
-	// 而之后优化使用的gpio_reset_pin()只是强制被动地解除之前的IO绑定
-	// 调试发现，对刷新一次后的组再次刷新，会出现第一或第二灯绿色无法显示的情况,这可能由于esp_rom_gpio_connect_out_signal();被重复调用
-	// 可以监测是否该组被写过，重置RMT即可，在不进行纵列压缩显示下，往往0-5组顺次写入，相比之前可以实现优化目的
-	// 对于仅有灯带控制需求，我们建议使用ESPIDF最新版本进行，其在此方面进行了优化
-	// 上述论断仅调试估测所得，并非实际具体原因
 }
 
 // RGB亮度调制  导入r g b数值地址+亮度

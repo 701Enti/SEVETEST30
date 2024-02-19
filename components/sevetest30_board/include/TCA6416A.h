@@ -86,11 +86,9 @@ void TCA6416A_mode_set(TCA6416A_mode_t *pTCA6416Amode);
 void TCA6416A_gpio_service(TCA6416A_value_t *pTCA6416Avalue);
 
 
-
-
-
-
-//结合开发需求，我们已在Pre-a 2.0版本移动以下定义到board_def.h文件
+#define TCA6416A_DEFAULT_CONFIG_MODE  SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE
+#define TCA6416A_DEFAULT_CONFIG_VALUE SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE
+//结合开发需求，我们已在Pre-a 2.0版本移动以下定义到board_def.h文件,并通过以上耦合
 //如果您不需要这样，以下注释内容可能是您需要加入该文件的一种写法示例
 
 // 默认模式 0=输出模式 1=输入模式(斜杠与注释冲突，因此略去)
