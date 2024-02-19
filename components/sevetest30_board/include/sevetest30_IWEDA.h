@@ -33,7 +33,7 @@
 
 //各种API的URL，字符由%s替代
 
-//查询IP的API,网上有很多这种
+//查询IP的API
 #define GET_IP_ADDRESS_API_URL "http://myip.ipip.net/s"
 
 //IP归属地查询API

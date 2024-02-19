@@ -28,7 +28,7 @@ float *src_data = NULL; // 源数据
 float *wind = NULL;     // 窗口系数
 
 uint8_t unit_led_color[FFT_VIEW_WIDTH_MAX] = {0};
-uint8_t  unit_led_high[FFT_VIEW_WIDTH_MAX] = {0};
+uint8_t unit_led_high[FFT_VIEW_WIDTH_MAX] = {0};
 
 __attribute__((aligned(16))) float y_cf[FFT_N_SAMPLES * 2];
 
@@ -16697,17 +16697,37 @@ void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg)
 }
 
 /// @brief 主界面，所有UI页面的上层级
-/// @param board_ctrl 主板控制句柄
-void main_UI_1(board_ctrl_t* board_ctrl){
-    if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0){
-        time_UI_1(1,1,1);
+void main_UI_1()
+{
+    board_ctrl_t* board_ctrl = NULL;
+    board_ctrl = board_status_get();
+    if (board_ctrl){
+        if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0 && board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
+        {
+            board_ctrl->amplifier_mute = !board_ctrl->amplifier_mute;
+            vTaskDelay(pdMS_TO_TICKS(500));
+            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
+        }        
+        else if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
+        {
+            // time_UI_1(1, 1, 1);
+
+            if (board_ctrl->amplifier_volume < 100)
+
+            board_ctrl->amplifier_volume++;
+            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
+        }
+        else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0)
+        {
+            // time_UI_2(1, 1, 1);
+
+            if (board_ctrl->amplifier_volume > 0)
+
+            board_ctrl->amplifier_volume--;
+            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
+        }
+
+
 
     }
-    else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0){
-        time_UI_2(1,1,1);
-
-    }
-
-
-     
 }

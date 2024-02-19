@@ -132,7 +132,10 @@
         "sevetest30_ledarray.h": "c",
         "esp_dsp.h": "c",
         "dsps_fft2r.h": "c",
-        "mcpwm.h": "c"
+        "mcpwm.h": "c",
+        "esp_gatts_api.h": "c",
+        "esp_gatt_defs.h": "c",
+        "sevetest30_touch.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

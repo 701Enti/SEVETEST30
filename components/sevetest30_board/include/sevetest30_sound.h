@@ -14,14 +14,14 @@
 #include "audio_event_iface.h"
 
 #define MUSIC_PLAY_EVT_TASK_CORE (0)
-#define MUSIC_PLAY_EVT_TASK_STACK_SIZE (8 * 1024)
+#define MUSIC_PLAY_EVT_TASK_STACK_SIZE (4 * 1024)
 
 #define MUSIC_MP3_DECODER_TASK_CORE (1)
 
 #define VAD_FRAME_LENGTH 30// VAD 帧时长(ms)
 
 #define ASR_EVT_TASK_CORE (0)
-#define ASR_EVT_TASK_STACK_SIZE (8*1024)
+#define ASR_EVT_TASK_STACK_SIZE (1*1024)
 
 #define ASR_HTTP_RESPONSE_BUF_MAX 1024
 #define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)

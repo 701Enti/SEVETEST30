@@ -3,24 +3,16 @@
 
 #include "audio_hal.h"
 #include "driver/i2c.h"
+#include "esp_gatts_api.h"
 
 //蓝牙配置
-#define BLE_DEVICE_NAME               "SEVETEST30" //蓝牙设备名称
-#define BLE_DEVICE_APPEARANCE_VALUE    0x0100      //蓝牙设备外观特征值(类别：0x004 外观特征值取值范围：0x0100 to 0x013F  0x0100-Generic Clock)
-#define BLE_SERVICE_UUID_16BITS        0x00ff      //16bits服务UUID
-#define BLE_CONNECT_SLAVE_LATENCY       0          //从设备连接延迟事件数，在IOS系统中最大限制为4，安卓系统需最大限制根据版本和制造商
-#define BLE_CONNECT_MIN_INTERVAL        0x10       //最小连接间隔 0x10 *1.25ms = 20ms,不同系统存在限制规范
-#define BLE_CONNECT_MAX_INTERVAL        0x20       //最大连接间隔  0x20*1.25ms = 40ms,不同系统存在限制规范
-#define BLE_CONNECT_TIMEOUT             400        //连接超时       400*10ms = 4000ms
-#define BLE_GATTS_CHAR_VAL_LEN_MAX      500        //特征值存储最大长度
-#define BLE_PREPARE_BUF_SIZE_MAX        1024       //写入准备缓存最大大小
-
-#define BLE_SERVICE_UUID_BASE(UUID_16BITS){0xfb,0x34,0x9b,0x5f,0x80,0x00,0x00,0x80,0x00,0x10,0x00,(UUID_16BITS >> 8),UUID_16BITS,0x00,0x00,0x00,}//完整服务UUID,包含 基本UUID + 16bits服务UUID
+#define SEVETEST30_BLE_DEVICE_NAME               "SEVETEST30" //蓝牙设备名称
+#define SEVETEST30_BLE_DEVICE_APPEARANCE_VALUE    0x0100      //蓝牙设备外观特征值(类别：0x004 外观特征值取值范围：0x0100 to 0x013F  0x0100-Generic Clock)
+#define SEVETEST30_BLE_LOCAL_MTU                   100        //本地最大可传输单元MTU限制大小
 
 
-/**
- * @brief Audio Codec Chip Function Definition
- */
+
+//音频相关
 #define FUNC_AUDIO_CODEC_EN       (true)
 #define CODEC_ADC_I2S_PORT        (0)
 #define CODEC_DAC_I2S_PORT        (1)
@@ -80,14 +72,14 @@
 //数字电位器-音量控制
 #define  AMP_DP_ADD    0x3E  //I2C地址     数字电位器访问地址 这里用的是TPL0401B，它性价比足够高，可以尽量使用完全一样型号的数字电位器，因为这可能涉及通讯时是否需要命令的特殊问题，程序可能不兼容
 #define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送，如TPL0401B需要0x00
-#define  AMP_STEP_VOL  0x02  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
-#define  AMP_VOL_MAX 100      //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
+#define  AMP_STEP_VOL  0x01  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
+#define  AMP_VOL_MAX   100   //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
 
 
 //数字电位器-辅助电压5V 下调控制
 #define  BV_DP_ADD    0x2E  //I2C地址     使用了TPL0401A
 #define  BV_DP_COMMAND 0x00 //操作命令
-#define  BV_STEP_VOL  0x02  //单位步长度
+#define  BV_STEP_VOL  0x01  //单位步长度
 #define  BV_VOL_MAX 100      //总映射步数
 
 //线性马达模块
@@ -107,7 +99,7 @@
 // 默认模式 0=输出模式 1=输入模式
 // 默认关闭 闹钟中断 充电标识信号 红外发射 红外接收
 
-#define TCA6416A_DEFAULT_CONFIG_MODE   {\  
+#define SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE   {\  
     .p00 = 1,                           \
     .p01 = 0,                           \
     .p02 = 1,                           \
@@ -128,7 +120,7 @@
 }
 
 // 默认电平值
-#define TCA6416A_DEFAULT_CONFIG_VALUE  {\
+#define SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE  {\
    .main_button=1,                      \
    .en_led_board=0,                     \
    .hp_detect=0,                        \
