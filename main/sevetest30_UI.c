@@ -16710,7 +16710,7 @@ void main_UI_1()
         }        
         else if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
         {
-            // time_UI_1(1, 1, 1);
+            time_UI_1(1, 1, 1);
 
             if (board_ctrl->amplifier_volume < 100)
 
@@ -16719,7 +16719,7 @@ void main_UI_1()
         }
         else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0)
         {
-            // time_UI_2(1, 1, 1);
+            time_UI_2(1, 1, 1);
 
             if (board_ctrl->amplifier_volume > 0)
 
