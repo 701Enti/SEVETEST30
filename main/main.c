@@ -63,66 +63,75 @@ void app_main(void)
   };
 
   sevetest30_all_board_init(&board_ctrl, &board_device_handle);
-  // init_time_data_sntp();
 
-  music_FFT_UI_cfg_t UI_cfg = {
-      .fft_i2s_port = CODEC_DAC_I2S_PORT,
-      .x = 1,
-      .y = 1,
-      .change = 3,
-      .width = LINE_LED_NUMBER,
-      .height = VERTICAL_LED_NUMBER,
-      .visual_cfg = {
-          .value_max = 128,
-          .high = FFT_VIEW_DATA_MAX,
-          .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-          .low = FFT_VIEW_DATA_MIN,
-          .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-          .x_multiples = 2,
-          .x_move = 0.5,
-      },
-  };
+
+
+  // for(;;){
+  //  fonts_read_zh_CN_12x(&board_device_handle);
+  //  vTaskDelay(pdMS_TO_TICKS(500));    
+  // }
+  
+
+  init_time_data_sntp();
+
+  // music_FFT_UI_cfg_t UI_cfg = {
+  //     .fft_i2s_port = CODEC_DAC_I2S_PORT,
+  //     .x = 1,
+  //     .y = 1,
+  //     .change = 3,
+  //     .width = LINE_LED_NUMBER,
+  //     .height = VERTICAL_LED_NUMBER,
+  //     .visual_cfg = {
+  //         .value_max = 128,
+  //         .high = FFT_VIEW_DATA_MAX,
+  //         .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+  //         .low = FFT_VIEW_DATA_MIN,
+  //         .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+  //         .x_multiples = 2,
+  //         .x_move = 0.5,
+  //     },
+  // };
 
   esp_log_level_set("gpio", ESP_LOG_NONE);
 
-  bluetooth_connect();
+  // bluetooth_connect();
 
   // uint8_t color[3] = {255,255,255};
   // separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
   // for (int i = 0; i <= 5; i++)
   //   ledarray_set_and_write(i);
 
-  const char *url1 = "http://m701.music.126.net/20240219233219/36d3c0abc144f688e58879ebdca112ce/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/31271000729/d21b/e9a7/ccf9/610fb06e731b320af25af6b5d8cb60b0.mp3";
-  // 检查资源可用性
-  if (http_check_common_url(url1) == ESP_OK)
-  {
-    music_url_play(url1, 1);
-    vTaskDelay(pdMS_TO_TICKS(500));
+  // const char *url1 = "http://m701.music.126.net/20240219233219/36d3c0abc144f688e58879ebdca112ce/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/31271000729/d21b/e9a7/ccf9/610fb06e731b320af25af6b5d8cb60b0.mp3";
+  // // 检查资源可用性
+  // if (http_check_common_url(url1) == ESP_OK)
+  // {
+  //   music_url_play(url1, 1);
+  //   vTaskDelay(pdMS_TO_TICKS(500));
 
-    music_FFT_UI_start(&UI_cfg, 1);
+  //   music_FFT_UI_start(&UI_cfg, 1);
 
-    uint8_t color[3] = {0};
+  //   uint8_t color[3] = {0};
 
-    while (sevetest30_fft_ui_running_flag)
-    {
+  //   while (sevetest30_fft_ui_running_flag)
+  //   {
 
-      if (ext_io_ctrl.auto_read_INT == true)
-      {
-        ext_io_ctrl.auto_read_INT = false;
-        ext_io_value_service();
-      }
+  //     if (ext_io_ctrl.auto_read_INT == true)
+  //     {
+  //       ext_io_ctrl.auto_read_INT = false;
+  //       ext_io_value_service();
+  //     }
 
-      music_FFT_UI_draw(&UI_cfg);
-      main_UI_1();
+  //     music_FFT_UI_draw(&UI_cfg);
+  //     main_UI_1();
 
-      for (int i = 0; i <= 5; i++)
-      {
-        ledarray_set_and_write(i);
-        progress_draw_buf(i * 2 + 1, 3.0, color);
-        progress_draw_buf(i * 2 + 2, 3.0, color);
-      }
-    }
-  }
+  //     for (int i = 0; i <= 5; i++)
+  //     {
+  //       ledarray_set_and_write(i);
+  //       progress_draw_buf(i * 2 + 1, 3.0, color);
+  //       progress_draw_buf(i * 2 + 2, 3.0, color);
+  //     }
+  //   }
+  // }
 
   //   for(;;){
   //   vibra_motor_start();
@@ -175,22 +184,25 @@ void app_main(void)
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   // }
 
-  //   for(;;){
-  //   uint8_t color[3]={255,255,255};
-  //   // refresh_time_data();
-  //   // time_UI_2(1,1,1);
+    for(;;){
 
-  //   for (int j=1;j<=LINE_LED_NUMBER;j++){
-  //     uint8_t* p = rectangle(1,LINE_LED_NUMBER);
-  //     separation_draw(j,1,1,RECTANGLE_MATRIX(p),*p,color,1);
-  //     free(p);
-  //   }
+      if (ext_io_ctrl.auto_read_INT == true)
+      {
+        ext_io_ctrl.auto_read_INT = false;
+        ext_io_value_service();
+      }
+    uint8_t color[3]={255,255,255};
+    refresh_time_data();
+    vTaskDelay(pdMS_TO_TICKS(100));
+    main_UI_1();
+     for (int i=0;i<=5;i++){
+      ledarray_set_and_write(i);
+      clean_draw_buf(i*2 + 0);
+      clean_draw_buf(i*2 + 1);
+     }
 
-  //    for (int i=0;i<=5;i++){
-  //     ledarray_set_and_write(i);
-  //     ledarray_deinit();
-  //    }
-  // }
+
+  }
 
   // init_time_data_sntp();
 

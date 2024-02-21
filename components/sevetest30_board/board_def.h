@@ -54,6 +54,7 @@
 #define SPI_MISO_IO GPIO_NUM_35;
 #define SPI_SCLK_IO GPIO_NUM_37;
 #define FONTS_CHIP_SPI_ID SPI2_HOST
+#define FONT_SPI_FREQ (1 * 1000000)//SPI通讯频率(单位HZ)
 
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
         .adc_input  = AUDIO_HAL_ADC_INPUT_LINE1,        \
@@ -87,7 +88,7 @@
 #define VIBRA_IN2_IO GPIO_NUM_10
 
 //电池接入控制
-#define BAT_IN_CTRL_IO   GPIO_NUM_10
+#define BAT_IN_CTRL_IO   GPIO_NUM_2
 
 // TCA6416A的中断信号输出
 #define TCA6416A_IO_INT  GPIO_NUM_1

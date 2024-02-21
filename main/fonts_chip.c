@@ -15,18 +15,21 @@
 
 uint8_t zh_CN_12x_buf[FONT_READ_CN_12X_BYTES] = {0};
 
+
 uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
 {
     memset(zh_CN_12x_buf,255,FONT_READ_CN_12X_BYTES);
 
     spi_transaction_t transaction;
-    memset(&transaction,0,sizeof(transaction));
 
-    transaction.length = FONT_READ_CN_12X_BYTES * 8; //12x12字模，每行占用2个Byte,共12行
+    transaction.length = FONT_READ_COMMAND_BITS + FONT_READ_ADDRESS_BITS + FONT_READ_DUMMY_BITS + FONT_READ_CN_12X_BYTES * 8; //12x12字模，每行占用2个Byte,共12行
+    transaction.rxlength = 0;
     transaction.cmd = FONT_READ_CMD;
-    transaction.addr = 0x10;
+    transaction.addr = 0x0FFFFF;
+ 
     transaction.rx_buffer = zh_CN_12x_buf;
     transaction.tx_buffer = NULL;
+    transaction.flags = 0;
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
@@ -35,9 +38,11 @@ uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
     //通讯开始
     gpio_set_level(interface_config.spics_io_num,0);
 
+    //通讯传输
     esp_err_t ret = spi_device_polling_transmit(board_device_handle->fonts_chip_handle,&transaction);
-   
-   //通讯结束
+
+    vTaskDelay(pdMS_TO_TICKS(100));    
+
     gpio_set_level(interface_config.spics_io_num,1);
 
     if(ret!=ESP_OK)ESP_LOGE("fonts_read_zh_CN_12x","与字库芯片通讯时发现问题 描述： %s",esp_err_to_name(ret));
@@ -71,12 +76,21 @@ esp_err_t fonts_chip_init(board_device_handle_t* board_device_handle)
         .spics_io_num = -1,
         .queue_size  = 7,
     };
+
     ret = get_spi_pins(&bus_config,&interface_config);
+
     ret = spi_bus_initialize(FONTS_CHIP_SPI_ID,&bus_config,SPI_DMA_CH_AUTO);
 
     //载入字库芯片设备
     ret = spi_bus_add_device(FONTS_CHIP_SPI_ID,&interface_config,&(board_device_handle->fonts_chip_handle));
-    gpio_pad_select_gpio(interface_config.spics_io_num);
-    ret = gpio_set_direction(interface_config.spics_io_num,GPIO_MODE_OUTPUT);
+
+    //设置片选CS的GPIO
+    gpio_set_level(interface_config.spics_io_num,1);
+    gpio_config_t spics_cfg = {
+        .pin_bit_mask = BIT64(interface_config.spics_io_num),
+        .mode = GPIO_MODE_OUTPUT,
+    };
+    gpio_config(&spics_cfg);
+
    return ret;
 }

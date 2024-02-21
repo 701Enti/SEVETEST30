@@ -89,15 +89,15 @@ static void tca6416a_int_task(void* arg){
 //之后可直接改变结构体成员值来控制扩展IO
 void sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode,TCA6416A_value_t* p_ext_value)
 {
-  gpio_config_t bat_in_ctrl_io_config = { 
+  gpio_config_t battery_in_ctrl_io_config = { 
   .pin_bit_mask = 1ULL << BAT_IN_CTRL_IO,
   .mode = GPIO_MODE_OUTPUT,  
   .pull_up_en = GPIO_PULLUP_DISABLE, 
   .pull_down_en =GPIO_PULLDOWN_DISABLE,
   .intr_type =GPIO_INTR_DISABLE,
   };
-  gpio_config(&bat_in_ctrl_io_config);//传参
-  gpio_set_level(BAT_IN_CTRL_IO,0);//设置IO,初始电平
+  gpio_config(&battery_in_ctrl_io_config);//传参
+  gpio_set_level(BAT_IN_CTRL_IO,1);//设置IO,初始电平
 
   //TCA6416A INT引脚
   gpio_config_t TCA6416A_int_config = { 
