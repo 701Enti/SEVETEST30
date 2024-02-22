@@ -11,6 +11,7 @@ set(COMPONENT_SRCS
 ./fonts_chip.c
 ./sevetest30_touch.c
 ./sevetest30_sound.c
+./BL5372.c
 )
 set(LDFRAGMENTS "./sevetest30.lf")
 register_component()
