@@ -1,14 +1,30 @@
-// 该文件由701Enti编写，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
-// 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
+/*
+ * 701Enti MIT License
+ *
+ * Copyright © 2024 <701Enti organization>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining 
+ * a copy of this software and associated documentation files (the “Software”), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 附加：1 对于 和风天气+ESP32 通过zlib解压gzip数据可以参考这位大佬的博客，甚有帮助非常感谢：https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
-//      2  github - zlib项目 链接 https://github.com/madler/zlib
-//      3  和风天气API开发文档：   https://dev.qweather.com/docs/api
+// 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
+//      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.30
+// bilibili: 701Enti
 
 #ifndef _SEVETEST30_IWEDA_H_
 #define _SEVETEST30_IWEDA_H_
