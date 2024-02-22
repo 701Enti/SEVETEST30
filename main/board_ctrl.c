@@ -1,4 +1,4 @@
-// 该文件由701Enti编写，包含各种SE30针对性硬件控制
+// 该文件归属701Enti组织，由SEVETEST30开发团队维护，，包含各种SE30针对性硬件控制
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
@@ -6,10 +6,9 @@
 //     但是没有调用sevetest30_board_ctrl,board_ctrl_buf缓存数据将不会更新,而系统缓存的位置是board_ctrl_buf，而不是您自己定义的外部缓存，
 ///    意味着系统比如蓝牙读取，读到的数据将不是更新的数据，所以如果您要进行控制数据更改，务必保证sevetest30_board_ctrl工作进行了
 ///    如果只是单纯希望修改控制数据可以调用board_status_get直接获取系统缓存结构体指针进行修改，这样其他API读到数据将是更新的数据,但是只有sevetest30_board_ctrl被调用，硬件才会与控制数据同步
-// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.11.25
+// bilibili: 701Enti
+
 
 #include "board_ctrl.h"
 #include "board.h"

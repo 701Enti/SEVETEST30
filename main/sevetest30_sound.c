@@ -1,11 +1,9 @@
-// 该文件由701Enti编写，包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，音乐API播放音乐时的硬件驱动等工作
+// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，音乐API播放音乐时的硬件驱动等工作
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
-// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.12.17
+// bilibili: 701Enti
 
 #include "sevetest30_sound.h"
 #include "sevetest30_IWEDA.h"

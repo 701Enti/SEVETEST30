@@ -1,13 +1,11 @@
-// 该文件由701Enti编写，包含一些sevetest30的 离线环境 数据获取（SWEDA）
+// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
 //       文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行,库中有仅为字库SPI通讯提供的SPI配置函数
-// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.8.13
+// bilibili: 701Enti
 
 #include "sevetest30_SWEDA.h"
 
@@ -24,7 +22,7 @@ battery_data_t battery_data;
 esp_adc_cal_characteristics_t adc_chars;
 
 // 刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 sevetest30_IWEDA.h)
-void refresh_time_data()
+void refresh_systemtime_data()
 {
     const char *TAG = "refresh_time_data";
 

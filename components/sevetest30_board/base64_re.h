@@ -6,8 +6,8 @@
  * See README for more details.
  */
 
-#ifndef BASE64_H
-#define BASE64_H
+#ifndef BASE64_RE_H
+#define BASE64_RE_H
 
 char * base64_encode_re(const void *src, size_t len, size_t *out_len);
 char * base64_url_encode_re(const void *src, size_t len, size_t *out_len);
