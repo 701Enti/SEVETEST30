@@ -1,29 +1,25 @@
-// 该文件由701Enti编写，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
 // 在编写sevetest30工程时第一次完成和使用，以下为开源代码，其协议与之随后共同声明
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+// ESP-IDF项目地址 https://github.com/espressif/esp-idf
 // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
 // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
-// 邮箱：   hi_701enti@yeah.net
 // github: https://github.com/701Enti
-// bilibili账号: 701Enti
-// 美好皆于不懈尝试之中，热爱终在不断追逐之下！            - 701Enti  2023.7.13
+// bilibili: 701Enti
 
 #include "sevetest30_LedArray.h"
-
+#include "led_strip.h"
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <esp_log.h>
 #include "driver/rmt.h"
 #include "hal/rmt_types.h"
 
-// 这是例程中使用的编码库，通过根目录CMakeLists添加 set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/led_strip) 来链接
-#include "led_strip.h"
 
 uint8_t black[3] = {0x00};
 uint8_t compound_result[LINE_LED_NUMBER * 3] = {0}; // 发送给WS2812的格式化数据缓存，GRB格式

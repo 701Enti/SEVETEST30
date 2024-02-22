@@ -135,7 +135,8 @@
         "mcpwm.h": "c",
         "esp_gatts_api.h": "c",
         "esp_gatt_defs.h": "c",
-        "sevetest30_touch.h": "c"
+        "sevetest30_touch.h": "c",
+        "led_strip.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",
