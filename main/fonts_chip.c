@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，对语言文字显示的硬件字库的访问支持，包含对字体特别是中文汉字的搜索工作
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，对语言文字显示的硬件字库的访问支持，包含对字体特别是中文汉字的搜索工作
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // github: https://github.com/701Enti
 // bilibili: 701Enti

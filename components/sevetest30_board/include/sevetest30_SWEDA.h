@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题

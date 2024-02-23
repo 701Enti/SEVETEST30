@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 在此，对 乐鑫科技-ESPRESSIF ESP-IDF ESP-ADF ESP-DSP各种框架及相关创作者们 表示感谢
 // 在此，对 网易云音乐 网易云音乐API及相关创作者们 表示感谢
@@ -200,25 +200,34 @@ void app_main(void)
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   // }
 
-    for(;;){
 
-      if (ext_io_ctrl.auto_read_INT == true)
-      {
-        ext_io_ctrl.auto_read_INT = false;
-        ext_io_value_service();
-      }
-    uint8_t color[3]={255,255,255};
-    refresh_systemtime_data();
-    vTaskDelay(pdMS_TO_TICKS(100));
-    main_UI_1();
-     for (int i=0;i<=5;i++){
-      ledarray_set_and_write(i);
-      clean_draw_buf(i*2 + 0);
-      clean_draw_buf(i*2 + 1);
-     }
+    sync
+    while(1){
+      BL5372_time_t time;
+      BL5372_time_now_get(&time);  
+      vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 
 
-  }
+  //   for(;;){
+
+  //     if (ext_io_ctrl.auto_read_INT == true)
+  //     {
+  //       ext_io_ctrl.auto_read_INT = false;
+  //       ext_io_value_service();
+  //     }
+  //   uint8_t color[3]={255,255,255};
+  //   refresh_systemtime_data();
+  //   vTaskDelay(pdMS_TO_TICKS(100));
+  //   main_UI_1();
+  //    for (int i=0;i<=5;i++){
+  //     ledarray_set_and_write(i);
+  //     clean_draw_buf(i*2 + 0);
+  //     clean_draw_buf(i*2 + 1);
+  //    }
+
+
+  // }
 
   // init_time_data_sntp();
 

@@ -19,9 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含各种SE30针对性硬件控制
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，，包含各种SE30针对性硬件控制
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+// 敬告：文件包含 DEVICE_I2C_PORT i2c通讯的初始化配置,需要调用sevetest30_all_board_init
 ///----注意：控制数据只有在完成sevetest30_board_ctrl工作之后，才会保存到board_ctrl_buf缓存中，如果果您只是外部定义了一个board_ctrl_t类型变量存储您的更改，
 //     但是没有调用sevetest30_board_ctrl,board_ctrl_buf缓存数据将不会更新,而系统缓存的位置是board_ctrl_buf，而不是您自己定义的外部缓存，
 ///    意味着系统比如蓝牙读取，读到的数据将不是更新的数据，所以如果您要进行控制数据更改，务必保证sevetest30_board_ctrl工作进行了
@@ -31,8 +31,9 @@
 
 #pragma once
 
+#include "esp_types.h"
 #include <string.h>
-#include <stdbool.h>
+#include <stdio.h>
 #include "audio_hal.h"
 #include "esxxx_common.h"
 #include "board_def.h"
@@ -40,6 +41,8 @@
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
 #include "esp_peripherals.h"
+#include "BL5372.h"
+
 
 extern esp_periph_set_handle_t se30_periph_set_handle;
 
@@ -88,7 +91,7 @@ typedef struct board_ctrl_t
    es_adc_input_t  codec_adc_pin;//麦克风端选择
 } board_ctrl_t;
 
-void sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle);
+esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle);
 void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t *board_ctrl);
 
