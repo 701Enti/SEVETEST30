@@ -47,13 +47,13 @@ void sync_systemtime_to_ext_rtc()
   refresh_systemtime_data();
   //缓存设定的时间
   BL5372_time_t time_buf;
-  time_buf->year = systemtime_data->year;
-  time_buf->month = systemtime_data->month;
-  time_buf->day = systemtime_data->day;
-  time_buf->week = systemtime_data->week;
-  time_buf->hour = systemtime_data->hour;
-  time_buf->minute = systemtime_data->minute;
-  time_buf->second = systemtime_data->second;
+  time_buf.year = systemtime_data.year;
+  time_buf.month = systemtime_data.month;
+  time_buf.day = systemtime_data.day;
+  time_buf.week = systemtime_data.week;
+  time_buf.hour = systemtime_data.hour;
+  time_buf.minute = systemtime_data.minute;
+  time_buf.second = systemtime_data.second;
   //执行同步
   BL5372_time_now_set(&time_buf);
 }

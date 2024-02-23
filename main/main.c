@@ -200,8 +200,8 @@ void app_main(void)
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   // }
 
-
-    sync
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    sync_systemtime_to_ext_rtc();
     while(1){
       BL5372_time_t time;
       BL5372_time_now_get(&time);  

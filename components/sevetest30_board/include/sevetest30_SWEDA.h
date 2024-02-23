@@ -51,6 +51,8 @@ typedef struct battery_data_t{
 extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
 
+void sync_systemtime_to_ext_rtc();
+
 void refresh_battery_data();
 
 void refresh_systemtime_data();
