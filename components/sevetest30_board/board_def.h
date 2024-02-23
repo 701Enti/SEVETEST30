@@ -61,9 +61,16 @@
 #define ESP_SD_PIN_CD            -1
 #define ESP_SD_PIN_WP            -1
 
-#define I2C_PORT   I2C_NUM_0
-#define I2C_SDA_IO GPIO_NUM_48
-#define I2C_SCL_IO GPIO_NUM_47
+//默认为音频设备控制提供
+#define AUDIO_I2C_PORT      I2C_NUM_0
+#define AUDIO_I2C_SDA_IO    GPIO_NUM_48
+#define AUDIO_I2C_SCL_IO    GPIO_NUM_47
+
+//默认为其他设备控制提供
+#define DEVICE_I2C_PORT      I2C_NUM_0
+#define DEVICE_I2C_SDA_IO    GPIO_NUM_48
+#define DEVICE_I2C_SCL_IO    GPIO_NUM_47
+#define DEVICE_I2C_FREQ_HZ   (100 * 1000)
 
 #define I2S_MCK_IO GPIO_NUM_11;
 #define I2S_BCK_IO GPIO_NUM_12;

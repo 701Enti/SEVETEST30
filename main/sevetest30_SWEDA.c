@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
@@ -28,7 +28,7 @@
 // bilibili: 701Enti
 
 #include "sevetest30_SWEDA.h"
-
+#include "BL5372.h"
 #include "esp_sntp.h"
 #include "esp_log.h"
 #include "driver/adc.h"
@@ -41,19 +41,37 @@ battery_data_t battery_data;
 
 esp_adc_cal_characteristics_t adc_chars;
 
+// 同步系统实时时间到外部RTC
+void sync_systemtime_to_ext_rtc()
+{
+  refresh_systemtime_data();
+  //缓存设定的时间
+  BL5372_time_t time_buf;
+  time_buf->year = systemtime_data->year;
+  time_buf->month = systemtime_data->month;
+  time_buf->day = systemtime_data->day;
+  time_buf->week = systemtime_data->week;
+  time_buf->hour = systemtime_data->hour;
+  time_buf->minute = systemtime_data->minute;
+  time_buf->second = systemtime_data->second;
+  //执行同步
+  BL5372_time_now_set(&time_buf);
+}
+
+
 // 刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 sevetest30_IWEDA.h)
 void refresh_systemtime_data()
 {
     const char *TAG = "refresh_time_data";
 
     // 获取内部系统时间，参考了官方文档  https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
-    time_t now_time;
+    time_t time_now;
     char time_buf[64] = {0};
     struct tm time_info;
 
-    time(&now_time);
+    time(&time_now);
     setenv("TZ", "CST-8", 1);                               // 设定时区
-    localtime_r(&now_time, &time_info);                     // 读取本地时间
+    localtime_r(&time_now, &time_info);                     // 读取本地时间
     strftime(time_buf, sizeof(time_buf), "%c", &time_info); // 对时间数据格式化
 
     // 解析保存系统时间

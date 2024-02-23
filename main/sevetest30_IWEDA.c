@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
 //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api

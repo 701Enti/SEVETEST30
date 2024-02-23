@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，由SEVETEST30开发团队维护，包含一些ESP32_S3通过硬件外设与TCA6416建立配置与扩展IO数据的通讯
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些ESP32_S3通过硬件外设与TCA6416建立配置与扩展IO数据的通讯
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 本库特性：1 由于IO控制时，有随时需要调用TCA6416A写入函数的需求，本库不会出现调用一次函数归定只能改一个IO或读一个IO还要传一系列参数的尴尬问题，而是一齐读写,同时还会保存实时IO数据，因此没有用到电平反转寄存器
 //          2 使用时直接修改公共变量以在项目非常方便使用，加之，可以像sevetest30_gpio.c封装后使用FreeRTOS支持，并添加中断支持，一但IO电平变化就读取，没有变就不读，客观上可以大大提高资源利用率
@@ -38,6 +38,8 @@
 
 #include "driver/i2c.h"
 #include "esp_log.h"
+
+#include "board_def.h"
 
 uint8_t TCA6416A_data_buf[3] = {0x00,0x00,0x00};//缓存寄存器地址与数据 {reg + data}
 
@@ -73,7 +75,7 @@ void TCA6416A_mode_set(TCA6416A_mode_t *pTCA6416Amode)
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_MODE1, TCA6416A_data_buf[1] = data1, TCA6416A_data_buf[2] = data2;
-  err = i2c_master_write_to_device(I2C_NUM_0, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  err = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
   if(err!=ESP_OK)ESP_LOGE(TAG,"与TCA6416A通讯时发现问题 描述： %s",esp_err_to_name(err));
 }
 
@@ -113,14 +115,14 @@ void TCA6416A_gpio_service(TCA6416A_value_t *pTCA6416Avalue)
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_OUT1, TCA6416A_data_buf[1] = data1, TCA6416A_data_buf[2] = data2;
-  err = i2c_master_write_to_device(I2C_NUM_0, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  err = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
 
   // 装载,清理，准备读取
-  //TCA6416的时序大概可以这样描述：先像正常的写数据一样，但是只写入选定的寄存器命令，之后不要STOP,马上通过i2c_master_read_from_device正常读取，即重新发送一次TCA6416A地址,主机接收数据，完成
+  //TCA6416A大概可以这样描述：先像正常的写数据一样，但是只写入选定的寄存器命令，之后不要STOP,马上通过i2c_master_read_from_device正常读取，即重新发送一次TCA6416A地址,主机接收数据，完成
   TCA6416A_data_buf[0] = TCA6416A_IN1, TCA6416A_data_buf[1] = 0x00, TCA6416A_data_buf[2] = 0x00;
 
   // 直接读出两个寄存器的值
-  err = i2c_master_write_read_device(I2C_NUM_0, i2c_add,&TCA6416A_data_buf[0],sizeof(TCA6416A_data_buf[0]),&TCA6416A_data_buf[1],sizeof(TCA6416A_data_buf[1])*2,1000 / portTICK_PERIOD_MS);
+  err = i2c_master_write_read_device(DEVICE_I2C_PORT, i2c_add,&TCA6416A_data_buf[0],sizeof(TCA6416A_data_buf[0]),&TCA6416A_data_buf[1],sizeof(TCA6416A_data_buf[1])*2,1000 / portTICK_PERIOD_MS);
   data1 = TCA6416A_data_buf[1], data2 = TCA6416A_data_buf[2]; // 取出
 
   // 依据data1,data2数值移位映射
