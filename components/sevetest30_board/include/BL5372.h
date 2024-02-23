@@ -149,6 +149,6 @@ void BL5372_config_get(BL5372_cfg_t* rtc_cfg);
 
 uint8_t BCD8421_transform_recode(uint8_t bin_dat);
 
-uint8_t BCD8421_transform_decode(uint8_t dec_dat)
+uint8_t BCD8421_transform_decode(uint8_t dec_dat);
 
 void BL5372_config_init();
