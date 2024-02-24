@@ -28,7 +28,6 @@
 // bilibili: 701Enti
 
 #include "sevetest30_SWEDA.h"
-#include "BL5372.h"
 #include "esp_sntp.h"
 #include "esp_log.h"
 #include "driver/adc.h"
@@ -41,37 +40,26 @@ battery_data_t battery_data;
 
 esp_adc_cal_characteristics_t adc_chars;
 
-// 同步系统实时时间到外部RTC
-void sync_systemtime_to_ext_rtc()
-{
-  refresh_systemtime_data();
-  // 缓存设定的时间
-  BL5372_time_t time_buf;
-  time_buf.year = systemtime_data.year - 2000; /// 舍去前两位，如2024年存储24
-  time_buf.month = systemtime_data.month;
-  time_buf.day = systemtime_data.day;
-  time_buf.week = systemtime_data.week;
-  time_buf.hour = systemtime_data.hour;
-  time_buf.minute = systemtime_data.minute;
-  time_buf.second = systemtime_data.second;
-  // 执行同步
-  BL5372_time_now_set(&time_buf);
-}
-
 // 刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 sevetest30_IWEDA.h)
 void refresh_systemtime_data()
 {
   const char *TAG = "refresh_time_data";
 
   // 获取内部系统时间，参考了官方文档  https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
-  time_t time_now;
-  char time_buf[64] = {0};
+  // 使用标准C库函数来获取时间并对其进行操作
+  time_t time_sec; //时间戳缓存（从Epoch(1970-01-01 00:00:00 UTC)开始的秒数）
+  time(&time_sec); // 计算当前日历时间，并转换为标准time_t类型
+
   struct tm time_info;
 
-  time(&time_now);
-  setenv("TZ", "CST-8", 1);                               // 设定时区
-  localtime_r(&time_now, &time_info);                     // 读取本地时间
-  strftime(time_buf, sizeof(time_buf), "%c", &time_info); // 对时间数据格式化
+  // 设定本地时区
+  setenv("TZ",CONFIG_LOCAL_TZ,1);     
+  tzset();
+  localtime_r(&time_sec, &time_info); // 通过时间戳time_sec读取本地时间到time_info
+
+  // 对时间数据格式化成常用表达
+  char time_buf[64] = {0};
+  strftime(time_buf, sizeof(time_buf), "%c", &time_info);
 
   // 解析保存系统时间
   char week_buf[10] = {0};
@@ -181,18 +169,77 @@ void refresh_battery_data()
   // 充电状态
 }
 
-
-/// @brief 启动外部离线RTC闹钟,时间和配置在电池接入正常运行时掉电保存
-/// @param time 要设置的时间数据的地址,除了 天 时 分 其他都是无效的
-/// @param alarm 选择离线RTC闹钟,这是一个枚举类型
-void start_ext_rtc_alarm(systemtime_t *time, BL5372_alarm_select_t alarm)
+// 同步系统实时时间到外部RTC
+void sync_systemtime_to_ext_rtc()
 {
+  refresh_systemtime_data();
   // 缓存设定的时间
   BL5372_time_t time_buf;
-  time_buf.day = time->day;  
-  time_buf.hour = time->hour;  
+  time_buf.year = systemtime_data.year - 2000; /// 舍去前两位，如2024年存储24
+  time_buf.month = systemtime_data.month;
+  time_buf.day = systemtime_data.day;
+  time_buf.week = systemtime_data.week;
+  time_buf.hour = systemtime_data.hour;
+  time_buf.minute = systemtime_data.minute;
+  time_buf.second = systemtime_data.second;
+  // 执行同步
+  BL5372_time_now_set(&time_buf);
+}
+
+// 同步系统实时时间，从外部RTC获取时间数据，这往往是无网络连接下的同步选择
+void sync_systemtime_from_ext_rtc()
+{
+  //从外部RTC获取时间数据
+  BL5372_time_t time_buf;
+  BL5372_time_now_get(&time_buf);
+  
+  // 使用标准C库函数来进行操作和设置
+
+  time_t time_sec; //时间戳缓存（从Epoch(1970-01-01 00:00:00 UTC)开始的秒数）
+  time(&time_sec); // 计算当前日历时间，并转换为标准time_t类型
+  
+  struct tm time_info;
+
+  // 设定本地时区
+  setenv("TZ",CONFIG_LOCAL_TZ,1);
+  tzset();
+  gmtime_r(&time_sec,&time_info);//通过时间戳time_sec读取本地时间到time_info
+
+  //修改时间值
+  time_info.tm_year = time_buf.year + 100;//time_buf.year为0时实际表示2000年，而tm_year为100时表示2000年
+  time_info.tm_mon = time_buf.month - 1;//范围为0 - 11
+  time_info.tm_mday = time_buf.day;
+  time_info.tm_wday = time_buf.week;
+  time_info.tm_hour = time_buf.hour;
+  time_info.tm_min = time_buf.minute;
+  time_info.tm_sec = time_buf.second;
+
+  //获取修改结果时间戳
+  time_sec = mktime(&time_info);
+
+  //设置系统时间
+  struct timeval time_now = {.tv_sec = time_sec};
+  settimeofday(&time_now,NULL);
+  
+}
+
+/// @brief 启动外部离线RTC闹钟,时间和配置在电池接入正常运行时掉电保存
+/// @param alarm 选择要设置的闹钟,这是一个枚举类型
+/// @param time 要设置的时间数据的地址,除了 时 分 其他都是无效的
+/// @param cycle_plan 要设置的重复计划的数据的地址
+void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t *time, BL5372_alarm_cycle_plan_t *cycle_plan)
+{
+  // 设置之前初始化闹钟的状态
+  BL5372_alarm_stop_ringing(alarm);
+  BL5372_alarm_status_set(alarm, false);
+
+  // 缓存设定的时间
+  BL5372_time_t time_buf;
+  time_buf.week = time->week;
+  time_buf.hour = time->hour;
   time_buf.minute = time->minute;
 
-  BL5372_time_alarm_set(alarm,&time_buf);
-  BL5372_alarm_status_set(alarm,true);
+  // 设置闹钟时间
+  BL5372_time_alarm_set(alarm, &time_buf, cycle_plan);
+  BL5372_alarm_status_set(alarm, true); // 打开闹钟
 }

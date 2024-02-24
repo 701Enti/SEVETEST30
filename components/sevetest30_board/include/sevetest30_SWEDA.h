@@ -32,6 +32,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "BL5372.h"
 
 typedef struct systemtime_t{
   int year;
@@ -53,6 +54,10 @@ extern battery_data_t battery_data;
 
 void sync_systemtime_to_ext_rtc();
 
+void sync_systemtime_from_ext_rtc();
+
 void refresh_battery_data();
 
 void refresh_systemtime_data();
+
+void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);
