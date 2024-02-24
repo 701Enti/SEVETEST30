@@ -32,8 +32,6 @@
 #define SEVETEST30_BLE_DEVICE_APPEARANCE_VALUE    0x0100      //蓝牙设备外观特征值(类别：0x004 外观特征值取值范围：0x0100 to 0x013F  0x0100-Generic Clock)
 #define SEVETEST30_BLE_LOCAL_MTU                   100        //本地最大可传输单元MTU限制大小
 
-
-
 //音频相关
 #define FUNC_AUDIO_CODEC_EN       (true)
 #define CODEC_ADC_I2S_PORT        (0)

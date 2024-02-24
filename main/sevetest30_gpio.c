@@ -115,7 +115,7 @@ void sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode,TCA6416A_value_t* p_ext_va
   .intr_type =GPIO_INTR_DISABLE,
   };
   gpio_config(&battery_in_ctrl_io_config);//传参
-  gpio_set_level(BAT_IN_CTRL_IO,1);//设置IO,初始电平
+  gpio_set_level(BAT_IN_CTRL_IO,0);//设置IO,初始电平
 
   //TCA6416A INT引脚
   gpio_config_t TCA6416A_int_config = { 

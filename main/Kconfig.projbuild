@@ -14,7 +14,11 @@ config WIFI_PASSWORD
 		Can be left blank if the network has no security set.
 
     
-
+config LOCAL_TZ 
+    string "the time zone of your area"
+    default "CST-8"
+    help
+        the time zone of your area
 
 config NTP_SERVER_0
     string "the first ntp server name"
