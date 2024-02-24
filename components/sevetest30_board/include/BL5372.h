@@ -29,6 +29,7 @@
 
 #include "esp_types.h"
 
+//I2C相关配置宏定义在board_def.h下
 #define BL5372_DEVICE_ADD 0x32
 
 //BL5372内部寄存器地址表，请通过BL5372数据手册了解这些寄存器功能细节
@@ -51,7 +52,11 @@ enum{
   BL5372_REG_CTRL_2,
 }; 
 
-
+//BL5372闹钟选择
+typedef enum{
+   BL5372_ALARM_A = 0,
+   BL5372_ALARM_B = 1,
+} BL5372_alarm_select_t;
 
 
 // 中断相关引脚的输出模式 SL2 SL1
@@ -63,27 +68,30 @@ typedef enum
     BL5372_INTR_OUT_MODE3,        // INTRA引脚输出 闹钟A          ///  INTRB引脚输出 闹钟A,闹钟B 周期性中断 32KHz时钟脉冲
 } BL5372_intr_out_mode_t;
 
-// 周期性中断(INT)的模式 CT2 CT1 CT0
+// 周期性中断(INT)模块的模式 CT2 CT1 CT0
 typedef enum
 {
-    BL5372_INT_MODE0 = 0x00, // 周期性中断接入的引脚为高电平
-    BL5372_INT_MODE1 = 0x01, // 周期性中断接入的引脚为低电平
-    BL5372_INT_MODE2,        // 周期性中断接入的引脚输出2Hz占空比50%的脉冲(脉冲模式)
-    BL5372_INT_MODE3,        // 周期性中断接入的引脚输出1Hz占空比50%的脉冲(脉冲模式)
-    BL5372_INT_MODE4,        // 当 秒 进位 周期性中断接入的引脚输出低电平
-    BL5372_INT_MODE5,        // 当 分 进位 周期性中断接入的引脚输出低电平
-    BL5372_INT_MODE6,        // 当 时 进位 周期性中断接入的引脚输出低电平
-    BL5372_INT_MODE7,        // 当 月 进位 周期性中断接入的引脚输出低电平
-} BL5372_INT_mode_t;
+    BL5372_INT_MOD_MODE0 = 0x00, // 周期性中断接入的引脚为高电平
+    BL5372_INT_MOD_MODE1 = 0x01, // 周期性中断接入的引脚为低电平
+    BL5372_INT_MOD_MODE2,        // 周期性中断接入的引脚输出2Hz占空比50%的脉冲(脉冲模式)
+    BL5372_INT_MOD_MODE3,        // 周期性中断接入的引脚输出1Hz占空比50%的脉冲(脉冲模式)
+    BL5372_INT_MOD_MODE4,        // 当 秒 进位 周期性中断接入的引脚输出低电平
+    BL5372_INT_MOD_MODE5,        // 当 分 进位 周期性中断接入的引脚输出低电平
+    BL5372_INT_MOD_MODE6,        // 当 时 进位 周期性中断接入的引脚输出低电平
+    BL5372_INT_MOD_MODE7,        // 当 月 进位 周期性中断接入的引脚输出低电平
+} BL5372_INT_module_mode_t;
 
+
+
+//运行配置
 typedef struct BL5372_cfg_t
 {
     //----------------控制寄存器1  BL5372_REG_CTRL_1
     bool alarm_A_en;                      // 设置为true将使能闹钟A AALE
     bool alarm_B_en;                      // 设置为true将使能闹钟B BALE
-    BL5372_intr_out_mode_t intr_out_mode; // 中断输出模式,这是一个枚举类型数据   SL2 SL1
+    BL5372_intr_out_mode_t intr_out_mode; // 中断输出模式,请查看BL5372_intr_out_mode_t  SL2 SL1
     bool test_en;                         // 设置为true进入测试模式 TEST
-    BL5372_INT_mode_t INT_mode;           // 周期性中断模式,这是一个枚举类型数据 CT2 CT1 CT0
+    BL5372_INT_module_mode_t INT_module_mode;    // 周期性中断模块的模式，请查看BL5372_INT_module_mode_t CT2 CT1 CT0
 
     //----------------控制寄存器2  BL5372_REG_CTRL_2
     bool hour_24_clock_en; // 设置为true进行24小时制记时 12/24
@@ -112,7 +120,7 @@ typedef struct BL5372_cfg_t
 // BL5372的时间数据，以常规时间的数值，24h制/12h制 视配置而定
 typedef struct BL5372_time_t
 {
-    int year;
+    int year;///舍去前两位，如2024年存储24
     int month;
     int day;
     int week;
@@ -128,7 +136,7 @@ typedef struct BL5372_time_t
     .alarm_B_en = false,                     \
     .intr_out_mode = BL5372_INTR_OUT_MODE2,  \
     .test_en = false,                        \
-    .INT_mode = BL5372_INT_MODE0,            \
+    .INT_module_mode = BL5372_INT_MOD_MODE0, \
     .hour_24_clock_en = true,                \
     .adj_en_or_xstp = false,                 \
     .out_32KHz_false = true,                 \
@@ -137,18 +145,37 @@ typedef struct BL5372_time_t
     .alarm_B_out_flag_or_out_keep = false,   \
 }
 
+void BL5372_config_init();
 
 
 void BL5372_time_now_set(BL5372_time_t *time);
 
 void BL5372_time_now_get(BL5372_time_t* time);
 
+
+
+void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t *time);
+
+void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time);
+
+
+void BL5372_alarm_status_set(BL5372_alarm_select_t alarm, bool status);
+
+bool BL5372_alarm_status_get(BL5372_alarm_select_t alarm);
+
+
+bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm);
+
+void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm);
+
+
+
 void BL5372_config_set(BL5372_cfg_t* rtc_cfg);
 
 void BL5372_config_get(BL5372_cfg_t* rtc_cfg);
 
+
+
 uint8_t BCD8421_transform_recode(uint8_t bin_dat);
 
 uint8_t BCD8421_transform_decode(uint8_t dec_dat);
-
-void BL5372_config_init();

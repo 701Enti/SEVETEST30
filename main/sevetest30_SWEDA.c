@@ -4,16 +4,16 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -45,138 +45,154 @@ esp_adc_cal_characteristics_t adc_chars;
 void sync_systemtime_to_ext_rtc()
 {
   refresh_systemtime_data();
-  //缓存设定的时间
+  // 缓存设定的时间
   BL5372_time_t time_buf;
-  time_buf.year = systemtime_data.year;
+  time_buf.year = systemtime_data.year - 2000; /// 舍去前两位，如2024年存储24
   time_buf.month = systemtime_data.month;
   time_buf.day = systemtime_data.day;
   time_buf.week = systemtime_data.week;
   time_buf.hour = systemtime_data.hour;
   time_buf.minute = systemtime_data.minute;
   time_buf.second = systemtime_data.second;
-  //执行同步
+  // 执行同步
   BL5372_time_now_set(&time_buf);
 }
-
 
 // 刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 sevetest30_IWEDA.h)
 void refresh_systemtime_data()
 {
-    const char *TAG = "refresh_time_data";
+  const char *TAG = "refresh_time_data";
 
-    // 获取内部系统时间，参考了官方文档  https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
-    time_t time_now;
-    char time_buf[64] = {0};
-    struct tm time_info;
+  // 获取内部系统时间，参考了官方文档  https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
+  time_t time_now;
+  char time_buf[64] = {0};
+  struct tm time_info;
 
-    time(&time_now);
-    setenv("TZ", "CST-8", 1);                               // 设定时区
-    localtime_r(&time_now, &time_info);                     // 读取本地时间
-    strftime(time_buf, sizeof(time_buf), "%c", &time_info); // 对时间数据格式化
+  time(&time_now);
+  setenv("TZ", "CST-8", 1);                               // 设定时区
+  localtime_r(&time_now, &time_info);                     // 读取本地时间
+  strftime(time_buf, sizeof(time_buf), "%c", &time_info); // 对时间数据格式化
 
-    // 解析保存系统时间
-    char week_buf[10] = {0};
-    char month_buf[10] = {0};
-    // 数据截取
-    sscanf(time_buf, " %s %s %d %d:%d:%d %d", week_buf, month_buf, &systemtime_data.day,
-           &systemtime_data.hour, &systemtime_data.minute, &systemtime_data.second,
-           &systemtime_data.year);
-    // 由于星期和月份数据是字符串，转换成数字以便显示和分析，switch表达式不支持字符串，但是可以通过字母的各个对比确定
+  // 解析保存系统时间
+  char week_buf[10] = {0};
+  char month_buf[10] = {0};
+  // 数据截取
+  sscanf(time_buf, " %s %s %d %d:%d:%d %d", week_buf, month_buf, &systemtime_data.day,
+         &systemtime_data.hour, &systemtime_data.minute, &systemtime_data.second,
+         &systemtime_data.year);
+  // 由于星期和月份数据是字符串，转换成数字以便显示和分析，switch表达式不支持字符串，但是可以通过字母的各个对比确定
 
-    switch (week_buf[0])
+  switch (week_buf[0])
+  {
+  case 'M':
+    systemtime_data.week = 1; // 星期一 Monday
+    break;
+
+  case 'T':
+    if (week_buf[1] == 'u')
+      systemtime_data.week = 2; // 星期二 Tuesday
+    if (week_buf[1] == 'h')
+      systemtime_data.week = 4; // 星期四 Thursday
+    break;
+
+  case 'W':
+    systemtime_data.week = 3; // 星期三 Wednesday
+    break;
+
+  case 'F':
+    systemtime_data.week = 5; // 星期五 Friday
+    break;
+
+  case 'S':
+    if (week_buf[1] == 'a')
+      systemtime_data.week = 6; // 星期六 Saturday
+
+    if (week_buf[1] == 'u')
+      systemtime_data.week = 7; // 星期日 Sunday
+    break;
+
+  default:
+    ESP_LOGE(TAG, "无法判断的数据 %s", week_buf);
+    systemtime_data.week = 0;
+    break;
+  }
+
+  switch (month_buf[0])
+  {
+  case 'J':
+    if (month_buf[1] == 'a')
+      systemtime_data.month = 1; // 一月 January
+    if (month_buf[1] == 'u')
     {
-    case 'M':
-        systemtime_data.week = 1; // 星期一 Monday
-    break;
-
-    case 'T':
-        if(week_buf[1] == 'u')
-           systemtime_data.week = 2; // 星期二 Tuesday
-        if(week_buf[1] == 'h')
-          systemtime_data.week = 4; // 星期四 Thursday
-    break;
-   
-    case 'W':
-        systemtime_data.week = 3; // 星期三 Wednesday
-    break;
-
-    case 'F':
-        systemtime_data.week = 5; // 星期五 Friday
-    break;
-
-    case 'S':
-        if(week_buf[1] == 'a')
-          systemtime_data.week = 6; // 星期六 Saturday
-      
-        if(week_buf[1] == 'u')
-          systemtime_data.week = 7; // 星期日 Sunday
-    break;
-
-    default:
-        ESP_LOGE(TAG,"无法判断的数据 %s",week_buf);
-        systemtime_data.week = 0;
-    break;
+      if (month_buf[2] == 'n')
+        systemtime_data.month = 6; // 六月 June
+      if (month_buf[2] == 'l')
+        systemtime_data.month = 7; // 七月 July
     }
-
-    switch (month_buf[0])
-    {
-    case 'J':
-      if (month_buf[1]=='a')
-        systemtime_data.month = 1;//一月 January
-      if (month_buf[1]=='u'){
-        if (month_buf[2]=='n')
-            systemtime_data.month = 6;//六月 June
-        if (month_buf[2]=='l')
-            systemtime_data.month = 7;//七月 July
-      }
-    break;
-    
-    case 'M':
-      if (month_buf[2]=='r')
-        systemtime_data.month = 3;//三月 March
-      if (month_buf[2]=='y')
-        systemtime_data.month = 5;//五月 May
-    break;
-    
-    case 'A':
-      if (month_buf[1]=='u')
-        systemtime_data.month = 8;//八月 August
-      if (month_buf[1]=='p')
-        systemtime_data.month = 4;//四月 April
-    break;
- 
-    case 'F':
-      systemtime_data.month = 2;//二月 February
     break;
 
-    case 'S':
-        systemtime_data.month = 9;//九月 September
+  case 'M':
+    if (month_buf[2] == 'r')
+      systemtime_data.month = 3; // 三月 March
+    if (month_buf[2] == 'y')
+      systemtime_data.month = 5; // 五月 May
     break;
 
-    case 'O':
-        systemtime_data.month = 10;//十月 October
+  case 'A':
+    if (month_buf[1] == 'u')
+      systemtime_data.month = 8; // 八月 August
+    if (month_buf[1] == 'p')
+      systemtime_data.month = 4; // 四月 April
     break;
 
-    case 'N':
-        systemtime_data.month = 11;//十一月 November
+  case 'F':
+    systemtime_data.month = 2; // 二月 February
     break;
 
-    case 'D':
-        systemtime_data.month = 12;//十二月 December
+  case 'S':
+    systemtime_data.month = 9; // 九月 September
     break;
 
-    default:
-       ESP_LOGE(TAG,"无法判断的数据 %s",month_buf);
-       systemtime_data.month = 0;
+  case 'O':
+    systemtime_data.month = 10; // 十月 October
     break;
-    }
+
+  case 'N':
+    systemtime_data.month = 11; // 十一月 November
+    break;
+
+  case 'D':
+    systemtime_data.month = 12; // 十二月 December
+    break;
+
+  default:
+    ESP_LOGE(TAG, "无法判断的数据 %s", month_buf);
+    systemtime_data.month = 0;
+    break;
+  }
 }
 
 // 刷新缓存的电池数据，充电状态，该函数需要频繁调用
-void refresh_battery_data(){
-    const char *TAG = "refresh_battery_data";
-    //电池数据请求
-    
-    //充电状态
- 
+void refresh_battery_data()
+{
+  const char *TAG = "refresh_battery_data";
+  // 电池数据请求
+
+  // 充电状态
+}
+
+
+/// @brief 启动外部离线RTC闹钟,时间和配置在电池接入正常运行时掉电保存
+/// @param time 要设置的时间数据的地址,除了 天 时 分 其他都是无效的
+/// @param alarm 选择离线RTC闹钟,这是一个枚举类型
+void start_ext_rtc_alarm(systemtime_t *time, BL5372_alarm_select_t alarm)
+{
+  // 缓存设定的时间
+  BL5372_time_t time_buf;
+  time_buf.day = time->day;  
+  time_buf.hour = time->hour;  
+  time_buf.minute = time->minute;
+
+  BL5372_time_alarm_set(alarm,&time_buf);
+  BL5372_alarm_status_set(alarm,true);
 }
