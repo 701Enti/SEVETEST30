@@ -33,16 +33,17 @@
 //读取步骤是 监测INT1状态： 一但外部IO(TCA6416A)中断触发，检测LSM6DS3TRC接入INT1中断触发 
 //          运行读取：     读出FIFO存储的数据
 //          复位FIFO缓冲区：将模式转到旁路模式又切换回FIFO模式，进入下一个循环
-//   快捷监测 6D检测 自由落体检测
+//   快捷监测 6D检测 自由落体检测 计步器(必须 ORD 26Hz+)
 
 //使用到的寄存器列表
 enum{
   //综合的
-  IMU_REG_CTRL1_XL,//ODR_XL
+  IMU_REG_CTRL1_XL,//ODR_XL 26Hz+ ||| 设置大于或等于正负4g
   IMU_REG_CTRL3_C,//BDU
   IMU_REG_CTRL4_C, // DRDY_MASK
   IMU_REG_CTRL6_C,//XL_HM_MODE
   IMU_REG_CTRL8_XL// LOW_PASS_ON_6D
+  IMU_REG_CTRL10_C,//FUNC_EN->1 PEDO_EN->1 PEDO_RST_STEP从0跳1再置0清除计步器步数
   IMU_REG_INT1_CTRL,//
   
   //自由落体检测
@@ -54,8 +55,13 @@ enum{
   IMU_REG_D6D_SRC//all
   IMU_REG_MD1_CFG,//INT1_6D  ||| INT1_FF
   IMU_REG_TAP_THS_6D,//SIXD_THS
-  IMU_REG_TAP_CFG,//INTERRUPTS_ENABLE(6D 自由落体检测)  LIR 
+  IMU_REG_TAP_CFG,//INTERRUPTS_ENABLE(6D 自由落体检测)  LIR->1(全局有效) 
   
+  //计步器(必须 ORD 26Hz+)
+  IMU_REG_STEP_COUNTER_H,//read
+  IMU_REG_STEP_COUNTER_L,//read
+  IMU_REG_CONFIG_PEDO_THS_MIN,//PEDO_FS->1 
+
 
 }
 
