@@ -27,24 +27,31 @@
 // bilibili: 701Enti
 
 //我们这里使用了普通FIFO模式，因为我们只是用于操作UI而无需完整的姿态数据以及严格的实时性，低误差性
-//初始化任务是 设置加速度计和陀螺仪的ORD（为了获得中断输出不得设置加速度计到掉电模式，以及XL_HM_MODE位的设置
+//初始化任务是 设置加速度计和陀螺仪的ORD（为了获得中断输出不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
 //            启用BDU和DRDY_MASK 配置INT1
-//           设置FIFO深度   设置 加速度 角速率 数据源到FIFO   配置为FIFO模式 
-//读取步骤是 监测INT1状态： 一但外部IO(TCA6416A)中断触发，检测LSM6DS3TRC接入INT1中断触发 
-//          运行读取：     读出FIFO存储的数据
-//          复位FIFO缓冲区：将模式转到旁路模式又切换回FIFO模式，进入下一个循环
+//            设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
+//读取步骤是  读出FIFO存储的数据 / 读出自动记录的数据     
+
 //   快捷监测 6D检测 自由落体检测 计步器(必须 ORD 26Hz+)
 
 //使用到的寄存器列表
 enum{
   //综合的
   IMU_REG_CTRL1_XL,//ODR_XL 26Hz+ ||| 设置大于或等于正负4g
-  IMU_REG_CTRL3_C,//BDU
+  IMU_REG_CTRL3_C,//BDU->1  IF_INC->1
   IMU_REG_CTRL4_C, // DRDY_MASK
   IMU_REG_CTRL6_C,//XL_HM_MODE
   IMU_REG_CTRL8_XL// LOW_PASS_ON_6D
   IMU_REG_CTRL10_C,//FUNC_EN->1 PEDO_EN->1 PEDO_RST_STEP从0跳1再置0清除计步器步数
   IMU_REG_INT1_CTRL,//
+
+  //FIFO
+  IMU_REG_FIFO_CTRL3,//抽取系数
+  IMU_REG_FIFO_CTRL4,//抽取系数
+  IMU_REG_FIFO_CTRL5,//ODR_FIFO FIFO_MODE->110b
+  IMU_REG_FIFO_STATUS1,//DIFF_FIFO 
+  IMU_REG_FIFO_STATUS2,//DIFF_FIFO
+
   
   //自由落体检测
   IMU_REG_WAKE_UP_SRC,//FF_IA
