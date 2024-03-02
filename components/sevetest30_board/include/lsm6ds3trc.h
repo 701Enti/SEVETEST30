@@ -34,8 +34,10 @@
 
 //   快捷监测 6D检测 自由落体检测 计步器(必须 ORD 26Hz+)
 
+#pragma once
+
 //使用到的寄存器列表
-enum{
+typedef enum{
   //综合的
   IMU_REG_CTRL1_XL = 0x10,//ODR_XL 26Hz+ ||| 设置大于或等于正负4g
   IMU_REG_CTRL3_C = 0x12,//BDU->1  IF_INC->1
@@ -73,8 +75,38 @@ enum{
   //温度监测
   IMU_REG_OUT_TEMP_L = 0x20,//read
   IMU_REG_OUT_TEMP_H = 0x21,//read
+}IMU_reg_select_t;
 
-}
+enum{
+  CTRL1_XL,
+  CTRL3_C,
+  CTRL4_C, 
+  CTRL6_C,
+  CTRL8_XL,
+  CTRL10_C,
+  INT1_CTRL,
+  FIFO_CTRL3,
+  FIFO_CTRL4,
+  FIFO_CTRL5,
+  FIFO_STATUS1,
+  FIFO_STATUS2,
+  FIFO_STATUS3,
+  FIFO_STATUS4,
+  WAKE_UP_SRC,
+  WAKE_UP_DUR,
+  FREE_FALL,
+  D6D_SRC
+  MD1_CFG,
+  TAP_THS_6D,
+  TAP_CFG,
+  STEP_COUNTER_L,
+  STEP_COUNTER_H,
+  CONFIG_PEDO_THS_MIN,
+  OUT_TEMP_L,
+  OUT_TEMP_H,
+
+  REG_NUMBER
+};
 
 
 
