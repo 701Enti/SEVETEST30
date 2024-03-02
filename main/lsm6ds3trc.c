@@ -24,3 +24,16 @@
 // github: https://github.com/701Enti
 // bilibili: 701Enti
 
+#include "lsm6ds3trc.h"
+#include "esp_log.h"
+#include "board_def.h"
+#include "driver/i2c.h"
+
+typedef struct{
+  IMU_reg_select_t reg_select;
+  uint8_t reg_value;
+}IMU_reg_mapping_t;
+
+IMU_reg_mapping_t reg_mapping_database[REG_NUMBER]{
+    
+}
