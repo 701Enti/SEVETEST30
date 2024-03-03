@@ -32,6 +32,7 @@
 #include "esp_log.h"
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
+#include "lsm6ds3trc.h"
 
 #include "sevetest30_gpio.h"
 
