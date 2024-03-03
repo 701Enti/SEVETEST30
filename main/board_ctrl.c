@@ -32,6 +32,7 @@
 #include "board_ctrl.h"
 #include "board.h"
 #include "fonts_chip.h"
+#include "lsm6ds3trc.h"
 #include "driver/i2c.h"
 
 #include "esp_log.h"
@@ -93,6 +94,7 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);
     fonts_chip_init(board_device_handle);
     BL5372_config_init();
+    lsm6ds3trc_init_or_reset();
     vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
 
     // 配置
@@ -293,7 +295,7 @@ void boost_voltage_set(board_ctrl_t *board_ctrl)
     esp_err_t err = ESP_OK;
     err = i2c_master_write_to_device(DEVICE_I2C_PORT, BV_DP_ADD, buf, sizeof(buf), 1000 / portTICK_PERIOD_MS);
     if (err != ESP_OK)
-        ESP_LOGE("boost_voltage_set", "与电压控制器通讯时发现问题 描述： %s", esp_err_to_name(err));
+        ESP_LOGE("boost_voltage_set", "与电压控制器通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
     else
         ESP_LOGI("boost_voltage_set", "辅助电压5V已调整");
 }
