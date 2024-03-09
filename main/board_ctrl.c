@@ -62,19 +62,20 @@ board_ctrl_t *board_status_get()
 
 
 //此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化
-// esp_err_t device_i2c_init()
-// {
-//     i2c_config_t port_cfg;
-//     port_cfg.mode = I2C_MODE_MASTER;
-//     port_cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
-//     port_cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
-//     port_cfg.master.clk_speed = DEVICE_I2C_FREQ_HZ;
+//初始化设备I2C接口
+esp_err_t device_i2c_init()
+{
+    i2c_config_t port_cfg;
+    port_cfg.mode = I2C_MODE_MASTER;
+    port_cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    port_cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    port_cfg.master.clk_speed = DEVICE_I2C_FREQ_HZ;
 
-//     get_i2c_pins(DEVICE_I2C_PORT,&port_cfg);
+    get_i2c_pins(DEVICE_I2C_PORT,&port_cfg);
 
-//     i2c_param_config(DEVICE_I2C_PORT, &port_cfg);
-//     return i2c_driver_install(DEVICE_I2C_PORT, port_cfg.mode, 0, 0, false);
-// }
+    i2c_param_config(DEVICE_I2C_PORT, &port_cfg);
+    return i2c_driver_install(DEVICE_I2C_PORT, port_cfg.mode, 0, 0, false);
+}
 
 /// @brief 全局设备初始化
 /// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
@@ -97,7 +98,7 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     lsm6ds3trc_init_or_reset();
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(200));
         lsm6ds3trc_data_get_step_counter();
     }
     
