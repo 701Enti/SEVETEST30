@@ -91,10 +91,11 @@ typedef struct board_ctrl_t
    es_adc_input_t  codec_adc_pin;//麦克风端选择
 } board_ctrl_t;
 
+
 esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle);
 void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t *board_ctrl);
-
+esp_err_t device_i2c_init();
 
 
 
