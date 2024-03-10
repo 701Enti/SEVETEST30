@@ -80,6 +80,8 @@ void app_main(void)
 
   sevetest30_all_board_init(&board_ctrl, &board_device_handle);
 
+
+
   // for(;;){
   //  fonts_read_zh_CN_12x(&board_device_handle);
   //  vTaskDelay(pdMS_TO_TICKS(500));
