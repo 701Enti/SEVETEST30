@@ -40,31 +40,31 @@
 
 //LSB对应实际的值
 //加速度计 mg/LSB (1 x 10^-3 g/LSB)
-#define IMU_LA_SO_FS_2G  0.061
-#define IMU_LA_SO_FS_4G  0.122
-#define IMU_LA_SO_FS_8G  0.244
-#define IMU_LA_SO_FS_16G 0.488
+#define IMU_LA_SO_FS_2G  0.061f
+#define IMU_LA_SO_FS_4G  0.122f
+#define IMU_LA_SO_FS_8G  0.244f
+#define IMU_LA_SO_FS_16G 0.488f
 //陀螺仪(角速率测量)  mdps/LSB (1 x 10^-3 dps/LSB)
-#define IMU_G_SO_FS125DPS  4.375
-#define IMU_G_SO_FS250DPS  8.75
-#define IMU_G_SO_FS500DPS  17.50
-#define IMU_G_SO_FS1000DPS 35
-#define IMU_G_SO_FS2000DPS 70
+#define IMU_G_SO_FS_125DPS  4.375f
+#define IMU_G_SO_FS_250DPS  8.75f
+#define IMU_G_SO_FS_500DPS  17.50f
+#define IMU_G_SO_FS_1000DPS 35.0f
+#define IMU_G_SO_FS_2000DPS 70.0f
 
 
 // 寄存器地址,用于数据库条目的构建,如下面的默认配置数据库
 enum
 {
   // 综合的
-  REG_ADD_CTRL1_XL = 0x10, // ODR_XL 26Hz+ ||| 设置大于或等于正负4g
-  REG_ADD_CTRL2_G = 0x11,
+  REG_ADD_CTRL1_XL = 0x10,//加速度计-> 数据输出速率 量程 滤波算法相关
+  REG_ADD_CTRL2_G = 0x11, //陀螺仪-> 数据输出速率 量程
   REG_ADD_CTRL3_C = 0x12,   // BDU->1  IF_INC->1
-  REG_ADD_CTRL4_C = 0x13,   // DRDY_MASK
+  REG_ADD_CTRL4_C = 0x13,   
   REG_ADD_CTRL6_C = 0x15,   // XL_HM_MODE
   REG_ADD_CTRL8_XL = 0x17,  // LOW_PASS_ON_6D
   REG_ADD_CTRL10_C = 0x19,  // FUNC_EN->1 PEDO_EN->1 PEDO_RST_STEP从0跳1再置0清除计步器步数
   REG_ADD_INT1_CTRL = 0x0D, // FIFO_FULL
-
+  REG_ADD_STATUS_REG = 0x1E,
   // FIFO
   REG_ADD_FIFO_CTRL3 = 0x08,   // 抽取系数 DEC_FIFO_G DEC_FIFO_XL
   REG_ADD_FIFO_CTRL4 = 0x09,   // 外部扩展传感器抽取系数
@@ -114,31 +114,124 @@ enum
   REG_ADD_OUTZ_H_XL = 0x2D,
 };
 
+//映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
 typedef struct
 {
   uint8_t reg_address;
   uint8_t reg_value;
 } IMU_reg_mapping_t;
 
-// 如果调试时需要根据情况改变条目,我们非常建议使用枚举进行ID_MAP_BASE中id数据的设置,指定条目的写入顺序
-// 而相对固定的计划好的数据库可以不使用ID_MAP_BASE,使用MAP_BASE,这将不会造成较大的影响
+//***********************************用户配置相关***********************************/
+typedef enum
+{
+  IMU_FS_XL_2G,       // ±2g
+  IMU_FS_XL_16G,      // ±16g  
+  IMU_FS_XL_4G,       // ±4g
+  IMU_FS_XL_8G,       // ±8g
+} IMU_FS_XL_t; // 加速度计(加速度测量)量程选择 g:重力加速度,约为g=9.780米/秒^2
 
-// 映射表条目标准构建单元,条目写入顺序是在数据库由上到下的顺序,靠近开头的先写
+typedef enum
+{
+  IMU_FS_G_125DPS = 0x01,   // ±125dps
+  IMU_FS_G_250DPS = 0x00,   // ±250dps
+  IMU_FS_G_500DPS = 0x02,   // ±500dps
+  IMU_FS_G_1000DPS = 0x04,  // ±1000dps
+  IMU_FS_G_2000DPS = 0x06,  // ±2000dps
+} IMU_FS_G_t; // 陀螺仪(角速率测量)量程选择 dps:角速率 表示 度/秒
+
+typedef enum{
+IMU_ORD_XL_POWER_DOWN = 0x00,
+//             当 XL_HM_MODE = true          | 当 XL_HM_MODE = false
+IMU_ORD_XL_1,//12.5 Hz (low power)           |  12.5 Hz (high performance)
+IMU_ORD_XL_2,//26 Hz (low power)             |  26 Hz (high performance)
+IMU_ORD_XL_3,//52 Hz (low power)             |  52 Hz (high performance) 
+IMU_ORD_XL_4,//104 Hz (normal mode)          |  104 Hz (high performance)
+IMU_ORD_XL_5,//208 Hz (normal mode)          |  208 Hz (high performance) 
+IMU_ORD_XL_6,//416 Hz (high performance)     |  416 Hz (high performance)
+IMU_ORD_XL_7,//833 Hz (high performance)     |  833 Hz (high performance)
+IMU_ORD_XL_8,//1.66 kHz (high performance)   |  1.66 kHz (high performance)
+IMU_ORD_XL_9,//3.33 kHz (high performance)   |  3.33 kHz (high performance)
+IMU_ORD_XL_MAX,//6.66 kHz (high performance) |  6.66 kHz (high performance)
+IMU_ORD_XL_MIN,//1.6 Hz (low power only)     |  12.5 Hz (high performance)
+}IMU_ORD_XL_t;//加速度计的数据输出速率
+
+typedef enum{
+IMU_ORD_G_POWER_DOWN = 0x00,
+//             当 XL_HM_MODE = true         | 当 XL_HM_MODE = false
+IMU_ORD_G_MIN,//12.5 Hz (low power)         | 12.5 Hz (high performance)
+IMU_ORD_G_1,  //26 Hz (low power)           | 26 Hz (high performance)
+IMU_ORD_G_2,  //52 Hz (low power)           | 52 Hz (high performance) 
+IMU_ORD_G_3,  //104 Hz (normal mode)        | 104 Hz (high performance)
+IMU_ORD_G_4,  //208 Hz (normal mode)        | 208 Hz (high performance) 
+IMU_ORD_G_5,  //416 Hz (high performance)   | 416 Hz (high performance)
+IMU_ORD_G_6,  //833 Hz (high performance)   | 833 Hz (high performance)
+IMU_ORD_G_7,  //1.66 kHz (high performance) | 1.66 kHz (high performance)
+IMU_ORD_G_8,  //3.33 kHz (high performance  | 3.33 kHz (high performance)
+IMU_ORD_G_MAX,//6.66 kHz (high performance  | 6.66 kHz (high performance)
+}IMU_ORD_G_t;//陀螺仪的数据输出速率
+
+//*****************************传感数据相关********************************/
+typedef struct{
+  int x;
+  int y;
+  int z;
+}IMU_acceleration_value_t;//加速度值 单位mg 即 1 x 10^-3 g
+
+typedef struct{
+  int x;
+  int y;
+  int z;
+}IMU_angular_rate_value_t;//角速度值 单位为mdps 即 1 x 10^-3 dps
+
+
+/*******************************公共API***************************************/
+void lsm6ds3trc_database_map_set(IMU_reg_mapping_t *reg_database, int map_num);
+void lsm6ds3trc_database_map_read(IMU_reg_mapping_t *reg_database, int map_num);
+
+void lsm6ds3trc_init_or_reset();
+
+uint16_t lsm6ds3trc_get_step_counter();
+
+IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration();
+
+IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();
+
+/***************************寄存器配置值合成API************************************/
+//将分散的配置数据合并成对应寄存器的值,用于数据库条目个性化构建
+//使用例子:MAP_BASE(REG_ADD_CTRL1_XL,value_transform_CTRL1_XL(这里填写各种配置数据)),
+
+uint8_t value_compound_CTRL1_XL(IMU_ORD_XL_t ODR_XL,IMU_FS_XL_t FS_XL,bool LPF1_BW_SEL,bool BW0_XL);
+uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G,IMU_FS_G_t FS_G);
+
+/******************************数据库构建****************************************/
+//关于写入的顺序:
+//不使用下面的USE_MAP_ID(),即只有MAP_BASE()
+//那么写入顺序是在数据库由上到下的顺序,靠近开头的先写
+//否则写入顺序是ID数字大小顺序,ID取值为 0 到 条目数量-1 ,ID小的先写入
+
+//构建单元,任何映射数据库都由若干个MAP_BASE构建单元组成
 #define MAP_BASE(address, value) \
   {                              \
     address, value               \
   }
-// 映射表条目ID标识方式的构建单元,条目写入顺序是在ID数字大小数据,ID取值为 0 到 条目数量-1 ,ID小的先写入
-#define ID_MAP_BASE(id, address, value) [id] = {address, value}
 
-// 默认寄存器值配置，用于初始化IMU_reg_mapping_t数组的值，在初始化传感器时使用
+//为 构建单元 应用ID标识 进行自定义顺序化读写的映射
+//使用例子:USE_MAP_ID(0)MAP_BASE(REG_ADD_CTRL3_C, 0x01),//这个条目将第一个写入
+#define USE_MAP_ID(id) [id]= 
 
-#define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 // 以下数据库的条目数量
+
+
+
+
+
+/****************************默认寄存器值配置数据库****************************************/
+//用于初始化IMU_reg_mapping_t数组即数据库的值，在初始化函数中被使用
+#define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
   MAP_BASE(REG_ADD_CTRL3_C, 0x01),             \    
   MAP_BASE(REG_ADD_CTRL3_C, 0x44),             \    
-  MAP_BASE(REG_ADD_CTRL1_XL, 0x48),            \  
-  MAP_BASE(REG_ADD_CTRL2_G, 0x48),             \  
+  MAP_BASE(REG_ADD_CTRL1_XL,value_compound_CTRL1_XL(IMU_ORD_XL_6,IMU_FS_XL_2G,false,false)),\  
+  MAP_BASE(REG_ADD_CTRL2_G,value_compound_CTRL2_G(IMU_ORD_G_5,IMU_FS_G_125DPS)),             \  
   MAP_BASE(REG_ADD_CTRL4_C, 0x08),             \    
   MAP_BASE(REG_ADD_CTRL6_C, 0x00),             \
   MAP_BASE(REG_ADD_CTRL8_XL, 0x01),            \
@@ -157,41 +250,5 @@ typedef struct
   MAP_BASE(REG_ADD_CONFIG_PEDO_THS_MIN, 0x90), \    
 }
 
-// 用户配置自定义类型
-typedef enum
-{
-  IMU_LA_FS_2G,       // ±2g
-  IMU_LA_FS_16G,      // ±16g  
-  IMU_LA_FS_4G,       // ±4g
-  IMU_LA_FS_8G,       // ±8g
-} IMU_LA_FS_select_t; // 加速度计(加速度测量)量程选择 g:重力加速度,约为g=9.780米/秒^2 CTRL1_XL低第三位 低第四位 移两位或
 
-typedef enum
-{
-  IMU_G_FS_125DPS = 0x02,   // ±125dps
-  IMU_G_FS_250DPS = 0x00,   // ±250dps
-  IMU_G_FS_500DPS = 0x04,   // ±500dps
-  IMU_G_FS_1000DPS = 0x08,  // ±1000dps
-  IMU_G_FS_2000DPS = 0x0C,  // ±2000dps
-} IMU_G_FS_select_t; // 陀螺仪(角速率测量)量程选择 dps:角速率 表示 度/秒 CTRL2_G 低四位 直接或
 
-// 数据自定义类型
-typedef struct{
-  int8_t x;
-  int8_t y;
-  int8_t z;
-}IMU_acceleration_value_t//加速度值 单位为g (重力加速度,约为g=9.780米/秒^2)
-
-typedef struct{
-  int16_t x;
-  int16_t y;
-  int16_t z;
-}IMU_angular_rate_value_t//角速度值 单位为dps (度/秒)
-
-void lsm6ds3trc_database_map_set(IMU_reg_mapping_t *reg_database, int map_num);
-
-void lsm6ds3trc_database_map_read(IMU_reg_mapping_t *reg_database, int map_num);
-
-void lsm6ds3trc_init_or_reset();
-
-uint16_t lsm6ds3trc_data_get_step_counter();

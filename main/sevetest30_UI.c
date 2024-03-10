@@ -16462,7 +16462,7 @@ void time_UI_1(int16_t x, int16_t y, uint8_t change)
 
     if (minute_buf != systemtime_data.minute)
     {
-        // 时间的颜色使用随机，感觉别有一番深意
+        // 时间的颜色使用随机
         esp_fill_random(&color[0], 1);
         esp_fill_random(&color[1], 1);
         esp_fill_random(&color[2], 1);
@@ -16490,7 +16490,7 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
 
     if (second_buf != systemtime_data.second)
     {
-        // 时间的颜色使用随机，感觉别有一番深意
+        // 时间的颜色使用随机
         esp_fill_random(&color[0], 1);
         esp_fill_random(&color[1], 1);
         esp_fill_random(&color[2], 1);
