@@ -170,6 +170,37 @@ IMU_ORD_G_8,  //3.33 kHz (high performance  | 3.33 kHz (high performance)
 IMU_ORD_G_MAX,//6.66 kHz (high performance  | 6.66 kHz (high performance)
 }IMU_ORD_G_t;//陀螺仪的数据输出速率
 
+typedef enum{
+//  不满足任何一个条件以下对应枚举设置不生效
+//  当HP_SLOPE_XL_EN = false  |  true
+//  并且  LPF2_XL_EN = true   |  任意 
+//并且INPUT_COMPOSITE= 任意    | false
+IMU_HPCF_XL1 = 0x00,//ODR/50  | ODR/4
+IMU_HPCF_XL2,       //ODR/100 | ODR/100
+IMU_HPCF_XL3,       //ODR/9   | ODR/9
+IMU_HPCF_XL4,       //ODR/400 | ODR/400
+}IMU_HPCF_XL_t;
+
+typedef enum{
+IMU_HPM_G1 = 0x00,//16 mHz
+IMU_HPM_G2,       //65 mHz
+IMU_HPM_G3,       //260 mHz
+IMU_HPM_G4,       //1.04 Hz
+}IMU_HPM_G_t;
+
+
+typedef enum{
+           //ODR = 800 Hz | ODR = 1.6 kHz | ODR = 3.3 kHz | ODR = 6.6 kHz
+IMU_FTYPE1,//    245 Hz   |     315 Hz    |      343Hz    |     351 Hz
+IMU_FTYPE2,//    195 Hz   |     224 Hz    |      234 Hz   |     237 Hz
+IMU_FTYPE3,//    155 Hz   |     168 Hz    |      172 Hz   |     173 Hz
+IMU_FTYPE4,//    293 Hz   |     505 Hz    |      925 Hz   |     937 Hz
+}IMU_FTYPE_t;
+
+
+
+
+
 //*****************************传感数据相关********************************/
 typedef struct{
   int x;
@@ -202,6 +233,10 @@ IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();
 
 uint8_t value_compound_CTRL1_XL(IMU_ORD_XL_t ODR_XL,IMU_FS_XL_t FS_XL,bool LPF1_BW_SEL,bool BW0_XL);
 uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G,IMU_FS_G_t FS_G);
+uint8_t value_compound_CTRL4_C(bool DEN_XL_EN,bool SLEEP,bool INT2_on_INT1,bool DEN_DRDY_INT1,bool DRDY_MASK,bool I2C_disable,bool LPF1_SEL_G);
+uint8_t value_compound_CTRL6_C(bool TRIG_EN,bool LVL_EN,bool LVL2_EN,bool XL_HM_MODE,bool USR_OFF_W,IMU_FTYPE_t FTYPE);
+uint8_t value_compound_CTRL7_G(bool G_HM_MODE,bool HP_EN_G,IMU_HPM_G_t HPM_G,bool ROUNDING_STATUS);
+uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN,IMU_HPCF_XL_t HPCF_XL,bool HP_REF_MODE,bool INPUT_COMPOSITE,bool HP_SLOPE_XL_EN,bool LOW_PASS_ON_6D);
 
 /******************************数据库构建****************************************/
 //关于写入的顺序:
@@ -230,18 +265,16 @@ uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G,IMU_FS_G_t FS_G);
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
   MAP_BASE(REG_ADD_CTRL3_C, 0x01),             \    
   MAP_BASE(REG_ADD_CTRL3_C, 0x44),             \    
-  MAP_BASE(REG_ADD_CTRL1_XL,value_compound_CTRL1_XL(IMU_ORD_XL_6,IMU_FS_XL_2G,false,false)),\  
-  MAP_BASE(REG_ADD_CTRL2_G,value_compound_CTRL2_G(IMU_ORD_G_5,IMU_FS_G_125DPS)),             \  
+  MAP_BASE(REG_ADD_CTRL1_XL,value_compound_CTRL1_XL(IMU_ORD_XL_6,IMU_FS_XL_16G,false,false)),\  
+  MAP_BASE(REG_ADD_CTRL2_G,value_compound_CTRL2_G(IMU_ORD_G_MAX,IMU_FS_G_125DPS)),             \  
   MAP_BASE(REG_ADD_CTRL4_C, 0x08),             \    
-  MAP_BASE(REG_ADD_CTRL6_C, 0x00),             \
-  MAP_BASE(REG_ADD_CTRL8_XL, 0x01),            \
+  MAP_BASE(REG_ADD_CTRL8_XL,value_compound_CTRL8_XL(true,IMU_HPCF_XL4,false,true,false,true)),\
   MAP_BASE(REG_ADD_CTRL10_C, 0x1F),            \
   MAP_BASE(REG_ADD_CTRL10_C, 0x1D),            \
   MAP_BASE(REG_ADD_INT1_CTRL, 0x20),           \
   MAP_BASE(REG_ADD_FIFO_CTRL3, 0x09),          \
   MAP_BASE(REG_ADD_FIFO_CTRL5, 0x26),          \
   MAP_BASE(REG_ADD_WAKE_UP_SRC, 0x20),         \
-  MAP_BASE(REG_ADD_WAKE_UP_DUR, 0x00),         \
   MAP_BASE(REG_ADD_FREE_FALL, 0x33),           \
   MAP_BASE(REG_ADD_D6D_SRC, 0x40),             \
   MAP_BASE(REG_ADD_MD1_CFG, 0x14),             \
