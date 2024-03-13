@@ -104,10 +104,10 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        // IMU_acceleration_value_t value = lsm6ds3trc_gat_now_acceleration();
-         IMU_angular_rate_value_t value = lsm6ds3trc_gat_now_angular_rate();
+        IMU_acceleration_value_t value = lsm6ds3trc_gat_now_acceleration();
+        // IMU_angular_rate_value_t value = lsm6ds3trc_gat_now_angular_rate();
         if(value.x != 0 ||value.y != 0 || value.z !=0)
-        ESP_LOGE("ME", "%d %d %d",value.x / 1000,value.y / 1000,value.z / 1000);
+        ESP_LOGE("ME", "%d %d %d",value.x,value.y,value.z);
     }
 
     return ESP_OK;
