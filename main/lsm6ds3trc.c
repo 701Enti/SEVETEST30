@@ -104,13 +104,33 @@ void lsm6ds3trc_init_or_reset()
 uint16_t lsm6ds3trc_get_step_counter()
 {
   IMU_reg_mapping_t reg_database[2] = {
-      MAP_BASE(REG_ADD_STEP_COUNTER_L, 0x00),
-      MAP_BASE(REG_ADD_STEP_COUNTER_H, 0x00),
+      MAP_BASE(STEP_COUNTER_L, 0x00),
+      MAP_BASE(STEP_COUNTER_H, 0x00),
   };
   lsm6ds3trc_database_map_read(reg_database, 2);
 
   uint16_t ret = reg_database[0].reg_value | (reg_database[1].reg_value << 8);
   return ret;
+}
+
+
+IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value()
+{
+  IMU_reg_mapping_t reg_database[1] = {
+      MAP_BASE(D6D_SRC, 0x00),
+  };
+  lsm6ds3trc_database_map_read(reg_database,1);
+
+  IMU_D6D_data_value_t data_value = {
+    .XL = reg_database[0].reg_value,
+    .XH = reg_database[0].reg_value >> 1,
+    .YL = reg_database[0].reg_value >> 2,
+    .YH = reg_database[0].reg_value >> 3,
+    .ZL = reg_database[0].reg_value >> 4,
+    .ZH = reg_database[0].reg_value >> 5,
+    };
+  
+  return data_value;
 }
 
 /// @brief 获取实时的加速度偏移
@@ -125,18 +145,18 @@ IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration()
 
   //构建映射数据库设置读取的目标
   IMU_reg_mapping_t reg_database[8] = {
-      MAP_BASE(REG_ADD_CTRL1_XL, 0x00),
+      MAP_BASE(CTRL1_XL, 0x00),
 
-      MAP_BASE(REG_ADD_OUTX_L_XL, 0x00),
-      MAP_BASE(REG_ADD_OUTX_H_XL, 0x00),
+      MAP_BASE(OUTX_L_XL, 0x00),
+      MAP_BASE(OUTX_H_XL, 0x00),
 
-      MAP_BASE(REG_ADD_OUTY_L_XL, 0x00),
-      MAP_BASE(REG_ADD_OUTY_H_XL, 0x00),
+      MAP_BASE(OUTY_L_XL, 0x00),
+      MAP_BASE(OUTY_H_XL, 0x00),
 
-      MAP_BASE(REG_ADD_OUTZ_L_XL, 0x00),
-      MAP_BASE(REG_ADD_OUTZ_H_XL, 0x00),
+      MAP_BASE(OUTZ_L_XL, 0x00),
+      MAP_BASE(OUTZ_H_XL, 0x00),
 
-      MAP_BASE(REG_ADD_STATUS_REG, 0x00),
+      MAP_BASE(STATUS_REG, 0x00),
   };
 
   //等待加速度数据成功获取
@@ -207,22 +227,22 @@ IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate()
 
   //构建映射数据库设置读取的目标
   IMU_reg_mapping_t reg_database[8] = {
-      MAP_BASE(REG_ADD_CTRL2_G, 0x00),
+      MAP_BASE(CTRL2_G, 0x00),
 
-      MAP_BASE(REG_ADD_OUTX_L_G, 0x00),
-      MAP_BASE(REG_ADD_OUTX_H_G, 0x00),
+      MAP_BASE(OUTX_L_G, 0x00),
+      MAP_BASE(OUTX_H_G, 0x00),
 
-      MAP_BASE(REG_ADD_OUTY_L_G, 0x00),
-      MAP_BASE(REG_ADD_OUTY_H_G, 0x00),
+      MAP_BASE(OUTY_L_G, 0x00),
+      MAP_BASE(OUTY_H_G, 0x00),
 
-      MAP_BASE(REG_ADD_OUTZ_L_G, 0x00),
-      MAP_BASE(REG_ADD_OUTZ_H_G, 0x00),
+      MAP_BASE(OUTZ_L_G, 0x00),
+      MAP_BASE(OUTZ_H_G, 0x00),
 
-      MAP_BASE(REG_ADD_STATUS_REG, 0x00),
+      MAP_BASE(STATUS_REG, 0x00),
   };
 
   //等待数据成功获取
-  while (!reg_database[7].reg_value & 0x02) {
+  while (!(reg_database[7].reg_value & 0x02)) {
     lsm6ds3trc_database_map_read(reg_database, 8);//执行映射读取操作
   }
 
