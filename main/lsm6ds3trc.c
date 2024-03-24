@@ -304,9 +304,18 @@ uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G, IMU_FS_G_t FS_G) {
   return  (ODR_G << 4) | (FS_G << 1);
 }
 
-
-uint8_t value_compound_CTRL3_C(){
-
+/// @brief 合成寄存器配置值 CTRL3_C : BOOT | BDU | H_LACTIVE | PP_OD | SIM | IF_INC | BLE | SW_RESET
+/// @param BOOT 重置所有寄存器到硬件默认值
+/// @param BDU  在读取输出寄存器的MSB和LSB之前，禁止输出寄存器更新
+/// @param H_LACTIVE 反转中断引脚输出电平为低电平
+/// @param PP_OD 在中断引脚上使用开漏输出
+/// @param SIM  SPI通讯模式选择, false = 4线SPI(4-wire interface)  / true = 3线SPI(3-wire interface)
+/// @param IF_INC 多字节访问寄存器时地址自动递增
+/// @param BLE   反转多字节数据值MSB LSB的寄存器存储位置
+/// @param SW_RESET 软复位,同时会重置所有寄存器到硬件默认值
+/// @return 实际寄存器值
+uint8_t value_compound_CTRL3_C(bool BOOT,bool BDU,bool H_LACTIVE,bool PP_OD,bool SIM,bool IF_INC,bool BLE,bool SW_RESET){
+  return (BOOT<<7) | (BDU<<6) | (H_LACTIVE<<5) | (PP_OD<<4) | (SIM<<3) | (IF_INC<<2 )| (BLE<<1 )| SW_RESET;
 }
 
 /// @brief 合成寄存器配置值 CTRL4_C : DEN_XL_EN | SLEEP | INT2_on_INT1 | DEN_DRDY_INT1 | DRDY_MASK | I2C_disable | LPF1_SEL_G | [0]

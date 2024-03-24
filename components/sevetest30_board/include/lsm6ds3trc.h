@@ -280,6 +280,7 @@ IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();
 
 uint8_t value_compound_CTRL1_XL(IMU_ORD_XL_t ODR_XL, IMU_FS_XL_t FS_XL, bool LPF1_BW_SEL, bool BW0_XL);
 uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G, IMU_FS_G_t FS_G);
+uint8_t value_compound_CTRL3_C(bool BOOT,bool BDU,bool H_LACTIVE,bool PP_OD,bool SIM,bool IF_INC,bool BLE,bool SW_RESET);
 uint8_t value_compound_CTRL4_C(bool DEN_XL_EN, bool SLEEP, bool INT2_on_INT1, bool DEN_DRDY_INT1, bool DRDY_MASK, bool I2C_disable, bool LPF1_SEL_G);
 uint8_t value_compound_CTRL6_C(bool TRIG_EN, bool LVL_EN, bool LVL2_EN, bool XL_HM_MODE, bool USR_OFF_W, IMU_FTYPE_t FTYPE);
 uint8_t value_compound_CTRL7_G(bool G_HM_MODE, bool HP_EN_G, IMU_HPM_G_t HPM_G, bool ROUNDING_STATUS);
@@ -310,9 +311,9 @@ uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_
 //用于初始化IMU_reg_mapping_t数组即数据库的值，在初始化函数中被使用
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
-MAP_BASE(CTRL3_C, 0x01),             \ 
+MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,true)),\ 
 MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \   
-MAP_BASE(CTRL3_C, 0x44), \
+MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,false)), \
 MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_6, IMU_FS_XL_16G, false, false)), \
 MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_MAX, IMU_FS_G_125DPS)), \
 MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)), \
