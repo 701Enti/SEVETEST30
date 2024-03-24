@@ -304,6 +304,11 @@ uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G, IMU_FS_G_t FS_G) {
   return  (ODR_G << 4) | (FS_G << 1);
 }
 
+
+uint8_t value_compound_CTRL3_C(){
+
+}
+
 /// @brief 合成寄存器配置值 CTRL4_C : DEN_XL_EN | SLEEP | INT2_on_INT1 | DEN_DRDY_INT1 | DRDY_MASK | I2C_disable | LPF1_SEL_G | [0]
 /// @param DEN_XL_EN 将DEN功能扩展到加速度计
 /// @param SLEEP 启用陀螺仪的睡眠模式
@@ -343,7 +348,7 @@ uint8_t value_compound_CTRL7_G(bool G_HM_MODE,bool HP_EN_G,IMU_HPM_G_t HPM_G,boo
 
 /// @brief 合成寄存器配置值 CTRL8_XL : LPF2_XL_EN | HPCF_XL[1:0] | HP_REF_MODE | INPUT_COMPOSITE |  HP_SLOPE_XL_EN | [0] | LOW_PASS_ON_6D
 /// @param LPF2_XL_EN 启用滤波器LPF2
-/// @param HPCF_XL 滤波器截止设置(部分生效的)
+/// @param HPCF_XL 加速度计滤波器截止设置(部分生效的)
 /// @param HP_REF_MODE 启用高通滤波器的参考模式
 /// @param INPUT_COMPOSITE 复合滤波器输入选择 false = ODR/2低通滤波 | true = ODR/4低通滤波
 /// @param HP_SLOPE_XL_EN 选择使用的是高通滤波器
