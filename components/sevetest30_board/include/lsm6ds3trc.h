@@ -151,13 +151,13 @@ enum
   X_OFS_USR = 0x73,
   Y_OFS_USR,
   Z_OFS_USR,
-}
+};
 
 //部分嵌入式功能寄存器地址库
 //对嵌入式功能寄存器内容的所有修改都必须在断电模式下执行
 enum{
   CONFIG_PEDO_THS_MIN = 0x0F,
-}
+};
 
 //映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
 typedef struct
@@ -179,7 +179,14 @@ typedef struct {
   int z;
 }IMU_angular_rate_value_t;//角速度值 单位为mdps 即 1 x 10^-3 dps
 
-
+typedef struct {
+  bool XL;//X轴偏低
+  bool XH;//X轴偏高
+  bool YL;//Y轴偏低
+  bool YH;//Y轴偏高
+  bool ZL;//Z轴偏低
+  bool ZH;//Z轴偏高
+}IMU_D6D_data_value_t;//D6D方向监测 方向偏移标识
 //***********************************用户配置相关***********************************/
 typedef enum
 {
@@ -270,6 +277,8 @@ void lsm6ds3trc_init_or_reset();
 
 uint16_t lsm6ds3trc_get_step_counter();
 
+IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value();
+
 IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration();
 
 IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();
@@ -312,13 +321,13 @@ uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,true)),\ 
-MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \   
+MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \    
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,false)), \
 MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_6, IMU_FS_XL_16G, false, false)), \
 MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_MAX, IMU_FS_G_125DPS)), \
 MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)), \
 MAP_BASE(CTRL6_C,value_compound_CTRL6_C(true,false,false,false,false,IMU_FTYPE3)),\
-MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true))
+MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true)),\
 MAP_BASE(CTRL8_XL, value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
 MAP_BASE(CTRL10_C, 0x1F), \
 MAP_BASE(CTRL10_C, 0x1D), \
@@ -331,7 +340,6 @@ MAP_BASE(D6D_SRC, 0x40), \
 MAP_BASE(MD1_CFG, 0x14), \
 MAP_BASE(TAP_THS_6D, 0x80), \
 MAP_BASE(TAP_CFG, 0x81), \
-
 }
 
 
