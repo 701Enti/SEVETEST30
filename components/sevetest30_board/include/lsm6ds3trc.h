@@ -330,10 +330,10 @@ MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_MAX, IMU_FS_G_125DPS)), \
 MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)), \
 MAP_BASE(CTRL6_C,value_compound_CTRL6_C(true,false,false,false,false,IMU_FTYPE3)),\
 MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true)),\
-MAP_BASE(CTRL8_XL, value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
-MAP_BASE(CTRL10_C, value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
-MAP_BASE(CTRL10_C, 0x1D), value_compound_CTRL10_C(false,false,true,true,true,false,true), \
-MAP_BASE(INT1_CTRL, 0x20), \
+MAP_BASE(CTRL8_XL,value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
+MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
+MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,false,true)), \
+MAP_BASE(INT1_CTRL,value_compound_INT1_CTRL(false,false,true,false,false,false,false,false)), \
 MAP_BASE(FIFO_CTRL3, 0x09), \
 MAP_BASE(FIFO_CTRL5, 0x26), \
 MAP_BASE(WAKE_UP_SRC, 0x20), \
