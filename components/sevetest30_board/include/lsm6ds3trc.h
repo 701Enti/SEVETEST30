@@ -294,6 +294,8 @@ uint8_t value_compound_CTRL4_C(bool DEN_XL_EN, bool SLEEP, bool INT2_on_INT1, bo
 uint8_t value_compound_CTRL6_C(bool TRIG_EN, bool LVL_EN, bool LVL2_EN, bool XL_HM_MODE, bool USR_OFF_W, IMU_FTYPE_t FTYPE);
 uint8_t value_compound_CTRL7_G(bool G_HM_MODE, bool HP_EN_G, IMU_HPM_G_t HPM_G, bool ROUNDING_STATUS);
 uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_REF_MODE, bool INPUT_COMPOSITE, bool HP_SLOPE_XL_EN, bool LOW_PASS_ON_6D);
+uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bool TILT_EN,bool FUNC_EN,bool PEDO_RST_STEP,bool SIGN_MOTION_EN);
+uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL);
 
 /******************************数据库构建****************************************/
 //关于写入的顺序:
@@ -329,14 +331,13 @@ MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)
 MAP_BASE(CTRL6_C,value_compound_CTRL6_C(true,false,false,false,false,IMU_FTYPE3)),\
 MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true)),\
 MAP_BASE(CTRL8_XL, value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
-MAP_BASE(CTRL10_C, 0x1F), \
-MAP_BASE(CTRL10_C, 0x1D), \
+MAP_BASE(CTRL10_C, value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
+MAP_BASE(CTRL10_C, 0x1D), value_compound_CTRL10_C(false,false,true,true,true,false,true), \
 MAP_BASE(INT1_CTRL, 0x20), \
 MAP_BASE(FIFO_CTRL3, 0x09), \
 MAP_BASE(FIFO_CTRL5, 0x26), \
 MAP_BASE(WAKE_UP_SRC, 0x20), \
 MAP_BASE(FREE_FALL, 0x33), \
-MAP_BASE(D6D_SRC, 0x40), \
 MAP_BASE(MD1_CFG, 0x14), \
 MAP_BASE(TAP_THS_6D, 0x80), \
 MAP_BASE(TAP_CFG, 0x81), \

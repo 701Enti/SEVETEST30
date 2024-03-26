@@ -388,7 +388,39 @@ uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_
 }
 
 
+/// @brief 合成寄存器配置值 CTRL10_C : WRIST_TILT_EN | [0] | TIMER_EN | PEDO_EN | TILT_EN | FUNC_EN | PEDO_RST_STEP | SIGN_MOTION_EN
+/// @param WRIST_TILT_EN 启用wrist斜率运算程序
+/// @param TIMER_EN 启用计数时间戳
+/// @param PEDO_EN 启用计步器运算程序
+/// @param TILT_EN 使能斜率计算
+/// @param FUNC_EN 启用嵌入式功能(包括但不限于计步器等)
+/// @param PEDO_RST_STEP 重置计步器的计数值
+/// @param SIGN_MOTION_EN 使能显著运动检测功能
+/// @return 实际寄存器值
+uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bool TILT_EN,bool FUNC_EN,bool PEDO_RST_STEP,bool SIGN_MOTION_EN){
+  return( WRIST_TILT_EN << 7) | (TIMER_EN << 5) | (PEDO_EN << 4) | (TILT_EN << 3) | (FUNC_EN << 2) | (PEDO_RST_STEP << 1) | SIGN_MOTION_EN;
+}
 
+
+/// @brief 合成寄存器配置值 INT1_CTRL : INT1_STEP_DETECTOR | INT1_SIGN_MOT | INT1_FULL_FLAG | INT1_FIFO_OVR | INT1_FTH | INT1_BOOT | INT1_DRDY_G | INT1_DRDY_XL
+/// @param INT1_STEP_DETECTOR 在INT1启用中断- 计步器
+/// @param INT1_SIGN_MOT 在INT1启用中断- 显著运动检测
+/// @param INT1_FULL_FLAG 在INT1启用中断- FIFO数据填充完成
+/// @param INT1_FIFO_OVR 在INT1启用中断- FIFO数据溢出
+/// @param INT1_FTH 在INT1启用中断- FIFO阈值中断
+/// @param INT1_BOOT 在INT1启用中断- BOOT引导状态
+/// @param INT1_DRDY_G 在INT1启用中断- 陀螺仪数据准备完毕
+/// @param INT1_DRDY_XL 在INT1启用中断- 加速度计数据准备完毕
+/// @return 实际寄存器值
+uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL){
+  return INT1_STEP_DETECTOR << 7 | INT1_SIGN_MOT << 6 | INT1_FULL_FLAG << 5 | INT1_FIFO_OVR << 4 | INT1_FTH << 3 | INT1_BOOT << 2 | INT1_DRDY_G << 1 | INT1_DRDY_XL;
+}
+
+
+
+uint8_t value_compound_INT2_CTRL(){
+  
+}
 
 
 
