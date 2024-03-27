@@ -403,7 +403,7 @@ uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bo
 
 
 /// @brief 合成寄存器配置值 INT1_CTRL : INT1_STEP_DETECTOR | INT1_SIGN_MOT | INT1_FULL_FLAG | INT1_FIFO_OVR | INT1_FTH | INT1_BOOT | INT1_DRDY_G | INT1_DRDY_XL
-/// @param INT1_STEP_DETECTOR 在INT1启用中断- 计步器
+/// @param INT1_STEP_DETECTOR 在INT1启用中断- 计步器计数
 /// @param INT1_SIGN_MOT 在INT1启用中断- 显著运动检测
 /// @param INT1_FULL_FLAG 在INT1启用中断- FIFO数据填充完成
 /// @param INT1_FIFO_OVR 在INT1启用中断- FIFO数据溢出
@@ -413,14 +413,57 @@ uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bo
 /// @param INT1_DRDY_XL 在INT1启用中断- 加速度计数据准备完毕
 /// @return 实际寄存器值
 uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL){
-  return INT1_STEP_DETECTOR << 7 | INT1_SIGN_MOT << 6 | INT1_FULL_FLAG << 5 | INT1_FIFO_OVR << 4 | INT1_FTH << 3 | INT1_BOOT << 2 | INT1_DRDY_G << 1 | INT1_DRDY_XL;
+  return (INT1_STEP_DETECTOR << 7) | (INT1_SIGN_MOT << 6) | (INT1_FULL_FLAG << 5) | (INT1_FIFO_OVR << 4) | (INT1_FTH << 3) | (INT1_BOOT << 2) | (INT1_DRDY_G << 1)| INT1_DRDY_XL;
 }
 
 
 
-uint8_t value_compound_INT2_CTRL(){
-  
+/// @brief 合成寄存器配置值 INT2_CTRL : INT2_STEP_DELTA | INT2_STEP_COUNT_OV | INT2_FULL_FLAG | INT2_FIFO_OVR | INT2_FTH | INT2_DRDY_TEMP | INT2_DRDY_G | INT2_DRDY_XL
+/// @param INT2_STEP_DELTA 在INT2启用中断- 计步器计数
+/// @param INT2_STEP_COUNT_OV 在INT2启用中断- 计步器计数溢出中断
+/// @param INT2_FULL_FLAG 在INT2启用中断- FIFO数据填充完成
+/// @param INT2_FIFO_OVR 在INT2启用中断- FIFO数据溢出
+/// @param INT2_FTH 在INT2启用中断- FIFO阈值中断
+/// @param INT2_DRDY_TEMP 在INT2启用中断- 温度数据就绪
+/// @param INT2_DRDY_G 在INT2启用中断- 陀螺仪数据准备完毕
+/// @param INT2_DRDY_XL 在INT2启用中断- 加速度计数据准备完毕
+/// @return 实际寄存器值
+uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bool INT2_FULL_FLAG,bool INT2_FIFO_OVR,bool INT2_FTH,bool INT2_DRDY_TEMP,bool INT2_DRDY_G,bool INT2_DRDY_XL){
+  return (INT2_STEP_DELTA << 7)  | (INT2_STEP_COUNT_OV << 6) | (INT2_FULL_FLAG << 5) | (INT2_FIFO_OVR << 4) | (INT2_FTH << 3) | (INT2_DRDY_TEMP << 2) | (INT2_DRDY_G << 1) | INT2_DRDY_XL;
+}
+
+
+/// @brief 合成寄存器配置值 MD1_CFG : INT1_INACT_STATE | INT1_SINGLE_TAP | INT1_WU | INT1_FF | INT1_DOUBLE_TAP | INT1_6D | INT1_TILT | INT1_TIMER
+/// @param INT1_INACT_STATE INT1上启用静默模式
+/// @param INT1_SINGLE_TAP INT1上路由 - Single-tap识别事件
+/// @param INT1_WU INT1上路由 - 唤醒事件
+/// @param INT1_FF INT1上路由 - 自由落体事件
+/// @param INT1_DOUBLE_TAP INT1上路由 - double-tap识别事件
+/// @param INT1_6D INT1上路由 - 6D相关事件
+/// @param INT1_TILT INT1上路由 - 倾斜事件
+/// @param INT1_TIMER INT1上路由 - 计时器停止事件
+/// @return 实际寄存器值
+uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool INT1_WU,bool INT1_FF,bool INT1_DOUBLE_TAP,bool INT1_6D,bool INT1_TILT,bool INT1_TIMER){
+ return (INT1_INACT_STATE << 7) | (INT1_SINGLE_TAP << 6) | (INT1_WU << 5) | (INT1_FF << 4) | (INT1_DOUBLE_TAP << 3) | (INT1_6D << 2) | (INT1_TILT << 1) | INT1_TIMER;
 }
 
 
 
+/// @brief 合成寄存器配置值 WAKE_UP_SRC : [0] | [0] | FF_IA | SLEEP_STATE_IA | WU_IA | X_WU | Y_WU | Z_WU
+/// @param FF_IA 启用自由落体事件检测
+/// @param SLEEP_STATE_IA 启用睡眠事件检测
+/// @param WU_IA 启用唤醒事件检测
+/// @param X_WU  启用在X轴上的的唤醒事件检测
+/// @param Y_WU  启用在Y轴上的的唤醒事件检测
+/// @param Z_WU  启用在Z轴上的的唤醒事件检测
+/// @return 实际寄存器值
+uint8_t value_compound_WAKE_UP_SRC(bool FF_IA,bool SLEEP_STATE_IA,bool WU_IA,bool X_WU,bool Y_WU,bool Z_WU){
+  return (FF_IA << 5) | (SLEEP_STATE_IA << 4) | (WU_IA << 3) | (X_WU << 2) | (Y_WU << 1) | Z_WU;
+}
+
+/// @brief 合成寄存器配置值的一部分 FREE_FALL : FF_DUR4(未包含,默认值0)|FF_DUR3(未包含,默认值0)|FF_DUR2(未包含,默认值0)|FF_DUR1(未包含,默认值0)|FF_DUR0(未包含,默认值0) | FF_THS2 | FF_THS1 | FF_THS0
+/// @param FF_THS 自由落体检测触发阈值
+/// @return 可能需要继续加工的实际寄存器值
+uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS){
+ return FF_THS;
+}

@@ -263,6 +263,16 @@ typedef enum {
   IMU_FTYPE4,//    293 Hz   |     505 Hz    |      925 Hz   |     937 Hz
 }IMU_FTYPE_t;//陀螺仪低通滤波器（LPF1）带宽选择
 
+typedef enum {
+IMU_FF_THS_156MG,
+IMU_FF_THS_219MG,
+IMU_FF_THS_250MG,
+IMU_FF_THS_312MG,
+IMU_FF_THS_344MG,
+IMU_FF_THS_406MG,
+IMU_FF_THS_469MG,
+IMU_FF_THS_500MG,
+}IMU_FF_THS_t;//自由落体检测触发阈值,单位mg 即 1 x 10^-3 g
 
 
 
@@ -296,7 +306,10 @@ uint8_t value_compound_CTRL7_G(bool G_HM_MODE, bool HP_EN_G, IMU_HPM_G_t HPM_G, 
 uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_REF_MODE, bool INPUT_COMPOSITE, bool HP_SLOPE_XL_EN, bool LOW_PASS_ON_6D);
 uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bool TILT_EN,bool FUNC_EN,bool PEDO_RST_STEP,bool SIGN_MOTION_EN);
 uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL);
-
+uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bool INT2_FULL_FLAG,bool INT2_FIFO_OVR,bool INT2_FTH,bool INT2_DRDY_TEMP,bool INT2_DRDY_G,bool INT2_DRDY_XL);
+uint8_t value_compound_WAKE_UP_SRC(bool FF_IA,bool SLEEP_STATE_IA,bool WU_IA,bool X_WU,bool Y_WU,bool Z_WU);
+uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool INT1_WU,bool INT1_FF,bool INT1_DOUBLE_TAP,bool INT1_6D,bool INT1_TILT,bool INT1_TIMER);
+uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 /******************************数据库构建****************************************/
 //关于写入的顺序:
 //不使用下面的USE_MAP_ID(),即只有MAP_BASE()
@@ -334,13 +347,13 @@ MAP_BASE(CTRL8_XL,value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false
 MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
 MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,false,true)), \
 MAP_BASE(INT1_CTRL,value_compound_INT1_CTRL(false,false,true,false,false,false,false,false)), \
+MAP_BASE(WAKE_UP_SRC,value_compound_WAKE_UP_SRC(true,false,false,false,false,false)), \
+MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
+MAP_BASE(FREE_FALL,0x30 | value_compound_partly_FREE_FALL(IMU_FF_THS_500MG)), \
+MAP_BASE(TAP_CFG, 0x81), \
+MAP_BASE(TAP_THS_6D, 0x80), \
 MAP_BASE(FIFO_CTRL3, 0x09), \
 MAP_BASE(FIFO_CTRL5, 0x26), \
-MAP_BASE(WAKE_UP_SRC, 0x20), \
-MAP_BASE(FREE_FALL, 0x33), \
-MAP_BASE(MD1_CFG, 0x14), \
-MAP_BASE(TAP_THS_6D, 0x80), \
-MAP_BASE(TAP_CFG, 0x81), \
 }
 
 
