@@ -275,10 +275,63 @@ IMU_FF_THS_500MG,
 }IMU_FF_THS_t;//自由落体检测触发阈值,单位mg 即 1 x 10^-3 g
 
 
+typedef enum {
+ IMU_INACT_EN_DISABLE,//失能
+ IMU_INACT_EN_MODE1,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪 不改变
+ IMU_INACT_EN_MODE2,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 睡眠模式
+ IMU_INACT_EN_MODE3,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 断电模式
+}IMU_INACT_EN_t;//静默功能设置
 
+typedef enum {
+ IMU_DEC_FIFO_GYRO_NONE,//不抽取任何数据
+ IMU_DEC_FIFO_GYRO_ALL,//完整数据(系数1抽取)
+ IMU_DEC_FIFO_GYRO_2,//以系数2抽取
+ IMU_DEC_FIFO_GYRO_3,//以系数3抽取
+ IMU_DEC_FIFO_GYRO_4,//以系数4抽取
+ IMU_DEC_FIFO_GYRO_8,//以系数8抽取
+ IMU_DEC_FIFO_GYRO_16,//以系数16抽取
+ IMU_DEC_FIFO_GYRO_32,//以系数32抽取
+}IMU_DEC_FIFO_GYRO_t;//陀螺仪FIFO数据集抽取设置
 
+typedef enum {
+ IMU_DEC_FIFO_XL_NONE,//不抽取任何数据
+ IMU_DEC_FIFO_XL_ALL,//完整数据(系数1抽取)
+ IMU_DEC_FIFO_XL_2,//以系数2抽取
+ IMU_DEC_FIFO_XL_3,//以系数3抽取
+ IMU_DEC_FIFO_XL_4,//以系数4抽取
+ IMU_DEC_FIFO_XL_8,//以系数8抽取
+ IMU_DEC_FIFO_XL_16,//以系数16抽取
+ IMU_DEC_FIFO_XL_32,//以系数32抽取
+}IMU_DEC_FIFO_XL_t;//加速度计FIFO数据集抽取设置
 
+typedef enum {
+ IMU_ODR_FIFO_DISABLE,//FIFO关闭
+ IMU_ODR_FIFO_MIN,//12.5 Hz
+ IMU_ODR_FIFO_1,//26 Hz
+ IMU_ODR_FIFO_2,//52 Hz
+ IMU_ODR_FIFO_3,//104 Hz
+ IMU_ODR_FIFO_4,//208 Hz
+ IMU_ODR_FIFO_5,//416 Hz
+ IMU_ODR_FIFO_6,//833 Hz
+ IMU_ODR_FIFO_7,//1.66 kHz
+ IMU_ODR_FIFO_8,//3.33 kHz
+ IMU_ODR_FIFO_MAX,//6.66 kHz
+}IMU_ODR_FIFO_t;//FIFO ORD选择
 
+typedef enum{
+IMU_FIFO_MODE_BYPASS            = 0,//旁路模式,FIFO关闭
+IMU_FIFO_MODE_FIFO              = 1,//FIFO模式,数据全部填充状态不再抽取
+IMU_FIFO_MODE_CONTINUOUS        = 6, //连续模式,如果FIFO已满，新数据将覆盖旧的数据
+IMU_FIFO_MODE_CONTINUOUS_FIFO   = 3,//先是连续模式，触发器被取消断言后进行FIFO模式
+IMU_FIFO_MODE_BYPASS_CONTINUOUS = 4,//先是旁路模式，触发器被取消断言后进行连续模式
+}IMU_FIFO_MODE_t;//FIFO运行模式
+
+typedef enum{
+IMU_SIXD_THS_80_DEGREES,//80度
+IMU_SIXD_THS_70_DEGREES,//70度
+IMU_SIXD_THS_60_DEGREES,//60度
+IMU_SIXD_THS_50_DEGREES,//50度
+}IMU_SIXD_THS_t;// 4D/6D检测功能的阈值
 /*******************************公共API***************************************/
 void lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num);
 void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
@@ -309,7 +362,11 @@ uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool
 uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bool INT2_FULL_FLAG,bool INT2_FIFO_OVR,bool INT2_FTH,bool INT2_DRDY_TEMP,bool INT2_DRDY_G,bool INT2_DRDY_XL);
 uint8_t value_compound_WAKE_UP_SRC(bool FF_IA,bool SLEEP_STATE_IA,bool WU_IA,bool X_WU,bool Y_WU,bool Z_WU);
 uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool INT1_WU,bool INT1_FF,bool INT1_DOUBLE_TAP,bool INT1_6D,bool INT1_TILT,bool INT1_TIMER);
+uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE,IMU_INACT_EN_t INACT_EN,bool SLOPE_FDS,bool TAP_X_EN,bool TAP_Y_EN,bool TAP_Z_EN,bool LIR);
+uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO,IMU_DEC_FIFO_XL_t DEC_FIFO_XL);
+uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO,IMU_FIFO_MODE_t FIFO_MODE);
 uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
+
 /******************************数据库构建****************************************/
 //关于写入的顺序:
 //不使用下面的USE_MAP_ID(),即只有MAP_BASE()
@@ -350,10 +407,10 @@ MAP_BASE(INT1_CTRL,value_compound_INT1_CTRL(false,false,true,false,false,false,f
 MAP_BASE(WAKE_UP_SRC,value_compound_WAKE_UP_SRC(true,false,false,false,false,false)), \
 MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
 MAP_BASE(FREE_FALL,0x30 | value_compound_partly_FREE_FALL(IMU_FF_THS_500MG)), \
-MAP_BASE(TAP_CFG, 0x81), \
-MAP_BASE(TAP_THS_6D, 0x80), \
-MAP_BASE(FIFO_CTRL3, 0x09), \
-MAP_BASE(FIFO_CTRL5, 0x26), \
+MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,false,false,false,false,false,false,true)), \
+MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_32,IMU_DEC_FIFO_XL_32)), \
+MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_5,IMU_FIFO_MODE_CONTINUOUS)), \
+MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true,IMU_SIXD_THS_80_DEGREES)), \
 }
 
 
