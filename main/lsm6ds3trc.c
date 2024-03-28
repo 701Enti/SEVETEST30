@@ -434,7 +434,7 @@ uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bo
 
 
 /// @brief 合成寄存器配置值 MD1_CFG : INT1_INACT_STATE | INT1_SINGLE_TAP | INT1_WU | INT1_FF | INT1_DOUBLE_TAP | INT1_6D | INT1_TILT | INT1_TIMER
-/// @param INT1_INACT_STATE INT1上启用静默模式
+/// @param INT1_INACT_STATE INT1上路由 - 静默事件
 /// @param INT1_SINGLE_TAP INT1上路由 - Single-tap识别事件
 /// @param INT1_WU INT1上路由 - 唤醒事件
 /// @param INT1_FF INT1上路由 - 自由落体事件
@@ -461,9 +461,52 @@ uint8_t value_compound_WAKE_UP_SRC(bool FF_IA,bool SLEEP_STATE_IA,bool WU_IA,boo
   return (FF_IA << 5) | (SLEEP_STATE_IA << 4) | (WU_IA << 3) | (X_WU << 2) | (Y_WU << 1) | Z_WU;
 }
 
+
 /// @brief 合成寄存器配置值的一部分 FREE_FALL : FF_DUR4(未包含,默认值0)|FF_DUR3(未包含,默认值0)|FF_DUR2(未包含,默认值0)|FF_DUR1(未包含,默认值0)|FF_DUR0(未包含,默认值0) | FF_THS2 | FF_THS1 | FF_THS0
 /// @param FF_THS 自由落体检测触发阈值
 /// @return 可能需要继续加工的实际寄存器值
 uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS){
  return FF_THS;
+}
+
+/// @brief 合成寄存器配置值的一部分 TAP_THS_6D : D4D_EN | SIXD_THS[1:0] | TAP_THS[4:0](未包含,默认值00000)
+/// @param D4D_EN 关闭4D检测,使用6D检测
+/// @param SIXD_THS 4D/6D检测功能的阈值
+/// @return 可能需要继续加工的实际寄存器值
+uint8_t value_compound_partly_TAP_THS_6D(bool D4D_EN,IMU_SIXD_THS_t SIXD_THS){
+  return (D4D_EN << 7) | (SIXD_THS << 5);
+}
+
+/// @brief 合成寄存器配置值 TAP_CFG : INTERRUPTS_ENABLE | INACT_EN1 INACT_EN0 | SLOPE_FDS | TAP_X_EN | TAP_Y_EN | TAP_Z_EN | LIR
+/// @param INTERRUPTS_ENABLE 使能基本中断(6D/4D 自由落体检测 唤醒事件 静默事件 Single-tap/double-tap)
+/// @param INACT_EN 静默功能的设置
+/// @param SLOPE_FDS 在唤醒和静默/活动检测上选择高通滤波
+/// @param TAP_X_EN 在tap识别中启用X方向
+/// @param TAP_Y_EN 在tap识别中启用Y方向
+/// @param TAP_Z_EN 在tap识别中启用Z方向
+/// @param LIR 中断锁存
+/// @return 实际寄存器值
+uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE,IMU_INACT_EN_t INACT_EN,bool SLOPE_FDS,bool TAP_X_EN,bool TAP_Y_EN,bool TAP_Z_EN,bool LIR){
+  return (INTERRUPTS_ENABLE << 7) | (INACT_EN << 5) | (SLOPE_FDS << 4) | (TAP_X_EN << 3) | (TAP_Y_EN << 2) | (TAP_Z_EN << 1) | LIR;
+}
+
+
+
+/// @brief 合成寄存器配置值 FIFO_CTRL3 : [0] [0] | DEC_FIFO_GYRO[2:0] | DEC_FIFO_XL[2:0]
+/// @param DEC_FIFO_GYRO 陀螺仪FIFO数据集抽取设置
+/// @param DEC_FIFO_XL   加速度计FIFO数据集抽取设置
+/// @return 实际寄存器值
+uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO,IMU_DEC_FIFO_XL_t DEC_FIFO_XL){
+  return (DEC_FIFO_GYRO << 3) | DEC_FIFO_XL;
+}
+
+
+
+
+/// @brief // 合成寄存器配置值 FIFO_CTRL5 : [0] | ODR_FIFO[3:0] | FIFO_MODE[2:0]
+/// @param ODR_FIFO FIFO_ORD选择
+/// @param FIFO_MODE FIFO运行模式
+/// @return 实际寄存器值
+uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO,IMU_FIFO_MODE_t FIFO_MODE){
+  return (ODR_FIFO << 3) | FIFO_MODE; 
 }
