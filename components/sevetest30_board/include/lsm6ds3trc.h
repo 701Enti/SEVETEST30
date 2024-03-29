@@ -365,6 +365,7 @@ uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool I
 uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE,IMU_INACT_EN_t INACT_EN,bool SLOPE_FDS,bool TAP_X_EN,bool TAP_Y_EN,bool TAP_Z_EN,bool LIR);
 uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO,IMU_DEC_FIFO_XL_t DEC_FIFO_XL);
 uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO,IMU_FIFO_MODE_t FIFO_MODE);
+uint8_t value_compound_partly_TAP_THS_6D(bool D4D_EN,IMU_SIXD_THS_t SIXD_THS);
 uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 
 /******************************数据库构建****************************************/
@@ -407,7 +408,7 @@ MAP_BASE(INT1_CTRL,value_compound_INT1_CTRL(false,false,true,false,false,false,f
 MAP_BASE(WAKE_UP_SRC,value_compound_WAKE_UP_SRC(true,false,false,false,false,false)), \
 MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
 MAP_BASE(FREE_FALL,0x30 | value_compound_partly_FREE_FALL(IMU_FF_THS_500MG)), \
-MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,false,false,false,false,false,false,true)), \
+MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,IMU_INACT_EN_MODE1,false,false,false,false,true)), \
 MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_32,IMU_DEC_FIFO_XL_32)), \
 MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_5,IMU_FIFO_MODE_CONTINUOUS)), \
 MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true,IMU_SIXD_THS_80_DEGREES)), \
