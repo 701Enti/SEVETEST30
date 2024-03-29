@@ -89,19 +89,6 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     fonts_chip_init(board_device_handle);
     BL5372_config_init();
     lsm6ds3trc_init_or_reset(); 
-
-    while (1)
-    {
-        vTaskDelay(pdMS_TO_TICKS(50));
-        // IMU_acceleration_value_t value = lsm6ds3trc_gat_now_acceleration();
-        // // IMU_angular_rate_value_t value = lsm6ds3trc_gat_now_angular_rate();
-        // if(value.x != 0 ||value.y != 0 || value.z !=0)
-        // ESP_LOGE("ME", "%d %d %d",value.x,value.y,value.z);
-
-        IMU_D6D_data_value_t value = lsm6ds3trc_get_D6D_data_value();
-        ESP_LOGE("ME", "%d %d %d %d %d %d",value.XL,value.XH,value.YL,value.YH,value.ZL,value.ZH);
-    } 
-
     vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
 
     // 配置

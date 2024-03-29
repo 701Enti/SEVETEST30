@@ -82,10 +82,11 @@ void app_main(void)
 
 
 
-  // for(;;){
-  //  fonts_read_zh_CN_12x(&board_device_handle);
-  //  vTaskDelay(pdMS_TO_TICKS(500));
-  // }
+  for(;;){
+   vTaskDelay(pdMS_TO_TICKS(500));
+    uint8_t color[3] = {255,255,255};
+    separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
+  }
 
   // init_time_data_sntp();
   // vTaskDelay(pdMS_TO_TICKS(5000));
@@ -139,8 +140,7 @@ void app_main(void)
 
     // bluetooth_connect();
 
-    // uint8_t color[3] = {255,255,255};
-    // separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
+
     // for (int i = 0; i <= 5; i++)
     //   ledarray_set_and_write(i);
 

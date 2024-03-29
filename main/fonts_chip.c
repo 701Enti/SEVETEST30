@@ -33,21 +33,19 @@
 
 uint8_t zh_CN_12x_buf[FONT_READ_CN_12X_BYTES] = {0};
 
-
 uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
 {
-    memset(zh_CN_12x_buf,255,FONT_READ_CN_12X_BYTES);
 
+    memset(zh_CN_12x_buf,0,FONT_READ_CN_12X_BYTES);
     spi_transaction_t transaction;
 
-    transaction.length = FONT_READ_COMMAND_BITS + FONT_READ_ADDRESS_BITS + FONT_READ_DUMMY_BITS + FONT_READ_CN_12X_BYTES * 8; //12x12字模，每行占用2个Byte,共12行
+    transaction.length = FONT_READ_COMMAND_BITS + FONT_READ_ADDRESS_BITS + FONT_READ_DUMMY_BITS; //12x12字模，每行占用2个Byte,共12行
     transaction.rxlength = 0;
     transaction.cmd = FONT_READ_CMD;
-    transaction.addr = 0x0FFFFF;
- 
+    transaction.addr = 0x1FFFFF;
+    transaction.flags = 0;
     transaction.rx_buffer = zh_CN_12x_buf;
     transaction.tx_buffer = NULL;
-    transaction.flags = 0;
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
@@ -59,8 +57,7 @@ uint8_t *fonts_read_zh_CN_12x(board_device_handle_t* board_device_handle)
     //通讯传输
     esp_err_t ret = spi_device_polling_transmit(board_device_handle->fonts_chip_handle,&transaction);
 
-    vTaskDelay(pdMS_TO_TICKS(100));    
-
+    //通讯结束
     gpio_set_level(interface_config.spics_io_num,1);
 
     if(ret!=ESP_OK)ESP_LOGE("fonts_read_zh_CN_12x","与字库芯片通讯时发现问题 描述： %s",esp_err_to_name(ret));
