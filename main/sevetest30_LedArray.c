@@ -1882,7 +1882,7 @@ rmt_config_t *rmt_cfg1;
 led_strip_t *strip0 = NULL;
 led_strip_t *strip1 = NULL;
 
-/// @brief RGB三色分离方式绘制,只支持单色绘制
+/// @brief RGB三色分离方式绘制,只支持单色绘制,之后ledarray_set_and_write需要被调用才可显示
 /// @brief 取模方式请参考头文件
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
@@ -1942,7 +1942,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, ui
 // change控制显示亮度，0-100%
 // 为了支持动画效果，允许起始坐标可以没有范围甚至为负数
 
-/// @brief RGB彩色图像直显方式，自动获取图像头参数
+/// @brief RGB彩色图像直显方式，自动获取图像头参数,之后ledarray_set_and_write需要被调用才可显示
 /// @brief 取模方式请参考头文件
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制

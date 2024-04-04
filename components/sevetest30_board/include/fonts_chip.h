@@ -32,14 +32,14 @@
 
 #define FONT_READ_CN_12X_BYTES 12 * 2 //一个12x12中文汉字数据字节数 
 
-#define FONT_SPI_MODE 0 //SPI通讯模式
+#define FONT_SPI_MODE  0//SPI通讯模式
 
 
 #define FONT_READ_CMD 0x03 //普通读命令码
 #define FONT_READ_COMMAND_BITS 8       //普通读 命令 位长度
 #define FONT_READ_ADDRESS_BITS 8 * 3   //普通读 地址 位长度
 
-#define FONT_READ_DUMMY_BITS  0      //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
+#define FONT_READ_DUMMY_BITS  0     //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
 
 
 
