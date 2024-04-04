@@ -80,40 +80,42 @@ void app_main(void)
 
   sevetest30_all_board_init(&board_ctrl, &board_device_handle);
 
+  esp_log_level_set("gpio", ESP_LOG_NONE);
 
-
-  for(;;){
-   vTaskDelay(pdMS_TO_TICKS(500));
-    uint8_t color[3] = {255,255,255};
-    separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
-  }
+  // for(;;){
+  //  vTaskDelay(pdMS_TO_TICKS(100));
+  //   uint8_t color[3] = {25,25,25};
+  //   separation_draw(1,1,12,fonts_read_zh_CN_12x(&board_device_handle),2*12,color,1);
+  //   for (int i = 0; i < 6; i++)
+  //   ledarray_set_and_write(i);
+  // }
 
   // init_time_data_sntp();
   // vTaskDelay(pdMS_TO_TICKS(5000));
   // sync_systemtime_to_ext_rtc();
 
-  sync_systemtime_from_ext_rtc();
+  // sync_systemtime_from_ext_rtc();
 
-  esp_log_level_set("gpio", ESP_LOG_NONE);
 
-  for (;;)
-  {
-    if (ext_io_ctrl.auto_read_INT == true)
-    {
-      ext_io_ctrl.auto_read_INT = false;
-      ext_io_value_service();
-    }
-    uint8_t color[3] = {255, 255, 255};
-    refresh_systemtime_data();
-    vTaskDelay(pdMS_TO_TICKS(100));
-    main_UI_1();
-    for (int i = 0; i <= 5; i++)
-    {
-      ledarray_set_and_write(i);
-      clean_draw_buf(i * 2 + 0);
-      clean_draw_buf(i * 2 + 1);
-    }
-  }
+
+  // for (;;)
+  // {
+  //   if (ext_io_ctrl.auto_read_INT == true)
+  //   {
+  //     ext_io_ctrl.auto_read_INT = false;
+  //     ext_io_value_service();
+  //   }
+  //   uint8_t color[3] = {255, 255, 255};
+  //   refresh_systemtime_data();
+  //   vTaskDelay(pdMS_TO_TICKS(100));
+  //   main_UI_1();
+  //   for (int i = 0; i <= 5; i++)
+  //   {
+  //     ledarray_set_and_write(i);
+  //     clean_draw_buf(i * 2 + 0);
+  //     clean_draw_buf(i * 2 + 1);
+  //   }
+  // }
 
 
 

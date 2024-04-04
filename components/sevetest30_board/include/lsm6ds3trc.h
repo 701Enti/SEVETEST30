@@ -26,8 +26,7 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
- // 我们这里使用了普通FIFO模式，因为我们只是用于操作UI而无需完整的姿态数据以及严格的实时性，低误差性
- // 初始化任务是 设置加速度计和陀螺仪的ORD（为了获得中断输出不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
+ // 基本初始化任务是 设置加速度计和陀螺仪的ORD（为了获得中断输出不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
  //             启用BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
  //             设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
  // 读取步骤是  读出FIFO存储的数据 / 读出自动记录的数据
@@ -158,13 +157,6 @@ enum
 enum{
   CONFIG_PEDO_THS_MIN = 0x0F,
 };
-
-//映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
-typedef struct
-{
-  uint8_t reg_address;
-  uint8_t reg_value;
-} IMU_reg_mapping_t;
 
 //*****************************传感数据相关********************************/
 typedef struct {
@@ -338,7 +330,11 @@ void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
 
 void lsm6ds3trc_init_or_reset();
 
+bool lsm6ds3trc_get_free_fall_status();
+
 uint16_t lsm6ds3trc_get_step_counter();
+
+int lsm6ds3trc_get_now_temperature();
 
 IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value();
 
@@ -360,7 +356,6 @@ uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_
 uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bool TILT_EN,bool FUNC_EN,bool PEDO_RST_STEP,bool SIGN_MOTION_EN);
 uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL);
 uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bool INT2_FULL_FLAG,bool INT2_FIFO_OVR,bool INT2_FTH,bool INT2_DRDY_TEMP,bool INT2_DRDY_G,bool INT2_DRDY_XL);
-uint8_t value_compound_WAKE_UP_SRC(bool FF_IA,bool SLEEP_STATE_IA,bool WU_IA,bool X_WU,bool Y_WU,bool Z_WU);
 uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool INT1_WU,bool INT1_FF,bool INT1_DOUBLE_TAP,bool INT1_6D,bool INT1_TILT,bool INT1_TIMER);
 uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE,IMU_INACT_EN_t INACT_EN,bool SLOPE_FDS,bool TAP_X_EN,bool TAP_Y_EN,bool TAP_Z_EN,bool LIR);
 uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO,IMU_DEC_FIFO_XL_t DEC_FIFO_XL);
@@ -374,6 +369,13 @@ uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 //那么写入顺序是在数据库由上到下的顺序,靠近开头的先写
 //否则写入顺序是ID数字大小顺序,ID取值为 0 到 条目数量-1 ,ID小的先写入
 
+//映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
+typedef struct
+{
+  uint8_t reg_address;
+  uint8_t reg_value;
+} IMU_reg_mapping_t;
+
 //构建单元,任何映射数据库都由若干个MAP_BASE构建单元组成,address可枚举,是需要写入寄存器的名字,实际指代的是需要写入寄存器的地址
 #define MAP_BASE(address, value) \
   {                              \
@@ -381,38 +383,49 @@ uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
   }
 
 //为 构建单元 应用ID标识 进行自定义顺序化读写的映射
-//使用例子:USE_MAP_ID(0)MAP_BASE(REG_ADD_CTRL3_C, 0x01),//这个条目将第一个写入
+//使用例子:USE_MAP_ID(0)MAP_BASE(REG_ADD_CTRL3_C, 0x01),//这个条目将第一个写入,因为它是数组中角标为0的元素
 #define USE_MAP_ID(id) [id]= 
 
-
-
-
-
+//寄存器值配置数据库是包含需要读写的寄存器地址以及一个uint8_t的值为单元的键值对数据集
+//如果用户未通过USE_MAP_ID索引单元的优先级,那么这个单元下的目标寄存器何时读取或写入value由它在数组的前后位置决定
+//同时它不需要各种配置函数的连续性调用,不需要反复的参数传递,可能提高系统以及总线的相同时间内的利用率
+//不同于常规,读取目标先进行了整合,这使得长数据读取,连续读取寄存器时可以方便地引入RTOS支持
+//但通过这种方式,外部组件对该部分的配置使用将比较复杂,或许需要编写库内的进一步封装的个性化配置函数
 
 /****************************默认寄存器值配置数据库****************************************/
 //用于初始化IMU_reg_mapping_t数组即数据库的值，在初始化函数中被使用
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,true)),\ 
-MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \    
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,false)), \
 MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_6, IMU_FS_XL_16G, false, false)), \
-MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_MAX, IMU_FS_G_125DPS)), \
+MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,IMU_INACT_EN_MODE1,false,false,false,false,true)), \
+MAP_BASE(WAKE_UP_DUR, 0x00),MAP_BASE(FREE_FALL,0x30|value_compound_partly_FREE_FALL(IMU_FF_THS_312MG)), \
+MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
+MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_5, IMU_FS_G_125DPS)), \
 MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)), \
-MAP_BASE(CTRL6_C,value_compound_CTRL6_C(true,false,false,false,false,IMU_FTYPE3)),\
 MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true)),\
 MAP_BASE(CTRL8_XL,value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
 MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
 MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,false,true)), \
-MAP_BASE(INT1_CTRL,value_compound_INT1_CTRL(false,false,true,false,false,false,false,false)), \
-MAP_BASE(WAKE_UP_SRC,value_compound_WAKE_UP_SRC(true,false,false,false,false,false)), \
-MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
-MAP_BASE(FREE_FALL,0x30 | value_compound_partly_FREE_FALL(IMU_FF_THS_500MG)), \
-MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,IMU_INACT_EN_MODE1,false,false,false,false,true)), \
 MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_32,IMU_DEC_FIFO_XL_32)), \
 MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_5,IMU_FIFO_MODE_CONTINUOUS)), \
 MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true,IMU_SIXD_THS_80_DEGREES)), \
+MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \    
 }
 
+//FIFO是姿态传感器中一种常用的缓存策略,FIFO具有抽取功能,可以采集大量的传感数据的一小部分用于参考
+//同时也压缩了数据,因为数据实时性需求大,一帧FIFO数据往往包含多个传感器的数据
+//配置抽取的方式不同,FIFO中各种数据的顺序会发生一定变化,通过配置映射数据库来告知读取函数这些数据的顺序含义
+//FIFO映射数据库使用寄存器值配置数据库的完全相同逻辑,但是不同单元的读写顺序显然相比更加重要
+//键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址
+//键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
 
-
+/****************************默认FIFO映射数据库(加速度计与陀螺仪ORD一致,抽取系数一致)****************************************/
+#define IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM 4 //默认FIFO映射数据库的最大条目数量
+#define IMU_DEFAULT_FIFO_MAPPING_DATABASE    { \
+MAP_BASE(FIFO_DATA_OUT_L,),\ 
+MAP_BASE(FIFO_DATA_OUT_H,),\
+MAP_BASE(FIFO_DATA_OUT_L,),\ 
+MAP_BASE(FIFO_DATA_OUT_H,),\
+}
