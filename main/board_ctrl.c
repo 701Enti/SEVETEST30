@@ -93,23 +93,6 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
 
     // 配置
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
-
-    // while (1)
-    // {
-    //     // vTaskDelay(pdMS_TO_TICKS(500));
-    //     // IMU_acceleration_value_t value = lsm6ds3trc_gat_now_acceleration();
-    //     // IMU_angular_rate_value_t value = lsm6ds3trc_gat_now_angular_rate();
-    //     // if(value.x != 0 ||value.y != 0 || value.z !=0)
-    //     // ESP_LOGE("ME", "%d %d %d",value.x,value.y,value.z);
-
-    //     // IMU_D6D_data_value_t value = lsm6ds3trc_get_D6D_data_value();
-    //     // ESP_LOGE("ME", "%d %d %d %d %d %d",value.XL,value.XH,value.YL,value.YH,value.ZL,value.ZH);
-
-        
-
-    //     // if(lsm6ds3trc_get_free_fall_status())ESP_LOGE("ME", "自由落体");
-    // } 
-
     return ESP_OK;
 }
 

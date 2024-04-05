@@ -22,20 +22,22 @@
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  //       对于功能设计需求，并不是所有寄存器都被考虑，都要求配置，实际上可以遵从默认设置
+ //       FIFO读出数据可能存在无效样本,需要自行过滤,(过滤大于等于0x7FF0样本)
  // 您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路 https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html
  // github: https://github.com/701Enti
  // bilibili: 701Enti
-
- // 基本初始化任务是 设置加速度计和陀螺仪的ORD（为了获得中断输出不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
- //             启用BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
+ // [基本初始化] 设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
+ //             开启BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
  //             设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
- // 读取步骤是  读出FIFO存储的数据 / 读出自动记录的数据
-
- //   快捷监测 6D检测 自由落体检测 计步器(必须 ORD 26Hz+)
+ // [读取步骤] 读出FIFO存储的数据 / 读出自动记录的数据
+ // [快捷监测] 6D/4D检测 自由落体检测 计步器
+ // [默认中断] INT1上路由 - 自由落体事件
+ // [中断锁存] 默认启用
 
 #pragma once
 
 #include "esp_types.h"
+#include "esp_err.h"
 
 //LSB对应实际的值
 //加速度计 mg/LSB (1 x 10^-3 g/LSB)
@@ -200,15 +202,15 @@ typedef enum
 typedef enum {
   IMU_ORD_XL_POWER_DOWN = 0x00,
   //             当 XL_HM_MODE = true          | 当 XL_HM_MODE = false
-  IMU_ORD_XL_1,//12.5 Hz (low power)           |  12.5 Hz (high performance)
-  IMU_ORD_XL_2,//26 Hz (low power)             |  26 Hz (high performance)
-  IMU_ORD_XL_3,//52 Hz (low power)             |  52 Hz (high performance) 
-  IMU_ORD_XL_4,//104 Hz (normal mode)          |  104 Hz (high performance)
-  IMU_ORD_XL_5,//208 Hz (normal mode)          |  208 Hz (high performance) 
-  IMU_ORD_XL_6,//416 Hz (high performance)     |  416 Hz (high performance)
-  IMU_ORD_XL_7,//833 Hz (high performance)     |  833 Hz (high performance)
-  IMU_ORD_XL_8,//1.66 kHz (high performance)   |  1.66 kHz (high performance)
-  IMU_ORD_XL_9,//3.33 kHz (high performance)   |  3.33 kHz (high performance)
+  IMU_ORD_XL_0,//12.5 Hz (low power)           |  12.5 Hz (high performance)
+  IMU_ORD_XL_1,//26 Hz (low power)             |  26 Hz (high performance)
+  IMU_ORD_XL_2,//52 Hz (low power)             |  52 Hz (high performance) 
+  IMU_ORD_XL_3,//104 Hz (normal mode)          |  104 Hz (high performance)
+  IMU_ORD_XL_4,//208 Hz (normal mode)          |  208 Hz (high performance) 
+  IMU_ORD_XL_5,//416 Hz (high performance)     |  416 Hz (high performance)
+  IMU_ORD_XL_6,//833 Hz (high performance)     |  833 Hz (high performance)
+  IMU_ORD_XL_7,//1.66 kHz (high performance)   |  1.66 kHz (high performance)
+  IMU_ORD_XL_8,//3.33 kHz (high performance)   |  3.33 kHz (high performance)
   IMU_ORD_XL_MAX,//6.66 kHz (high performance) |  6.66 kHz (high performance)
   IMU_ORD_XL_MIN,//1.6 Hz (low power only)     |  12.5 Hz (high performance)
 }IMU_ORD_XL_t;//加速度计的数据输出速率
@@ -216,7 +218,7 @@ typedef enum {
 typedef enum {
   IMU_ORD_G_POWER_DOWN = 0x00,
   //             当 XL_HM_MODE = true         | 当 XL_HM_MODE = false
-  IMU_ORD_G_MIN,//12.5 Hz (low power)         | 12.5 Hz (high performance)
+  IMU_ORD_G_0,//12.5 Hz (low power)         | 12.5 Hz (high performance)
   IMU_ORD_G_1,  //26 Hz (low power)           | 26 Hz (high performance)
   IMU_ORD_G_2,  //52 Hz (low power)           | 52 Hz (high performance) 
   IMU_ORD_G_3,  //104 Hz (normal mode)        | 104 Hz (high performance)
@@ -324,23 +326,31 @@ IMU_SIXD_THS_70_DEGREES,//70度
 IMU_SIXD_THS_60_DEGREES,//60度
 IMU_SIXD_THS_50_DEGREES,//50度
 }IMU_SIXD_THS_t;// 4D/6D检测功能的阈值
-/*******************************公共API***************************************/
-void lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num);
-void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
 
-void lsm6ds3trc_init_or_reset();
 
-bool lsm6ds3trc_get_free_fall_status();
+/******************************数据库构建****************************************/
+//关于写入的顺序:
+//不使用下面的USE_MAP_ID(),即只有MAP_BASE()
+//那么写入顺序是在数据库由上到下的顺序,靠近开头的先写
+//否则写入顺序是ID数字大小顺序,ID取值为 0 到 条目数量-1 ,ID小的先写入
 
-uint16_t lsm6ds3trc_get_step_counter();
+//映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
+typedef struct
+{
+  uint8_t reg_address;
+  uint32_t reg_value;
+} IMU_reg_mapping_t;
 
-int lsm6ds3trc_get_now_temperature();
+//构建单元,任何映射数据库都由若干个MAP_BASE构建单元组成,address可枚举,是需要写入寄存器的名字,实际指代的是需要写入寄存器的地址
+#define MAP_BASE(address, value) \
+  {                              \
+    address, value               \
+  }
 
-IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value();
+//为 构建单元 应用ID标识 进行自定义顺序化读写的映射
+//使用例子:USE_MAP_ID(0)MAP_BASE(REG_ADD_CTRL3_C, 0x01),//这个条目将第一个写入,因为它是数组中角标为0的元素
+#define USE_MAP_ID(id) [id]= 
 
-IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration();
-
-IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();
 
 /***************************寄存器配置值合成API************************************/
 //将分散的配置数据合并成对应寄存器的值,用于数据库条目个性化构建
@@ -363,30 +373,8 @@ uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO,IMU_FIFO_MODE_t FIFO_M
 uint8_t value_compound_partly_TAP_THS_6D(bool D4D_EN,IMU_SIXD_THS_t SIXD_THS);
 uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 
-/******************************数据库构建****************************************/
-//关于写入的顺序:
-//不使用下面的USE_MAP_ID(),即只有MAP_BASE()
-//那么写入顺序是在数据库由上到下的顺序,靠近开头的先写
-//否则写入顺序是ID数字大小顺序,ID取值为 0 到 条目数量-1 ,ID小的先写入
 
-//映射数据库存储单元,映射数据库是IMU_reg_mapping_t数组
-typedef struct
-{
-  uint8_t reg_address;
-  uint8_t reg_value;
-} IMU_reg_mapping_t;
-
-//构建单元,任何映射数据库都由若干个MAP_BASE构建单元组成,address可枚举,是需要写入寄存器的名字,实际指代的是需要写入寄存器的地址
-#define MAP_BASE(address, value) \
-  {                              \
-    address, value               \
-  }
-
-//为 构建单元 应用ID标识 进行自定义顺序化读写的映射
-//使用例子:USE_MAP_ID(0)MAP_BASE(REG_ADD_CTRL3_C, 0x01),//这个条目将第一个写入,因为它是数组中角标为0的元素
-#define USE_MAP_ID(id) [id]= 
-
-//寄存器值配置数据库是包含需要读写的寄存器地址以及一个uint8_t的值为单元的键值对数据集
+//寄存器值配置数据库是包含需要读写的寄存器地址以及一个uint32_t实际看作uint8_t的值为单元的键值对数据集
 //如果用户未通过USE_MAP_ID索引单元的优先级,那么这个单元下的目标寄存器何时读取或写入value由它在数组的前后位置决定
 //同时它不需要各种配置函数的连续性调用,不需要反复的参数传递,可能提高系统以及总线的相同时间内的利用率
 //不同于常规,读取目标先进行了整合,这使得长数据读取,连续读取寄存器时可以方便地引入RTOS支持
@@ -394,38 +382,71 @@ typedef struct
 
 /****************************默认寄存器值配置数据库****************************************/
 //用于初始化IMU_reg_mapping_t数组即数据库的值，在初始化函数中被使用
-#define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 20 //默认寄存器值配置数据库的最大条目数量
+#define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 13 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,true)),\ 
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,false)), \
-MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_6, IMU_FS_XL_16G, false, false)), \
+MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_2,IMU_FS_XL_4G, false, false)), \
+MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_2,IMU_FS_G_125DPS)), \
+MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_16,IMU_DEC_FIFO_XL_16)), \
+MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_6,IMU_FIFO_MODE_CONTINUOUS)), \
 MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,IMU_INACT_EN_MODE1,false,false,false,false,true)), \
-MAP_BASE(WAKE_UP_DUR, 0x00),MAP_BASE(FREE_FALL,0x30|value_compound_partly_FREE_FALL(IMU_FF_THS_312MG)), \
+MAP_BASE(FREE_FALL,0x30|value_compound_partly_FREE_FALL(IMU_FF_THS_312MG)), \
 MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
-MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_5, IMU_FS_G_125DPS)), \
-MAP_BASE(CTRL4_C, value_compound_CTRL4_C(true,false,false,false,true,false,true)), \
-MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true)),\
-MAP_BASE(CTRL8_XL,value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true)), \
-MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,true,true)), \
-MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,true,true,false,true)), \
-MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_32,IMU_DEC_FIFO_XL_32)), \
-MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_5,IMU_FIFO_MODE_CONTINUOUS)), \
 MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true,IMU_SIXD_THS_80_DEGREES)), \
+MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,false,true,true,true)), \
+MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,false,true,false,true)), \
 MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \    
 }
+
+//启用滤波
+// MAP_BASE(CTRL7_G,value_compound_CTRL7_G(false,true,IMU_HPM_G2,true))
+// MAP_BASE(CTRL8_XL,value_compound_CTRL8_XL(true, IMU_HPCF_XL4, false, true, false, true))
+
+//启用DRDY_MASK功能
+// MAP_BASE(CTRL4_C, value_compound_CTRL4_C(false,false,false,false,true,false,false))
 
 //FIFO是姿态传感器中一种常用的缓存策略,FIFO具有抽取功能,可以采集大量的传感数据的一小部分用于参考
 //同时也压缩了数据,因为数据实时性需求大,一帧FIFO数据往往包含多个传感器的数据
 //配置抽取的方式不同,FIFO中各种数据的顺序会发生一定变化,通过配置映射数据库来告知读取函数这些数据的顺序含义
 //FIFO映射数据库使用寄存器值配置数据库的完全相同逻辑,但是不同单元的读写顺序显然相比更加重要
 //键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址
-//键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
+//键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,用完整uint32_t存储,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
+//条目键值对的 value 设置为NULL表示舍弃该条目数据读取
 
 /****************************默认FIFO映射数据库(加速度计与陀螺仪ORD一致,抽取系数一致)****************************************/
-#define IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM 4 //默认FIFO映射数据库的最大条目数量
-#define IMU_DEFAULT_FIFO_MAPPING_DATABASE    { \
-MAP_BASE(FIFO_DATA_OUT_L,),\ 
-MAP_BASE(FIFO_DATA_OUT_H,),\
-MAP_BASE(FIFO_DATA_OUT_L,),\ 
-MAP_BASE(FIFO_DATA_OUT_H,),\
+#define IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM 12 //默认FIFO映射数据库的最大条目数量
+#define IMU_DEFAULT_FIFO_MAPPING_DATABASE(Gx_L,Gx_H,Gy_L,Gy_H,Gz_L,Gz_H,XLx_L,XLx_H,XLy_L,XLy_H,XLz_L,XLz_H)    { \
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gx_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gx_H),\
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gy_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gy_H),\
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gz_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gz_H),\
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLx_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLx_H),\
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLy_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLy_H),\
+MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLz_L),\ 
+MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLz_H),\
 }
+
+
+/*******************************公共API***************************************/
+esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num);
+esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
+esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num);
+
+void lsm6ds3trc_init_or_reset();
+
+bool lsm6ds3trc_get_free_fall_status();
+
+uint16_t lsm6ds3trc_get_step_counter();
+
+int lsm6ds3trc_get_now_temperature();
+
+IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value();
+
+IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration();
+
+IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate();

@@ -82,6 +82,17 @@ void app_main(void)
 
   esp_log_level_set("gpio", ESP_LOG_NONE);
 
+  for(;;){
+    refresh_IMU_FIFO_data(NULL,0,0);
+    for(int i=0;i<3;i++){
+      if((IMU_XLz_L[i] | IMU_XLz_H[i]<<8) < 0x7FF0)
+      ESP_LOGI("ME","%d",(int16_t)(IMU_XLz_L[i] | IMU_XLz_H[i]<<8));  
+    }
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+
+
+
   // for(;;){
   //  vTaskDelay(pdMS_TO_TICKS(100));
   //   uint8_t color[3] = {25,25,25};
