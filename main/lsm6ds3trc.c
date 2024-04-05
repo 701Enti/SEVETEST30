@@ -21,9 +21,19 @@
  // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对姿态传感器LSM6DS3TR-C的操作
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ //       对于功能设计需求，并不是所有寄存器都被考虑，都要求配置，实际上可以遵从默认设置
+ //       FIFO读出数据可能存在无效样本,需要自行过滤,(过滤大于等于0x7FF0样本)
+ // 您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路 https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html
  // github: https://github.com/701Enti
  // bilibili: 701Enti
-
+ // [基本初始化] 设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
+ //             开启BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
+ //             设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
+ // [读取步骤] 读出FIFO存储的数据 / 读出自动记录的数据
+ // [快捷监测] 6D/4D检测 自由落体检测 计步器
+ // [默认中断] INT1上路由 - 自由落体事件
+ // [中断锁存] 默认启用
+ 
 #include "lsm6ds3trc.h"
 #include "esp_log.h"
 #include "board_def.h"
@@ -38,13 +48,14 @@
 /// @param reg_database 导入数据库，这是一个以IMU_reg_mapping_t的数组，其中的条目即单个IMU_reg_mapping_t数据的个数没有规定，
 ///                     并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式
 /// @param map_num 需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量
-void lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
+/// @return ESP_OK / ESP_FAIL
+esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
 {
   const char* TAG = "lsm6ds3trc_database_map_set";
   if (!reg_database)
   {
     ESP_LOGE(TAG, "导入了为空的数据库");
-    return;
+    return ESP_FAIL;
   }
   // 用于偏移到指定数据库内存区域获取数据
   IMU_reg_mapping_t* mapping_buf = reg_database;
@@ -57,10 +68,12 @@ void lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
     if (err != ESP_OK)
     {
       ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(err));
-      return;
+      return ESP_FAIL;
     }
   }
+
   ESP_LOGI(TAG, "成功映射配置到姿态传感器LSM6DS3TRC");
+  return ESP_OK;
 }
 
 /// @brief 映射LSM6DS3TRC硬件寄存器的数据到数据库,即读取设定的寄存器到数据库
@@ -68,13 +81,14 @@ void lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
 ///                     并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式
 //                      完成读取后,数据库中寄存器的值将更新,因此在初始化数据库设定寄存器时的值任意如0x00
 /// @param map_num 需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量
-void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num)
+/// @return ESP_OK / ESP_FAIL
+esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num)
 {
   const char* TAG = "lsm6ds3trc_database_map_read";
   if (!reg_database)
   {
     ESP_LOGE(TAG, "导入了为空的数据库");
-    return;
+    return ESP_FAIL;
   }
   // 用于偏移到指定数据库内存区域写入数据库
   IMU_reg_mapping_t* mapping_buf = reg_database;
@@ -87,9 +101,11 @@ void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num)
     if (err != ESP_OK)
     {
       ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(err));
-      return;
+      return ESP_FAIL;
     }
   }
+
+  return ESP_OK;
 }
 
 /// @brief [FIFO数据映射]
@@ -100,16 +116,17 @@ void lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num)
 /// @brief 键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址
 /// @brief 键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
 /// @brief 每次读取从这些地址开始导入,在data_num控制下偏移地址地存储数据
-/// @param FIFO_database FIFO映射数据库
-/// @param map_num  数据库的条目数量即MAP_BASE个数
-/// @param read_num 读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据
-void lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num){
+/// @param FIFO_database FIFO映射数据库,条目键值对的 value 设置为NULL表示舍弃该条目数据读取
+/// @param map_num  (必须准确)数据库的条目数量即MAP_BASE个数
+/// @param read_num (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据
+/// @return ESP_OK / ESP_FAIL
+esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num){
   const char* TAG = "lsm6ds3trc_FIFO_map";
 
   //参数合法性检查
   if(!FIFO_database){
     ESP_LOGE(TAG, "导入了为空的FIFO映射数据库");
-    return;
+    return ESP_FAIL;
   }
 
   //初始化读取缓存
@@ -119,15 +136,38 @@ void lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_n
   for (int a=0;a<map_num;a++)//映射需要依次读取的寄存器地址
     buf_db[a].reg_address = FIFO_database[a].reg_address;
   
-  //读取循环
-  for (int idx=0;idx<read_num;idx++){
-    lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
-    
+  //读取循环,共映射read_num帧数据
+  static int idx=0;
+  while (idx<read_num){
+    //读取一帧数据,FIFO内部会根据读取数据次数偏移到存储区,如果合理,每次读到的顺序是FIFO_database设置的顺序
+    if(lsm6ds3trc_database_map_read(buf_db,map_num) != ESP_OK){
+      ESP_LOGW(TAG, "数据读取意外终止,数据被部分映射 第 %d 个无法读取 / 共有 %d 个,等待重试",idx+1,read_num);
+      if(lsm6ds3trc_database_map_read(buf_db,map_num) != ESP_OK){
+        ESP_LOGW(TAG, "重试读取失败,等待下次调用");
+        break;
+      }
+    }
+    //映射这帧数据到所有预设内存区域
+    for(int dp=0;dp<map_num;dp++){
+      //遍历所有条目,在预设的内存区域写入,用idx偏移到指定数组元素,而FIFO_database[dp].reg_value的值不变
+      if((uint8_t*)FIFO_database[dp].reg_value){//条目键值对的 value 设置为NULL表示舍弃该条目数据读取
+        *((uint8_t*)(FIFO_database[dp].reg_value + idx)) =  buf_db[dp].reg_value;//FIFO_database[dp].reg_value的值不变
+      }
+    }
+
+    idx++;
   }
 
   //释放内存
   free(buf_db);
   buf_db = NULL;
+
+  if(idx < read_num)
+   return ESP_FAIL;//idx的值将不会复位,使得下次开始从错误位置再次读取
+   
+  idx = 0;
+  return ESP_OK;
+  
 }
 
 
@@ -206,7 +246,7 @@ int lsm6ds3trc_get_now_temperature()
 }
 
 
-/// @brief 获取实时的加速度偏移
+/// @brief 获取实时的加速度偏移(支持DRDY_MASK下无效样本过滤)
 /// @return 实时的加速度值偏移
 IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration()
 {
@@ -288,7 +328,7 @@ IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration()
   return ret;
 }
 
-/// @brief 获取实时的角速率偏移
+/// @brief 获取实时的角速率偏移(支持DRDY_MASK下无效样本过滤)
 /// @return 实时的角速率偏移值
 IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate()
 {

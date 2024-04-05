@@ -32,8 +32,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "board_def.h"
 #include "BL5372.h"
-
+#include "lsm6ds3trc.h"
 
 typedef struct systemtime_t{
   int year;
@@ -53,12 +54,31 @@ typedef struct battery_data_t{
 extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
 
+extern uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_Gy_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_Gy_H[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_Gz_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_Gz_H[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLx_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLx_H[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLy_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLy_H[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLz_L[IMU_FIFO_DEFAULT_READ_NUM];
+extern uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM];
+
+
+
+void refresh_battery_data();
+void refresh_systemtime_data();
+
+esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num);
+
+
+void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);
+
+
+
 void sync_systemtime_to_ext_rtc();
 
 void sync_systemtime_from_ext_rtc();
-
-void refresh_battery_data();
-
-void refresh_systemtime_data();
-
-void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);

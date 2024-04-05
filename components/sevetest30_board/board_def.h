@@ -120,7 +120,8 @@
 // TCA6416A的中断信号输出
 #define TCA6416A_IO_INT  GPIO_NUM_1
 
-
+//姿态传感器默认FIFO周期读取个数(默认方式)
+#define IMU_FIFO_DEFAULT_READ_NUM 3
 
 
 //TCA6416A 控制IO端口次序名称定义
