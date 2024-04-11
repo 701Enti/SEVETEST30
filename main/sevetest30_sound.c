@@ -33,6 +33,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
@@ -81,6 +82,7 @@
 
 bool volatile sevetest30_music_running_flag = false;
 bool volatile sevetest30_asr_running_flag = false;
+int  volatile running_i2s_port = 0;
 
 // 音频元素句柄
 audio_pipeline_handle_t pipeline = NULL;
@@ -101,6 +103,9 @@ raw_stream_cfg_t raw_cfg;
 
 // 事件监听
 audio_event_iface_handle_t common_mp3_evt = NULL;
+
+//互斥锁句柄
+SemaphoreHandle_t http_i2s_mp3_music_xMutex;
 
 // 服务定义
 baidu_TTS_cfg_t *TTS_cfg_buf = NULL;
@@ -178,7 +183,11 @@ void common_mp3_running_event()
   mp3_decoder = NULL;
 
   common_mp3_evt = NULL; // 释放句柄，表示任务的结束
+
+  xSemaphoreTake(http_i2s_mp3_music_xMutex,portMAX_DELAY);
   sevetest30_music_running_flag = false;
+  xSemaphoreGive(http_i2s_mp3_music_xMutex);
+
   vTaskDelete(NULL);
 }
 
@@ -421,7 +430,6 @@ void common_asr_running_event()
   audio_rsp_filter = NULL;
   raw_read = NULL;
 
-  sevetest30_asr_running_flag = false;
   vTaskDelete(NULL);
 }
 
@@ -556,6 +564,8 @@ void http_i2s_mp3_music_start(TaskFunction_t running_event, UBaseType_t priority
   audio_pipeline_run(pipeline);
   // 初始化clk,之后真实的音频播放配置由mp3文件自动变更
   i2s_stream_set_clk(i2s_stream_writer, 44100, 16, 2);
+  //为共享变量读取创建互斥锁
+  http_i2s_mp3_music_xMutex = xSemaphoreCreateMutex();
   // 事件监听任务启动
   xTaskCreatePinnedToCore(running_event, "http_i2s_mp3_music_run", MUSIC_PLAY_EVT_TASK_STACK_SIZE, NULL, priority, NULL, MUSIC_PLAY_EVT_TASK_CORE);
 }
@@ -592,6 +602,8 @@ void music_url_play(const char* url, UBaseType_t priority)
   element_cfg_data_reset();
 
   i2s_cfg.i2s_port = CODEC_DAC_I2S_PORT;
+  running_i2s_port = i2s_cfg.i2s_port;
+
   i2s_stream_reader = audio_calloc(1,sizeof(audio_element_handle_t)); // 锁定i2s_stream_reader，禁止初始化
 
   const char *link_tag[3] = {"http", "mp3", "i2s"};
@@ -630,7 +642,10 @@ void tts_service_play(baidu_TTS_cfg_t *tts_cfg, UBaseType_t priority)
   }
 
   element_cfg_data_reset();
+
   i2s_cfg.i2s_port = CODEC_DAC_I2S_PORT;
+  running_i2s_port = i2s_cfg.i2s_port;
+
   http_cfg.event_handle = _TTS_get_token_handle;
   if (TTS_cfg_buf == NULL)
     TTS_cfg_buf = audio_calloc(1, sizeof(baidu_TTS_cfg_t));
@@ -653,10 +668,11 @@ void tts_service_play(baidu_TTS_cfg_t *tts_cfg, UBaseType_t priority)
 
   audio_pipeline_link(pipeline, &link_tag[0], 3);
   audio_element_set_uri(http_stream_reader, BAIDU_TTS_ENDPOINT);
+
   http_i2s_mp3_music_start(&common_mp3_running_event, priority);
 }
 
-/// @brief 启动语音识别服务，启动后不断地自动监听并完成识别
+/// @brief 启动语音识别服务，启动后不断地自动监听并完成识别,是一个不断循环识别的任务
 /// @param asr_cfg asr配置
 /// @param priority 任务优先级
 void asr_service_start(baidu_ASR_cfg_t *asr_cfg, UBaseType_t priority)
@@ -685,6 +701,8 @@ void asr_service_start(baidu_ASR_cfg_t *asr_cfg, UBaseType_t priority)
   element_cfg_data_reset();
 
   i2s_cfg.i2s_port = CODEC_ADC_I2S_PORT;
+  running_i2s_port = i2s_cfg.i2s_port;
+
   i2s_cfg.type = AUDIO_STREAM_READER;
   rsp_cfg.dest_ch = 1;
   rsp_cfg.dest_rate = asr_cfg->rate;

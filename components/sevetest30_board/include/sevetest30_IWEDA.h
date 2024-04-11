@@ -35,7 +35,7 @@
 #include "esp_err.h"
 #include "stdbool.h"
 
-#define HTTP_BUF_MAX 2048 //http输出与URL数据缓存允许大小
+#define HTTP_BUF_MAX 8192 //http输出与URL数据缓存允许大小
 #define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 
@@ -44,8 +44,9 @@
 
 #define ASR_RESULT_TEX_BUF_MAX (4096)
 
-#define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192
-#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000
+#define ACCESSTOKEN_SIZE_MAX (100)
+#define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192//聊天结果字符最大存储容量
+#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000//聊天回复等待超时时间
 
 //各种API的URL，字符由%s替代
 
@@ -124,7 +125,7 @@ typedef struct ip_position
 extern char http_get_out_buf[HTTP_BUF_MAX]; // 输出数据缓存
 extern char http_get_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
 extern char *ip_address;//公网IP
-extern char *asr_result_tex;//语音识别结果
+extern char *sevetest30_asr_result_tex;//语音识别结果
 
 extern ip_position *ip_position_data;
 extern Real_time_weather *real_time_weather_data;
@@ -155,3 +156,5 @@ void refresh_position_data();
 void refresh_weather_data();
 
 char *ERNIE_Bot_4_chat_tex_exchange(char *user_content);
+
+esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken);

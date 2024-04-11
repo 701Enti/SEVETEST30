@@ -4,27 +4,27 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含对传感器数据，网络API等数据的 整理显示与动画交互工作
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明
-// 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含对传感器数据，网络API等数据的 整理显示与动画交互工作
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明
+ // 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #include <sevetest30_UI.h>
 #include <sevetest30_sound.h>
@@ -32,6 +32,7 @@
 #include <sevetest30_IWEDA.h>
 #include <sevetest30_SWEDA.h>
 #include <sevetest30_LedArray.h>
+#include "freertos/semphr.h"
 #include <esp_log.h>
 #include <math.h>
 #include <esp_random.h>
@@ -42,17 +43,19 @@
 #define LOW_TEMP_MULTIPLE 20 // 低于BLUE_TEMP多少倍将达到设定的最高白色亮度
 
 bool weather_change_flag = 0;
-float *src_data = NULL; // 源数据
-float *wind = NULL;     // 窗口系数
+float* src_data = NULL; // 源数据
+float* wind = NULL;     // 窗口系数
 
-uint8_t unit_led_color[FFT_VIEW_WIDTH_MAX] = {0};
-uint8_t unit_led_high[FFT_VIEW_WIDTH_MAX] = {0};
+uint8_t unit_led_color[FFT_VIEW_WIDTH_MAX] = { 0 };
+uint8_t unit_led_high[FFT_VIEW_WIDTH_MAX] = { 0 };
 
 __attribute__((aligned(16))) float y_cf[FFT_N_SAMPLES * 2];
 
 bool volatile sevetest30_fft_ui_running_flag = false;
 
-void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg);
+xSemaphoreHandle music_FFT_UI_xMutex;
+
+void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg);
 
 // 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
 // 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G B三个分量 0 - (value_max)
@@ -69,7 +72,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg);
 /// @param high 高值分量 越趋近预设高温 向高值分量侧倾
 /// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
 /// @param low 低值分量 越趋近预设低温 向低值分量侧倾
-void temp_to_color(int temp, uint8_t value_max, uint8_t *high, uint8_t *comfort, uint8_t *low)
+void temp_to_color(int temp, uint8_t value_max, uint8_t* high, uint8_t* comfort, uint8_t* low)
 {
     float value_buf = 0;
 
@@ -103,7 +106,7 @@ void temp_to_color(int temp, uint8_t value_max, uint8_t *high, uint8_t *comfort,
 /// @param high 高值分量 越趋近预设高温 向高值分量侧倾
 /// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
 /// @param low 低值分量 越趋近预设低温 向低值分量侧倾
-void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high, uint8_t *comfort, uint8_t *low)
+void data_to_color(int data, UI_color_visual_cfg_t* visual_cfg, uint8_t* high, uint8_t* comfort, uint8_t* low)
 {
     float value_buf = 0;
 
@@ -143,7 +146,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
     // 以下是有亿点长switch判断，准备天气图标
     switch (real_time_weather_data->icon)
     {
-    // 正在进行的，多云，晴，大雨等，包括夜晚的
+        // 正在进行的，多云，晴，大雨等，包括夜晚的
     case 100:
     {
         const unsigned char gImage_100[251] = {
@@ -16428,7 +16431,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         return; // 如果绝对值大于99显示都是问题了，大可能是传错了，退出
     }
 
-    uint8_t color[3] = {0};
+    uint8_t color[3] = { 0 };
     temp_to_color(real_time_weather_data->temp, 255, &color[0], &color[1], &color[2]); // 数据可以通过颜色可视化
 
     if (change != 0)
@@ -16436,7 +16439,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         // 确定要不要带负号，以及负号位置，它由数字位数决定
         if (real_time_weather_data->temp < 0)
         {
-            uint8_t *p = rectangle(2, 1);
+            uint8_t* p = rectangle(2, 1);
             if (temp_buf >= 10)
                 separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
             else
@@ -16457,7 +16460,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
 // 显示了当前系统时间  时 分      起始坐标xy  亮度值0-100% 为0不会任何进行显示操作 始终返回UI主题颜色指针
 void time_UI_1(int16_t x, int16_t y, uint8_t change)
 {
-    static uint8_t color[3] = {0};
+    static uint8_t color[3] = { 0 };
     static int8_t minute_buf = 80;
 
     if (minute_buf != systemtime_data.minute)
@@ -16485,7 +16488,7 @@ void time_UI_1(int16_t x, int16_t y, uint8_t change)
 // 显示了当前系统时间  秒     起始坐标xy  亮度值0-100%   为0不会任何进行显示操作 始终返回UI主题颜色指针
 void time_UI_2(int16_t x, int16_t y, uint8_t change)
 {
-    static uint8_t color[3] = {0};
+    static uint8_t color[3] = { 0 };
     static int8_t second_buf = 80;
 
     if (second_buf != systemtime_data.second)
@@ -16506,24 +16509,35 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
     }
 }
 
-// 启动音频频谱UI绘制任务,检测到音频活动任务结束会自动关闭任务
-void music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg, UBaseType_t priority)
+/// @brief 启动音频频谱UI绘制任务(必须有音频任务进行中),检测到音频活动任务结束会自动关闭任务
+/// @param UI_cfg FFT的UI配置
+/// @param priority 任务优先级
+void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority)
 {
-
     if (sevetest30_fft_ui_running_flag)
     {
         ESP_LOGE("music_FFT_UI_start", "绘制繁忙中,无法准备新绘制任务");
         return;
     }
-    sevetest30_fft_ui_running_flag = true;
-    xTaskCreatePinnedToCore(&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, UI_cfg, priority, NULL, FFT_UI_TASK_CORE);
+    
+    if (sevetest30_music_running_flag || sevetest30_asr_running_flag) {
+      ESP_LOGI("music_FFT_UI_start", "I2S端口(%d)在sevetest30_sound中被选定,将监视此端口",running_i2s_port);
+      sevetest30_fft_ui_running_flag = true;  
+      music_FFT_UI_xMutex = xSemaphoreCreateMutex();
+      xTaskCreatePinnedToCore(&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, UI_cfg, priority, NULL, FFT_UI_TASK_CORE);  
+    }
+    else{
+      ESP_LOGE("music_FFT_UI_start","在sevetest30_sound中没有运行中的合法I2S端口,无法准备新绘制任务");
+    }
+
+    return;
 }
 
 /// @brief 初始化音频频谱UI,初始化FFT并申请重要内存
 /// @return 成功 ESP_OK 失败 ESP_FAIL
 esp_err_t music_FFT_init()
 {
-    const char *TAG = "music_FFT_init";
+    const char* TAG = "music_FFT_init";
 
     if (src_data || wind)
     {
@@ -16556,7 +16570,7 @@ esp_err_t music_FFT_init()
 /// @return 成功 ESP_OK 失败 ESP_FAIL
 esp_err_t music_FFT_deinit()
 {
-    const char *TAG = "music_FFT_deinit";
+    const char* TAG = "music_FFT_deinit";
     if (!src_data || !wind)
     {
         ESP_LOGE(TAG, "发现变量错误的内存状态");
@@ -16570,12 +16584,12 @@ esp_err_t music_FFT_deinit()
     return ESP_OK;
 }
 
-/// @brief 利用 FFT 刷新一帧音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程
+/// @brief 利用 FFT 刷新音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程
 /// @param UI_cfg UI配置
-void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg)
+void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
 {
-    const char *TAG = "music_FFT_UI_refresh_Task";
-    __attribute__((aligned(16))) float *y1_cf = &y_cf[0]; // 指向合成缓存
+    const char* TAG = "music_FFT_UI_refresh_Task";
+    __attribute__((aligned(16))) float* y1_cf = &y_cf[0]; // 指向合成缓存
     int N = FFT_N_SAMPLES;                                // FFT 点数 N
 
     // 初始化
@@ -16586,7 +16600,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg)
     }
     // 源数据缓存
     size_t read_len = 0; // i2s_read 已读取长度
-    int16_t *i2s_read_buf = NULL;
+    int16_t* i2s_read_buf = NULL;
     i2s_read_buf = malloc(FFT_N_SAMPLES * sizeof(int16_t));
     while (!i2s_read_buf)
     {
@@ -16596,7 +16610,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg)
     memset(i2s_read_buf, 0, FFT_N_SAMPLES * sizeof(int16_t));
 
     // 申请图谱绘制缓存
-    float *unit_data_max = NULL; // 存储每个单位频率范围下较大的幅度
+    float* unit_data_max = NULL; // 存储每个单位频率范围下较大的幅度
     unit_data_max = malloc(UI_cfg->width * sizeof(float));
     while (!unit_data_max)
     {
@@ -16613,7 +16627,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg)
         // 清理之前缓存的数据
         memset(unit_data_max, 0, UI_cfg->width * sizeof(float));
         // 载入FFT源数据
-        i2s_read(UI_cfg->fft_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);
+        i2s_read(running_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);
 
         for (int i = 0; i < N; i++)
             src_data[i] = (float)i2s_read_buf[i] / FFT_DAMPEN_MULTIPLES;
@@ -16691,19 +16705,23 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t *UI_cfg)
         ESP_LOGE(TAG, "反初始化操作没有正常运行");
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
+
+    xSemaphoreTake(music_FFT_UI_xMutex,portMAX_DELAY);
     sevetest30_fft_ui_running_flag = false;
+    xSemaphoreGive(music_FFT_UI_xMutex);
+
     vTaskDelete(NULL);
 }
 
-void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg)
+void music_FFT_UI_draw(music_FFT_UI_cfg_t* UI_cfg)
 {
     for (int j = 0; j < UI_cfg->width; j++)
     {
         // 显示数据到缓存
-        uint8_t *p = rectangle(1, unit_led_high[j]);
+        uint8_t* p = rectangle(1, unit_led_high[j]);
         if (p)
         {
-            uint8_t color_buf[3] = {0};
+            uint8_t color_buf[3] = { 0 };
             color_buf[0] = unit_led_color[j * 3 + 0];
             color_buf[1] = unit_led_color[j * 3 + 1];
             color_buf[2] = unit_led_color[j * 3 + 2];
@@ -16719,20 +16737,20 @@ void main_UI_1()
 {
     board_ctrl_t* board_ctrl = NULL;
     board_ctrl = board_status_get();
-    if (board_ctrl){
+    if (board_ctrl) {
         if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0 && board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
         {
             board_ctrl->amplifier_mute = !board_ctrl->amplifier_mute;
             vTaskDelay(pdMS_TO_TICKS(500));
             sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
-        }        
+        }
         else if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
         {
             time_UI_1(1, 1, 1);
 
             if (board_ctrl->amplifier_volume < 100)
 
-            board_ctrl->amplifier_volume++;
+                board_ctrl->amplifier_volume++;
             sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
         }
         else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0)
@@ -16741,7 +16759,7 @@ void main_UI_1()
 
             if (board_ctrl->amplifier_volume > 0)
 
-            board_ctrl->amplifier_volume--;
+                board_ctrl->amplifier_volume--;
             sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
         }
 

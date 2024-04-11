@@ -64,7 +64,6 @@ typedef struct UI_color_visual_cfg_t
 
 typedef struct music_FFT_UI_cfg_t
 {
-   i2s_port_t fft_i2s_port;//需要监视的I2S端口
    int16_t x;///起始位置X坐标
    int16_t y;///起始位置Y坐标
    uint8_t change;///亮度
@@ -93,7 +92,6 @@ void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg);
 
 void main_UI_1();
 
-//需要创建任务调用的
 void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority);
 
 

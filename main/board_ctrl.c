@@ -93,6 +93,7 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
 
     // 配置
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
+
     return ESP_OK;
 }
 
