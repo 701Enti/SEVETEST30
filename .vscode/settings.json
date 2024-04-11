@@ -141,7 +141,8 @@
         "i2c_types.h": "c",
         "esp_types.h": "c",
         "lsm6ds3trc.h": "c",
-        "esp_vad.h": "c"
+        "esp_vad.h": "c",
+        "semphr.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

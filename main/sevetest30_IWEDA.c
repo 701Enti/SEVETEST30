@@ -3,28 +3,28 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
-//      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
-// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
+ //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
+ // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 
 #include "zlib.h"
@@ -60,20 +60,20 @@
 #include "tcpip_adapter.h"
 #endif
 
-char http_get_out_buf[HTTP_BUF_MAX] = {0}; // 输出数据缓存
-char http_get_url_buf[HTTP_BUF_MAX] = {0}; // url缓存,留着调用时候可以用
-char *ip_address;                          // 公网IP
+char http_get_out_buf[HTTP_BUF_MAX] = { 0 }; // 输出数据缓存
+char http_get_url_buf[HTTP_BUF_MAX] = { 0 }; // url缓存,留着调用时候可以用
+char* ip_address;                          // 公网IP
 
-char *asr_result_tex = NULL; // 语音识别结果
-char *ERNIE_Bot_4_chat_result = NULL;
-char *ERNIE_Bot_4_chat_user_content = NULL;
+char* sevetest30_asr_result_tex = NULL; // 语音识别结果
+char* ERNIE_Bot_4_chat_result = NULL;
+char* ERNIE_Bot_4_chat_user_content = NULL;
 
-Real_time_weather *real_time_weather_data;
-ip_position *ip_position_data;
+Real_time_weather* real_time_weather_data;
+ip_position* ip_position_data;
 
 esp_http_client_handle_t http_get_handle = NULL;
 
-char *baidu_ERNIE_Bot_access_token = NULL;
+char baidu_ERNIE_Bot_access_token[ACCESSTOKEN_SIZE_MAX] = { 0 };
 
 void transform_ip_address();
 void transform_postcode();
@@ -89,9 +89,9 @@ esp_err_t wifi_connect()
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-    ESP_ERROR_CHECK( ret );
+    ESP_ERROR_CHECK(ret);
 
-// 初始化TCP/IP协议栈
+    // 初始化TCP/IP协议栈
     esp_netif_init();
 
     // 初始化网络连接
@@ -193,7 +193,7 @@ void init_time_data_sntp()
 /// @return ESP_OK 正确可用 否则返回 响应错误码
 int http_check_response_content(esp_http_client_handle_t client_handle)
 {
-    const char *TAG = "http_check_response_content";
+    const char* TAG = "http_check_response_content";
 
     esp_http_client_fetch_headers(client_handle);                //   接收消息头
     int status = esp_http_client_get_status_code(client_handle); // 获取消息头中的响应状态信息
@@ -224,21 +224,21 @@ int http_check_response_content(esp_http_client_handle_t client_handle)
 /// @return ESP_FAIL 无法连接 ESP_OK 正确可用  否则返回 响应错误码
 int http_check_common_url(const char* url)
 {
-    const char *TAG = "http_check_common_url";
+    const char* TAG = "http_check_common_url";
     int ret = ESP_OK;
-    sprintf(http_get_url_buf,url);
+    sprintf(http_get_url_buf, url);
     http_init_get_request();
 
-    if (esp_http_client_open(http_get_handle,0) != ESP_OK)
+    if (esp_http_client_open(http_get_handle, 0) != ESP_OK)
     {
-        ESP_LOGE(TAG, "无法打开连接的URL -> %s",url);
+        ESP_LOGE(TAG, "无法打开连接的URL -> %s", url);
         esp_http_client_cleanup(http_get_handle);
         return ESP_FAIL;
     }
 
     // 校验响应状态与数据
     ret = http_check_response_content(http_get_handle);
-    if(ret != ESP_OK)ESP_LOGE(TAG,"响应信息发现异常的URL \n-> %s",url);
+    if (ret != ESP_OK)ESP_LOGE(TAG, "响应信息发现异常的URL \n-> %s", url);
     esp_http_client_cleanup(http_get_handle);
     return ret;
 }
@@ -266,11 +266,11 @@ void http_init_get_request()
 // 如果服务器响应的数据使用chunked编码发送或gzip压缩等传输处理，不会发生报错，并且这是在设计考虑范围之内的，
 // 如果出现响应数据无法解析的问题，考虑解码方式是否对应合理，本库中包含对gzip的便捷解压支持函数
 // 有效的分析方式是通过抓包，参考详细响应的消息头，极少数API文档也许不会提供这些信息
-void http_get_request_send(bool *flag)
+void http_get_request_send(bool* flag)
 {
     while (1)
     {
-        const char *TAG = "http_get_request_send";
+        const char* TAG = "http_get_request_send";
         // 对服务器发送连接请求
         esp_err_t err_flag = esp_http_client_open(http_get_handle, 0); // get请求无需额外添加报文数据
         if (err_flag != ESP_OK)
@@ -302,12 +302,12 @@ void http_get_request_send(bool *flag)
 // 对gzip压缩后的响应，解压回原来的JSON格式，外部函数需要对传入参数有效性负责
 // 输入数据选择，输出数据缓冲区选择，输入数据最大允许长度
 // 对于 和风天气+ESP32 通过zlib解压gzip数据的思路可以参考这位大佬的博客，甚有帮助非常感谢：https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
-void gzip_decompress(void *input, void *output, int len)
+void gzip_decompress(void* input, void* output, int len)
 {
-    const char *TAG = "zlib_gzip_decompress";
+    const char* TAG = "zlib_gzip_decompress";
     int flag = 0; // 解压状态标识
     // 配置zlib数据流
-    z_stream stream_config = {0};
+    z_stream stream_config = { 0 };
     stream_config.next_in = input;   // 输入数据
     stream_config.next_out = output; // 输出数据
     stream_config.avail_in = 0;      // 当前输入数据的有效字节数
@@ -341,18 +341,18 @@ void gzip_decompress(void *input, void *output, int len)
     ESP_LOGI(TAG, "数据解压完成 %lx -> %lx", stream_config.total_in, stream_config.total_out);
 
     // 最后一件事，在输出末尾添加结束标识以便识别
-    ((char *)output)[stream_config.total_out] = '\0';
+    ((char*)output)[stream_config.total_out] = '\0';
 }
 
 // 解析返回的IP地址数据，保存到ip_address
 void transform_ip_address()
 {
 
-    const char *TAG = "transform_ip_address";
+    const char* TAG = "transform_ip_address";
 
     ip_address = malloc(30);
     memset(ip_address, 0, 30);
-    char *buf = "0";
+    char* buf = "0";
     uint8_t i = 0;
     while (http_get_out_buf[i] != '\0')
     {
@@ -418,11 +418,11 @@ OK:
 void transform_postcode()
 {
 
-    const char *TAG = "transform_postcode";
+    const char* TAG = "transform_postcode";
 
     // 因为返回数据中被一个find（）扩住了，json解析不了，想办法缓存有用的数据再解析,注意其中特征 "find("的位置    ")"始终为结束字符
     // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
-    char json_buf[PRE_CJSON_BUF_MAX] = {0}; // 这里发现缓存JOSN数据的数组，下标如果设定值达到2017会立刻堆栈溢出，是个很有意思的问题，但是我并不知道为什么，请求各路大佬给出解答
+    char json_buf[PRE_CJSON_BUF_MAX] = { 0 }; // 这里发现缓存JOSN数据的数组，下标如果设定值达到2017会立刻堆栈溢出，是个很有意思的问题，但是我并不知道为什么，请求各路大佬给出解答
     uint8_t i = 5;
     while (http_get_out_buf[i] != ')')
     {
@@ -432,11 +432,11 @@ void transform_postcode()
     http_get_out_buf[i] = '\0';
 
     // 提取完成开始json解析
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_data = cJSON_GetObjectItem(root_data, "data");
+    cJSON* cjson_data = cJSON_GetObjectItem(root_data, "data");
 
-    cJSON *cjson_postcode = cJSON_GetArrayItem(cjson_data, 5);
+    cJSON* cjson_postcode = cJSON_GetArrayItem(cjson_data, 5);
     ip_position_data->postcode = cjson_postcode->valuestring;
 
     ESP_LOGI(TAG, "解析完毕,获取到IP归属地邮政编码 %s", cjson_postcode->valuestring);
@@ -446,18 +446,18 @@ void transform_postcode()
 // 解析经纬度数据,保存到ip_position_data
 void transform_lng_lat()
 {
-    const char *TAG = "transform_lng_lat";
+    const char* TAG = "transform_lng_lat";
 
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(http_get_out_buf);
 
-    cJSON *cjson_data = cJSON_GetObjectItem(root_data, "data");
-    cJSON *cjson_results = cJSON_GetObjectItem(cjson_data, "results");
+    cJSON* cjson_data = cJSON_GetObjectItem(root_data, "data");
+    cJSON* cjson_results = cJSON_GetObjectItem(cjson_data, "results");
 
-    cJSON *cjson_results_root = cJSON_GetArrayItem(cjson_results, 0);
+    cJSON* cjson_results_root = cJSON_GetArrayItem(cjson_results, 0);
 
-    cJSON *cjson_lng = cJSON_GetObjectItem(cjson_results_root, "lng");
-    cJSON *cjson_lat = cJSON_GetObjectItem(cjson_results_root, "lat");
+    cJSON* cjson_lng = cJSON_GetObjectItem(cjson_results_root, "lng");
+    cJSON* cjson_lat = cJSON_GetObjectItem(cjson_results_root, "lat");
 
     ip_position_data->lng = cjson_lng->valuestring;
     ip_position_data->lat = cjson_lat->valuestring;
@@ -468,21 +468,21 @@ void transform_lng_lat()
 // 解析locationID数据,保存到ip_position_data,同时会进一步完善ip_position_data数据
 void transform_locationID()
 {
-    const char *TAG = "transform_locationID";
+    const char* TAG = "transform_locationID";
 
-    char json_buf[PRE_CJSON_BUF_MAX] = {0};                    // 缓存JOSN数据
+    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
     gzip_decompress(http_get_out_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_location = cJSON_GetObjectItem(root_data, "location");
-    cJSON *cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
+    cJSON* cjson_location = cJSON_GetObjectItem(root_data, "location");
+    cJSON* cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
 
-    cJSON *cjson_name = cJSON_GetObjectItem(cjson_location_root, "name");
-    cJSON *cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
-    cJSON *cjson_adm2 = cJSON_GetObjectItem(cjson_location_root, "adm2");
-    cJSON *cjson_adm1 = cJSON_GetObjectItem(cjson_location_root, "adm1");
-    cJSON *cjson_country = cJSON_GetObjectItem(cjson_location_root, "country");
+    cJSON* cjson_name = cJSON_GetObjectItem(cjson_location_root, "name");
+    cJSON* cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
+    cJSON* cjson_adm2 = cJSON_GetObjectItem(cjson_location_root, "adm2");
+    cJSON* cjson_adm1 = cJSON_GetObjectItem(cjson_location_root, "adm1");
+    cJSON* cjson_country = cJSON_GetObjectItem(cjson_location_root, "country");
 
     ip_position_data->country = cjson_country->valuestring;
     ip_position_data->adm1 = cjson_adm1->valuestring;
@@ -492,37 +492,37 @@ void transform_locationID()
 
     ESP_LOGI(TAG, "获取到locationID %s", ip_position_data->id);
     ESP_LOGI(TAG, "详细地址：%s - %s - %s  - %s ", ip_position_data->country, ip_position_data->adm1,
-             ip_position_data->adm2, ip_position_data->name);
+        ip_position_data->adm2, ip_position_data->name);
     // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
 }
 // 解析实时天气，保存到全局 real_time_weather_data
 void transform_real_time_weather_data()
 {
-    const char *TAG = "transform_real_time_weather_data";
+    const char* TAG = "transform_real_time_weather_data";
 
-    char json_buf[PRE_CJSON_BUF_MAX] = {0};                    // 缓存JOSN数据
+    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
     gzip_decompress(http_get_out_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
     // JSON数据解析,当前仅需要 now 的数据 15个 全部解析
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_now = cJSON_GetObjectItem(root_data, "now"); // 选定参数为为 now
+    cJSON* cjson_now = cJSON_GetObjectItem(root_data, "now"); // 选定参数为为 now
 
-    cJSON *cjson_obsTime = cJSON_GetObjectItem(cjson_now, "obsTime");     // 数据观测时间
-    cJSON *cjson_temp = cJSON_GetObjectItem(cjson_now, "temp");           // 温度，摄氏度
-    cJSON *cjson_feelsLike = cJSON_GetObjectItem(cjson_now, "feelsLike"); // 体感温度，摄氏度
-    cJSON *cjson_icon = cJSON_GetObjectItem(cjson_now, "icon");           // 天气状况代码
-    cJSON *cjson_text = cJSON_GetObjectItem(cjson_now, "text");           // 天气文字描述例如多云
-    cJSON *cjson_wind360 = cJSON_GetObjectItem(cjson_now, "wind360");     // 360度风向
-    cJSON *cjson_windDir = cJSON_GetObjectItem(cjson_now, "windDir");     // 风向文字描述
-    cJSON *cjson_windScale = cJSON_GetObjectItem(cjson_now, "windScale"); // 风力等级
-    cJSON *cjson_windSpeed = cJSON_GetObjectItem(cjson_now, "windSpeed"); // 风速
-    cJSON *cjson_humidity = cJSON_GetObjectItem(cjson_now, "humidity");   // 相对湿度，百分比
-    cJSON *cjson_precip = cJSON_GetObjectItem(cjson_now, "precip");       // 当前每小时降水量，毫米
-    cJSON *cjson_pressure = cJSON_GetObjectItem(cjson_now, "pressure");   // 大气压强
-    cJSON *cjson_vis = cJSON_GetObjectItem(cjson_now, "vis");             // 能见度,KM
-    cJSON *cjson_cloud = cJSON_GetObjectItem(cjson_now, "cloud");         // 云量，可能为空
-    cJSON *cjson_dew = cJSON_GetObjectItem(cjson_now, "dew");             // 露点温度，可能为空
+    cJSON* cjson_obsTime = cJSON_GetObjectItem(cjson_now, "obsTime");     // 数据观测时间
+    cJSON* cjson_temp = cJSON_GetObjectItem(cjson_now, "temp");           // 温度，摄氏度
+    cJSON* cjson_feelsLike = cJSON_GetObjectItem(cjson_now, "feelsLike"); // 体感温度，摄氏度
+    cJSON* cjson_icon = cJSON_GetObjectItem(cjson_now, "icon");           // 天气状况代码
+    cJSON* cjson_text = cJSON_GetObjectItem(cjson_now, "text");           // 天气文字描述例如多云
+    cJSON* cjson_wind360 = cJSON_GetObjectItem(cjson_now, "wind360");     // 360度风向
+    cJSON* cjson_windDir = cJSON_GetObjectItem(cjson_now, "windDir");     // 风向文字描述
+    cJSON* cjson_windScale = cJSON_GetObjectItem(cjson_now, "windScale"); // 风力等级
+    cJSON* cjson_windSpeed = cJSON_GetObjectItem(cjson_now, "windSpeed"); // 风速
+    cJSON* cjson_humidity = cJSON_GetObjectItem(cjson_now, "humidity");   // 相对湿度，百分比
+    cJSON* cjson_precip = cJSON_GetObjectItem(cjson_now, "precip");       // 当前每小时降水量，毫米
+    cJSON* cjson_pressure = cJSON_GetObjectItem(cjson_now, "pressure");   // 大气压强
+    cJSON* cjson_vis = cJSON_GetObjectItem(cjson_now, "vis");             // 能见度,KM
+    cJSON* cjson_cloud = cJSON_GetObjectItem(cjson_now, "cloud");         // 云量，可能为空
+    cJSON* cjson_dew = cJSON_GetObjectItem(cjson_now, "dew");             // 露点温度，可能为空
 
     // 存储到 real_time_weather_data
 
@@ -555,46 +555,46 @@ void transform_real_time_weather_data()
 
 /// @brief 解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex
 /// @param asr_response 语音识别响应的数据
-void asr_data_save_result(char *asr_response)
+void asr_data_save_result(char* asr_response)
 {
-    static const char *TAG = "asr_data_get_result";
+    static const char* TAG = "asr_data_get_result";
     if (asr_response == NULL)
     {
         ESP_LOGE(TAG, "传入了为空的输入数据");
         return;
     }
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(asr_response);
-    cJSON *cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
+    cJSON* cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
     if (strcasecmp(cjson_err_msg->valuestring, "success."))
     {
         ESP_LOGE(TAG, "不是成功的响应信息 %s", cjson_err_msg->valuestring);
         return;
     }
 
-    cJSON *cjson_result = cJSON_GetObjectItem(root_data, "result");
-    cJSON *cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
+    cJSON* cjson_result = cJSON_GetObjectItem(root_data, "result");
+    cJSON* cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
     ESP_LOGI(TAG, "%s", cjson_result_root->valuestring);
 
-    if (!asr_result_tex)
+    if (!sevetest30_asr_result_tex)
     {
     ASR_RESULT_TEX_MALLOC:
-        asr_result_tex = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        while (!asr_result_tex)
+        sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+        while (!sevetest30_asr_result_tex)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请asr_result_tex资源发现问题 正在重试");
-            asr_result_tex = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+            ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
+            sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
         }
-        memset(asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
+        memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
     }
     else
     {
-        free(asr_result_tex);
-        asr_result_tex = NULL;
+        free(sevetest30_asr_result_tex);
+        sevetest30_asr_result_tex = NULL;
         goto ASR_RESULT_TEX_MALLOC;
     }
-    strncpy(asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
+    strncpy(sevetest30_asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
 
     cJSON_Delete(root_data);
     return;
@@ -602,9 +602,9 @@ void asr_data_save_result(char *asr_response)
 
 /// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据，缓存识别结果到 ERNIE_Bot_4_chat_result
 /// @param chat_response 交互响应的数据
-void ERNIE_Bot_4_chat_transform(char *chat_response)
+void ERNIE_Bot_4_chat_transform(char* chat_response)
 {
-    static const char *TAG = "ERNIE_Bot_4_chat_transform";
+    static const char* TAG = "ERNIE_Bot_4_chat_transform";
     if (chat_response == NULL)
     {
         ESP_LOGE(TAG, "传入了为空的输入数据");
@@ -614,12 +614,12 @@ void ERNIE_Bot_4_chat_transform(char *chat_response)
     if (!ERNIE_Bot_4_chat_result)
     {
     ERNIE_BOT_4_CHAT_RESULT_MALLOC:
-        ERNIE_Bot_4_chat_result = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+        ERNIE_Bot_4_chat_result = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
         while (!ERNIE_Bot_4_chat_result)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
             ESP_LOGE(TAG, "申请ERNIE_Bot_4_chat_result资源发现问题 正在重试");
-            ERNIE_Bot_4_chat_result = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+            ERNIE_Bot_4_chat_result = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
         }
         memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
     }
@@ -630,9 +630,9 @@ void ERNIE_Bot_4_chat_transform(char *chat_response)
         goto ERNIE_BOT_4_CHAT_RESULT_MALLOC;
     }
 
-    cJSON *root_data = NULL;
+    cJSON* root_data = NULL;
     root_data = cJSON_Parse(chat_response);
-    cJSON *cjson_result = NULL;
+    cJSON* cjson_result = NULL;
     cjson_result = cJSON_GetObjectItem(root_data, "result");
 
     if (!cjson_result)
@@ -648,33 +648,33 @@ void ERNIE_Bot_4_chat_transform(char *chat_response)
 }
 
 // 聊天传输任务，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
-void ERNIE_Bot_4_chat_http_Task(bool *flag)
+void ERNIE_Bot_4_chat_http_Task(bool* flag)
 {
     while (1)
     {
-        static const char *TAG = "ERNIE_Bot_4_chat";
+        static const char* TAG = "ERNIE_Bot_4_chat";
 
         // 设置URL
-        char *url_buf = NULL;
-        url_buf = (char *)malloc(1024 * sizeof(char));
+        char* url_buf = NULL;
+        url_buf = (char*)malloc(1024 * sizeof(char));
         while (!url_buf)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
             ESP_LOGE(TAG, "申请url_buf资源发现问题 正在重试");
-            url_buf = (char *)malloc(1024 * sizeof(char));
+            url_buf = (char*)malloc(1024 * sizeof(char));
         }
         memset(url_buf, 0, sizeof(1024 * sizeof(char)));
         strcat(url_buf, ERNIE_BOT_4_URL);
         strcat(url_buf, baidu_ERNIE_Bot_access_token);
 
         // 申请响应数据缓存
-        char *response_buf = NULL;
-        response_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!response_buf && sevetest30_asr_running_flag)
+        char* response_buf = NULL;
+        response_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+        while (!response_buf)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
             ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
-            response_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+            response_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
         }
         memset(response_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
 
@@ -689,17 +689,17 @@ void ERNIE_Bot_4_chat_http_Task(bool *flag)
         esp_http_client_set_header(client_handle, "Content-Type", "application/json");
 
         // 准备HTTP-BODY
-        char *request_body_buf = NULL;
-        request_body_buf = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
+        char* request_body_buf = NULL;
+        request_body_buf = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
         while (!request_body_buf)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
             ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
-            request_body_buf = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
+            request_body_buf = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
         }
         memset(request_body_buf, 0, ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
         snprintf(request_body_buf, ASR_RESULT_TEX_BUF_MAX + 2048,
-                 "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false}", ERNIE_Bot_4_chat_user_content);
+            "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false}", ERNIE_Bot_4_chat_user_content);
 
         // 对服务器发送请求
         esp_err_t err_flag = ESP_OK;
@@ -726,7 +726,7 @@ void ERNIE_Bot_4_chat_http_Task(bool *flag)
         // 读取响应
         esp_http_client_read_response(client_handle, response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
 
-        ESP_LOGE(TAG, "%s", response_buf);
+        ESP_LOGI(TAG, "%s", response_buf);
 
         // 解析响应并保存
         ERNIE_Bot_4_chat_transform(response_buf);
@@ -750,29 +750,74 @@ void ERNIE_Bot_4_chat_http_Task(bool *flag)
 
 /// @brief 文心一言ERNIE-Bot 4.0文本对话
 /// @param user_content 用户内容
-/// @return 对话返回结果
-char *ERNIE_Bot_4_chat_tex_exchange(char *user_content)
+/// @return 对话返回结果/NULL(错误)
+char* ERNIE_Bot_4_chat_tex_exchange(char* user_content)
 {
+    const char* TAG = "ERNIE_Bot_4_chat_tex_exchange";
+
     if (!strcasecmp(user_content, ""))
     {
-        ESP_LOGE("ERNIE_Bot_4_chat_tex_exchange", "空的用户内容");
-        return;
+        ESP_LOGE(TAG, "空的用户内容");
+        return NULL;
     }
     ERNIE_Bot_4_chat_user_content = user_content;
 
-    // 获取token
-    while (!baidu_ERNIE_Bot_access_token)
-    {
-        baidu_ERNIE_Bot_access_token = baidu_get_access_token(CONFIG_BAIDU_ERNIE_BOT_ACCESS_KEY, CONFIG_BAIDU_ERNIE_BOT_SECRET_KEY);
-        if (!baidu_ERNIE_Bot_access_token)
+    if (baidu_ERNIE_Bot_access_token[1] == 0) {
+        ESP_LOGW(TAG, "即将初始化请求token");
+        if (baidu_get_AccessToken(CONFIG_BAIDU_ERNIE_BOT_ACCESS_KEY, CONFIG_BAIDU_ERNIE_BOT_SECRET_KEY, baidu_ERNIE_Bot_access_token))
         {
-            ESP_LOGE("ERNIE_Bot_4_chat_tex_exchange", "获取token时发现问题");
+            ESP_LOGE(TAG, "获取请求token时发现问题");
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
     }
+
     bool Task_comp_flag = false;
     xTaskCreatePinnedToCore(&ERNIE_Bot_4_chat_http_Task, "ERNIE_Bot_4_chat_http_Task", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
     return ERNIE_Bot_4_chat_result;
+}
+
+
+
+/// @brief 百度API获取AccessToken,保存到char数组
+/// @param client_id client_id 字符串
+/// @param client_secret client_secret 字符串
+/// @param AccessToken char数组地址
+/// @return ESP_FAIL / ESP_OK
+esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken)
+{
+    const char* TAG = "baidu_get_AccessToken";
+
+    if (!AccessToken)
+    {
+        ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
+        return ESP_FAIL;
+    }
+
+    //发送请求
+    bool Task_comp_flag = false;                                                                    // 任务是否完成标识
+    snprintf(http_get_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
+    http_init_get_request();
+    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+
+    //检查是否得到请求响应的结果
+    if (!strcasecmp(http_get_out_buf, ""))
+        return ESP_FAIL;
+    else
+    {
+        //解析数据
+        cJSON* root_data = NULL;
+        root_data = cJSON_Parse(http_get_out_buf);
+        cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
+
+        memset(AccessToken,0,ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
+        snprintf(AccessToken,ACCESSTOKEN_SIZE_MAX,"%s", cjson_AccessToken->valuestring);//复制AccessToken
+
+        cJSON_Delete(root_data);
+
+        return ESP_OK;
+    }
 }

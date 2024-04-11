@@ -38,8 +38,9 @@
 
 #define VAD_FRAME_LENGTH 30// VAD 帧时长(ms)
 
+// i2s_filter_raw_run 任务
 #define ASR_EVT_TASK_CORE (0)
-#define ASR_EVT_TASK_STACK_SIZE (1*1024)
+#define ASR_EVT_TASK_STACK_SIZE (3*1024)
 
 #define ASR_HTTP_RESPONSE_BUF_MAX 1024
 #define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)
@@ -96,10 +97,9 @@ typedef struct baidu_ASR_cfg_t
   int  record_save_times_max;          //最大录制record_save_times_max帧数据后强制发送
 }baidu_ASR_cfg_t;
 
-
-
-extern bool volatile sevetest30_music_running_flag;
-extern bool volatile sevetest30_asr_running_flag;
+extern int volatile running_i2s_port;//运行的I2S配置
+extern bool volatile sevetest30_music_running_flag;//音乐播放/TTS语音合成运行标志
+extern bool volatile sevetest30_asr_running_flag;//语音识别运行标志
 
 void element_cfg_data_reset();
 
