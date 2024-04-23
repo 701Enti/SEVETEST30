@@ -142,7 +142,8 @@
         "esp_types.h": "c",
         "lsm6ds3trc.h": "c",
         "esp_vad.h": "c",
-        "semphr.h": "c"
+        "semphr.h": "c",
+        "gzip_miniz.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

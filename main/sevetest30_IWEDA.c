@@ -344,6 +344,94 @@ void gzip_decompress(void* input, void* output, int len)
     ((char*)output)[stream_config.total_out] = '\0';
 }
 
+
+/// @brief 获取JSON_Line数据中的有效数据单元个数
+/// @param data 要扫描的JSON_Line数据字符串或字符数组首地址
+/// @param len 要扫描的字符长度
+/// @return 合法的数据单元个数
+int json_line_unit_num_get(char* data, int len) {
+
+    //此处的处理思路
+     //当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
+     //当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
+     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+     //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+     //假设通过参数data传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
+     //按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 | [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
+     //显然地,focus_num在"关闭焦点"时跳变到0一次,就有一个单元;跳变到0两次,就有两个单元(保存到缓存unit_num中),以此类推,只要原数据合理,数据单元计算将不受到数据长度和复杂度的干涉
+
+    int focus_num = 0;//焦点个数
+    int unit_num = 0;//扫描到的数据单元个数
+
+    for (int idx = 0;idx < len;idx++) {
+        if (data[idx] == '{')focus_num++;//出现新焦点
+        if (data[idx] == '}') {
+            focus_num--;//关闭焦点
+            if (focus_num == 0)unit_num++;//focus_num在"关闭焦点"时跳变到0一次,就有一个单元
+        }
+
+        //不合法的JSON_Line数据 - 源数据末尾被截断
+        if (idx == len - 1 && focus_num != 0) {
+            return unit_num;
+        }
+
+        //不合法的JSON_Line数据 - 格式错误
+        if (focus_num < 0) {
+            return unit_num;
+        }
+
+    }
+    return unit_num;
+}
+
+/// @brief 选定JSON_Line数据中的一个数据单元复制到外部字符缓存区
+/// @param dest 外部字符缓存区,需要在外部函数提前申请好连续内存
+/// @param src JSON_Line格式源数据字符串
+/// @param unit_id 选定复制的数据单元ID,第一个单元为0,第二个单元为1....
+/// @param max_len 最多复制max_len个字符
+void json_line_unit_copy(char* dest, char* src, int unit_id, int max_len) {
+
+    //此处的处理思路(基于上面的json_line_unit_num_get函数思路)
+     //当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
+     //当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
+     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+     //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+     //假设传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
+     //按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 | [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
+     //显然地,数据中任意单元开始位置是"出现新焦点"并且focus_num由0跳变到1的位置,结束位置是"关闭焦点"并且focus_num由1跳变到0的位置
+     //记录这些"坐标"以及间距,利用strncpy标准C函数的特性复制目标区域即可
+
+    int focus_num = 0;//焦点个数
+    int unit_num = 0;//扫描到的数据单元个数
+    int start = 0;//开始位置
+    int total_len = 0;//选定单元的实际总长度
+
+    for (int idx = 0;idx < max_len;idx++) {
+        if (src[idx] == '{') {
+            focus_num++;//出现新焦点  
+            if (focus_num == 1 && unit_num == unit_id)//扫描到指定的数据单元
+                start = idx;//开始位置是"出现新焦点"并且focus_num由0跳变到1的位置
+        }
+        if (src[idx] == '}') {
+            focus_num--;//关闭焦点
+            if (focus_num == 0) {
+                //现在在指定的数据单元
+                if (unit_num == unit_id) {
+                    total_len = idx - start + 1;//选定单元的实际总长度
+                    if (total_len >= max_len)total_len = max_len;//最多复制max_len个字符
+                    strncpy(dest, &src[start], total_len);//利用strncpy标准C函数的特性复制目标区域即可
+                    return;
+                }
+                unit_num++;//focus_num在"关闭焦点"时跳变到0一次,一个单元被扫过
+            }
+        }
+        if (focus_num < 0) {
+            ESP_LOGE("json_line_unit_copy", "不合法的JSON_Line数据 终止字符的下标位置-%d", idx);
+            return;
+        }
+    }
+}
+
 // 解析返回的IP地址数据，保存到ip_address
 void transform_ip_address()
 {
@@ -568,7 +656,7 @@ void asr_data_save_result(char* asr_response)
     cJSON* cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
     if (strcasecmp(cjson_err_msg->valuestring, "success."))
     {
-        ESP_LOGE(TAG, "不是成功的响应信息 %s", cjson_err_msg->valuestring);
+        ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
         return;
     }
 
@@ -600,20 +688,20 @@ void asr_data_save_result(char* asr_response)
     return;
 }
 
-/// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据，缓存识别结果到 ERNIE_Bot_4_chat_result
-/// @param chat_response 交互响应的数据
+/// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存)
+/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
 void ERNIE_Bot_4_chat_transform(char* chat_response)
 {
     static const char* TAG = "ERNIE_Bot_4_chat_transform";
-    if (chat_response == NULL)
+    if (!chat_response)
     {
         ESP_LOGE(TAG, "传入了为空的输入数据");
         return;
     }
 
+    //如果缓存为空,申请缓存
     if (!ERNIE_Bot_4_chat_result)
     {
-    ERNIE_BOT_4_CHAT_RESULT_MALLOC:
         ERNIE_Bot_4_chat_result = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
         while (!ERNIE_Bot_4_chat_result)
         {
@@ -623,12 +711,6 @@ void ERNIE_Bot_4_chat_transform(char* chat_response)
         }
         memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
     }
-    else
-    {
-        free(ERNIE_Bot_4_chat_result);
-        ERNIE_Bot_4_chat_result = NULL;
-        goto ERNIE_BOT_4_CHAT_RESULT_MALLOC;
-    }
 
     cJSON* root_data = NULL;
     root_data = cJSON_Parse(chat_response);
@@ -636,18 +718,44 @@ void ERNIE_Bot_4_chat_transform(char* chat_response)
     cjson_result = cJSON_GetObjectItem(root_data, "result");
 
     if (!cjson_result)
-    {
         ESP_LOGE(TAG, "交互出现问题,请重试");
-        strncpy(ERNIE_Bot_4_chat_result, "", ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
-    }
     else
-        strncpy(ERNIE_Bot_4_chat_result, cjson_result->valuestring, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
+        strncat(ERNIE_Bot_4_chat_result, cjson_result->valuestring, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX - strlen(ERNIE_Bot_4_chat_result));
 
     cJSON_Delete(root_data);
     return;
 }
 
-// 聊天传输任务，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
+/// @brief 根据百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元) 获取聊天传输状态是否结束
+/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
+/// @return true 结束 / false 进行中(或者错误)
+int ERNIE_Bot_4_chat_over_status(char* chat_response)
+{
+    static const char* TAG = "ERNIE_Bot_4_chat_over_status";
+    if (!chat_response)
+    {
+        ESP_LOGE(TAG, "传入了为空的输入数据");
+        return false;
+    }
+
+    cJSON* root_data = NULL;
+    root_data = cJSON_Parse(chat_response);
+    cJSON* cjson_is_end = NULL;
+    cjson_is_end = cJSON_GetObjectItem(root_data, "is_end");
+
+    if (!cjson_is_end) {
+        cJSON_Delete(root_data);
+        return false;
+    }
+    else {
+        int ret = cjson_is_end->valueint;
+        cJSON_Delete(root_data);
+        return ret;
+    }
+}
+
+/// @brief ERNIE-4.0聊天传输任务,使用POST请求
+/// @param flag 传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
 void ERNIE_Bot_4_chat_http_Task(bool* flag)
 {
     while (1)
@@ -677,6 +785,23 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
             response_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
         }
         memset(response_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+        strcpy(response_buf, "");
+
+
+        //申请json_line格式解析缓存
+        char* json_buf = NULL;
+        json_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+        while (!json_buf)
+        {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            ESP_LOGE(TAG, "申请json_buf资源发现问题 正在重试");
+            json_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+        }
+        memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+
+        //清理交互结果缓存
+        if (ERNIE_Bot_4_chat_result)
+            memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
 
         // 初始化http_client
         esp_http_client_config_t http_config;
@@ -699,12 +824,16 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
         }
         memset(request_body_buf, 0, ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
         snprintf(request_body_buf, ASR_RESULT_TEX_BUF_MAX + 2048,
-            "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false}", ERNIE_Bot_4_chat_user_content);
+            "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false,\"stream\":true}", ERNIE_Bot_4_chat_user_content);
 
-        // 对服务器发送请求
         esp_err_t err_flag = ESP_OK;
+
+        // 设置超时时间
         err_flag |= esp_http_client_set_timeout_ms(client_handle, ERNIE_BOT_4_CHAT_TIMEOUT_MS);
+
+        // 对服务器发送连接请求
         err_flag |= esp_http_client_open(client_handle, strlen(request_body_buf));
+
         if (err_flag != ESP_OK)
         {
             ESP_LOGE(TAG, "配置连接时出现问题 -> %s", http_config.url);
@@ -719,19 +848,77 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
         // 校验响应
         if (http_check_response_content(client_handle) != ESP_OK)
         {
-            ESP_LOGE(TAG, "交互出现问题，请重试");
+            ESP_LOGE(TAG, "校验响应时发现问题");
             goto TASK_OVER;
         }
 
-        // 读取响应
-        esp_http_client_read_response(client_handle, response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
+        //数据处理
 
-        ESP_LOGI(TAG, "%s", response_buf);
+        int complete_num = 0;//实时已经读取的单元个数,可以为0
+        int right_num = 0;//实时合法的单元个数,可以为0
 
-        // 解析响应并保存
-        ERNIE_Bot_4_chat_transform(response_buf);
+        //根据单元总数,解析并拼接单元内容
+        while (true) {
+            //获取合法单元个数
+            right_num = json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
+
+            //此前未读取任何响应数据,循环开始时right_num必然为0,第一次读取响应发生在下面的等待下
+
+            //如果有未读单元,执行读取
+            if (complete_num < right_num) {
+                memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+                json_line_unit_copy(json_buf, response_buf, complete_num, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);//复制一个数据单元
+                ERNIE_Bot_4_chat_transform(json_buf);//解析并拼接保存
+                complete_num++;
+            }
+
+            //(right_num=0 complete_num=0)或者(读完最后一个单元)[已读个数 = 总个数],检验,如果数据没有完全读取完成,需要等待并读取更多下文
+            if (complete_num == right_num) {
+                if (ERNIE_Bot_4_chat_over_status(json_buf) == false) {
+                    uint32_t count;//等待一个单位延时的次数,count=[3]就是等待了[3ms]
+                    count = 0;
+                    while (count < ERNIE_BOT_4_CHAT_TIMEOUT_MS) {
+
+                        //拼接新的响应内容,响应读取仅发生在这里,包含第一次读取
+                        //如果有未读部分,读取速度是 1ms => 1字符 否则 1ms => 0字符(等待)
+                        if (strlen(response_buf) + 1 < ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX) {
+                            esp_http_client_read_response(client_handle, &response_buf[strlen(response_buf)], 1);
+                        }
+                        else {
+                            ESP_LOGE(TAG, "响应缓存内存空间不足");
+                            goto TASK_OVER;
+                        }
+
+
+                        //如果有新的发现,退出等待
+                        if (json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX) > right_num)
+                            break;
+
+                        vTaskDelay(pdMS_TO_TICKS(1));
+                        count++;
+
+                        if (count >= ERNIE_BOT_4_CHAT_TIMEOUT_MS) {
+                            ESP_LOGE(TAG, "等待回复超时");
+                            goto TASK_OVER;//等待超时,退出                            
+                        }
+                    }
+                }
+                else {
+                    if (ERNIE_Bot_4_chat_result) {
+                        ESP_LOGI(TAG, "%s", ERNIE_Bot_4_chat_result);
+                        ESP_LOGI(TAG, "解析完成,共拼接%d个数据单元", complete_num);
+                    }
+                    else{
+                        ESP_LOGE(TAG,"解析任务内部运行异常");
+                    }
+                    goto TASK_OVER;
+                }
+            }
+        }
+
 
     TASK_OVER:
+
         // 关闭连接清理缓存
         esp_http_client_cleanup(client_handle);
 
@@ -739,11 +926,14 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
         free(url_buf);
         free(response_buf);
         free(request_body_buf);
+        free(json_buf);
         url_buf = NULL;
         response_buf = NULL;
         request_body_buf = NULL;
+        json_buf = NULL;
 
         *flag = true;
+
         vTaskDelete(NULL); // 终止任务
     }
 }
@@ -799,6 +989,7 @@ esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* Acce
     bool Task_comp_flag = false;                                                                    // 任务是否完成标识
     snprintf(http_get_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
     http_init_get_request();
+    esp_http_client_set_timeout_ms(http_get_handle, 10000);
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
@@ -813,8 +1004,8 @@ esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* Acce
         root_data = cJSON_Parse(http_get_out_buf);
         cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
 
-        memset(AccessToken,0,ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
-        snprintf(AccessToken,ACCESSTOKEN_SIZE_MAX,"%s", cjson_AccessToken->valuestring);//复制AccessToken
+        memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
+        snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring);//复制AccessToken
 
         cJSON_Delete(root_data);
 

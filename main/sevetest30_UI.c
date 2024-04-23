@@ -32,7 +32,6 @@
 #include <sevetest30_IWEDA.h>
 #include <sevetest30_SWEDA.h>
 #include <sevetest30_LedArray.h>
-#include "freertos/semphr.h"
 #include <esp_log.h>
 #include <math.h>
 #include <esp_random.h>
@@ -52,8 +51,6 @@ uint8_t unit_led_high[FFT_VIEW_WIDTH_MAX] = { 0 };
 __attribute__((aligned(16))) float y_cf[FFT_N_SAMPLES * 2];
 
 bool volatile sevetest30_fft_ui_running_flag = false;
-
-xSemaphoreHandle music_FFT_UI_xMutex;
 
 void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg);
 
@@ -16509,7 +16506,7 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
     }
 }
 
-/// @brief 启动音频频谱UI绘制任务(必须有音频任务进行中),检测到音频活动任务结束会自动关闭任务
+/// @brief 启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现
 /// @param UI_cfg FFT的UI配置
 /// @param priority 任务优先级
 void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority)
@@ -16519,15 +16516,14 @@ void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority)
         ESP_LOGE("music_FFT_UI_start", "绘制繁忙中,无法准备新绘制任务");
         return;
     }
-    
+
     if (sevetest30_music_running_flag || sevetest30_asr_running_flag) {
-      ESP_LOGI("music_FFT_UI_start", "I2S端口(%d)在sevetest30_sound中被选定,将监视此端口",running_i2s_port);
-      sevetest30_fft_ui_running_flag = true;  
-      music_FFT_UI_xMutex = xSemaphoreCreateMutex();
-      xTaskCreatePinnedToCore(&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, UI_cfg, priority, NULL, FFT_UI_TASK_CORE);  
+        ESP_LOGI("music_FFT_UI_start", "I2S端口(%d)在sevetest30_sound中被选定,将监视此端口", running_i2s_port);
+        sevetest30_fft_ui_running_flag = true;
+        xTaskCreatePinnedToCore(&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, UI_cfg, priority, NULL, FFT_UI_TASK_CORE);
     }
-    else{
-      ESP_LOGE("music_FFT_UI_start","在sevetest30_sound中没有运行中的合法I2S端口,无法准备新绘制任务");
+    else {
+        ESP_LOGE("music_FFT_UI_start", "在sevetest30_sound中没有运行中的合法I2S端口,无法准备新绘制任务");
     }
 
     return;
@@ -16622,12 +16618,18 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
     // 生成海宁窗
     dsps_wind_hann_f32(wind, N);
 
-    while ((sevetest30_music_running_flag || sevetest30_asr_running_flag) && sevetest30_fft_ui_running_flag)
+    while (sevetest30_fft_ui_running_flag)
     {
-        // 清理之前缓存的数据
-        memset(unit_data_max, 0, UI_cfg->width * sizeof(float));
-        // 载入FFT源数据
-        i2s_read(running_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);
+        //如果音频活动进行,正常读取,否则,不运算新的监视数据
+        if (running_i2s_port >= 0 && running_i2s_port < I2S_NUM_MAX) {
+            memset(unit_data_max, 0, UI_cfg->width * sizeof(float));// 清理之前缓存的数据
+            i2s_read(running_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);// 载入FFT源数据
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        else{
+            vTaskDelay(pdMS_TO_TICKS(500));
+            continue;
+        }
 
         for (int i = 0; i < N; i++)
             src_data[i] = (float)i2s_read_buf[i] / FFT_DAMPEN_MULTIPLES;
@@ -16645,6 +16647,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
 
         for (int i = 0; i < N / 2; i++)
             y1_cf[i] = 10 * log10f((y1_cf[i * 2 + 0] * y1_cf[i * 2 + 0] + y1_cf[i * 2 + 1] * y1_cf[i * 2 + 1]) / N);
+
         // 调试时可使用官方提供的显示API,将以图表形式把数据打印到 ESP-IDF Monitor上
         //  dsps_view(y1_cf,N,24,12,FFT_VIEW_DATA_MIN,FFT_VIEW_DATA_MAX,'|');
 
@@ -16694,7 +16697,11 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
             if (unit_led_high[j] > UI_cfg->height)
                 unit_led_high[j] = UI_cfg->height;
         }
+
     }
+
+    ESP_LOGW(TAG, "FFT绘制任务关闭");
+
     free(unit_data_max);
     free(i2s_read_buf);
     unit_data_max = NULL;
@@ -16705,11 +16712,6 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
         ESP_LOGE(TAG, "反初始化操作没有正常运行");
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
-
-    xSemaphoreTake(music_FFT_UI_xMutex,portMAX_DELAY);
-    sevetest30_fft_ui_running_flag = false;
-    xSemaphoreGive(music_FFT_UI_xMutex);
-
     vTaskDelete(NULL);
 }
 
