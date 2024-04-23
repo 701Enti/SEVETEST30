@@ -44,7 +44,7 @@
 
 #define ASR_HTTP_RESPONSE_BUF_MAX 1024
 #define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)
-#define ASR_TIMEOUT_MS  30000//识别超时时长(ms)
+#define ASR_TIMEOUT_MS  10000//识别超时时长(ms)
 
 #define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS url
 #define BAIDU_ASR_URL      "http://vop.baidu.com/server_api" //百度ASR url
@@ -100,6 +100,7 @@ typedef struct baidu_ASR_cfg_t
 extern int volatile running_i2s_port;//运行的I2S配置
 extern bool volatile sevetest30_music_running_flag;//音乐播放/TTS语音合成运行标志
 extern bool volatile sevetest30_asr_running_flag;//语音识别运行标志
+
 
 void element_cfg_data_reset();
 

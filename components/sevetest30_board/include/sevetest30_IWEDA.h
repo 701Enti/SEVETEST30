@@ -40,13 +40,13 @@
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 
 #define HTTP_TASK_CORE           (0)
-#define HTTP_TASK_PRIO           (2)
+#define HTTP_TASK_PRIO           (1)
 
 #define ASR_RESULT_TEX_BUF_MAX (4096)
 
 #define ACCESSTOKEN_SIZE_MAX (100)
 #define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192//聊天结果字符最大存储容量
-#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000//聊天回复等待超时时间
+#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      20000//聊天回复等待超时时间
 
 //各种API的URL，字符由%s替代
 
@@ -133,6 +133,10 @@ extern Real_time_weather *real_time_weather_data;
 //内外部共享函数
 
 void gzip_decompress(void *input,void *output, int len);
+
+int json_line_unit_num_get(char* data,int len);
+
+void json_line_unit_copy(char* dest, char* src, int unit_id, int max_len);
 
 int http_check_common_url(const char* url);
 

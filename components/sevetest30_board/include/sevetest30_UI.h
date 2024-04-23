@@ -40,16 +40,14 @@
 #include "board_ctrl.h"
 
 #define FFT_UI_TASK_CORE (1)     // FFT UI绘制任务核心
-#define FFT_UI_TASK_STACK_SIZE (1*1024)//FFT UI绘制任务堆栈大小
+#define FFT_UI_TASK_STACK_SIZE (3*1024)//FFT UI绘制任务堆栈大小
 
 #define DSP_MAX_FFT_SIZE    32768     //最大FFT大小
-#define FFT_N_SAMPLES 8192      // FFT 点数N 取2的整数次幂
+#define FFT_N_SAMPLES 4096     // FFT 点数N 取2的整数次幂
 #define FFT_DAMPEN_MULTIPLES 50 // FFT 音频数据衰减倍数
 #define FFT_VIEW_DATA_MIN 0   // FFT UI视口音频数据最小值
 #define FFT_VIEW_DATA_MAX 500// FFT UI视口音频数据最大值
 #define FFT_VIEW_WIDTH_MAX 100 //// FFT UI视口宽度最大值
-
-extern bool volatile sevetest30_fft_ui_running_flag;
 
 typedef struct UI_color_visual_cfg_t
 {
@@ -71,6 +69,9 @@ typedef struct music_FFT_UI_cfg_t
    int height;///显示高度 会裁切不在显示高度的图谱
    UI_color_visual_cfg_t visual_cfg;//频谱颜色可视化配置
 }music_FFT_UI_cfg_t;
+
+
+extern bool volatile sevetest30_fft_ui_running_flag;
 
 
 // 数据可视化函数
