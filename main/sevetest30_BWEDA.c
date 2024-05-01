@@ -1037,7 +1037,7 @@ esp_err_t bluetooth_connect()
     return ESP_OK;
 }
 
-/// @brief 如果notify或indicate机制启动，会直接向客户端推送更新的特征值，否则它将只保存在本地属性表中,推送工作实际发生在服务配置回调下,推送数据来源为board_ctrl.c申请的堆缓存board_ctrl_buf
+/// @brief 进行一次蓝牙数据推送,如果notify或indicate机制启动，会直接向客户端推送更新的特征值，否则它将只保存在本地属性表中,推送工作实际发生在服务配置回调下,推送数据来源为board_ctrl.c申请的堆缓存board_ctrl_buf
 void sevetest30_ble_attr_value_push()
 {
     board_ctrl_t *board_ctrl = NULL;

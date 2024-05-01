@@ -29,6 +29,9 @@
 
 #include "esp_types.h"
 
+// I2C相关配置宏定义在board_def.h下
+#define BL5372_DEVICE_ADD 0x32
+
 // BL5372内部寄存器地址表，请通过BL5372数据手册了解这些寄存器功能细节
 enum
 {

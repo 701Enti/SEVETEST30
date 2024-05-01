@@ -1,0 +1,55 @@
+
+/*
+ * 701Enti MIT License
+ *
+ * Copyright © 2024 <701Enti organization>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对温湿度传感器 AHT21的支持
+// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+// github: https://github.com/701Enti
+// bilibili: 701Enti
+
+#pragma once
+
+#include "esp_types.h"
+
+// I2C相关配置宏定义在board_def.h下
+#define AHT21_DEVICE_ADD 0x38
+
+#define AHT21_STATUS_GET_COMMAND 0x71 //获取状态字命令
+#define AHT21_TRIGGER_COMMAND 0xAC //触发读取命令
+
+typedef struct AHT21_result_handle_t
+{
+  bool  flag_crc;//启用CRC校验
+  bool  data_crc;//数据经过了CRC校验    
+  bool  data_true;//数据被认为正确读取了
+  float temp;//温度,摄氏度
+  float hum;//湿度,%RH
+}AHT21_result_handle_t;
+
+void AHT21_begin();
+
+void AHT21_trigger();
+
+uint8_t AHT21_get_status();
+
+void AHT21_get_result(AHT21_result_handle_t* dest);
+
+

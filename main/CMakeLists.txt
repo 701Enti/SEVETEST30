@@ -13,6 +13,7 @@ set(COMPONENT_SRCS
 ./sevetest30_sound.c
 ./BL5372.c
 ./lsm6ds3trc.c
+./AHT21.c
 )
 set(LDFRAGMENTS "./sevetest30.lf")
 register_component()
