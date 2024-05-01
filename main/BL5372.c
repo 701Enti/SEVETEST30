@@ -31,8 +31,7 @@
 #include "board_def.h"
 #include "driver/i2c.h"
 
-// I2C相关配置宏定义在board_def.h下
-#define BL5372_DEVICE_ADD 0x32
+
 
 /// @brief 设置BL5372实时时间
 /// @param time 作为设置实时时间的数据的地址

@@ -101,6 +101,8 @@ void app_main(void)
 
 
 
+
+
   //lsm6ds3trc全部使用例子
   //FIFO
   // for(;;){
@@ -209,76 +211,81 @@ void app_main(void)
   //  }
 
 
-  baidu_ASR_cfg_t asr_cfg;
-  asr_cfg.dev_pid = ASR_PID_CM_NEAR;
-  asr_cfg.rate = ASR_RATE_16K;
-  asr_cfg.stop_threshold = 5;
-  asr_cfg.send_threshold = 3;
-  asr_cfg.record_save_times_max = 20;
+//AI交流例程
+  // baidu_ASR_cfg_t asr_cfg;
+  // asr_cfg.dev_pid = ASR_PID_CM_NEAR;
+  // asr_cfg.rate = ASR_RATE_16K;
+  // asr_cfg.stop_threshold = 5;
+  // asr_cfg.send_threshold = 3;
+  // asr_cfg.record_save_times_max = 20;
 
-  // 启动ASR服务
-  asr_service_start(&asr_cfg, 1);
+  // // 启动ASR服务
+  // asr_service_start(&asr_cfg, 1);
 
-  vTaskDelay(pdMS_TO_TICKS(500));
+  // vTaskDelay(pdMS_TO_TICKS(500));
 
-  //运行FFT任务,全程监视
-  music_FFT_UI_start(&UI_cfg, 1);
+  // //运行FFT任务,全程监视
+  // music_FFT_UI_start(&UI_cfg, 1);
 
-  char* text1 = NULL;
+  // char* text1 = NULL;
 
-  while (1)
-  {
+  // while (1)
+  // {
 
-    while (1)
-    {
-      music_FFT_UI_draw(&UI_cfg);
-      //刷新屏幕
-      for (int i = 0; i <= 5; i++)
-      {
-        ledarray_set_and_write(i);
-        clean_draw_buf(i * 2 + 1);
-        clean_draw_buf(i * 2 + 2);
-      }
+  //   while (1)
+  //   {
+  //     music_FFT_UI_draw(&UI_cfg);
+  //     //刷新屏幕
+  //     for (int i = 0; i <= 5; i++)
+  //     {
+  //       ledarray_set_and_write(i);
+  //       clean_draw_buf(i * 2 + 1);
+  //       clean_draw_buf(i * 2 + 2);
+  //     }
 
-      //如果内存申请并且数据有效,退出
-      if (sevetest30_asr_result_tex) {
-        if (sevetest30_asr_result_tex[1] != 0) {
-          //获取到样本,强制终止ASR服务
-          sevetest30_asr_running_flag = false;
-          break;
-        }
-      }
-    }
+  //     //如果内存申请并且数据有效,退出
+  //     if (sevetest30_asr_result_tex) {
+  //       if (sevetest30_asr_result_tex[1] != 0) {
+  //         //获取到样本,强制终止ASR服务
+  //         sevetest30_asr_running_flag = false;
+  //         break;
+  //       }
+  //     }
+  //   }
 
-    //发送文本内容给GPT
-    text1 = ERNIE_Bot_4_chat_tex_exchange(sevetest30_asr_result_tex);
-    //如果正常回复,TTS语音播放
-    if (text1)
-      if (text1[1] != 0)
-      {
-        baidu_TTS_cfg_t tts_cfg = BAIDU_TTS_DEFAULT_CONFIG(text1, 1);
-        //启动TTS服务
-        tts_service_play(&tts_cfg, 1);
+  //   //发送文本内容给GPT
+  //   text1 = ERNIE_Bot_4_chat_tex_exchange(sevetest30_asr_result_tex);
+  //   //如果正常回复,TTS语音播放
+  //   if (text1)
+  //     if (text1[1] != 0)
+  //     {
+  //       baidu_TTS_cfg_t tts_cfg = BAIDU_TTS_DEFAULT_CONFIG(text1, 1);
+  //       //启动TTS服务
+  //       tts_service_play(&tts_cfg, 1);
 
-        while (sevetest30_music_running_flag)
-        {
-          music_FFT_UI_draw(&UI_cfg);
-          for (int i = 0; i <= 5; i++)
-          {
-            ledarray_set_and_write(i);
-            clean_draw_buf(i * 2 + 1);
-            clean_draw_buf(i * 2 + 2);
-          }
-        }
-      }
-    //重置缓存
-    if (text1)memset(text1, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
+  //       while (sevetest30_music_running_flag)
+  //       {
+  //         music_FFT_UI_draw(&UI_cfg);
+  //         for (int i = 0; i <= 5; i++)
+  //         {
+  //           ledarray_set_and_write(i);
+  //           clean_draw_buf(i * 2 + 1);
+  //           clean_draw_buf(i * 2 + 2);
+  //         }
+  //       }
+  //     }
+  //   //重置缓存
+  //   if (text1)memset(text1, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
 
-    memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
-    asr_service_start(&asr_cfg, 1);
+  //   memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
+  //   asr_service_start(&asr_cfg, 1);
+  // }
 
 
-  }
+
+
+
+
 
 
 
