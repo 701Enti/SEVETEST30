@@ -34,8 +34,9 @@
 #include "esp_adc_cal.h"
 #include "sevetest30_gpio.h"
 
-systemtime_t systemtime_data;
-battery_data_t battery_data;
+systemtime_t systemtime_data = {0};
+battery_data_t battery_data = {0};
+env_temp_hum_data_t env_temp_hum_data = {0};
 
 uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
@@ -175,11 +176,18 @@ void refresh_battery_data()
   // 充电状态
 }
 
+/// @brief 刷新当前环境的温度湿度数据,使用硬件传感器
+void refresh_env_temp_hum_data(){
+    AHT21_trigger();
+    vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
+    AHT21_get_result(&env_temp_hum_data);
+}
+
 /// @brief 刷新姿态传感器FIFO抽取后的数据,有(默认方式)和(自定义方式)
 /// @brief 数据保存至全局变量(默认方式) / 数据保存至FIFO_database预设内存区域(自定义方式)
-/// @param FIFO_database [在仅使用SWEDA操作硬件下,可设置为NULL使用默认数据库(默认方式)] / 导入自定义的FIFO映射数据库(自定义方式)
-/// @param map_num  [使用默认数据库,无效(默认方式)] / (必须准确)数据库的条目数量即MAP_BASE个数(自定义方式)
-/// @param read_num [使用默认数据库,无效(默认方式)] / (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据(自定义方式)
+/// @param FIFO_database [填写参数为 NULL 使用默认数据库(默认方式)] / 导入自定义的FIFO映射数据库(自定义方式)
+/// @param map_num  [使用默认数据库,忽略这个参数(默认方式)] / (必须准确)数据库的条目数量即MAP_BASE个数(自定义方式)
+/// @param read_num [使用默认数据库,忽略这个参数(默认方式)] / (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据(自定义方式)
 /// @return ESP_OK / ESP_FAIL
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num)
 {

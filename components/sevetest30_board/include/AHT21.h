@@ -19,11 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对温湿度传感器 AHT21的支持
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对温湿度传感器 AHT21的支持
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ // AHT21的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢 http://www.aosong.com/products-99.html
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #pragma once
 
@@ -38,8 +39,7 @@
 typedef struct AHT21_result_handle_t
 {
   bool  flag_crc;//启用CRC校验
-  bool  data_crc;//数据经过了CRC校验    
-  bool  data_true;//数据被认为正确读取了
+  bool  data_true;//数据有效(无效的话可能是数据读取失败或者CRC校验后发现问题)
   float temp;//温度,摄氏度
   float hum;//湿度,%RH
 }AHT21_result_handle_t;

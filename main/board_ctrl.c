@@ -94,13 +94,6 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     AHT21_begin();
     lsm6ds3trc_init_or_reset(); 
     vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
-      
-    for(;;){
-    AHT21_trigger();
-    vTaskDelay(pdMS_TO_TICKS(500));
-    AHT21_result_handle_t res = {0,0,0,0,0};
-    AHT21_get_result(&res);
-   }
 
     // 配置
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
