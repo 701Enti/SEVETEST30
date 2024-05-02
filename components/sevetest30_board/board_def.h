@@ -120,9 +120,11 @@
 // TCA6416A的中断信号输出
 #define TCA6416A_IO_INT  GPIO_NUM_1
 
-//姿态传感器默认FIFO周期读取个数(默认方式)
-#define IMU_FIFO_DEFAULT_READ_NUM 3
+//姿态传感器 lsm6ds3trc 
+#define IMU_FIFO_DEFAULT_READ_NUM 3//默认FIFO周期读取个数(默认方式)
 
+//温湿度传感器 AHT21
+#define AHT21_DEFAULT_MEASURE_DELAY 200//默认触发后进行读取操作间隔的延时,单位ms
 
 //TCA6416A 控制IO端口次序名称定义
 // 默认模式 0=输出模式 1=输入模式

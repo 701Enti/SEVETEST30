@@ -33,8 +33,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "board_def.h"
+#include "AHT21.h"
 #include "BL5372.h"
 #include "lsm6ds3trc.h"
+
+
 
 typedef struct systemtime_t{
   int year;
@@ -51,8 +54,12 @@ typedef struct battery_data_t{
   bool finished_flag;//充电完成标识(完成充电为 true)
 }battery_data_t;
 
+
+typedef AHT21_result_handle_t env_temp_hum_data_t;
+
 extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
+extern env_temp_hum_data_t env_temp_hum_data;
 
 extern uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM];
