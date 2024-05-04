@@ -59,16 +59,21 @@
 #define ESP_SD_PIN_CD            -1
 #define ESP_SD_PIN_WP            -1
 
-//默认为音频设备控制提供
+//默认为音频设备控制提供(以下定义被board_pins_config为ES8388提供的回调函数应用)
 #define AUDIO_I2C_PORT      I2C_NUM_0
 #define AUDIO_I2C_SDA_IO    GPIO_NUM_48
 #define AUDIO_I2C_SCL_IO    GPIO_NUM_47
+//(通信频率在ES8838.c固定100kHz)
+//(board_ctrl更改后,频率与DEVICE_I2C_FREQ_HZ一致,这只是因为共用一个I2C_NUM_0)
 
 //默认为其他设备控制提供
+// (sevetest30 设备与音频共用一个I2C_NUM_0,通信频率在ES8838.c固定100kHz,需要调整通讯频率的器件在board_ctrl中请求)
 #define DEVICE_I2C_PORT      I2C_NUM_0
 #define DEVICE_I2C_SDA_IO    GPIO_NUM_48
 #define DEVICE_I2C_SCL_IO    GPIO_NUM_47
-#define DEVICE_I2C_FREQ_HZ   (100 * 1000)
+#define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000)
+
+
 
 #define I2S_MCK_IO GPIO_NUM_11;
 #define I2S_BCK_IO GPIO_NUM_12;
@@ -146,7 +151,7 @@
     .p14 = 1,                           \
     .p15 = 0,                           \
     .p16 = 0,                           \
-    .p17 = 0,                           \
+    .p17 = 1,                           \
     .addr=0,                            \
 }
 

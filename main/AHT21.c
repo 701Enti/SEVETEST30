@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对温湿度传感器 AHT21的支持
+ // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对温湿度传感器 AHT21的支持
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  // AHT21的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢 http://www.aosong.com/products-99.html
@@ -104,9 +104,12 @@ void AHT21_get_result(AHT21_result_handle_t* dest) {
         ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
-    else
-       memset(dest,0,sizeof(AHT21_result_handle_t));
-
+    else{
+        bool crc_flag = dest->flag_crc;
+        memset(dest,0,sizeof(AHT21_result_handle_t));
+        dest->flag_crc = crc_flag;
+    }
+       
     if ((AHT21_get_status() & 0x80)) {
         ESP_LOGE(TAG, "温湿度传感器AHT21正在测量中,无法读取");
         return;

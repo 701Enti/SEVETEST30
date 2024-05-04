@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，音乐API播放音乐时的硬件驱动等工作
+ // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，音乐API播放音乐时的硬件驱动等工作
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
  // github: https://github.com/701Enti

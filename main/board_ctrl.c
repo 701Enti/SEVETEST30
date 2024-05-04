@@ -19,9 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，，包含各种SE30针对性硬件控制
+// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，，包含各种SE30针对性硬件控制
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件包含 DEVICE_I2C_PORT i2c通讯的初始化配置,需要调用device_i2c_init(),此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化
+//     API规范: sevetest30_board_ctrl  外部函数应该调用board_status_get获取控制缓存变量,修改值后导入
 ///----注意：控制数据只有在完成sevetest30_board_ctrl工作之后，才会保存到board_ctrl_buf缓存中，如果果您只是外部定义了一个board_ctrl_t类型变量存储您的更改，
 //     但是没有调用sevetest30_board_ctrl,board_ctrl_buf缓存数据将不会更新,而系统缓存的位置是board_ctrl_buf，而不是您自己定义的外部缓存，
 ///    意味着系统比如蓝牙读取，读到的数据将不是更新的数据，所以如果您要进行控制数据更改，务必保证sevetest30_board_ctrl工作进行了
@@ -31,8 +32,6 @@
 
 #include "board_ctrl.h"
 #include "board.h"
-
-#include "driver/i2c.h"
 
 #include "fonts_chip.h"
 #include "lsm6ds3trc.h"
@@ -56,6 +55,8 @@ void codechip_mode_and_status_set(board_ctrl_t *board_ctrl);
 void codechip_volume_set(board_ctrl_t *board_ctrl);
 void board_ctrl_buf_map(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select);
 
+
+//API规范: sevetest30_board_ctrl :  外部函数应该调用board_status_get获取控制缓存变量,修改值后导入
 /// @brief 获取系统控制缓存结构体指针,应该使用获取的结构体指针，修改参数并以此调用sevetest30_board_ctrl()
 /// @return 控制缓存结构体指针
 board_ctrl_t *board_status_get()
@@ -64,21 +65,21 @@ board_ctrl_t *board_status_get()
 }
 
 
-//此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化
-//初始化设备I2C接口
-esp_err_t device_i2c_init()
-{
-    i2c_config_t port_cfg;
-    port_cfg.mode = I2C_MODE_MASTER;
-    port_cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    port_cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    port_cfg.master.clk_speed = DEVICE_I2C_FREQ_HZ;
+// //此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化
+// //初始化设备I2C接口
+// esp_err_t device_i2c_init()
+// {
+//     i2c_config_t port_cfg;
+//     port_cfg.mode = I2C_MODE_MASTER;
+//     port_cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
+//     port_cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
+//     port_cfg.master.clk_speed = DEVICE_I2C_FREQ_HZ;
 
-    get_i2c_pins(DEVICE_I2C_PORT,&port_cfg);
+//     get_i2c_pins(DEVICE_I2C_PORT,&port_cfg);
 
-    i2c_param_config(DEVICE_I2C_PORT, &port_cfg);
-    return i2c_driver_install(DEVICE_I2C_PORT, port_cfg.mode, 0, 0, false);
-}
+//     i2c_param_config(DEVICE_I2C_PORT, &port_cfg);
+//     return i2c_driver_install(DEVICE_I2C_PORT, port_cfg.mode, 0, 0, false);
+// }
 
 /// @brief 全局设备初始化
 /// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
@@ -101,7 +102,7 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     return ESP_OK;
 }
 
-/// @brief 全局设备控制
+/// @brief 全局设备控制,外部函数应该调用board_status_get获取控制缓存变量,修改值后导入
 /// @param board_ctrl 调用board_status_get()获取系统控制缓存结构体，进行需要修改后放入
 /// @param ctrl_select 选择控制的对象，这是一个枚举类型
 void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select)
@@ -109,6 +110,7 @@ void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_se
     switch (ctrl_select)
     {
     case BOARD_CTRL_ALL:
+        i2c_param_config(DEVICE_I2C_PORT,board_ctrl->p_i2c_device_config);
         amplifier_set(board_ctrl);
         boost_voltage_set(board_ctrl);
         codechip_mode_and_status_set(board_ctrl);
@@ -119,6 +121,9 @@ void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_se
         ext_io_value_service();
         ext_io_mode_service();
         break;
+
+    case BOARD_CTRL_DEVICE_I2C:
+        i2c_param_config(DEVICE_I2C_PORT,board_ctrl->p_i2c_device_config);
 
     case BOARD_CTRL_AMPLIFIER:
         amplifier_set(board_ctrl);
@@ -180,6 +185,9 @@ void board_ctrl_buf_map(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_selec
     switch (ctrl_select)
     {
     case BOARD_CTRL_ALL:
+        board_ctrl_buf->p_i2c_device_config = board_ctrl->p_i2c_device_config;
+        board_ctrl_buf->p_ext_io_mode = board_ctrl->p_ext_io_mode;
+        board_ctrl_buf->p_ext_io_value = board_ctrl->p_ext_io_value;        
         board_ctrl_buf->amplifier_volume = board_ctrl->amplifier_volume;
         board_ctrl_buf->amplifier_mute = board_ctrl->amplifier_mute;
         board_ctrl_buf->boost_voltage = board_ctrl->boost_voltage;
@@ -189,9 +197,12 @@ void board_ctrl_buf_map(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_selec
         board_ctrl_buf->codec_dac_volume = board_ctrl->codec_dac_volume;
         board_ctrl_buf->codec_adc_pin = board_ctrl->codec_adc_pin;
         board_ctrl_buf->codec_adc_gain = board_ctrl->codec_adc_gain;
-        board_ctrl_buf->p_ext_io_mode = board_ctrl->p_ext_io_mode;
-        board_ctrl_buf->p_ext_io_value = board_ctrl->p_ext_io_value;
         break;
+
+    case BOARD_CTRL_DEVICE_I2C:
+        board_ctrl_buf->p_i2c_device_config = board_ctrl->p_i2c_device_config;
+        break;
+
 
     case BOARD_CTRL_AMPLIFIER:
         board_ctrl_buf->amplifier_volume = board_ctrl->amplifier_volume;

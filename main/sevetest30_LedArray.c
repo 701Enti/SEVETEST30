@@ -19,9 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+// 两种绘制方式均支持亮度调整(警告:过高的调整幅度可能导致色彩失真)
 // ESP-IDF项目地址 https://github.com/espressif/esp-idf
 // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
 // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
@@ -1890,7 +1891,7 @@ led_strip_t *strip1 = NULL;
 /// @param p       导入字模指针
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB）
-/// @param change   亮度调整（1-100）
+/// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
 void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0; // xy的增加量
@@ -1947,7 +1948,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, ui
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p        导入图像指针
-/// @param change   亮度调整（1-100）
+/// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
 void direct_draw(int16_t x, int16_t y, const uint8_t *p, uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0;				  // xy的增加量

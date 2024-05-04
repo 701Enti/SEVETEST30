@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
+ // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
  //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
@@ -177,9 +177,11 @@ void refresh_battery_data()
 }
 
 /// @brief 刷新当前环境的温度湿度数据,使用硬件传感器
-void refresh_env_temp_hum_data(){
+/// @param crc_flag 启用CRC校验
+void refresh_env_temp_hum_data(bool crc_flag){
     AHT21_trigger();
     vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
+    env_temp_hum_data.flag_crc = crc_flag;
     AHT21_get_result(&env_temp_hum_data);
 }
 
