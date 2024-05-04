@@ -145,7 +145,8 @@
         "semphr.h": "c",
         "gzip_miniz.h": "c",
         "aht21.h": "c",
-        "ringbuf.h": "c"
+        "ringbuf.h": "c",
+        "ags10.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

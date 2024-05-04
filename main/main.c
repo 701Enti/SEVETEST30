@@ -40,6 +40,7 @@
 
 #include "board_def.h"
 #include "board_ctrl.h"
+#include "board_pins_config.h"
 #include "fonts_chip.h"
 #include "audio_hal.h"
 
@@ -64,6 +65,7 @@ void app_main(void)
     .scl_pullup_en = GPIO_PULLUP_ENABLE,
     .master.clk_speed = DEVICE_I2C_DEFAULT_FREQ_HZ,
   };
+  get_i2c_pins(DEVICE_I2C_PORT,&i2c_config);
 
   board_device_handle_t board_device_handle;
   board_ctrl_t board_ctrl = {
@@ -89,10 +91,17 @@ void app_main(void)
   for (int i = 0; i < 6; i++)
     ledarray_set_and_write(i);
 
-  // vTaskDelay(pdMS_TO_TICKS(5000));
+
+  for(;;){
+    vTaskDelay(pdMS_TO_TICKS(5000)); 
+    refresh_env_TVOC_data(true);
+  }
+  
+
+  
 
   // gpio_set_level(BAT_IN_CTRL_IO,0);//关机
-
+ 
 
 
 

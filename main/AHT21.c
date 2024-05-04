@@ -65,7 +65,7 @@ uint8_t CheckCrc8(uint8_t* pDat, uint8_t Lenth)
     uint8_t crc = 0xff, i, j;
 
     if (!pDat) {
-        ESP_LOGE("CheckCrc8","导入了为空的数据地址");
+        ESP_LOGE("AHT21.c - CheckCrc8","导入了为空的数据地址");
         return crc;
     }
 
@@ -139,9 +139,9 @@ void AHT21_get_result(AHT21_result_handle_t* dest) {
                     ESP_LOGE(TAG, "数据CRC校验后发现问题");
                     return;
                 }
-                else
-                    ESP_LOGI(TAG, "温度 %f\u2103     湿度 %f%%RH", dest->temp, dest->hum);  
             }
+
+            ESP_LOGI(TAG, "温度 %f\u2103     湿度 %f%%RH", dest->temp, dest->hum);  
 
             //数据有效标记
             dest->data_true = true;
