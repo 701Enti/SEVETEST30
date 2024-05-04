@@ -34,6 +34,7 @@
 #include <stdbool.h>
 #include "board_def.h"
 #include "AHT21.h"
+#include "AGS10.h"
 #include "BL5372.h"
 #include "lsm6ds3trc.h"
 
@@ -56,6 +57,8 @@ typedef struct battery_data_t{
 
 
 typedef AHT21_result_handle_t env_temp_hum_data_t;
+typedef AGS10_result_handle_t env_TVOC_data_t;
+
 
 extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
@@ -75,12 +78,13 @@ extern uint8_t IMU_XLz_L[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM];
 
 
-
 void refresh_battery_data();
 void refresh_systemtime_data();
+void refresh_env_temp_hum_data(bool crc_flag);
+void refresh_env_TVOC_data(bool crc_flag);
+
 
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num);
-
 
 void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);
 

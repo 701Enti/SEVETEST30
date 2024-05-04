@@ -37,6 +37,7 @@
 systemtime_t systemtime_data = {0};
 battery_data_t battery_data = {0};
 env_temp_hum_data_t env_temp_hum_data = {0};
+env_TVOC_data_t env_TVOC_data = {0};
 
 uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
@@ -183,6 +184,13 @@ void refresh_env_temp_hum_data(bool crc_flag){
     vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
     env_temp_hum_data.flag_crc = crc_flag;
     AHT21_get_result(&env_temp_hum_data);
+}
+
+/// @brief 刷新当前环境的空气质量数据,使用硬件传感器
+/// @param crc_flag 启用CRC校验
+void refresh_env_TVOC_data(bool crc_flag){
+  env_TVOC_data.flag_crc = crc_flag;
+  AGS10_TVOC_result_get(&env_TVOC_data);
 }
 
 /// @brief 刷新姿态传感器FIFO抽取后的数据,有(默认方式)和(自定义方式)

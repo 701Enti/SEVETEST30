@@ -124,7 +124,8 @@ void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_se
 
     case BOARD_CTRL_DEVICE_I2C:
         i2c_param_config(DEVICE_I2C_PORT,board_ctrl->p_i2c_device_config);
-
+        break;
+        
     case BOARD_CTRL_AMPLIFIER:
         amplifier_set(board_ctrl);
         break;
