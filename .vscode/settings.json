@@ -144,7 +144,8 @@
         "esp_vad.h": "c",
         "semphr.h": "c",
         "gzip_miniz.h": "c",
-        "aht21.h": "c"
+        "aht21.h": "c",
+        "ringbuf.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

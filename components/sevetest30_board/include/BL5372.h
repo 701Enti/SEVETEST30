@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含各种SE30对外部RTC芯片 BL5372的支持
+// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对外部RTC芯片 BL5372的支持
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
 // github: https://github.com/701Enti

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
+// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
 // 蓝牙配置使用了ESP-IDF官方例程并进行修改，ESP-IDF项目地址 https://github.com/espressif/esp-idf 
 // 使用的例程地址 https://github.com/espressif/esp-idf/tree/release/v4.4/examples/bluetooth/bluedroid/ble/gatt_server_service_table
 // 此处修改了 服务属性数据库 服务数量 以及 gatts_event_handler回调 根据某个成员的理解添加了中文注释 添加 外部源文件board_ctrl的控制数据联动 提供了蓝牙数据存储与全局控制API的对接思路

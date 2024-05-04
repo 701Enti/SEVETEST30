@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，主要由SEVETEST30开发团队维护，包含对传感器数据，网络API等数据的 整理显示与动画交互工作
+// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含对传感器数据，网络API等数据的 整理显示与动画交互工作
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明
 // 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
