@@ -146,7 +146,9 @@
         "gzip_miniz.h": "c",
         "aht21.h": "c",
         "ringbuf.h": "c",
-        "ags10.h": "c"
+        "ags10.h": "c",
+        "assert.h": "c",
+        "nvs_flash.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

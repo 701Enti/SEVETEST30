@@ -595,6 +595,10 @@ void music_url_play(const char* url, UBaseType_t priority)
   }
   else
   {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
     sevetest30_music_running_flag = true;
     common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
   }
@@ -629,14 +633,20 @@ void music_url_play(const char* url, UBaseType_t priority)
 /// @param priority 任务优先级
 void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority)
 {
+  const char* TAG = "tts_service_play";
+
   // common_mp3_evt不为空说明还有音频事件运行中，进行等待再继续
   if (common_mp3_evt != NULL)
   {
-    ESP_LOGE("tts_service_play", "播放繁忙中，无法准备新播放任务");
+    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
     return;
   }
   else
   {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
     sevetest30_music_running_flag = true;
     common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
   }
@@ -659,7 +669,7 @@ void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority)
   const char* link_tag[3] = { "http", "mp3", "i2s" };
   if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
   {
-    ESP_LOGE("tts_service_play", "准备音频元素时发现问题");
+    ESP_LOGE(TAG, "准备音频元素时发现问题");
     sevetest30_music_running_flag = false;
     return;
   }
@@ -679,13 +689,19 @@ void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority)
 /// @param priority 任务优先级
 void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority)
 {
+  const char* TAG = "asr_service_start";
+
   if (sevetest30_asr_running_flag)
   {
-    ESP_LOGE("asr_service_start", "识别繁忙中，无法准备新识别任务");
+    ESP_LOGE(TAG, "识别繁忙中，无法准备新识别任务");
     return;
   }
   else
   {
+    if(periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
     sevetest30_asr_running_flag = true;
   }
 
@@ -695,7 +711,7 @@ void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority)
     baidu_access_token = baidu_get_access_token(CONFIG_BAIDU_SPEECH_ACCESS_KEY, CONFIG_BAIDU_SPEECH_SECRET_KEY);
     if (!baidu_access_token)
     {
-      ESP_LOGE("asr_service_start", "获取token时发现问题");
+      ESP_LOGE(TAG, "获取token时发现问题");
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
@@ -722,7 +738,7 @@ void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority)
 
   if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
   {
-    ESP_LOGE("asr_service_start", "准备音频元素时发现问题");
+    ESP_LOGE(TAG, "准备音频元素时发现问题");
     sevetest30_asr_running_flag = false;
     return;
   }

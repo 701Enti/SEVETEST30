@@ -38,6 +38,8 @@
 
 #include "esp_log.h"
 
+#include "esp_peripherals.h"
+
 #include "board_def.h"
 #include "board_ctrl.h"
 #include "board_pins_config.h"
@@ -58,18 +60,18 @@ void app_main(void)
   TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
   TCA6416A_value_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
   // ext_io_value_data.en_led_board = 1;//关闭灯板
-  
-  i2c_config_t i2c_config = {
+
+  i2c_config_t device_i2c_config = {
     .mode = I2C_MODE_MASTER,
     .sda_pullup_en = GPIO_PULLUP_ENABLE,
     .scl_pullup_en = GPIO_PULLUP_ENABLE,
     .master.clk_speed = DEVICE_I2C_DEFAULT_FREQ_HZ,
   };
-  get_i2c_pins(DEVICE_I2C_PORT,&i2c_config);
+  get_i2c_pins(DEVICE_I2C_PORT, &device_i2c_config);
 
   board_device_handle_t board_device_handle;
   board_ctrl_t board_ctrl = {
-      .p_i2c_device_config = &i2c_config,    
+      .p_i2c_device_config = &device_i2c_config,
       .p_ext_io_mode = &ext_io_mode_data,   // 存储IO模式信息的结构体的地址
       .p_ext_io_value = &ext_io_value_data, // 存储IO电平信息的结构体的地址
       .boost_voltage = BV_VOL_MAX,
@@ -82,26 +84,50 @@ void app_main(void)
       .codec_dac_volume = 100,
       .codec_adc_pin = ADC_INPUT_LINPUT1_RINPUT1,
   };
-  sevetest30_all_board_init(&board_ctrl, &board_device_handle);
+
 
   esp_log_level_set("gpio", ESP_LOG_NONE);
-
-  //logo显示
-  direct_draw(1, 1, sign_701, 2);
-  for (int i = 0; i < 6; i++)
-    ledarray_set_and_write(i);
-
-
-  for(;;){
-    vTaskDelay(pdMS_TO_TICKS(5000)); 
-    refresh_env_TVOC_data(true);
+  for (int q = 2; q < 6; q++) {
+    //logo显示
+    direct_draw(1, 1, sign_701, q);
+    for (int i = 0; i < 6; i++)
+      ledarray_set_and_write(i);
   }
-  
+  for (int q = 6; q > 1; q--) {
+    //logo显示
+    direct_draw(1, 1, sign_701, q);
+    for (int i = 0; i < 6; i++)
+      ledarray_set_and_write(i);
+  }
 
-  
+  sevetest30_all_device_init(&board_ctrl, &board_device_handle);
+
+
+  esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
+  wifi_init(&wifi_periph_config);
+
+
+  // 载入wifi信息
+  periph_wifi_cfg_t wifi_cfg = {
+      .wifi_config.sta.ssid = CONFIG_WIFI_SSID,
+      .wifi_config.sta.password = CONFIG_WIFI_PASSWORD,
+  };
+  if (wifi_connect(&wifi_cfg) != ESP_OK)
+    ESP_LOGE("MAIN", "网络连接失败");
+  else
+    ESP_LOGI("MAIN", "已连接到网络 - %s", CONFIG_WIFI_SSID);
+
+
+
+
+
+  clean_draw();
+
+
+
 
   // gpio_set_level(BAT_IN_CTRL_IO,0);//关机
- 
+
 
 
 
@@ -114,7 +140,7 @@ void app_main(void)
   //初始化结束后
 
 
-  // wifi_connect();
+
 
 
 
@@ -187,12 +213,7 @@ void app_main(void)
 //   refresh_systemtime_data();
 //   vTaskDelay(pdMS_TO_TICKS(100));
 //   main_UI_1();
-//   for (int i = 0; i <= 5; i++)
-//   {
-//     ledarray_set_and_write(i);
-//     clean_draw_buf(i * 2 + 0);
-//     clean_draw_buf(i * 2 + 1);
-//   }
+// clean_draw();
 // }
 
 
@@ -273,12 +294,7 @@ void app_main(void)
 //     {
 //       music_FFT_UI_draw(&UI_cfg);
 //       //刷新屏幕
-//       for (int i = 0; i <= 5; i++)
-//       {
-//         ledarray_set_and_write(i);
-//         clean_draw_buf(i * 2 + 1);
-//         clean_draw_buf(i * 2 + 2);
-//       }
+//       clean_draw();
 
 //       //如果内存申请并且数据有效,退出
 //       if (sevetest30_asr_result_tex) {
@@ -303,12 +319,7 @@ void app_main(void)
 //         while (sevetest30_music_running_flag)
 //         {
 //           music_FFT_UI_draw(&UI_cfg);
-//           for (int i = 0; i <= 5; i++)
-//           {
-//             ledarray_set_and_write(i);
-//             clean_draw_buf(i * 2 + 1);
-//             clean_draw_buf(i * 2 + 2);
-//           }
+//           clean_draw();
 //         }
 //       }
 //     //重置缓存
