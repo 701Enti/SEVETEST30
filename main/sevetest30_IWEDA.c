@@ -48,7 +48,7 @@
 #include "sdkconfig.h"
 #include <esp_sntp.h>
 
-#include "esp_peripherals.h"
+
 #include "periph_wifi.h"
 #include "board.h"
 #include "board_ctrl.h"
@@ -72,6 +72,7 @@ Real_time_weather* real_time_weather_data;
 ip_position* ip_position_data;
 
 esp_http_client_handle_t http_get_handle = NULL;
+esp_periph_handle_t se30_wifi_periph_handle = NULL;
 
 char baidu_ERNIE_Bot_access_token[ACCESSTOKEN_SIZE_MAX] = { 0 };
 
@@ -81,8 +82,11 @@ void transform_lng_lat();
 void transform_locationID();
 void transform_real_time_weather_data();
 
-// 通用网络连接函数
-esp_err_t wifi_connect()
+
+/// @brief WIFI外设初始化
+/// @param periph_config 网络外设配置
+/// @return ESP_OK / ESP_FAIL
+esp_err_t wifi_init(esp_periph_config_t* periph_config)
 {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -92,23 +96,39 @@ esp_err_t wifi_connect()
     ESP_ERROR_CHECK(ret);
 
     // 初始化TCP/IP协议栈
-    esp_netif_init();
+    ret = esp_netif_init();
 
-    // 初始化网络连接
-    esp_periph_config_t se30_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG(); // 选择硬件信息
-    se30_periph_set_handle = esp_periph_set_init(&se30_periph_config);        // 获取运行配置句柄
+    // 初始化网络外设
+    se30_periph_set_handle = esp_periph_set_init(periph_config); // 获取运行配置句柄
 
-    // 载入wifi信息
-    periph_wifi_cfg_t periph_wifi_cfg = {
-        .wifi_config.sta.ssid = CONFIG_WIFI_SSID,
-        .wifi_config.sta.password = CONFIG_WIFI_PASSWORD,
-    };
-
-    esp_periph_handle_t wifi_handle = periph_wifi_init(&periph_wifi_cfg); // 获取wifi配置句柄
-
-    esp_periph_start(se30_periph_set_handle, wifi_handle);             // 启动连接任务
-    return periph_wifi_wait_for_connected(wifi_handle, portMAX_DELAY); // 请求连接
+    return ret;
 }
+
+
+/// @brief 通用网络连接函数
+/// @param wifi_cfg 网络配置,要连接的网络SSID和密码必填
+/// @return ESP_OK / ESP_FAIL
+esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
+{
+    static const char* TAG = "wifi_connect";
+
+    if(!se30_periph_set_handle) {
+        ESP_LOGE(TAG, "初始化工作未完成");
+        return ESP_FAIL;
+    }
+
+    if (se30_wifi_periph_handle) {
+        ESP_LOGE(TAG, "上次的WIFI句柄未有效删除,无法连接");
+        return ESP_FAIL;
+    }
+
+    se30_wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
+
+    esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);// 启动连接任务
+    return periph_wifi_wait_for_connected(se30_wifi_periph_handle, portMAX_DELAY);//请求连接
+}
+
+
 
 // 封装好的网络信息API请求服务，包含信息解析，并存储到对应结构体或缓冲变量
 
@@ -180,6 +200,11 @@ void refresh_weather_data()
 // 测试发现默认使用的NTP需要调用完成后3到4秒完成更新
 void init_time_data_sntp()
 {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE("http_init_get_request", "网络未连接");
+        return;
+    }
+
     // 调整方式参考了官方文档 https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
     esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, CONFIG_NTP_SERVER_0); // 索引表示第0个，其NTP服务器名为
@@ -246,6 +271,11 @@ int http_check_common_url(const char* url)
 /// @brief 初始化GET请求
 void http_init_get_request()
 {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE("http_init_get_request", "网络未连接");
+        return;
+    }
+
     // 配置http传输信息
     esp_http_client_config_t http_config;
     memset(&http_config, 0, sizeof(http_config)); // 对参数初始化为0
@@ -908,8 +938,8 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
                         ESP_LOGI(TAG, "%s", ERNIE_Bot_4_chat_result);
                         ESP_LOGI(TAG, "解析完成,共拼接%d个数据单元", complete_num);
                     }
-                    else{
-                        ESP_LOGE(TAG,"解析任务内部运行异常");
+                    else {
+                        ESP_LOGE(TAG, "解析任务内部运行异常");
                     }
                     goto TASK_OVER;
                 }
@@ -950,6 +980,12 @@ char* ERNIE_Bot_4_chat_tex_exchange(char* user_content)
         ESP_LOGE(TAG, "空的用户内容");
         return NULL;
     }
+
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE(TAG, "网络未连接");
+        return NULL;
+    }
+
     ERNIE_Bot_4_chat_user_content = user_content;
 
     if (baidu_ERNIE_Bot_access_token[1] == 0) {
@@ -982,6 +1018,11 @@ esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* Acce
     if (!AccessToken)
     {
         ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
+        return ESP_FAIL;
+    }
+
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE(TAG, "网络未连接");
         return ESP_FAIL;
     }
 

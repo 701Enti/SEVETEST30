@@ -30,7 +30,7 @@
 #define _SEVETEST30_IWEDA_H_
 #endif
 
-#include "esp_peripherals.h"
+#include "periph_wifi.h"
 #include "esp_http_client.h"
 #include "esp_err.h"
 #include "stdbool.h"
@@ -129,6 +129,8 @@ extern char *sevetest30_asr_result_tex;//语音识别结果
 
 extern ip_position *ip_position_data;
 extern Real_time_weather *real_time_weather_data;
+extern esp_periph_handle_t se30_wifi_periph_handle;
+
 
 //内外部共享函数
 
@@ -151,7 +153,9 @@ void http_get_request_send(bool *flag);
 void asr_data_save_result(char* asr_response);
 
 //外部自由调用功能函数
-esp_err_t wifi_connect();
+esp_err_t wifi_init(esp_periph_config_t* periph_config);
+
+esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg);
 
 void init_time_data_sntp();
 

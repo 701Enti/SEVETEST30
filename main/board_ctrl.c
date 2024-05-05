@@ -85,9 +85,9 @@ board_ctrl_t *board_status_get()
 /// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
 /// @param board_device_handle 设备句柄，定义board_device_handle_t非指针类型全局变量不进行任何更改，在进行一些活动时将使用其中句柄
 /// @return 成功 ESP_OK 失败 ESP_FAIL
-esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle)
+esp_err_t sevetest30_all_device_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle)
 {
-    // 初始化设备
+    // 初始化所有设备
     audio_board_init();
     sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);
     fonts_chip_init(board_device_handle);
@@ -96,7 +96,7 @@ esp_err_t sevetest30_all_board_init(board_ctrl_t *board_ctrl, board_device_handl
     lsm6ds3trc_init_or_reset(); 
     vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
 
-    // 配置
+    //配置设备
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
 
     return ESP_OK;

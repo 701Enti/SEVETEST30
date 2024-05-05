@@ -37,7 +37,7 @@
 #define LETTER 5                    //字母 5x8
 #define CHINESE 12                  //中文 12x12
 #define LINE_LED_NUMBER  24         //灯板横向长度（每一根通讯线连接的WS2812数量） 此处“横向”始终表示通讯线延伸方向
-#define VERTICAL_LED_NUMBER 12      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
+#define VERTICAL_LED_NUMBER 11      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
 #define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+0x01)
 #define RECTANGLE_SIZE_MAX 36//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48
 
@@ -81,6 +81,11 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth,const uint8_t *p, uin
 
 
 void direct_draw(int16_t x, int16_t y,const uint8_t *p,uint8_t change);
+
+
+///清除屏幕上的所有图案以及数据缓存
+void clean_draw();
+
 
 void clean_draw_buf(int8_t y);
 

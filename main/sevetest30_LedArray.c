@@ -4,30 +4,30 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
-// 两种绘制方式均支持亮度调整(警告:过高的调整幅度可能导致色彩失真)
-// ESP-IDF项目地址 https://github.com/espressif/esp-idf
-// 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
-// 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+ // 两种绘制方式均支持亮度调整(警告:过高的调整幅度可能导致色彩失真)
+ // ESP-IDF项目地址 https://github.com/espressif/esp-idf
+ // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
+ // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #include "sevetest30_LedArray.h"
 #include "led_strip.h"
@@ -42,8 +42,8 @@
 #include "hal/rmt_types.h"
 
 
-uint8_t black[3] = {0x00};
-uint8_t compound_result[LINE_LED_NUMBER * 3] = {0}; // 发送给WS2812的格式化数据缓存，GRB格式
+uint8_t black[3] = { 0x00 };
+uint8_t compound_result[LINE_LED_NUMBER * 3] = { 0 }; // 发送给WS2812的格式化数据缓存，GRB格式
 
 // 一个图像可看作不同颜色的像素组合，而每个像素颜色可用红绿蓝三元色的深度（亮度）表示
 // 因此，我们可以将一个图像分离成三个单色图层，我们就定义三个8bit数组
@@ -52,44 +52,44 @@ uint8_t compound_result[LINE_LED_NUMBER * 3] = {0}; // 发送给WS2812的格式�
 // 最后，我们选择以排为单位，3个图层，每个图层12排，共3x12=36个数组，这里称为缓冲区
 
 // SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必增加足够变量 red_y(x) green_y(x) blue_y(x)
-uint8_t red_y1[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y2[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y3[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y4[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y5[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y6[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y7[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y8[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y9[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y10[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y11[LINE_LED_NUMBER] = {0x00};
-uint8_t red_y12[LINE_LED_NUMBER] = {0x00};
+uint8_t red_y1[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y2[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y3[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y4[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y5[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y6[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y7[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y8[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y9[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y10[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y11[LINE_LED_NUMBER] = { 0x00 };
+uint8_t red_y12[LINE_LED_NUMBER] = { 0x00 };
 
-uint8_t green_y1[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y2[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y3[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y4[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y5[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y6[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y7[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y8[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y9[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y10[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y11[LINE_LED_NUMBER] = {0x00};
-uint8_t green_y12[LINE_LED_NUMBER] = {0x00};
+uint8_t green_y1[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y2[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y3[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y4[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y5[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y6[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y7[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y8[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y9[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y10[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y11[LINE_LED_NUMBER] = { 0x00 };
+uint8_t green_y12[LINE_LED_NUMBER] = { 0x00 };
 
-uint8_t blue_y1[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y2[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y3[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y4[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y5[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y6[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y7[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y8[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y9[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y10[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y11[LINE_LED_NUMBER] = {0x00};
-uint8_t blue_y12[LINE_LED_NUMBER] = {0x00};
+uint8_t blue_y1[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y2[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y3[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y4[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y5[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y6[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y7[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y8[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y9[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y10[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y11[LINE_LED_NUMBER] = { 0x00 };
+uint8_t blue_y12[LINE_LED_NUMBER] = { 0x00 };
 
 // sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
 // 前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换
@@ -101,16 +101,16 @@ uint8_t blue_y12[LINE_LED_NUMBER] = {0x00};
 // 以下是生成的基本单色字库，支持数字（4x7）,汉字（12x12）,字母（5x8）
 
 // 数字 0-9
-const uint8_t matrix_0[7] = {0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0};
-const uint8_t matrix_1[7] = {0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20};
-const uint8_t matrix_2[7] = {0xF0, 0x10, 0x10, 0xF0, 0x80, 0x80, 0xF0};
-const uint8_t matrix_3[7] = {0xF0, 0x10, 0x10, 0xF0, 0x10, 0x10, 0xF0};
-const uint8_t matrix_4[7] = {0x10, 0x30, 0x50, 0xF0, 0x10, 0x10, 0x10};
-const uint8_t matrix_5[7] = {0xF0, 0x80, 0x80, 0xF0, 0x10, 0x10, 0xF0};
-const uint8_t matrix_6[7] = {0xF0, 0x80, 0x80, 0xF0, 0x90, 0x90, 0xF0};
-const uint8_t matrix_7[7] = {0xF0, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
-const uint8_t matrix_8[7] = {0xF0, 0x90, 0x90, 0xF0, 0x90, 0x90, 0xF0};
-const uint8_t matrix_9[7] = {0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0};
+const uint8_t matrix_0[7] = { 0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0 };
+const uint8_t matrix_1[7] = { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
+const uint8_t matrix_2[7] = { 0xF0, 0x10, 0x10, 0xF0, 0x80, 0x80, 0xF0 };
+const uint8_t matrix_3[7] = { 0xF0, 0x10, 0x10, 0xF0, 0x10, 0x10, 0xF0 };
+const uint8_t matrix_4[7] = { 0x10, 0x30, 0x50, 0xF0, 0x10, 0x10, 0x10 };
+const uint8_t matrix_5[7] = { 0xF0, 0x80, 0x80, 0xF0, 0x10, 0x10, 0xF0 };
+const uint8_t matrix_6[7] = { 0xF0, 0x80, 0x80, 0xF0, 0x90, 0x90, 0xF0 };
+const uint8_t matrix_7[7] = { 0xF0, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10 };
+const uint8_t matrix_8[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x90, 0x90, 0xF0 };
+const uint8_t matrix_9[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0 };
 
 // 大写字母 A-Z
 
@@ -1875,13 +1875,13 @@ const uint8_t sign_se30[872] = {
 };
 
 // SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，或者切换每行WS2812数据传输IO口，务必修改这个数组内的值满足需求
-const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = {4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38}; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
+const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
 
-rmt_config_t *rmt_cfg0;
-rmt_config_t *rmt_cfg1;
+rmt_config_t* rmt_cfg0;
+rmt_config_t* rmt_cfg1;
 
-led_strip_t *strip0 = NULL;
-led_strip_t *strip1 = NULL;
+led_strip_t* strip0 = NULL;
+led_strip_t* strip1 = NULL;
 
 /// @brief RGB三色分离方式绘制,只支持单色绘制,之后ledarray_set_and_write需要被调用才可显示
 /// @brief 取模方式请参考头文件
@@ -1892,7 +1892,7 @@ led_strip_t *strip1 = NULL;
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB）
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
+void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0; // xy的增加量
 	uint8_t dat = 0x00;		// 临时数据存储
@@ -1905,7 +1905,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, ui
 		return;
 	}
 
-	uint8_t color[3] = {in_color[0], in_color[1], in_color[2]};			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
+	uint8_t color[3] = { in_color[0], in_color[1], in_color[2] };			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
 	ledarray_intensity_change(&color[0], &color[1], &color[2], change); // 亮度调制
 
 	p--; // 地址初始补偿
@@ -1949,10 +1949,10 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t *p, ui
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p        导入图像指针
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void direct_draw(int16_t x, int16_t y, const uint8_t *p, uint8_t change)
+void direct_draw(int16_t x, int16_t y, const uint8_t* p, uint8_t change)
 {
 	uint8_t Dx = 0, Dy = 0;				  // xy的增加量
-	uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
+	uint8_t* pT1 = p, * pT2 = p, * pT3 = p; // 临时指针
 	int16_t sx = 0;						  // 临时存储选定的横坐标
 	if (p == NULL)
 	{
@@ -1961,7 +1961,7 @@ void direct_draw(int16_t x, int16_t y, const uint8_t *p, uint8_t change)
 	}
 	// 获取图案长宽数据
 	uint8_t length = 0, breadth = 0; // 长宽信息
-	uint8_t dat[4] = {0x00};		 // 临时数据存储
+	uint8_t dat[4] = { 0x00 };		 // 临时数据存储
 	p += 0x02;						 // 偏移到长宽数据区
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -1972,7 +1972,7 @@ void direct_draw(int16_t x, int16_t y, const uint8_t *p, uint8_t change)
 	length = (dat[3] << 8) | dat[2];
 	// 图像解析
 	p += 0x02;				   // 偏移到图像数据区
-	uint8_t color[3] = {0x00}; // 临时数据存储
+	uint8_t color[3] = { 0x00 }; // 临时数据存储
 	while (length)
 	{
 		// 获取颜色数据
@@ -2000,11 +2000,21 @@ void direct_draw(int16_t x, int16_t y, const uint8_t *p, uint8_t change)
 	}
 }
 
+/// @brief 清除屏幕上的所有图案以及数据缓存
+void clean_draw() {
+	for (int i = 0; i <= VERTICAL_LED_NUMBER/2 - 1; i++)
+	{
+		clean_draw_buf(i * 2 + 1);
+		clean_draw_buf(i * 2 + 2);		
+		ledarray_set_and_write(i);
+	}
+}
+
 /// @brief 清空指定行的缓存
-/// @param y 指定行纵坐标
+/// @param y 指定行纵坐标(从1开始)
 void clean_draw_buf(int8_t y)
 {
-	uint8_t dat[3] = {0};
+	uint8_t dat[3] = { 0 };
 	for (int i = 0; i < LINE_LED_NUMBER; i++)
 		color_input(i, y, dat);
 }
@@ -2013,10 +2023,10 @@ void clean_draw_buf(int8_t y)
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色
-void progress_draw_buf(int8_t y,float step, uint8_t *color)
+void progress_draw_buf(int8_t y, float step, uint8_t* color)
 {
-	float dat[3] = {0};
-	uint8_t dat_buf[3] = {0};
+	float dat[3] = { 0 };
+	uint8_t dat_buf[3] = { 0 };
 	for (int i = 0; i < LINE_LED_NUMBER; i++)
 	{
 		memset(dat_buf, 0, 3 * sizeof(uint8_t));
@@ -2058,7 +2068,7 @@ void progress_draw_buf(int8_t y,float step, uint8_t *color)
 /// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
 /// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小（Byte） RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
 /// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p);
-uint8_t *rectangle(int8_t breadth, int8_t length)
+uint8_t* rectangle(int8_t breadth, int8_t length)
 {
 	if (breadth < 0 || length < 0)
 		return NULL;
@@ -2067,15 +2077,15 @@ uint8_t *rectangle(int8_t breadth, int8_t length)
 	uint8_t Dx = 0;								 // 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
 	bool flag = 0;								 // 即将写入的位数据值
 
-	static uint8_t *pT1 = NULL;
-	static uint8_t *p = NULL;
+	static uint8_t* pT1 = NULL;
+	static uint8_t* p = NULL;
 
 	// 进一法，最后不足8个点就补满8位。
 	// 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
 	x_byte_num = ceil(breadth * 1.0 / 8.0);
 	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
 
-	uint8_t *rectangle_data = (uint8_t *)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t));
+	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t));
 	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t));
 
 	*rectangle_data = entire_byte_num; // 装载entire_byte_num
@@ -2113,7 +2123,7 @@ uint8_t *rectangle(int8_t breadth, int8_t length)
 // 显示一个数字，起始坐标xy,输入整型0-9数字，不支持负数，颜色color,亮度0-100%
 void print_number(int16_t x, int16_t y, int8_t figure, uint8_t color[3], uint8_t change)
 {
-	uint8_t *p = NULL;
+	uint8_t* p = NULL;
 	// 将p指向对应数字字模
 	switch (figure)
 	{
@@ -2167,7 +2177,7 @@ void print_number(int16_t x, int16_t y, int8_t figure, uint8_t color[3], uint8_t
 
 // 颜色导入(x为绝对坐标值，0 到 LINE_LED_NUMBER-1)
 // SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
-void color_input(int8_t x, int8_t y, uint8_t *dat)
+void color_input(int8_t x, int8_t y, uint8_t* dat)
 {
 	if (x < 0 || x > LINE_LED_NUMBER)
 		return; // 不在显示范围退出即可，允许在范围外但不报告
@@ -2252,7 +2262,7 @@ void color_input(int8_t x, int8_t y, uint8_t *dat)
 
 // 颜色导出(x为绝对坐标值，0 到 LINE_LED_NUMBER-1)
 // SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
-void color_output(int8_t x, int8_t y, uint8_t *dat)
+void color_output(int8_t x, int8_t y, uint8_t* dat)
 {
 	if (x < 0 || x > LINE_LED_NUMBER)
 		return; // 不在显示范围退出即可，允许在范围外但不报告
@@ -2342,9 +2352,9 @@ void color_compound(uint8_t line_sw)
 {
 	uint8_t i = 0;
 	// 初始化
-	uint8_t *red = NULL;
-	uint8_t *green = NULL;
-	uint8_t *blue = NULL;
+	uint8_t* red = NULL;
+	uint8_t* green = NULL;
+	uint8_t* blue = NULL;
 	switch (line_sw)
 	{
 	case 1:
@@ -2468,13 +2478,12 @@ void ledarray_deinit()
 }
 
 /// @brief 灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化
-/// @param group_sw 选定要刷新的组，每组有两串WS2812,如12行WS2812,共6组,取值为0-5
+/// @param group_sw 选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算
 void ledarray_set_and_write(uint8_t group_sw)
 {
 	if (group_sw > VERTICAL_LED_NUMBER / 2 - 1)
 	{
-		ESP_LOGE("ledarray_set_and_write", "输入了不在显示范围的组别");
-		return;
+		return; // 不在显示范围退出即可，允许在范围外但不报告
 	}
 
 	if (strip0 == NULL || strip1 == NULL)
@@ -2512,7 +2521,7 @@ void ledarray_set_and_write(uint8_t group_sw)
 }
 
 // RGB亮度调制  导入r g b数值地址+亮度
-void ledarray_intensity_change(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t intensity)
+void ledarray_intensity_change(uint8_t* r, uint8_t* g, uint8_t* b, uint8_t intensity)
 {
 	// 注意，RGB和HSV的取值范围并不一致，标准定义是 R G B 为 0-255  H 为 0-360 S V 为0-1（为了方便计算，这里 S V 映射到 0-100）
 
@@ -2530,14 +2539,14 @@ void ledarray_intensity_change(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t inten
 	uint32_t h = 0, s = 0, v = 0;
 	rgb_to_hvs(*r, *g, *b, &h, &s, &v);
 	v = intensity;
-	led_strip_hsv2rgb(h, s, v, (uint32_t *)r, (uint32_t *)g, (uint32_t *)b);
+	led_strip_hsv2rgb(h, s, v, (uint32_t*)r, (uint32_t*)g, (uint32_t*)b);
 }
 
 // 因为max和min好像是c++的，这里手写一个，效果一样
 // 取三个double元素最大的那个
 double value_max(double value1, double value2, double value3)
 {
-	double buffer[3] = {value1, value2, value3};
+	double buffer[3] = { value1, value2, value3 };
 	uint8_t a = 0, b = 0;
 	for (a = 0; a < 2; a++)
 	{
@@ -2557,7 +2566,7 @@ double value_max(double value1, double value2, double value3)
 // 取三个double元素最小的那个
 double value_min(double value1, double value2, double value3)
 {
-	double buffer[3] = {value1, value2, value3};
+	double buffer[3] = { value1, value2, value3 };
 	uint8_t a = 0, b = 0;
 	for (a = 0; a < 2; a++)
 	{
@@ -2577,7 +2586,7 @@ double value_min(double value1, double value2, double value3)
 // 注意，RGB和HSV的取值范围并不一致，标准定义是 R G B 为 0-255  H 为 0-360 S V 为0-1
 // 然而，为了方便计算，这里 S V 映射到 0-100
 // 将RGB转换到HSV颜色空间,计算方法是网上随便找的
-void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t *p_h, uint32_t *p_s, uint32_t *p_v)
+void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t* p_h, uint32_t* p_s, uint32_t* p_v)
 {
 	// HSV需要浮点存储
 	double h = 0, s = 0, v = 0;
@@ -2634,7 +2643,7 @@ void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t *
  * Wiki: https://en.wikipedia.org/wiki/HSL_and_HSV
  *
  */
-void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t *g, uint32_t *b)
+void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t* r, uint32_t* g, uint32_t* b)
 {
 	h %= 360; // h -> [0,360]
 	uint32_t rgb_max = v * 2.55f;
