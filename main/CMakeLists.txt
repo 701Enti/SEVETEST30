@@ -8,7 +8,7 @@ set(COMPONENT_SRCS
 ./sevetest30_UI.c
 ./sevetest30_SWEDA.c
 ./board_ctrl.c
-./fonts_chip.c
+./gt32l32s0140.c
 ./sevetest30_touch.c
 ./sevetest30_sound.c
 ./BL5372.c

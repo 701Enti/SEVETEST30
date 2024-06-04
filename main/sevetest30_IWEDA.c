@@ -112,7 +112,7 @@ esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
 {
     static const char* TAG = "wifi_connect";
 
-    if(!se30_periph_set_handle) {
+    if (!se30_periph_set_handle) {
         ESP_LOGE(TAG, "初始化工作未完成");
         return ESP_FAIL;
     }
@@ -125,9 +125,56 @@ esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
     se30_wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
 
     esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);// 启动连接任务
-    return periph_wifi_wait_for_connected(se30_wifi_periph_handle, portMAX_DELAY);//请求连接
+    return periph_wifi_wait_for_connected(se30_wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS));//请求连接
 }
 
+/// @brief 百度API获取AccessToken,保存到char数组
+/// @param client_id client_id 字符串
+/// @param client_secret client_secret 字符串
+/// @param AccessToken char数组地址
+/// @return ESP_FAIL / ESP_OK
+esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken)
+{
+    const char* TAG = "baidu_get_AccessToken";
+
+    if (!AccessToken)
+    {
+        ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
+        return ESP_FAIL;
+    }
+
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE(TAG, "网络未连接");
+        return ESP_FAIL;
+    }
+
+    //发送请求
+    bool Task_comp_flag = false;                                                                    // 任务是否完成标识
+    snprintf(http_get_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
+    http_init_get_request();
+    esp_http_client_set_timeout_ms(http_get_handle, 10000);
+    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+
+    //检查是否得到请求响应的结果
+    if (!strcasecmp(http_get_out_buf, ""))
+        return ESP_FAIL;
+    else
+    {
+        //解析数据
+        cJSON* root_data = NULL;
+        root_data = cJSON_Parse(http_get_out_buf);
+        cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
+
+        memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
+        snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring);//复制AccessToken
+
+        cJSON_Delete(root_data);
+
+        return ESP_OK;
+    }
+}
 
 
 // 封装好的网络信息API请求服务，包含信息解析，并存储到对应结构体或缓冲变量
@@ -251,6 +298,12 @@ int http_check_common_url(const char* url)
 {
     const char* TAG = "http_check_common_url";
     int ret = ESP_OK;
+
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+        ESP_LOGE("http_check_common_url", "网络未连接");
+        return ESP_FAIL;
+    }
+
     sprintf(http_get_url_buf, url);
     http_init_get_request();
 
@@ -535,12 +588,11 @@ OK:
 // 解析返回的IP归属地址邮政编码信息，保存到ip_position_data
 void transform_postcode()
 {
-
     const char* TAG = "transform_postcode";
 
     // 因为返回数据中被一个find（）扩住了，json解析不了，想办法缓存有用的数据再解析,注意其中特征 "find("的位置    ")"始终为结束字符
     // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
-    char json_buf[PRE_CJSON_BUF_MAX] = { 0 }; // 这里发现缓存JOSN数据的数组，下标如果设定值达到2017会立刻堆栈溢出，是个很有意思的问题，但是我并不知道为什么，请求各路大佬给出解答
+    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };
     uint8_t i = 5;
     while (http_get_out_buf[i] != ')')
     {
@@ -671,52 +723,6 @@ void transform_real_time_weather_data()
     // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
 }
 
-/// @brief 解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex
-/// @param asr_response 语音识别响应的数据
-void asr_data_save_result(char* asr_response)
-{
-    static const char* TAG = "asr_data_get_result";
-    if (asr_response == NULL)
-    {
-        ESP_LOGE(TAG, "传入了为空的输入数据");
-        return;
-    }
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(asr_response);
-    cJSON* cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
-    if (strcasecmp(cjson_err_msg->valuestring, "success."))
-    {
-        ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
-        return;
-    }
-
-    cJSON* cjson_result = cJSON_GetObjectItem(root_data, "result");
-    cJSON* cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
-    ESP_LOGI(TAG, "%s", cjson_result_root->valuestring);
-
-    if (!sevetest30_asr_result_tex)
-    {
-    ASR_RESULT_TEX_MALLOC:
-        sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        while (!sevetest30_asr_result_tex)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
-            sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        }
-        memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
-    }
-    else
-    {
-        free(sevetest30_asr_result_tex);
-        sevetest30_asr_result_tex = NULL;
-        goto ASR_RESULT_TEX_MALLOC;
-    }
-    strncpy(sevetest30_asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
-
-    cJSON_Delete(root_data);
-    return;
-}
 
 /// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存)
 /// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
@@ -1005,51 +1011,86 @@ char* ERNIE_Bot_4_chat_tex_exchange(char* user_content)
 }
 
 
-
-/// @brief 百度API获取AccessToken,保存到char数组
-/// @param client_id client_id 字符串
-/// @param client_secret client_secret 字符串
-/// @param AccessToken char数组地址
-/// @return ESP_FAIL / ESP_OK
-esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken)
+/// @brief 解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex
+/// @param asr_response 语音识别响应的数据
+void asr_data_save_result(char* asr_response)
 {
-    const char* TAG = "baidu_get_AccessToken";
-
-    if (!AccessToken)
+    static const char* TAG = "asr_data_get_result";
+    if (asr_response == NULL)
     {
-        ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
-        return ESP_FAIL;
+        ESP_LOGE(TAG, "传入了为空的输入数据");
+        return;
+    }
+    cJSON* root_data = NULL;
+    root_data = cJSON_Parse(asr_response);
+    cJSON* cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
+    if (strcasecmp(cjson_err_msg->valuestring, "success."))
+    {
+        ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
+        return;
     }
 
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE(TAG, "网络未连接");
-        return ESP_FAIL;
-    }
+    cJSON* cjson_result = cJSON_GetObjectItem(root_data, "result");
+    cJSON* cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
+    ESP_LOGI(TAG, "%s", cjson_result_root->valuestring);
 
-    //发送请求
-    bool Task_comp_flag = false;                                                                    // 任务是否完成标识
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
+    if (!sevetest30_asr_result_tex)
+    {
+    ASR_RESULT_TEX_MALLOC:
+        sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+        while (!sevetest30_asr_result_tex)
+        {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
+            sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+        }
+        memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
+    }
+    else
+    {
+        free(sevetest30_asr_result_tex);
+        sevetest30_asr_result_tex = NULL;
+        goto ASR_RESULT_TEX_MALLOC;
+    }
+    strncpy(sevetest30_asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
+
+    cJSON_Delete(root_data);
+    return;
+}
+
+
+/// @brief 通过特定URL提取json数据中音乐歌词(LRC格式数据)
+/// @param url  获取音乐歌词使用的完整URL
+/// @param dest 读取保存到的位置 
+/// @param len_max 最大允许保存的字符长度
+esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max) {
+    const char* TAG = "get_music_lyric_by_url";
+    bool Task_comp_flag = false;// 任务是否完成标识
+    snprintf(http_get_url_buf, HTTP_BUF_MAX, url); // 确定请求URL
     http_init_get_request();
-    esp_http_client_set_timeout_ms(http_get_handle, 10000);
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
 
-    //检查是否得到请求响应的结果
-    if (!strcasecmp(http_get_out_buf, ""))
-        return ESP_FAIL;
-    else
-    {
-        //解析数据
-        cJSON* root_data = NULL;
-        root_data = cJSON_Parse(http_get_out_buf);
-        cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
-
-        memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
-        snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring);//复制AccessToken
-
+    //开始json解析
+    cJSON* root_data = NULL;
+    root_data = cJSON_Parse(http_get_out_buf);
+    cJSON* cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
+    if (cjson_lyric) {
+        if (strlen(cjson_lyric->valuestring) < len_max) {
+            strcpy(dest, cjson_lyric->valuestring);
+            cJSON_Delete(root_data);
+            return ESP_OK;
+        }
+        else {
+            ESP_LOGE(TAG, "歌词数据长度过大");
+            cJSON_Delete(root_data);
+            return ESP_FAIL;
+        }
+    }
+    else {
+        ESP_LOGW(TAG, "发现歌词获取对选定的音乐不支持或该音乐无歌词");
         cJSON_Delete(root_data);
-
-        return ESP_OK;
+        return ESP_FAIL;
     }
 }

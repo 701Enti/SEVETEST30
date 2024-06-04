@@ -47,11 +47,6 @@
 
 extern esp_periph_set_handle_t se30_periph_set_handle;
 
-typedef struct board_device_handle_t
-{
-   spi_device_handle_t fonts_chip_handle;
-
-} board_device_handle_t;
 
 typedef enum
 {
@@ -94,7 +89,7 @@ typedef struct board_ctrl_t
 } board_ctrl_t;
 
 
-esp_err_t sevetest30_all_device_init(board_ctrl_t *board_ctrl, board_device_handle_t *board_device_handle);
+esp_err_t sevetest30_all_device_init(board_ctrl_t *board_ctrl);
 void sevetest30_board_ctrl(board_ctrl_t *board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t *board_ctrl);
 esp_err_t device_i2c_init();

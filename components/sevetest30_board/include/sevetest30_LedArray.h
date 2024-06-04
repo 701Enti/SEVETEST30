@@ -34,12 +34,15 @@
 #endif 
 
 #define FIGURE 4                    //数字 4x7
-#define LETTER 5                    //字母 5x8
-#define CHINESE 12                  //中文 12x12
 #define LINE_LED_NUMBER  24         //灯板横向长度（每一根通讯线连接的WS2812数量） 此处“横向”始终表示通讯线延伸方向
-#define VERTICAL_LED_NUMBER 11      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
+#define VERTICAL_LED_NUMBER 12      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
 #define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+0x01)
 #define RECTANGLE_SIZE_MAX 36//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48
+
+
+#define FONT_PRINT_NUM_MAX 512 //字库打印函数最大单次打印字符数
+#define FONT_PRINT_FMT_BUF_SIZE (FONT_PRINT_NUM_MAX*10)//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留
+
 
 //数字 0-9
 extern const uint8_t matrix_1 [7];
@@ -70,7 +73,7 @@ extern uint8_t compound_result[LINE_LED_NUMBER*3];
     //取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
 
-void separation_draw(int16_t x, int16_t y, uint8_t breadth,const uint8_t *p, uint8_t byte_number, uint8_t* color_in,uint8_t change);
+void separation_draw(int32_t x, int32_t y, uint8_t breadth,const uint8_t *p, uint8_t byte_number, uint8_t* color_in,uint8_t change);
 
 
 //彩色图像直显方式 
@@ -80,7 +83,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth,const uint8_t *p, uin
    //选择带数据头的图案数据，长宽会自动获取
 
 
-void direct_draw(int16_t x, int16_t y,const uint8_t *p,uint8_t change);
+void direct_draw(int32_t x, int32_t y,const uint8_t *p,uint8_t change);
 
 
 ///清除屏幕上的所有图案以及数据缓存
@@ -89,11 +92,13 @@ void clean_draw();
 
 void clean_draw_buf(int8_t y);
 
-void progress_draw_buf(int8_t y,float step, uint8_t *color);
+void progress_draw_buf(int8_t y,uint8_t step, uint8_t* color);
 
 uint8_t *rectangle(int8_t breadth, int8_t length);
 
-void print_number(int16_t x,int16_t y,int8_t figure,uint8_t* color,uint8_t change);
+void print_number(int32_t x,int32_t y,int8_t figure,uint8_t* color,uint8_t change);
+
+void font_roll_print(uint8_t color[3],uint8_t change,char* format, ...);
 
 void ledarray_init();
 
