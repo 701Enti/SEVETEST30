@@ -67,7 +67,7 @@ typedef struct music_FFT_UI_cfg_t
 {
    int16_t x;///起始位置X坐标
    int16_t y;///起始位置Y坐标
-   uint8_t change;///亮度
+   uint8_t change;///亮度调制
    int width;///视口宽度 图谱显示会自动适应视口宽度
    int height;///显示高度 会裁切不在显示高度的图谱
    UI_color_visual_cfg_t visual_cfg;//频谱颜色可视化配置

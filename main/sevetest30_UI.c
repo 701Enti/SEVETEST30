@@ -16482,7 +16482,11 @@ void time_UI_1(int16_t x, int16_t y, uint8_t change)
         print_number(x - 1 + LINE_LED_NUMBER - (4 + 1) * 1 + 0, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, minute_uints, color, change);
     }
 }
-// 显示了当前系统时间  秒     起始坐标xy  亮度值0-100%   为0不会任何进行显示操作 始终返回UI主题颜色指针
+
+/// @brief 显示了当前系统时间  秒 
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+/// @param change 亮度值0-100% 为0不会任何进行显示操作
 void time_UI_2(int16_t x, int16_t y, uint8_t change)
 {
     static uint8_t color[3] = { 0 };
@@ -16495,6 +16499,9 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
         esp_fill_random(&color[1], 1);
         esp_fill_random(&color[2], 1);
         second_buf = systemtime_data.second;
+    }
+    else{
+        ESP_LOGE("time_UI_2", "时间刷新异常");
     }
 
     if (change != 0)

@@ -46,9 +46,9 @@
 #define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)
 #define ASR_TIMEOUT_MS  10000//识别超时时长(ms)
 
-#define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS url
-#define BAIDU_ASR_URL      "http://vop.baidu.com/server_api" //百度ASR url
-#define BAIDU_ASR_PRO_URL  "http://vop.baidu.com/pro_api"//百度ASR极速版 url
+#define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS uri
+#define BAIDU_ASR_URL      "http://vop.baidu.com/server_api" //百度ASR uri
+#define BAIDU_ASR_PRO_URL  "http://vop.baidu.com/pro_api"//百度ASR极速版 uri
 
 
 
@@ -101,6 +101,7 @@ extern int volatile running_i2s_port;//运行的I2S配置
 extern bool volatile sevetest30_music_running_flag;//音乐播放/TTS语音合成运行标志
 extern bool volatile sevetest30_asr_running_flag;//语音识别运行标志
 
+uint64_t mp3_decoder_play_time_get();
 
 void element_cfg_data_reset();
 
@@ -108,5 +109,5 @@ esp_err_t audio_element_all_init(const char *link_tag[], int link_num);
 
 // 外部功能函数
 void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority);
-void music_url_play(const char *url, UBaseType_t priority);
+void music_uri_play(const char *uri, UBaseType_t priority);
 void asr_service_start(baidu_ASR_cfg_t* asr_cfg,UBaseType_t priority);

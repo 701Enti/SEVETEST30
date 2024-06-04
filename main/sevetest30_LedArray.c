@@ -30,6 +30,7 @@
  // bilibili: 701Enti
 
 #include "sevetest30_LedArray.h"
+#include "stdarg.h"
 #include "led_strip.h"
 #include <math.h>
 #include <string.h>
@@ -40,18 +41,16 @@
 #include <esp_log.h>
 #include "driver/rmt.h"
 #include "hal/rmt_types.h"
-
-
-uint8_t black[3] = { 0x00 };
-uint8_t compound_result[LINE_LED_NUMBER * 3] = { 0 }; // 发送给WS2812的格式化数据缓存，GRB格式
+#include "gt32l32s0140.h"
 
 // 一个图像可看作不同颜色的像素组合，而每个像素颜色可用红绿蓝三元色的深度（亮度）表示
 // 因此，我们可以将一个图像分离成三个单色图层，我们就定义三个8bit数组
 // 分别表示这三个图层中[12x24=288]像素R G B 三色的明暗程度，合成他们便可表示显示板上的图像
 // 但是考虑到硬件设计中，WS2812是一排24灯为最小操作单位写入，所以每个图层最好分割成12排
 // 最后，我们选择以排为单位，3个图层，每个图层12排，共3x12=36个数组，这里称为缓冲区
-
 // SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必增加足够变量 red_y(x) green_y(x) blue_y(x)
+
+//请勿移动以下数组定义位置,可能产生内存对齐问题
 uint8_t red_y1[LINE_LED_NUMBER] = { 0x00 };
 uint8_t red_y2[LINE_LED_NUMBER] = { 0x00 };
 uint8_t red_y3[LINE_LED_NUMBER] = { 0x00 };
@@ -64,7 +63,7 @@ uint8_t red_y9[LINE_LED_NUMBER] = { 0x00 };
 uint8_t red_y10[LINE_LED_NUMBER] = { 0x00 };
 uint8_t red_y11[LINE_LED_NUMBER] = { 0x00 };
 uint8_t red_y12[LINE_LED_NUMBER] = { 0x00 };
-
+//请勿移动以下数组定义位置,可能产生内存对齐问题
 uint8_t green_y1[LINE_LED_NUMBER] = { 0x00 };
 uint8_t green_y2[LINE_LED_NUMBER] = { 0x00 };
 uint8_t green_y3[LINE_LED_NUMBER] = { 0x00 };
@@ -77,7 +76,7 @@ uint8_t green_y9[LINE_LED_NUMBER] = { 0x00 };
 uint8_t green_y10[LINE_LED_NUMBER] = { 0x00 };
 uint8_t green_y11[LINE_LED_NUMBER] = { 0x00 };
 uint8_t green_y12[LINE_LED_NUMBER] = { 0x00 };
-
+//请勿移动以下数组定义位置,可能产生内存对齐问题
 uint8_t blue_y1[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y2[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y3[LINE_LED_NUMBER] = { 0x00 };
@@ -90,6 +89,19 @@ uint8_t blue_y9[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y10[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y11[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y12[LINE_LED_NUMBER] = { 0x00 };
+
+const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
+uint8_t compound_result[LINE_LED_NUMBER * 3] = { 0 }; // 发送给WS2812的格式化数据缓存，GRB格式
+
+//本库WS2812使用硬件RMT驱动,占用两个RMT模块RMT0 RMT1
+//12排分为6组(0-5)两个RMT模块实际绑定了全部的6组IO
+//通过直接的IO模式切换选择RMT的控制对象
+rmt_config_t* rmt_cfg0;
+rmt_config_t* rmt_cfg1;
+led_strip_t* strip0 = NULL;
+led_strip_t* strip1 = NULL;
+
+
 
 // sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
 // 前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换
@@ -112,11 +124,6 @@ const uint8_t matrix_7[7] = { 0xF0, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10 };
 const uint8_t matrix_8[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x90, 0x90, 0xF0 };
 const uint8_t matrix_9[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0 };
 
-// 大写字母 A-Z
-
-// 小写字母 a-z
-
-// 基本汉字（宋体）
 
 // 彩色图像直显方式 取模方式适配Img2Lcd
 // 水平扫描，从左到右，从顶到底扫描，24位真彩（RGB顺序），需要图像数据头
@@ -1874,14 +1881,6 @@ const uint8_t sign_se30[872] = {
 	0X00,
 };
 
-// SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，或者切换每行WS2812数据传输IO口，务必修改这个数组内的值满足需求
-const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
-
-rmt_config_t* rmt_cfg0;
-rmt_config_t* rmt_cfg1;
-
-led_strip_t* strip0 = NULL;
-led_strip_t* strip1 = NULL;
 
 /// @brief RGB三色分离方式绘制,只支持单色绘制,之后ledarray_set_and_write需要被调用才可显示
 /// @brief 取模方式请参考头文件
@@ -1892,12 +1891,12 @@ led_strip_t* strip1 = NULL;
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB）
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
+void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
 {
-	uint8_t Dx = 0, Dy = 0; // xy的增加量
+	uint32_t Dx = 0, Dy = 0; // xy的增加量
 	uint8_t dat = 0x00;		// 临时数据存储
 	uint8_t i = 0;			// 临时变量i
-	int16_t sx = 0;			// 临时存储选定的横坐标
+	int32_t sx = 0;			// 临时存储选定的横坐标
 	bool flag = 0;			// 该像素是否需要点亮
 	if (p == NULL)
 	{
@@ -1905,6 +1904,7 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t* p, ui
 		return;
 	}
 
+	uint8_t black[3] = { 0 };
 	uint8_t color[3] = { in_color[0], in_color[1], in_color[2] };			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
 	ledarray_intensity_change(&color[0], &color[1], &color[2], change); // 亮度调制
 
@@ -1949,18 +1949,19 @@ void separation_draw(int16_t x, int16_t y, uint8_t breadth, const uint8_t* p, ui
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p        导入图像指针
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void direct_draw(int16_t x, int16_t y, const uint8_t* p, uint8_t change)
+void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change)
 {
-	uint8_t Dx = 0, Dy = 0;				  // xy的增加量
+	uint32_t Dx = 0, Dy = 0;				  // xy的增加量
+	int32_t sx = 0;						  // 临时存储选定的横坐标	
 	uint8_t* pT1 = p, * pT2 = p, * pT3 = p; // 临时指针
-	int16_t sx = 0;						  // 临时存储选定的横坐标
+
 	if (p == NULL)
 	{
 		ESP_LOGE("direct_draw", "输入了无法处理的空指针");
 		return;
 	}
 	// 获取图案长宽数据
-	uint8_t length = 0, breadth = 0; // 长宽信息
+	uint32_t length = 0, breadth = 0; // 长宽信息
 	uint8_t dat[4] = { 0x00 };		 // 临时数据存储
 	p += 0x02;						 // 偏移到长宽数据区
 	for (uint8_t i = 0; i < 4; i++)
@@ -2002,10 +2003,10 @@ void direct_draw(int16_t x, int16_t y, const uint8_t* p, uint8_t change)
 
 /// @brief 清除屏幕上的所有图案以及数据缓存
 void clean_draw() {
-	for (int i = 0; i <= VERTICAL_LED_NUMBER/2 - 1; i++)
+	for (int i = 0; i <= VERTICAL_LED_NUMBER / 2 - 1; i++)
 	{
 		clean_draw_buf(i * 2 + 1);
-		clean_draw_buf(i * 2 + 2);		
+		clean_draw_buf(i * 2 + 2);
 		ledarray_set_and_write(i);
 	}
 }
@@ -2023,18 +2024,14 @@ void clean_draw_buf(int8_t y)
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色
-void progress_draw_buf(int8_t y, float step, uint8_t* color)
+void progress_draw_buf(int8_t y, uint8_t step, uint8_t* color)
 {
-	float dat[3] = { 0 };
-	uint8_t dat_buf[3] = { 0 };
+	uint8_t dat[3] = { 0 };
 	for (int i = 0; i < LINE_LED_NUMBER; i++)
 	{
-		memset(dat_buf, 0, 3 * sizeof(uint8_t));
-		color_output(i, y, dat_buf);
+		color_output(i, y, dat);
 		for (int j = 0; j < 3; j++)
 		{
-			dat[j] = (float)dat_buf[j];
-
 			if (color[j] >= 0 && color[j] <= 255)
 			{
 				if (dat[j] < color[j])
@@ -2056,10 +2053,8 @@ void progress_draw_buf(int8_t y, float step, uint8_t* color)
 			{
 				dat[j] = color[j];
 			}
-
-			dat_buf[j] = (uint8_t)dat[j];
 		}
-		color_input(i, y, dat_buf);
+		color_input(i, y, dat);
 	}
 }
 
@@ -2117,11 +2112,15 @@ uint8_t* rectangle(int8_t breadth, int8_t length)
 	return rectangle_data;
 }
 
-// 打印函数，但是只能是单一字符或数字
-// 一样为了支持动画效果，允许起始坐标可以没有范围甚至为负数
+//*************************软件字符打印函数，但是只能是单一字符或数字,字模不需要硬件支持
 
-// 显示一个数字，起始坐标xy,输入整型0-9数字，不支持负数，颜色color,亮度0-100%
-void print_number(int16_t x, int16_t y, int8_t figure, uint8_t color[3], uint8_t change)
+/// @brief 显示一个数字(软件字模)
+/// @param x 起始坐标x
+/// @param y 起始坐标x
+/// @param figure 输入整型0-9数字,不支持负数
+/// @param color 颜色RGB
+/// @param change 亮度0-100
+void print_number(int32_t x, int32_t y, int8_t figure, uint8_t color[3], uint8_t change)
 {
 	uint8_t* p = NULL;
 	// 将p指向对应数字字模
@@ -2173,6 +2172,93 @@ void print_number(int16_t x, int16_t y, int8_t figure, uint8_t color[3], uint8_t
 		return;
 	}
 	separation_draw(x, y, FIGURE, p, sizeof(matrix_7), color, change); // 因为，数字字模数据大小一样，随便输入一个字模就可以
+}
+
+
+//*************************使用字库支持的打印函数,支持绝大部分字符,字模需要硬件支持
+
+/// @brief 通过字库芯片支持在LED阵列滚动显示任意字符
+/// @param color 字符颜色
+/// @param change 亮度调制 1-100
+/// @param format 形式同printf的可变参量表
+void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
+	const char* TAG = "font_roll_print";
+
+	//申请字符unicode编码缓存
+	uint32_t* buf_unicode = NULL;
+	buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	while (!buf_unicode)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
+		buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	}
+	memset(buf_unicode, 0, FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+
+	//申请打印字符缓存
+	char* str_buf = NULL;
+	str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	while (!str_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+		str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	}
+	memset(str_buf, 0, FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+	//格式化打印字符到缓存
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
+
+	uint8_t zh_CN_12x_buf[FONT_READ_ZH_CN_12X_BYTES] = { 0 };
+
+	//获取所有要显示字符的Unicode,以及字符单元总个数
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
+	int32_t x_buf = 0;//当前显示字符的起始x轴坐标
+	int32_t x_comp = 0;//x轴横向补偿值,默认以宽12点显示,小于12宽度字体,通过补偿差值平移字符使得字符显示连续
+
+	//由于读取的变化的延迟与系统延迟的影响,需要进行补偿延时保证显示的连贯
+	TickType_t tick_before = 0;//缓存刷新前时间
+	TickType_t tick_after = 0;//缓存刷新后时间
+
+	for (int a = LINE_LED_NUMBER + 12 * total_unit;a > 0;a--) {
+
+		tick_before = xTaskGetTickCount();//缓存刷新前时间
+
+        //刷新一帧滚动字符图像
+		for (int idx = 0;idx < total_unit;idx++) {
+			x_buf = a - 12 * (total_unit - idx) - x_comp;
+			if (x_buf > -12 && x_buf <= LINE_LED_NUMBER) {
+				//Unicode小于128兼容ASCII字符集
+				if (buf_unicode[idx] >= 128) {
+					fonts_read_zh_CN_12x(buf_unicode[idx], zh_CN_12x_buf);//读取汉字字符 宽度12
+					separation_draw(x_buf, 1, 12, zh_CN_12x_buf, FONT_READ_ZH_CN_12X_BYTES, color, 1);
+				}
+				else {
+					fonts_read_ASCII_6x12(buf_unicode[idx], zh_CN_12x_buf);//读取ASCII字符 宽度6
+					separation_draw(x_buf, 1, 6, zh_CN_12x_buf, FONT_READ_ASCII_6X12_BYTES, color, 1);
+					x_comp += 6;//相比横向12点阵缺少6列,进行补偿
+				}
+			}
+		}
+
+		tick_after = xTaskGetTickCount();//缓存刷新后时间
+        if(tick_before + 10 - tick_after > 0)
+		vTaskDelayUntil(&tick_after,tick_before + 10 - tick_after);
+
+
+
+		//缓存写入完成,刷新屏幕
+		for (int i = 0; i <= 5; i++) {
+			ledarray_set_and_write(i);
+		}
+	}
+	//释放所有缓存
+	free(buf_unicode);
+	buf_unicode = NULL;
+	free(str_buf);
+	str_buf = NULL;
 }
 
 // 颜色导入(x为绝对坐标值，0 到 LINE_LED_NUMBER-1)
@@ -2433,16 +2519,15 @@ void color_compound(uint8_t line_sw)
 	}
 }
 
+
 /// @brief 初始化灯板阵列
 void ledarray_init()
 {
-	static rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0
-	static rmt_config_t rmt_cfg1_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1], 1); // 使用默认通道配置模板，通道1
+	rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0;
+	rmt_config_t rmt_cfg1_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1], 1); // 使用默认通道配置模板，通道1;
+
 	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
 	rmt_cfg1_buf.clk_div = 2;
-
-	rmt_cfg0_buf.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-	rmt_cfg1_buf.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
 
 	rmt_config(&rmt_cfg0_buf); // 传输配置参数
 	rmt_config(&rmt_cfg1_buf);
@@ -2459,11 +2544,7 @@ void ledarray_init()
 	rmt_cfg0 = &rmt_cfg0_buf;
 	rmt_cfg1 = &rmt_cfg0_buf;
 
-	gpio_reset_pin(ledarray_gpio_info[0]);
-	gpio_reset_pin(ledarray_gpio_info[1]);
-
-	rmt_tx_stop(0);
-	rmt_tx_stop(1);
+	ESP_LOGW("ledarray_init", " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
 }
 
 /// @brief 重置灯板阵列
@@ -2496,27 +2577,21 @@ void ledarray_set_and_write(uint8_t group_sw)
 	static gpio_num_t former_select1 = ledarray_gpio_info[1];
 
 	// strip0
-	gpio_reset_pin(former_select0);											   // 解除对上次刷新IO的绑定
+	gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
 	color_compound(group_sw * 2 + 1);										   // 合成数据
-	rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定要写入的新输出IO
-	vTaskDelay(pdMS_TO_TICKS(10));
+	rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
 	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
 		strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	rmt_tx_start(0, false);
 	strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
-	rmt_tx_stop(0);
 	former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
 
 	// strip1
-	gpio_reset_pin(former_select1);											   // 解除对上次刷新IO的绑定
+	gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
 	color_compound(group_sw * 2 + 2);										   // 合成数据
-	rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定要写入的新输出IO
-	vTaskDelay(pdMS_TO_TICKS(10));
+	rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
 	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
 		strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	rmt_tx_start(1, false);
 	strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
-	rmt_tx_stop(1);
 	former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
 }
 

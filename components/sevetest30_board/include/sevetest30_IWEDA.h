@@ -35,6 +35,8 @@
 #include "esp_err.h"
 #include "stdbool.h"
 
+#define WIFI_CONNECT_TIMEOUT_MS 30000//WIFI连接等待超时时间
+
 #define HTTP_BUF_MAX 8192 //http输出与URL数据缓存允许大小
 #define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
@@ -46,7 +48,8 @@
 
 #define ACCESSTOKEN_SIZE_MAX (100)
 #define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192//聊天结果字符最大存储容量
-#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      20000//聊天回复等待超时时间
+#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000//聊天回复等待超时时间
+
 
 //各种API的URL，字符由%s替代
 
@@ -76,7 +79,9 @@
 //百度文心一言 ERNIE-Bot 4.0 API
 #define ERNIE_BOT_4_URL "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=%s"
 
-//和风天气API-实时天气,顺序是在GUI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
+
+
+//和风天气API-实时天气,顺序是在UI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
 typedef struct Real_time_weather{
 
     int icon;//天气状况代码，匹配合适的图案
@@ -151,6 +156,8 @@ void http_get_request_send(bool *flag);
 //库定制函数
 
 void asr_data_save_result(char* asr_response);
+
+esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max);
 
 //外部自由调用功能函数
 esp_err_t wifi_init(esp_periph_config_t* periph_config);
