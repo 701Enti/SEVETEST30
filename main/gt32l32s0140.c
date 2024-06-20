@@ -34,8 +34,6 @@
 
 spi_device_handle_t fonts_chip_handle = NULL;
 
-// uint8_t zh_CN_12x_buf[FONT_READ_CN_12X_BYTES] = { 0 };
-// uint8_t ASCII_6x12_buf[FONT_READ_ASCII_6X12_BYTES] = { 0 };
 
 /// @brief 通用字库芯片基本初始化工作
 /// @param board_device_handle
@@ -202,9 +200,9 @@ void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest) {
 // 6.回到1
 
 /// @brief 获取字符串即UTF-8再编码数据 对应到的 Unicode编码数据
-/// @param utf_dat 导入一个字符串即UTF-8再编码数据区首地址(如果使用char数组,请在末尾单元加上'\0')
+/// @param utf_dat 导入一个字符串(本质是UTF-8代码数据链指针)或者说是UTF-8再编码数据区首地址(如果使用char数组,请在末尾单元加上'\0')
 /// @param Unicode_dest Unicode编码数据缓存位置,一个uint32_t单元对应一个文字或符号的Unicode编码
-/// @param dest_len Unicode_dest缓存中包含uint32_t单元的个数
+/// @param dest_len Unicode_dest缓存中能够存储uint32_t单元的个数(缓存最大可映射字符数)
 /// @return 总共识别到的字符数
 uint32_t UTF8_Unicode_get(char* utf_dat, uint32_t* Unicode_dest, int dest_len) {
     static const char* TAG = "UTF8_Unicode_get";

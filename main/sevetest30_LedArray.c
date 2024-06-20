@@ -2211,20 +2211,23 @@ void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
 	va_start(ap, format);
 	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
 
+
+
+
 	uint8_t zh_CN_12x_buf[FONT_READ_ZH_CN_12X_BYTES] = { 0 };
+
+
+
+
 
 	//获取所有要显示字符的Unicode,以及字符单元总个数
 	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
+
 	int32_t x_buf = 0;//当前显示字符的起始x轴坐标
 	int32_t x_comp = 0;//x轴横向补偿值,默认以宽12点显示,小于12宽度字体,通过补偿差值平移字符使得字符显示连续
 
-	//由于读取的变化的延迟与系统延迟的影响,需要进行补偿延时保证显示的连贯
-	TickType_t tick_before = 0;//缓存刷新前时间
-	TickType_t tick_after = 0;//缓存刷新后时间
-
 	for (int a = LINE_LED_NUMBER + 12 * total_unit;a > 0;a--) {
 
-		tick_before = xTaskGetTickCount();//缓存刷新前时间
 
         //刷新一帧滚动字符图像
 		for (int idx = 0;idx < total_unit;idx++) {
@@ -2243,16 +2246,13 @@ void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
 			}
 		}
 
-		tick_after = xTaskGetTickCount();//缓存刷新后时间
-        if(tick_before + 10 - tick_after > 0)
-		vTaskDelayUntil(&tick_after,tick_before + 10 - tick_after);
-
-
 
 		//缓存写入完成,刷新屏幕
 		for (int i = 0; i <= 5; i++) {
 			ledarray_set_and_write(i);
 		}
+
+
 	}
 	//释放所有缓存
 	free(buf_unicode);
