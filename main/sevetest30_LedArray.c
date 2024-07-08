@@ -21,8 +21,10 @@
 
  // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
- // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
- // 两种绘制方式均支持亮度调整(警告:过高的调整幅度可能导致色彩失真)
+ // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件,同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+ // 绘制函数本身不会刷新屏幕,需要运行屏幕刷新,才会在屏幕上点亮
+ // 绘制函数规定使用字模点阵的左上角的点作为其坐标表示点,LED的延伸方向为X轴正方向,沿线方向的灯排对应的gpio号在ledarray_gpio_info数组的先后顺序指代其在Y轴正向出现顺序,对应角标+1为其对应的Y轴坐标
+ // 在标准SEVETEST30-LedArray板下,正视"701Enti"标志,此时坐标原点应为最左上角像素点,X轴正方向向右,Y轴正方向向下,原点坐标为(1,1)即填入函数 x = 1,y = 1
  // ESP-IDF项目地址 https://github.com/espressif/esp-idf
  // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
  // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
@@ -30,6 +32,9 @@
  // bilibili: 701Enti
 
 #include "sevetest30_LedArray.h"
+#include "sevetest30_UI.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "stdarg.h"
 #include "led_strip.h"
 #include <math.h>
@@ -101,17 +106,6 @@ rmt_config_t* rmt_cfg1;
 led_strip_t* strip0 = NULL;
 led_strip_t* strip1 = NULL;
 
-
-
-// sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
-// 前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换
-// 后者直接读取存储了RGB数据的数组，直接写入WS2812,便于显示复杂，颜色丰富的图形
-
-// 三色分离方式 取模适配PCtoLCD2002
-// 取模说明：从第一行开始向右每取8个点作为一个字节，如果最后不足8个点就补满8位。
-// 取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
-// 以下是生成的基本单色字库，支持数字（4x7）,汉字（12x12）,字母（5x8）
-
 // 数字 0-9
 const uint8_t matrix_0[7] = { 0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0 };
 const uint8_t matrix_1[7] = { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
@@ -125,1763 +119,159 @@ const uint8_t matrix_8[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x90, 0x90, 0xF0 };
 const uint8_t matrix_9[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0 };
 
 
-// 彩色图像直显方式 取模方式适配Img2Lcd
-// 水平扫描，从左到右，从顶到底扫描，24位真彩（RGB顺序），需要图像数据头
-// 以下是彩色图案数据，仅供彩色图像直显方式，
-// 图像编辑可以用系统自带的画板工具，像素调到合适值
 
-// 24x12图像
-const uint8_t sign_701[872] = {
-	0X00,
-	0X18,
-	0X18,
-	0X00,
-	0X0C,
-	0X00,
-	0X00,
-	0X1B,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X10,
-	0XA9,
-	0XEA,
-	0X00,
-	0XA3,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XFF,
-	0XFF,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-};
+/******************************屏幕刷新任务 [绘制函数本身不会刷新屏幕,需要运行屏幕刷新,才会在屏幕上点亮] *****************************/
+uint8_t draw_line_count[VERTICAL_LED_NUMBER] = { 0 };//每行的绘制计数,在局部刷新模式下,为0次绘制活动的行不刷新屏幕
+ledarray_refresh_mode_t refresh_mode_buf = LEDARRAY_REFRESH_DISABLE;
+SemaphoreHandle_t refresh_Task_Mutex = NULL;
 
-const uint8_t sign_se30[872] = {
-	0X00,
-	0X18,
-	0X18,
-	0X00,
-	0X0C,
-	0X00,
-	0X00,
-	0X1B,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0XFF,
-	0X7F,
-	0X27,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0XA2,
-	0XE8,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0XFF,
-	0XC9,
-	0X0E,
-	0X00,
-	0X00,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0XFF,
-	0XF2,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X3F,
-	0X48,
-	0XCC,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-	0X00,
-};
+/// @brief [单次全刷任务]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
+void refresh_ALL_ONCE_Task() {
+	while (1) {
+		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
+			ledarray_set_and_write(idx);
+		}
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+}
+
+/// @brief [多次全刷任务]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
+void refresh_ALL_MULTIPLE_Task() {
+	while (1) {
+		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
+			ledarray_set_and_write(idx);
+			vTaskDelay(pdMS_TO_TICKS(2));
+		}
+	}
+}
+
+/// @brief [单次局刷任务]一次性刷新所有发生绘制活动的行,需要部分完全刷新之后才发生延时
+void refresh_PART_ONCE_Task() {
+	while (1) {
+		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
+			if (draw_line_count[idx * 2 + 0] || draw_line_count[idx * 2 + 1])
+				ledarray_set_and_write(idx);
+		}
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+}
+
+/// @brief [多次局刷任务]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
+void refresh_PART_MULTIPLE_Task() {
+	while (1) {
+		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
+			if (draw_line_count[idx * 2 + 0] || draw_line_count[idx * 2 + 1])
+				ledarray_set_and_write(idx);
+			vTaskDelay(pdMS_TO_TICKS(10));
+		}
+	}
+}
+
+/// @brief 设置LED阵列的刷新模式
+/// @param mode 刷新模式
+void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
+	switch (refresh_mode_buf)
+	{
+	case LEDARRAY_REFRESH_ALL_ONCE:
+		vTaskDelete(xTaskGetHandle("ALL_ONCE"));
+		break;
+	case LEDARRAY_REFRESH_ALL_MULTIPLE:
+		vTaskDelete(xTaskGetHandle("ALL_MULTIPLE"));
+		break;
+	case LEDARRAY_REFRESH_PART_ONCE:
+		vTaskDelete(xTaskGetHandle("PART_ONCE"));
+		break;
+	case LEDARRAY_REFRESH_PART_MULTIPLE:
+		vTaskDelete(xTaskGetHandle("PART_MULTIPLE"));
+		break;
+	default:
+		break;
+	}
+	switch (mode)
+	{
+	case LEDARRAY_REFRESH_ALL_ONCE:
+		xTaskCreatePinnedToCore(&refresh_ALL_ONCE_Task, "ALL_ONCE",
+			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+		break;
+	case LEDARRAY_REFRESH_ALL_MULTIPLE:
+		xTaskCreatePinnedToCore(&refresh_ALL_MULTIPLE_Task, "ALL_MULTIPLE",
+			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+		break;
+	case LEDARRAY_REFRESH_PART_ONCE:
+		xTaskCreatePinnedToCore(&refresh_PART_ONCE_Task, "PART_ONCE",
+			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+		break;
+	case LEDARRAY_REFRESH_PART_MULTIPLE:
+		xTaskCreatePinnedToCore(&refresh_PART_MULTIPLE_Task, "PART_MULTIPLE",
+			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+		break;
+	default:
+		break;
+	}
+
+	refresh_mode_buf = mode;
+}
+
+/*******************************************************软件图像生成函数**********************************************************/
+/// @brief 生成一个矩形字模(需要释放)
+/// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
+/// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
+/// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小（Byte） RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
+/// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p);
+uint8_t* rectangle(int8_t breadth, int8_t length)
+{
+	if (breadth < 0 || length < 0)
+		return NULL;
+
+	uint8_t x_byte_num = 1, entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
+	uint8_t Dx = 0;								 // 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
+	bool flag = 0;								 // 即将写入的位数据值
+
+	static uint8_t* pT1 = NULL;
+	static uint8_t* p = NULL;
+
+	// 进一法，最后不足8个点就补满8位。
+	// 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
+	x_byte_num = ceil(breadth * 1.0 / 8.0);
+	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
+
+	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t));
+	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t));
+
+	*rectangle_data = entire_byte_num; // 装载entire_byte_num
+	p = rectangle_data;
+	pT1 = rectangle_data + 0x01; // 获取到数据的起始地址
+
+	// 先进行全图填充
+	flag = 1;
+	for (uint8_t i = 0; i < entire_byte_num; i++)
+	{
+		if (pT1 - p > entire_byte_num)
+		{
+			ESP_LOGE("rectangle", "计算总数据大小出错");
+			return NULL; // 越界退出
+		}
+		for (uint8_t j = 0; j < 8; j++)
+		{
+			*pT1 |= flag << (7 - j); // 写入
+			if (Dx == breadth - 1)
+			{
+				Dx = 0;
+				j = 8; // 一行写完强制退出，写下一个，实际就是回车，因为下一个字节就是下一行的了
+			}
+			else
+				Dx++;
+		}
+		pT1++; // 地址偏移
+	}
+	return rectangle_data;
+}
 
 
+/*******************************************************基本绘制函数**********************************************************/
+/// @brief 三色分离方式 取模适配PCtoLCD2002
+/// @brief 取模说明：从第一行开始向右每取8个点作为一个字节，如果最后不足8个点就补满8位。
+/// @brief 取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 /// @brief RGB三色分离方式绘制,只支持单色绘制,之后ledarray_set_and_write需要被调用才可显示
 /// @brief 取模方式请参考头文件
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
@@ -1939,12 +329,9 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, ui
 	}
 }
 
-//  起始坐标xy 导入字模(请选择带数据头的图案数据，长宽会自动获取)
-// change控制显示亮度，0-100%
-// 为了支持动画效果，允许起始坐标可以没有范围甚至为负数
-
-/// @brief RGB彩色图像直显方式，自动获取图像头参数,之后ledarray_set_and_write需要被调用才可显示
-/// @brief 取模方式请参考头文件
+/// @brief 彩色图像直显方式 取模方式适配Img2Lcd
+/// @brief [水平扫描，从左到右，从顶到底扫描，24位真彩（RGB顺序），需要图像数据头]
+/// @brief 将自动获取图像头参数,之后ledarray_set_and_write需要被调用才可显示
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p        导入图像指针
@@ -2001,6 +388,7 @@ void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change)
 	}
 }
 
+/*******************************************************图像操作绘制函数**********************************************************/
 /// @brief 清除屏幕上的所有图案以及数据缓存
 void clean_draw() {
 	for (int i = 0; i <= VERTICAL_LED_NUMBER / 2 - 1; i++)
@@ -2011,7 +399,7 @@ void clean_draw() {
 	}
 }
 
-/// @brief 清空指定行的缓存
+/// @brief 清空指定行的图像
 /// @param y 指定行纵坐标(从1开始)
 void clean_draw_buf(int8_t y)
 {
@@ -2020,7 +408,7 @@ void clean_draw_buf(int8_t y)
 		color_input(i, y, dat);
 }
 
-/// @brief 渐进指定行的缓存，使得缓存颜色向目标颜色以步进值偏移一步，这只会对绘制状态非活动的区域起作用
+/// @brief 渐进指定行的图像，使得颜色向目标颜色以步进值偏移一步，这只会对绘制状态非活动的区域起作用
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色
@@ -2058,63 +446,9 @@ void progress_draw_buf(int8_t y, uint8_t step, uint8_t* color)
 	}
 }
 
-/// @brief 生成一个矩形字模(需要释放)
-/// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
-/// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
-/// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小（Byte） RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
-/// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p);
-uint8_t* rectangle(int8_t breadth, int8_t length)
-{
-	if (breadth < 0 || length < 0)
-		return NULL;
+/*******************************************************扩展绘制函数**********************************************************/
 
-	uint8_t x_byte_num = 1, entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
-	uint8_t Dx = 0;								 // 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
-	bool flag = 0;								 // 即将写入的位数据值
-
-	static uint8_t* pT1 = NULL;
-	static uint8_t* p = NULL;
-
-	// 进一法，最后不足8个点就补满8位。
-	// 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
-	x_byte_num = ceil(breadth * 1.0 / 8.0);
-	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
-
-	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t));
-	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t));
-
-	*rectangle_data = entire_byte_num; // 装载entire_byte_num
-	p = rectangle_data;
-	pT1 = rectangle_data + 0x01; // 获取到数据的起始地址
-
-	// 先进行全图填充
-	flag = 1;
-	for (uint8_t i = 0; i < entire_byte_num; i++)
-	{
-		if (pT1 - p > entire_byte_num)
-		{
-			ESP_LOGE("rectangle", "计算总数据大小出错");
-			return NULL; // 越界退出
-		}
-		for (uint8_t j = 0; j < 8; j++)
-		{
-			*pT1 |= flag << (7 - j); // 写入
-			if (Dx == breadth - 1)
-			{
-				Dx = 0;
-				j = 8; // 一行写完强制退出，写下一个，实际就是回车，因为下一个字节就是下一行的了
-			}
-			else
-				Dx++;
-		}
-		pT1++; // 地址偏移
-	}
-	return rectangle_data;
-}
-
-//*************************软件字符打印函数，但是只能是单一字符或数字,字模不需要硬件支持
-
-/// @brief 显示一个数字(软件字模)
+/// @brief 打印一个数字(软件字模)
 /// @param x 起始坐标x
 /// @param y 起始坐标x
 /// @param figure 输入整型0-9数字,不支持负数
@@ -2175,14 +509,14 @@ void print_number(int32_t x, int32_t y, int8_t figure, uint8_t color[3], uint8_t
 }
 
 
-//*************************使用字库支持的打印函数,支持绝大部分字符,字模需要硬件支持
-
-/// @brief 通过字库芯片支持在LED阵列滚动显示任意字符
+/// @brief 通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
 /// @param change 亮度调制 1-100
 /// @param format 形式同printf的可变参量表
-void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
-	const char* TAG = "font_roll_print";
+void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char* format, ...) {
+	const char* TAG = "font_raw_print_12x";
 
 	//申请字符unicode编码缓存
 	uint32_t* buf_unicode = NULL;
@@ -2195,7 +529,7 @@ void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
 	}
 	memset(buf_unicode, 0, FONT_PRINT_NUM_MAX * sizeof(uint32_t));
 
-	//申请打印字符缓存
+	//申请UTF-8编码缓存
 	char* str_buf = NULL;
 	str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
 	while (!str_buf)
@@ -2206,67 +540,344 @@ void font_roll_print(uint8_t color[3], uint8_t change, char* format, ...) {
 	}
 	memset(str_buf, 0, FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
 
-	//格式化打印字符到缓存
+	//格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
 	va_list ap;
 	va_start(ap, format);
 	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
 
-
-
-
-	uint8_t zh_CN_12x_buf[FONT_READ_ZH_CN_12X_BYTES] = { 0 };
-
-
-
-
-
-	//获取所有要显示字符的Unicode,以及字符单元总个数
+	//获取所有要显示字符的Unicode,以及字符总个数
 	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
 
-	int32_t x_buf = 0;//当前显示字符的起始x轴坐标
-	int32_t x_comp = 0;//x轴横向补偿值,默认以宽12点显示,小于12宽度字体,通过补偿差值平移字符使得字符显示连续
+	//申请字符点阵数据缓存
+	uint8_t* font_buf = NULL;
+	font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	while (!font_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+		font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	}
+	memset(font_buf, 0, total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 
-	for (int a = LINE_LED_NUMBER + 12 * total_unit;a > 0;a--) {
+	int idx = 0;//选定操作的为[idx]号字符
+	uint32_t ASCII_num = 0;//总共含有的ASCII字符个数
 
-
-        //刷新一帧滚动字符图像
-		for (int idx = 0;idx < total_unit;idx++) {
-			x_buf = a - 12 * (total_unit - idx) - x_comp;
-			if (x_buf > -12 && x_buf <= LINE_LED_NUMBER) {
-				//Unicode小于128兼容ASCII字符集
-				if (buf_unicode[idx] >= 128) {
-					fonts_read_zh_CN_12x(buf_unicode[idx], zh_CN_12x_buf);//读取汉字字符 宽度12
-					separation_draw(x_buf, 1, 12, zh_CN_12x_buf, FONT_READ_ZH_CN_12X_BYTES, color, 1);
-				}
-				else {
-					fonts_read_ASCII_6x12(buf_unicode[idx], zh_CN_12x_buf);//读取ASCII字符 宽度6
-					separation_draw(x_buf, 1, 6, zh_CN_12x_buf, FONT_READ_ASCII_6X12_BYTES, color, 1);
-					x_comp += 6;//相比横向12点阵缺少6列,进行补偿
-				}
-			}
+	//从字库读取所有字符的点阵数据到font_buf
+	for (idx = 0;idx < total_unit;idx++) {
+		if (buf_unicode[idx] >= 128) {
+			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
 		}
-
-
-		//缓存写入完成,刷新屏幕
-		for (int i = 0; i <= 5; i++) {
-			ledarray_set_and_write(i);
+		else {//Unicode小于128兼容ASCII字符集
+			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
+			ASCII_num++;
 		}
+	}
 
+	int32_t x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_base = 0;//当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
 
+	//绘制所有字符
+	for (idx = 0;idx < total_unit;idx++) {
+		x_buf = x + x_base;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+		if (buf_unicode[idx] >= 128) {
+			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+				separation_draw(x_buf, y, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
+			x_base += 12;
+		}
+		else {//Unicode小于128兼容ASCII字符集
+			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+				separation_draw(x_buf, y, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
+			x_base += 6;
+		}
 	}
 	//释放所有缓存
 	free(buf_unicode);
 	buf_unicode = NULL;
 	free(str_buf);
 	str_buf = NULL;
+	free(font_buf);
+	font_buf = NULL;
 }
 
-// 颜色导入(x为绝对坐标值，0 到 LINE_LED_NUMBER-1)
-// SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
+/// @brief 通过字库芯片支持在LED阵列滚动打印任意字符
+/// @param dx 初始横坐标偏移(无范围限制)，在滚动开始位置 x = LINE_LED_NUMBER 发生的偏移(无需偏移=0,偏移>0向右偏,偏移<0向左偏)
+/// @param dy 初始纵坐标偏移(无范围限制),滚动开始位置 y = 1 发生的偏移(无需偏移=0,偏移>0向下偏,偏移<0向上偏)
+/// @param color 字符颜色
+/// @param change 亮度调制 1-100
+/// @param cartoon_handle sevetest30_UI动画支持句柄,填写NULL以使用默认效果
+/// @param format 形式同printf的可变参量表
+void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...) {
+	const char* TAG = "font_roll_print_12x";
+
+	//申请字符unicode编码缓存
+	uint32_t* buf_unicode = NULL;
+	buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	while (!buf_unicode)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
+		buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	}
+	memset(buf_unicode, 0, FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+
+	//申请UTF-8编码缓存
+	char* str_buf = NULL;
+	str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	while (!str_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+		str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	}
+	memset(str_buf, 0, FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+	//格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
+
+	//获取所有要显示字符的Unicode,以及字符总个数
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
+
+	//申请字符点阵数据缓存
+	uint8_t* font_buf = NULL;
+	font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	while (!font_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+		font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	}
+	memset(font_buf, 0, total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+
+	int idx = 0;//选定操作的为[idx]号字符
+	uint32_t ASCII_num = 0;//总共含有的ASCII字符个数
+
+	//从字库读取所有字符的点阵数据到font_buf
+	for (idx = 0;idx < total_unit;idx++) {
+		if (buf_unicode[idx] >= 128) {
+			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
+		}
+		else {//Unicode小于128兼容ASCII字符集
+			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
+			ASCII_num++;
+		}
+	}
+
+	//绘制图像形成滚动效果
+
+	int32_t x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_base = 0;//当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平步数距离,这在计算[idx-1]号字符时完成累加
+
+	//如果把要滚动的字符看做一列火车车厢,屏幕看作一条小于车长的直隧洞
+	//那么隧洞有车厢存在的时间,为车头进入一刻,直到车尾离开一刻,这段时间移动距离为隧洞和车厢总长和
+	//因此这里,滚动总长度为字符链长+屏幕长,由于可显示的最小移动为一个像素点的偏移,将这个偏移称为1步,长度使用对应步数来标识
+	//因为每个字符将发生的位移一致,使用变量step作为所有字符的当前向左偏移步数,由于偏移方向与规定的屏幕x轴正方向(向右)相反,在坐标偏移运算中作减法
+	//从而,x_buf的值为对应字符([idx]号字符)在运动未开始时的初始x坐标,再减去step,过程中,step将由0累加到字符链长+屏幕长
+
+	//第1种方式 - 使用默认动画绘制
+	if (!cartoon_handle) {
+		for (int step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
+			//在当前step偏移下刷新一帧图像
+			for (idx = 0;idx < total_unit;idx++) {
+				x_buf = dx + LINE_LED_NUMBER + x_base - step;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+				//仅对可视范围内字符进行绘制
+
+				if (buf_unicode[idx] >= 128) {
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, 1 + dy, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
+					x_base += 12;
+				}
+				else {//Unicode小于128兼容ASCII字符集
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, 1 + dy, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
+					x_base += 6;
+				}
+
+			}
+			vTaskDelay(pdMS_TO_TICKS(50));
+			x_base = 0;//重置字符间隔偏移缓存
+		}
+	}
+
+	//第2种方式 - 运行sevetest30_UI提供的动画支持服务
+	if (cartoon_handle) {
+		//生成动画
+		cartoon_handle->cartoon_plan.total_step_buf = ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;//计算步数
+		cartoon_handle->create_callback(&(cartoon_handle->cartoon_plan), &(cartoon_handle->ctrl_param_list));//生成动画
+		//创建控制对象
+		int32_t cx = 0;//需要控制的x轴坐标数据,hook函数只写     
+		int32_t cy = 0;//需要控制的y轴坐标数据,hook函数只写 
+		uint8_t ccolor[3] = { color[0],color[1],color[2] };//需要控制的颜色数据,hook函数只写 
+		uint8_t cchange = change;//需要控制的亮度数据位置,hook函数只写 
+		cartoon_ctrl_object_t object = {
+			.pstep = &step,
+			.px = &cx,
+			.py = &cy,
+			.pcolor = ccolor,
+			.pchange = &cchange,
+		};
+		for (int step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
+            //调用钩子函数调整控制对象
+			cartoon_handle->ctrl_hook(&object,cartoon_handle->ctrl_param_list);
+			for (idx = 0;idx < total_unit;idx++) {
+				x_buf = dx + LINE_LED_NUMBER + x_base + cx;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+				//仅对可视范围内字符进行绘制
+				if (buf_unicode[idx] >= 128) {
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, cy + dy, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, ccolor, cchange);
+					x_base += 12;
+				}
+				else {//Unicode小于128兼容ASCII字符集
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, cy + dy, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, ccolor, cchange);
+					x_base += 6;
+				}
+			}
+			vTaskDelay(pdMS_TO_TICKS(50));
+			x_base = 0;//重置字符间隔偏移缓存
+		}
+	}
+
+
+
+
+
+	//释放所有缓存
+	free(buf_unicode);
+	buf_unicode = NULL;
+	free(str_buf);
+	str_buf = NULL;
+	free(font_buf);
+	font_buf = NULL;
+}
+
+/*******************************************************显示驱动函数**********************************************************/
+
+/// @brief 初始化灯板阵列
+void ledarray_init()
+{
+	const char* TAG = "ledarray_init";
+
+	if (!refresh_Task_Mutex) {
+		refresh_Task_Mutex = xSemaphoreCreateMutex();
+		if (!refresh_Task_Mutex) {
+			ESP_LOGE(TAG, "创建refresh_Task_Mutex互斥量时发现问题");
+			return;
+		}
+	}
+	else {
+		ESP_LOGE(TAG, "灯板阵列不可重复初始化,运行ledarray_deinit以去初始化");
+		return;
+	}
+
+	rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0;
+	rmt_config_t rmt_cfg1_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1], 1); // 使用默认通道配置模板，通道1;
+
+	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
+	rmt_cfg1_buf.clk_div = 2;
+
+	rmt_config(&rmt_cfg0_buf); // 传输配置参数
+	rmt_config(&rmt_cfg1_buf);
+	// 控制器安装  （通道选择，接收内存块数量（发送模式使用0个），中断标识）
+	rmt_driver_install(rmt_cfg0_buf.channel, 0, 0);
+	rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
+
+	// 安装 ws2812控制
+	led_strip_config_t strip_cfg0 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg0_buf.channel);
+	led_strip_config_t strip_cfg1 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg1_buf.channel);
+	strip0 = led_strip_new_rmt_ws2812(&strip_cfg0);
+	strip1 = led_strip_new_rmt_ws2812(&strip_cfg1);
+
+	rmt_cfg0 = &rmt_cfg0_buf;
+	rmt_cfg1 = &rmt_cfg0_buf;
+
+	ledarray_set_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
+
+	ESP_LOGW(TAG, " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
+}
+
+/// @brief 去初始化灯板阵列
+void ledarray_deinit()
+{
+	const char* TAG = "ledarray_deinit";
+
+	if (!refresh_Task_Mutex) {
+		ESP_LOGE(TAG, "灯板阵列未初始化,无需去初始化");
+		return;
+	}
+
+	ledarray_set_refresh_mode(LEDARRAY_REFRESH_DISABLE);
+	vSemaphoreDelete(refresh_Task_Mutex);
+	refresh_Task_Mutex = NULL;
+
+	strip0->del(strip0);
+	strip0 = NULL;
+	strip1->del(strip1);
+	strip1 = NULL;
+	rmt_driver_uninstall(0);
+	rmt_driver_uninstall(1);
+
+	ESP_LOGW(TAG, " %d X %d LED阵列去初始化重置完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
+}
+
+/// @brief 灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化
+/// @param group_sw 选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算
+void ledarray_set_and_write(uint8_t group_sw)
+{
+	if (group_sw > VERTICAL_LED_NUMBER / 2 - 1)
+	{
+		return; // 不在显示范围退出即可，允许在范围外但不报告
+	}
+
+	if (strip0 == NULL || strip1 == NULL)
+	{
+		ESP_LOGE("ledarray_set_and_write", "LED阵列未初始化");
+		return;
+	}
+
+	xSemaphoreTake(refresh_Task_Mutex, 0);
+
+	// 记录了上次调用函数刷新的组的输出IO
+	static gpio_num_t former_select0 = ledarray_gpio_info[0];
+	static gpio_num_t former_select1 = ledarray_gpio_info[1];
+
+	// strip0
+	gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
+	color_compound(group_sw * 2 + 1);										   // 合成数据
+	rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
+	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
+		strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+	strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
+
+
+	// strip1
+	gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
+	color_compound(group_sw * 2 + 2);	   // 合成数据
+	rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
+	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
+		strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+	strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
+
+	former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
+	former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
+
+	xSemaphoreGive(refresh_Task_Mutex);
+}
+
+/// @brief 颜色导入,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
+/// @param x 绝对横坐标(0 到 LINE_LED_NUMBER-1)
+/// @param y 一般纵坐标(1 到 VERTICAL_LED_NUMBER)
+/// @param dat 导入的颜色RGB数据位置
 void color_input(int8_t x, int8_t y, uint8_t* dat)
 {
-	if (x < 0 || x > LINE_LED_NUMBER)
+	if (x < 0 || x > LINE_LED_NUMBER - 1 || y < 1 || y > VERTICAL_LED_NUMBER) {
 		return; // 不在显示范围退出即可，允许在范围外但不报告
+	}
+
+	if (draw_line_count[y - 1] < 255)
+		draw_line_count[y - 1]++;//该行发生绘制活动,计数值增加
+
 	switch (y)
 	{
 	case 1:
@@ -2346,11 +957,17 @@ void color_input(int8_t x, int8_t y, uint8_t* dat)
 	}
 }
 
-// 颜色导出(x为绝对坐标值，0 到 LINE_LED_NUMBER-1)
-// SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
+/// @brief 颜色导出,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
+/// @param x 绝对横坐标(0 到 LINE_LED_NUMBER-1)
+/// @param y 一般纵坐标(1 到 LINE_LED_NUMBER)
+/// @param dat 导出存储的颜色RGB数据的位置
 void color_output(int8_t x, int8_t y, uint8_t* dat)
 {
-	if (x < 0 || x > LINE_LED_NUMBER)
+	if (!dat) {
+		ESP_LOGE("color_output", "输入了无法处理的空指针");
+		return;
+	}
+	if (x < 0 || x > LINE_LED_NUMBER - 1 || y < 1 || y > VERTICAL_LED_NUMBER)
 		return; // 不在显示范围退出即可，允许在范围外但不报告
 	switch (y)
 	{
@@ -2431,9 +1048,10 @@ void color_output(int8_t x, int8_t y, uint8_t* dat)
 	}
 }
 
-// 颜色数据合成,线路选择1-VERTICAL_LED_NUMBER
-// SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
-// 将R：red_y(x) G:green_y(x) B:blue_y(x) 合成为 为WS2812发送的数据
+
+/// @brief 颜色数据合成,将R red_y(x) G green_y(x) B blue_y(x) 合成为 为WS2812发送的数据
+/// @brief SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
+/// @param line_sw 合成选定的行(1-VERTICAL_LED_NUMBER)
 void color_compound(uint8_t line_sw)
 {
 	uint8_t i = 0;
@@ -2504,10 +1122,11 @@ void color_compound(uint8_t line_sw)
 		blue = blue_y12;
 		break;
 	default:
+		return;
 		break;
 	}
-	if (!red || !green || !blue)
-		return;
+
+	draw_line_count[line_sw - 1] = 0;//该行发生刷新活动,绘制计数值重置
 	// 填充数据
 	for (i = 0; i < LINE_LED_NUMBER; i++)
 	{
@@ -2520,81 +1139,7 @@ void color_compound(uint8_t line_sw)
 }
 
 
-/// @brief 初始化灯板阵列
-void ledarray_init()
-{
-	rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0;
-	rmt_config_t rmt_cfg1_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1], 1); // 使用默认通道配置模板，通道1;
-
-	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
-	rmt_cfg1_buf.clk_div = 2;
-
-	rmt_config(&rmt_cfg0_buf); // 传输配置参数
-	rmt_config(&rmt_cfg1_buf);
-	// 控制器安装  （通道选择，接收内存块数量（发送模式使用0个），中断标识）
-	rmt_driver_install(rmt_cfg0_buf.channel, 0, 0);
-	rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
-
-	// 安装 ws2812控制
-	led_strip_config_t strip_cfg0 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg0_buf.channel);
-	led_strip_config_t strip_cfg1 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg1_buf.channel);
-	strip0 = led_strip_new_rmt_ws2812(&strip_cfg0);
-	strip1 = led_strip_new_rmt_ws2812(&strip_cfg1);
-
-	rmt_cfg0 = &rmt_cfg0_buf;
-	rmt_cfg1 = &rmt_cfg0_buf;
-
-	ESP_LOGW("ledarray_init", " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
-}
-
-/// @brief 重置灯板阵列
-void ledarray_deinit()
-{
-	strip0->del(strip0);
-	strip0 = NULL;
-	strip1->del(strip1);
-	strip1 = NULL;
-	rmt_driver_uninstall(0);
-	rmt_driver_uninstall(1);
-}
-
-/// @brief 灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化
-/// @param group_sw 选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算
-void ledarray_set_and_write(uint8_t group_sw)
-{
-	if (group_sw > VERTICAL_LED_NUMBER / 2 - 1)
-	{
-		return; // 不在显示范围退出即可，允许在范围外但不报告
-	}
-
-	if (strip0 == NULL || strip1 == NULL)
-	{
-		ledarray_init();
-	}
-
-	// 记录了上次调用函数刷新的组的输出IO
-	static gpio_num_t former_select0 = ledarray_gpio_info[0];
-	static gpio_num_t former_select1 = ledarray_gpio_info[1];
-
-	// strip0
-	gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-	color_compound(group_sw * 2 + 1);										   // 合成数据
-	rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-		strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
-	former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
-
-	// strip1
-	gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-	color_compound(group_sw * 2 + 2);										   // 合成数据
-	rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-		strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
-	former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
-}
-
+/*******************************************************运算转换函数**********************************************************/
 // RGB亮度调制  导入r g b数值地址+亮度
 void ledarray_intensity_change(uint8_t* r, uint8_t* g, uint8_t* b, uint8_t intensity)
 {
@@ -2617,7 +1162,6 @@ void ledarray_intensity_change(uint8_t* r, uint8_t* g, uint8_t* b, uint8_t inten
 	led_strip_hsv2rgb(h, s, v, (uint32_t*)r, (uint32_t*)g, (uint32_t*)b);
 }
 
-// 因为max和min好像是c++的，这里手写一个，效果一样
 // 取三个double元素最大的那个
 double value_max(double value1, double value2, double value3)
 {

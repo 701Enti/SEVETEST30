@@ -87,11 +87,11 @@ esp_err_t fonts_chip_init()
 /// @brief 从字库读取12x12汉字字模,可以作为绘制函数的字模参数
 /// @param Unicode 汉字字模的Unicode编码
 /// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够FONT_READ_CN_12X_BYTES
-void fonts_read_zh_CN_12x(uint32_t Unicode,uint8_t* dest)
+void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest)
 {
     const char* TAG = "fonts_read_zh_CN_12x";
     esp_err_t ret = ESP_OK;
-    
+
     if (!fonts_chip_handle) {
         ESP_LOGE(TAG, "字库设备未初始化");
         return;
@@ -124,13 +124,13 @@ void fonts_read_zh_CN_12x(uint32_t Unicode,uint8_t* dest)
     gpio_set_level(interface_config.spics_io_num, 0);
 
     //通讯传输
-    ret |= spi_device_polling_start(fonts_chip_handle,&transaction,portMAX_DELAY);
+    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
     ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(FONT_READ_TIMEOUT_MS));
 
     //通讯结束
     gpio_set_level(interface_config.spics_io_num, 1);
 
-    if (ret != ESP_OK){
+    if (ret != ESP_OK) {
         ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
     }
 }
@@ -138,7 +138,7 @@ void fonts_read_zh_CN_12x(uint32_t Unicode,uint8_t* dest)
 /// @brief 从字库读取6x12 ASCII字符字模,可以作为绘制函数的字模参数
 /// @param Unicode ASCII字符字模的Unicode编码
 /// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够FONT_READ_ASCII_6X12_BYTES
-void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest) {
+void fonts_read_ASCII_6x12(uint32_t Unicode, uint8_t* dest) {
     const char* TAG = "fonts_read_ASCII_6x12";
     esp_err_t ret = ESP_OK;
 
@@ -150,7 +150,7 @@ void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest) {
     spi_transaction_t transaction;
 
     if ((Unicode >= 0x20) && (Unicode <= 0x7E))
-        transaction.addr =  (Unicode - 0x20) * 12 + FONT_ASCII_6X12_BASE_ADD;
+        transaction.addr = (Unicode - 0x20) * 12 + FONT_ASCII_6X12_BASE_ADD;
 
     transaction.length = FONT_READ_ASCII_6X12_BYTES * 8;
     transaction.rxlength = 0;
@@ -167,19 +167,24 @@ void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest) {
     gpio_set_level(interface_config.spics_io_num, 0);
 
     //通讯传输
-    ret |= spi_device_polling_start(fonts_chip_handle,&transaction,portMAX_DELAY);
+    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
     ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(FONT_READ_TIMEOUT_MS));
 
     //通讯结束
     gpio_set_level(interface_config.spics_io_num, 1);
 
-    if (ret != ESP_OK){
+    if (ret != ESP_OK) {
         ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
     }
 }
 
 
+//标准C下字符串的数据基于UTF-8编码,由于UTF-8编码本是unicode编码的再编码
+//如果我们有一个字符串,我们可以读取它指向的字符数据即UTF-8编码格式数据串
+//再使用下面的函数UTF8_Unicode_get,就可以进行格式转换,转成unicode编码格式数据串
+//从而借此unicode数据计算字符串每个字符在字库芯片的位置,读到对应字符点阵数据
 //获取 UTF-8再编码数据 对应到的 Unicode编码数据此处思路
+//(这可能需要您预先了解UTF-8编码格式)
 // 1.由于utf_idx累加,某时刻找到非[10]开头的字节,
 //   如果为0开头,直接导入unicode_dest[dest_idx],dest_idx++,继续utf_idx累加
 //   否则根据其获取 [剩余]字节数last_unit
@@ -199,7 +204,7 @@ void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest) {
 //   utf_idx_buf = 0;
 // 6.回到1
 
-/// @brief 获取字符串即UTF-8再编码数据 对应到的 Unicode编码数据
+/// @brief (计算不需要硬件字库通信)获取字符串即UTF-8再编码数据 对应到的 Unicode编码数据
 /// @param utf_dat 导入一个字符串(本质是UTF-8代码数据链指针)或者说是UTF-8再编码数据区首地址(如果使用char数组,请在末尾单元加上'\0')
 /// @param Unicode_dest Unicode编码数据缓存位置,一个uint32_t单元对应一个文字或符号的Unicode编码
 /// @param dest_len Unicode_dest缓存中能够存储uint32_t单元的个数(缓存最大可映射字符数)
@@ -265,7 +270,7 @@ uint32_t UTF8_Unicode_get(char* utf_dat, uint32_t* Unicode_dest, int dest_len) {
     return dest_idx;//返回总字符数
 }
 
-/// @brief 将Unicode编码转换为对应GB2312编码,计算方法来自高通字库 https://www.hmi.gaotongfont.cn/
+/// @brief (计算需要硬件字库通信)将Unicode编码转换为对应GB2312编码,计算方法来自高通字库 https://www.hmi.gaotongfont.cn/
 /// @param code Unicode编码
 /// @return 对应GB2312编码 设备未初始化: 0xFFFF 
 uint32_t UnicodeToGB2312(uint32_t code)
@@ -318,5 +323,21 @@ uint32_t UnicodeToGB2312(uint32_t code)
     if (ret != ESP_OK)ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
 
     return (result_code[0] << 8) | result_code[1];
+}
+
+/// @brief 计算unicode格式数据中含有的ASCII字符个数
+/// @param unicode_buf 要扫描的unicode编码数据缓存
+/// @param total_unit unicode_buf含有的总字符个数
+/// @return ASCII字符个数
+uint32_t ASCII_number_count(uint32_t* unicode_buf, int total_unit) {
+    uint32_t ASCII_num = 0;
+    if (unicode_buf) {
+      for(int j=0;j<total_unit;j++)
+        if(unicode_buf[j]<128)ASCII_num++;
+    }
+    else{
+        ESP_LOGE("ASCII_number_count", "导入了无法处理的空指针");
+    }
+    return ASCII_num;
 }
 

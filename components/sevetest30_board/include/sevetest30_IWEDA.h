@@ -41,8 +41,8 @@
 #define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 
-#define HTTP_TASK_CORE           (0)
-#define HTTP_TASK_PRIO           (1)
+#define HTTP_TASK_CORE           (0)//http任务运行核心
+#define HTTP_TASK_PRIO           (1)//http任务优先级
 
 #define ASR_RESULT_TEX_BUF_MAX (4096)
 

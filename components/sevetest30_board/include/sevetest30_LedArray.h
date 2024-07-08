@@ -28,20 +28,39 @@
 // bilibili: 701Enti
 
 #include <string.h>
+#include "esp_types.h"
 
 #ifndef _SEVETEST30_LEDARRAY_H_
 #define _SEVETEST30_LEDARRAY_H_
 #endif 
 
 #define FIGURE 4                    //数字 4x7
-#define LINE_LED_NUMBER  24         //灯板横向长度（每一根通讯线连接的WS2812数量） 此处“横向”始终表示通讯线延伸方向
-#define VERTICAL_LED_NUMBER 12      //灯板纵向长度（通讯线数量）                  此处“纵向”始终垂直通讯线延伸方向
+#define LINE_LED_NUMBER  24         //灯板横向长度(每一根通讯线连接的WS2812数量) 此处“横向”始终表示通讯线延伸方向
+#define VERTICAL_LED_NUMBER 12      //灯板纵向长度(通讯线数量)                  此处“纵向”始终垂直通讯线延伸方向
 #define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+0x01)
 #define RECTANGLE_SIZE_MAX 36//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48
 
 
-#define FONT_PRINT_NUM_MAX 512 //字库打印函数最大单次打印字符数
+#define FONT_PRINT_NUM_MAX 128 //字库打印函数最大单次打印字符数
 #define FONT_PRINT_FMT_BUF_SIZE (FONT_PRINT_NUM_MAX*10)//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留
+
+#define LEDARRAY_REFRESH_TASK_CORE           (1)//屏幕刷新任务运行核心
+#define LEDARRAY_REFRESH_TASK_PRIO           (1)//屏幕刷新任务优先级
+
+
+
+typedef enum
+{
+ LEDARRAY_REFRESH_DISABLE = 0,//禁用屏幕刷新
+ LEDARRAY_REFRESH_ALL_ONCE,//[单次全刷]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
+ LEDARRAY_REFRESH_ALL_MULTIPLE,//[多次全刷]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
+ LEDARRAY_REFRESH_PART_ONCE,//[单次局刷]一次性刷新所有发生绘制活动的行,刷新之后才发生延时
+ LEDARRAY_REFRESH_PART_MULTIPLE,//[多次局刷]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
+}ledarray_refresh_mode_t;
+
+#define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_REFRESH_PART_MULTIPLE //初始化时设置的默认屏幕刷新模式
+
+
 
 
 //数字 0-9
@@ -55,11 +74,9 @@ extern const uint8_t matrix_7 [7];
 extern const uint8_t matrix_8 [7];
 extern const uint8_t matrix_9 [7];
 
-extern const uint8_t sign_se30[872];
-extern const uint8_t sign_701[872];
 
-extern uint8_t compound_result[LINE_LED_NUMBER*3];
 
+void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode);
 
     // 以下函数将数据存储到缓冲区，不包含发送
     //sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
@@ -98,7 +115,9 @@ uint8_t *rectangle(int8_t breadth, int8_t length);
 
 void print_number(int32_t x,int32_t y,int8_t figure,uint8_t* color,uint8_t change);
 
-void font_roll_print(uint8_t color[3],uint8_t change,char* format, ...);
+void font_roll_print_12x(int32_t dx, int32_t dy,uint8_t color[3], uint8_t change, char* format, ...);
+
+void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char* format, ...);
 
 void ledarray_init();
 

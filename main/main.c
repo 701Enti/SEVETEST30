@@ -126,9 +126,12 @@ void app_main(void)
 
   // gpio_set_level(BAT_IN_CTRL_IO,0);//关机
 
-
   uint8_t color[3] = { 25,25,25 };
-  font_roll_print(color, 1, "这里是%s梦想%s-%s-%s-you", "我的","701","I","love");
+  font_roll_print_12x(0,0,color, 1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");  
+
+	vTaskDelay(pdMS_TO_TICKS(2500));
+  ledarray_set_refresh_mode(LEDARRAY_REFRESH_ALL_ONCE);
+  font_roll_print_12x(0,0,color, 1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");    
 
 
 
