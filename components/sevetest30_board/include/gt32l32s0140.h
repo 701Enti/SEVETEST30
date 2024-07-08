@@ -55,3 +55,5 @@ void fonts_read_ASCII_6x12(uint32_t Unicode,uint8_t* dest);
 uint32_t UTF8_Unicode_get(char* utf_dat, uint32_t* Unicode_dest, int dest_len);
 
 uint32_t UnicodeToGB2312(uint32_t code);
+
+uint32_t ASCII_number_count(uint32_t* unicode_buf, int total_unit);

@@ -149,7 +149,9 @@
         "ags10.h": "c",
         "assert.h": "c",
         "nvs_flash.h": "c",
-        "gt32l32s0140.h": "c"
+        "gt32l32s0140.h": "c",
+        "tcpip_adapter.h": "c",
+        "freertosconfig.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

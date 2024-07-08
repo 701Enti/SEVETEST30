@@ -54,6 +54,163 @@ bool volatile sevetest30_fft_ui_running_flag = false;
 
 void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg);
 
+
+/// @brief 帧参量渲染函数-x轴坐标,根据关键帧渲染得到所有帧的x轴坐标数据保存到param_list_buf
+/// @param plan 导入动画计划,如果是步数不定动画,需要外部预处理好关键帧的实际步位置
+/// @param param_list_buf 选择将写入到的控制参量表,需要外部申请好足够缓存
+void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list_buf) {
+    const char* TAG = "frame_param_render";
+    if (!plan || !param_list_buf) {
+        ESP_LOGE(TAG, "导入了为空的指针");
+        return;
+    }
+
+    int64_t  next_dp = 0;//下一帧增加/减少的参量值(斜率)
+
+    //1-找到所有线性关键帧和缓动关键帧,先计算间隔帧将拟合的一次函数,渲染间隔帧
+    int k_buf = 0;//缓存上一个焦点关键帧位置
+    for (int k = 0;k < plan->total_key_frame;k++) {
+        if (plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_LINEAR ||
+            plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_EASE_IN ||
+            plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_EASE_OUT
+            )
+        {
+            if (k_buf == 0)
+                k_buf = k;//第一个线性关键帧或缓动关键帧
+            else {
+                //计算参量变化斜率,遍历填充两关键帧之间的帧，保存参量到param_list_buf
+                next_dp = ((plan->key_frame_database[k].x - plan->key_frame_database[k_buf].x) * CARTOON_PARAM_RENDER_PRECISION) / (plan->key_frame_database[k].step_buf - plan->key_frame_database[k_buf].step_buf);
+                for (int s = plan->key_frame_database[k_buf].step_buf;s <= plan->key_frame_database[k].step_buf;s++)
+                    param_list_buf[s].x = plan->key_frame_database[k_buf].x + next_dp * (s - plan->key_frame_database[k_buf].step_buf) / CARTOON_PARAM_RENDER_PRECISION;
+                k_buf = k;
+            }
+        }
+    }
+
+    //2-找到缓动关键帧,如果缓入其前或缓出其后紧接拟合关键帧,拟合该缓动关键帧的缓动曲线
+    //以此调整该缓动关键帧附近的有效缓动帧数据(如果无紧接拟合关键帧,忽略)
+
+    //3-找到连续关键帧,将其视为线性关键帧与相邻两线性关键帧或缓动关键帧(视为线性关键帧)分别拟合两条一次函数
+    //得到偏移帧,与之前间隔帧取参数平均值(如果无相邻两线性关键帧或缓动关键帧,忽略)
+
+    //4-找到保持关键帧与最近的一关键帧(线性关键帧或拟合关键帧或缓动关键帧),向两者所有间隔帧填充保持关键帧数据
+    //如果其后找不到这样的关键帧,填充直到最后一帧
+}
+
+
+/// @brief 预渲染运行模式-动画生成回调
+/// @param plan 动画计划，资源在cartoon_handle_t句柄中
+/// @param dest 导入参量表的地址，资源在cartoon_handle_t句柄中
+void _PRE_RENDER_create_callback(cartoon_plan_t* plan, cartoon_ctrl_param_t** dest) {
+    const char* TAG = "_PRE_RENDER_create_callback";
+
+    if (!plan) {
+        ESP_LOGE(TAG, "导入了为空的动画计划");
+        return;
+    }
+    if (plan->total_step_buf == 0) {
+        ESP_LOGE(TAG, "总步数为0的无效动画");
+        return;
+    }
+
+    //申请控制参量表缓存
+    cartoon_ctrl_param_t* ctrl_param_list = NULL;
+    ctrl_param_list = (cartoon_ctrl_param_t*)malloc(size_of(cartoon_ctrl_param_t) * plan->total_step_buf);
+    if (!ctrl_param_list)
+    {
+        ESP_LOGE(TAG, "申请ctrl_param_list资源发现问题");
+        return;
+    }
+    memset(ctrl_param_list, 0, size_of(cartoon_ctrl_param_t) * plan->total_step_buf);
+
+    //计算所有关键帧的所在步数
+    for (int idx = 0;idx < plan->total_key_frame;idx++) {
+        plan->key_frame_database[idx].step_buf
+            = plan->key_frame_database[idx].percentage * plan->total_step_buf / 10000;
+    }
+
+    //渲染得到所有帧数据保存到控制参量表
+    frame_param_render(plan, ctrl_param_list);
+    *dest = ctrl_param_list;
+}
+
+/// @brief 预渲染运行模式-动画运行控制钩子
+/// @param object 控制对象，需要显示函数填写信息再导入
+/// @param param_list 导入参量表，资源在cartoon_handle_t句柄中
+void _PRE_RENDER_ctrl_hook(cartoon_ctrl_object_t* object, cartoon_ctrl_param_t* param_list) {
+    *(object->px) = param_list[*(object->step)].x;
+    *(object->py) = param_list[*(object->step)].y;
+    *(object->pchange) = param_list[*(object->step)].change;
+    (object->pcolor)[0] = param_list[*(object->step)].color[0];
+    (object->pcolor)[1] = param_list[*(object->step)].color[1];
+    (object->pcolor)[2] = param_list[*(object->step)].color[2];
+}
+
+
+/// @brief 创建新动画
+/// @param run_mode 运行模式，这是一个枚举类型
+/// @param key_frame_max  最大关键帧数量
+/// @return 动画的全局句柄
+cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, int key_frame_max) {
+    const char* TAG = "cartoon_new";
+    //申请动画支持缓存
+    cartoon_support_t* support = NULL;
+    support = (cartoon_support_t*)malloc(size_of(cartoon_support_t));
+    if (!support)
+    {
+        ESP_LOGE(TAG, "申请support资源发现问题");
+        return;
+    }
+    memset(support, 0, size_of(cartoon_support_t));
+
+    //确定回调与钩子方案
+    switch (run_mode)
+    {
+    case CARTOON_RUN_MODE_PRE_RENDER:
+        support->create_callback = _PRE_RENDER_create_callback();
+        support->ctrl_hook = _PRE_RENDER_ctrl_hook();
+        break;
+    case CARTOON_RUN_MODE_REAL_TIME_RENDER:
+
+        break;
+
+    default:
+        ESP_LOGE(TAG, "无法识别的运行类型");
+        free(support);
+        support = NULL;
+        return NULL;
+        break;
+    }
+
+    //申请关键帧缓存
+    key_frame_t* key_frame_database = NULL;
+    key_frame_database = (key_frame_t*)malloc(size_of(key_frame_t) * key_frame_max);
+    if (!key_frame_database)
+    {
+        ESP_LOGE(TAG, "申请key_frame_database资源发现问题");
+        free(support);
+        support = NULL;
+        return NULL;
+    }
+    memset(key_frame_database, 0, size_of(key_frame_t) * key_frame_max);
+
+    return (cartoon_handle_t)support;
+}
+
+void add_key_frame(cartoon_handle_t handle,key_frame_attr_t attr,uint32_t pct,int32_t x,int32_t y,uint8_t color[3],uint8_t change){
+
+}
+
+
+
+
+
+
+
+
+
+
+
 // 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
 // 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G B三个分量 0 - (value_max)
 // 以下函数是比较低级的数据可视化，对数据效果有很大损耗
@@ -16500,7 +16657,7 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
         esp_fill_random(&color[2], 1);
         second_buf = systemtime_data.second;
     }
-    else{
+    else {
         ESP_LOGE("time_UI_2", "时间刷新异常");
     }
 
@@ -16633,7 +16790,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
             i2s_read(running_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);// 载入FFT源数据
             vTaskDelay(pdMS_TO_TICKS(10));
         }
-        else{
+        else {
             vTaskDelay(pdMS_TO_TICKS(500));
             continue;
         }
