@@ -28,6 +28,7 @@
 // bilibili: 701Enti
 
 #include <string.h>
+#include <sevetest30_UI.h>
 #include "esp_types.h"
 
 #ifndef _SEVETEST30_LEDARRAY_H_
@@ -58,7 +59,7 @@ typedef enum
  LEDARRAY_REFRESH_PART_MULTIPLE,//[多次局刷]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
 }ledarray_refresh_mode_t;
 
-#define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_REFRESH_PART_MULTIPLE //初始化时设置的默认屏幕刷新模式
+#define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_REFRESH_ALL_ONCE //初始化时设置的默认屏幕刷新模式
 
 
 
@@ -115,7 +116,7 @@ uint8_t *rectangle(int8_t breadth, int8_t length);
 
 void print_number(int32_t x,int32_t y,int8_t figure,uint8_t* color,uint8_t change);
 
-void font_roll_print_12x(int32_t dx, int32_t dy,uint8_t color[3], uint8_t change, char* format, ...);
+void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...);
 
 void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char* format, ...);
 

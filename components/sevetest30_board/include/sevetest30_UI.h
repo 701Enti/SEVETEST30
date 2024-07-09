@@ -26,9 +26,7 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#ifndef _SEVETEST_UI_H_
-#define _SEVETEST_UI_H_
-#endif
+#pragma once
 
 #include <string.h>
 #include <stdbool.h>
@@ -120,20 +118,21 @@ typedef struct key_frame_t {
 //动画计划类型
 typedef struct cartoon_plan_t {
    key_frame_t* key_frame_database;//动画计划关键帧数据库   
-   uint32_t total_key_frame;//总关键帧数
-   uint32_t total_step_buf;//总步数缓存   
    bool x_en;//启用x轴坐标控制
    bool y_en;//启用y轴坐标控制
    bool color_en;//启用颜色控制
    bool change_en;//启用亮度控制
+   uint32_t total_key_frame;//实际总关键帧数缓存(私有缓存,用户函数请勿赋值)
+   uint32_t total_step_buf;//实际总步数缓存(私有缓存,用户函数请勿赋值) 
 }cartoon_plan_t;
 
 
+
 //动画生成回调函数类型,根据动画计划转换为控制参量表格式
-typedef void(*cartoon_create_callback_func_t)(cartoon_plan_t*, cartoon_ctrl_param_t**);
+typedef void(*cartoon_create_callback_func_t)(int);
 
 //动画控制钩子类型,用于控制和运用动画参量
-typedef void(*cartoon_ctrl_hook_func_t)(cartoon_ctrl_object_t*, cartoon_ctrl_param_t*);
+typedef void(*cartoon_ctrl_hook_func_t)(cartoon_ctrl_object_t*,int);
 
 
 typedef struct cartoon_support_t {
@@ -141,9 +140,9 @@ typedef struct cartoon_support_t {
    cartoon_ctrl_param_t* ctrl_param_list;//控制参量表,不同处理策略的控制参量表,钩子和回调都不一
    cartoon_create_callback_func_t create_callback;//动画生成回调,不同处理策略的控制参量表,钩子和回调都不一
    cartoon_ctrl_hook_func_t ctrl_hook;//动画控制的钩子函数,不同处理策略的控制参量表,钩子和回调都不一 
-};
+}cartoon_support_t;
 
-typedef cartoon_handle_t(*cartoon_support_t);
+typedef cartoon_support_t* cartoon_handle_t;
 
 
 typedef enum {
@@ -160,11 +159,15 @@ void data_to_color(int data, UI_color_visual_cfg_t* visual_cfg, uint8_t* high, u
 
 void temp_to_color(int temp, uint8_t value_max, uint8_t* high, uint8_t* comfort, uint8_t* low);
 
-// 动画支持
-//预渲染-适配函数
+//动画支持适配函数-模式:预渲染
 
-void _PRE_RENDER_create_callback(cartoon_plan_t* plan, cartoon_ctrl_param_t** dest);
-void _PRE_RENDER_ctrl_hook(cartoon_ctrl_object_t* object, cartoon_ctrl_param_t* param_list);
+void _PRE_RENDER_create_callback(cartoon_handle_t handle);
+void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* object);
+
+//动画支持通用函数
+
+cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode,bool en_x,bool en_y,bool en_color,bool en_change,int key_frame_max);
+void add_new_key_frame(cartoon_handle_t handle,key_frame_attr_t attr,uint32_t pct,int32_t x,int32_t y,uint8_t color[3],uint8_t change);
 
 
 

@@ -99,76 +99,83 @@ void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list
 
 
 /// @brief 预渲染运行模式-动画生成回调
-/// @param plan 动画计划，资源在cartoon_handle_t句柄中
-/// @param dest 导入参量表的地址，资源在cartoon_handle_t句柄中
-void _PRE_RENDER_create_callback(cartoon_plan_t* plan, cartoon_ctrl_param_t** dest) {
+/// @param handle 动画句柄
+void _PRE_RENDER_create_callback(cartoon_handle_t handle) {
     const char* TAG = "_PRE_RENDER_create_callback";
 
-    if (!plan) {
-        ESP_LOGE(TAG, "导入了为空的动画计划");
-        return;
-    }
-    if (plan->total_step_buf == 0) {
+    if (handle->cartoon_plan.total_step_buf == 0) {
         ESP_LOGE(TAG, "总步数为0的无效动画");
         return;
     }
-
     //申请控制参量表缓存
     cartoon_ctrl_param_t* ctrl_param_list = NULL;
-    ctrl_param_list = (cartoon_ctrl_param_t*)malloc(size_of(cartoon_ctrl_param_t) * plan->total_step_buf);
+    ctrl_param_list = (cartoon_ctrl_param_t*)malloc(sizeof(cartoon_ctrl_param_t) * handle->cartoon_plan.total_step_buf);
     if (!ctrl_param_list)
     {
         ESP_LOGE(TAG, "申请ctrl_param_list资源发现问题");
         return;
     }
-    memset(ctrl_param_list, 0, size_of(cartoon_ctrl_param_t) * plan->total_step_buf);
+    memset(ctrl_param_list, 0, sizeof(cartoon_ctrl_param_t) * handle->cartoon_plan.total_step_buf);
 
     //计算所有关键帧的所在步数
-    for (int idx = 0;idx < plan->total_key_frame;idx++) {
-        plan->key_frame_database[idx].step_buf
-            = plan->key_frame_database[idx].percentage * plan->total_step_buf / 10000;
+    for (int idx = 0;idx < handle->cartoon_plan.total_key_frame;idx++) {
+        handle->cartoon_plan.key_frame_database[idx].step_buf
+            = handle->cartoon_plan.key_frame_database[idx].percentage * handle->cartoon_plan.total_step_buf / 10000;
     }
 
     //渲染得到所有帧数据保存到控制参量表
-    frame_param_render(plan, ctrl_param_list);
-    *dest = ctrl_param_list;
+    if (handle->cartoon_plan.x_en)frame_param_render_x(&handle->cartoon_plan, ctrl_param_list);
+
+    handle->ctrl_param_list = ctrl_param_list;
 }
 
 /// @brief 预渲染运行模式-动画运行控制钩子
+/// @param handle 动画句柄
 /// @param object 控制对象，需要显示函数填写信息再导入
-/// @param param_list 导入参量表，资源在cartoon_handle_t句柄中
-void _PRE_RENDER_ctrl_hook(cartoon_ctrl_object_t* object, cartoon_ctrl_param_t* param_list) {
-    *(object->px) = param_list[*(object->step)].x;
-    *(object->py) = param_list[*(object->step)].y;
-    *(object->pchange) = param_list[*(object->step)].change;
-    (object->pcolor)[0] = param_list[*(object->step)].color[0];
-    (object->pcolor)[1] = param_list[*(object->step)].color[1];
-    (object->pcolor)[2] = param_list[*(object->step)].color[2];
+void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* object) {
+    if (handle->cartoon_plan.x_en){
+        *(object->px) = handle->ctrl_param_list[*(object->pstep)].x;
+    }   
+    if (handle->cartoon_plan.y_en){
+        *(object->py) = handle->ctrl_param_list[*(object->pstep)].y;
+    }     
+    if (handle->cartoon_plan.change_en){
+        *(object->pchange) = handle->ctrl_param_list[*(object->pstep)].change;
+    }
+    if (handle->cartoon_plan.color_en) {
+        (object->pcolor)[0] = handle->ctrl_param_list[*(object->pstep)].color[0];
+        (object->pcolor)[1] = handle->ctrl_param_list[*(object->pstep)].color[1];
+        (object->pcolor)[2] = handle->ctrl_param_list[*(object->pstep)].color[2];
+    }
 }
 
 
 /// @brief 创建新动画
 /// @param run_mode 运行模式，这是一个枚举类型
-/// @param key_frame_max  最大关键帧数量
+/// @param en_x 打开x轴数据的渲染开关
+/// @param en_y 打开y轴数据的渲染开关
+/// @param en_color 打开颜色数据的渲染开关
+/// @param en_change 打开亮度数据的渲染开关
+/// @param key_frame_max 最大关键帧个数
 /// @return 动画的全局句柄
-cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, int key_frame_max) {
+cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, bool en_color, bool en_change, int key_frame_max) {
     const char* TAG = "cartoon_new";
     //申请动画支持缓存
     cartoon_support_t* support = NULL;
-    support = (cartoon_support_t*)malloc(size_of(cartoon_support_t));
+    support = (cartoon_support_t*)malloc(sizeof(cartoon_support_t));
     if (!support)
     {
         ESP_LOGE(TAG, "申请support资源发现问题");
         return;
     }
-    memset(support, 0, size_of(cartoon_support_t));
+    memset(support, 0, sizeof(cartoon_support_t));
 
     //确定回调与钩子方案
     switch (run_mode)
     {
     case CARTOON_RUN_MODE_PRE_RENDER:
-        support->create_callback = _PRE_RENDER_create_callback();
-        support->ctrl_hook = _PRE_RENDER_ctrl_hook();
+        support->create_callback = _PRE_RENDER_create_callback;
+        support->ctrl_hook = _PRE_RENDER_ctrl_hook;
         break;
     case CARTOON_RUN_MODE_REAL_TIME_RENDER:
 
@@ -182,23 +189,46 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, int key_frame_max) {
         break;
     }
 
-    //申请关键帧缓存
-    key_frame_t* key_frame_database = NULL;
-    key_frame_database = (key_frame_t*)malloc(size_of(key_frame_t) * key_frame_max);
-    if (!key_frame_database)
+    //申请关键帧数据库缓存
+    key_frame_t* kf_db = NULL;
+    kf_db = (key_frame_t*)malloc(sizeof(key_frame_t) * key_frame_max);
+    if (!kf_db)
     {
         ESP_LOGE(TAG, "申请key_frame_database资源发现问题");
         free(support);
         support = NULL;
         return NULL;
     }
-    memset(key_frame_database, 0, size_of(key_frame_t) * key_frame_max);
+    memset(kf_db, 0, sizeof(key_frame_t) * key_frame_max);
+    support->cartoon_plan.key_frame_database = kf_db;
+
+    //打开渲染开关
+    support->cartoon_plan.x_en = en_x;
+    support->cartoon_plan.y_en = en_y;
+    support->cartoon_plan.color_en = en_color;
+    support->cartoon_plan.change_en = en_change;
 
     return (cartoon_handle_t)support;
 }
 
-void add_key_frame(cartoon_handle_t handle,key_frame_attr_t attr,uint32_t pct,int32_t x,int32_t y,uint8_t color[3],uint8_t change){
-
+/// @brief 添加新的关键帧到动画中
+/// @param handle 动画句柄
+/// @param attr 关键帧属性
+/// @param pct 关键帧百分位置,取值0-10000,表示播放步数百分比(末两位数表示小数部分)
+/// @param x x轴坐标
+/// @param y y轴坐标
+/// @param color 颜色
+/// @param change 亮度0-100
+void add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t x, int32_t y, uint8_t color[3], uint8_t change) {
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].frame_attribute = attr;
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].percentage = pct;
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].x = x;
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].y = y;
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[0] = color[0];
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[1] = color[1];
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[2] = color[2];
+    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].change = change;
+    handle->cartoon_plan.total_key_frame++;//自增总关键帧数,这将使得下次调用该函数操作的是下一关键帧
 }
 
 
