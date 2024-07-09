@@ -283,49 +283,52 @@ uint8_t* rectangle(int8_t breadth, int8_t length)
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
 void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
 {
-	uint32_t Dx = 0, Dy = 0; // xy的增加量
-	uint8_t dat = 0x00;		// 临时数据存储
-	uint8_t i = 0;			// 临时变量i
-	int32_t sx = 0;			// 临时存储选定的横坐标
-	bool flag = 0;			// 该像素是否需要点亮
 	if (p == NULL)
 	{
 		ESP_LOGE("separation_draw", "输入了无法处理的空指针");
 		return;
 	}
 
-	uint8_t black[3] = { 0 };
-	uint8_t color[3] = { in_color[0], in_color[1], in_color[2] };			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
-	ledarray_intensity_change(&color[0], &color[1], &color[2], change); // 亮度调制
+	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
+		uint32_t Dx = 0, Dy = 0; // xy的增加量
+		uint8_t dat = 0x00;		// 临时数据存储
+		uint8_t i = 0;			// 临时变量i
+		int32_t sx = 0;			// 临时存储选定的横坐标
+		bool flag = 0;			// 该像素是否需要点亮
+		uint8_t black[3] = { 0 };
+		uint8_t color[3] = { in_color[0], in_color[1], in_color[2] };			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
+		ledarray_intensity_change(&color[0], &color[1], &color[2], change); // 亮度调制
 
-	p--; // 地址初始补偿
-	while (byte_number)
-	{
-		p++; // 地址被动偏移
-		for (i = 0; i <= 7; i++)
+		p--; // 地址初始补偿
+		while (byte_number)
 		{
-			// 数据解析
-			dat = *p;				  // 读取数据
-			flag = (dat << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
-
-			// 存储到缓冲区
-			sx = x + Dx - 1;
-
-			if (flag)
-				color_input(sx, y + Dy, color);
-			else
-				color_input(sx, y + Dy, black);
-
-			if (Dx == breadth - 1)
+			p++; // 地址被动偏移
+			for (i = 0; i <= 7; i++)
 			{
-				Dx = 0; // 横向写入最后一个像素完毕，回车
-				Dy++;	// 横向写入最后一个像素完毕，回车
-				i = 8;	// 横向写入最后一个像素完毕，强制退出，等待地址偏移
+				// 数据解析
+				dat = *p;				  // 读取数据
+				flag = (dat << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
+
+				// 存储到缓冲区
+				sx = x + Dx - 1;
+
+				if (flag)
+					color_input(sx, y + Dy, color);
+				else
+					color_input(sx, y + Dy, black);
+
+				if (Dx == breadth - 1)
+				{
+					Dx = 0; // 横向写入最后一个像素完毕，回车
+					Dy++;	// 横向写入最后一个像素完毕，回车
+					i = 8;	// 横向写入最后一个像素完毕，强制退出，等待地址偏移
+				}
+				else
+					Dx++; // 确定写入完成一个像素
 			}
-			else
-				Dx++; // 确定写入完成一个像素
+			byte_number--; // 一个字节写入完成
 		}
-		byte_number--; // 一个字节写入完成
+		xSemaphoreGive(refresh_Task_Mutex);
 	}
 }
 
@@ -338,53 +341,56 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, ui
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
 void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change)
 {
-	uint32_t Dx = 0, Dy = 0;				  // xy的增加量
-	int32_t sx = 0;						  // 临时存储选定的横坐标	
-	uint8_t* pT1 = p, * pT2 = p, * pT3 = p; // 临时指针
-
 	if (p == NULL)
 	{
 		ESP_LOGE("direct_draw", "输入了无法处理的空指针");
 		return;
 	}
-	// 获取图案长宽数据
-	uint32_t length = 0, breadth = 0; // 长宽信息
-	uint8_t dat[4] = { 0x00 };		 // 临时数据存储
-	p += 0x02;						 // 偏移到长宽数据区
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		dat[i] = *p;
-		p++;
-	}
-	breadth = (dat[1] << 8) | dat[0];
-	length = (dat[3] << 8) | dat[2];
-	// 图像解析
-	p += 0x02;				   // 偏移到图像数据区
-	uint8_t color[3] = { 0x00 }; // 临时数据存储
-	while (length)
-	{
-		// 获取颜色数据
-		pT1 = p;
-		pT2 = p + 0x01;
-		pT3 = p + 0x02;
-		color[0] = *pT1;
-		color[1] = *pT2;
-		color[2] = *pT3;
+	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
+		uint32_t Dx = 0, Dy = 0;				  // xy的增加量
+		int32_t sx = 0;						  // 临时存储选定的横坐标	
+		uint8_t* pT1 = p, * pT2 = p, * pT3 = p; // 临时指针
 
-		ledarray_intensity_change(&color[0], &color[1], &color[2], change);
-
-		sx = x + Dx - 1;
-		color_input(sx, y + Dy, color);
-
-		if (Dx == breadth - 1)
+		// 获取图案长宽数据
+		uint32_t length = 0, breadth = 0; // 长宽信息
+		uint8_t dat[4] = { 0x00 };		 // 临时数据存储
+		p += 0x02;						 // 偏移到长宽数据区
+		for (uint8_t i = 0; i < 4; i++)
 		{
-			Dx = 0; // 横向写入最后一个像素完毕，回车
-			Dy++;	// 横向写入最后一个像素完毕，回车
-			length--;
+			dat[i] = *p;
+			p++;
 		}
-		else
-			Dx++;
-		p += 0x03; // 地址被动偏移
+		breadth = (dat[1] << 8) | dat[0];
+		length = (dat[3] << 8) | dat[2];
+		// 图像解析
+		p += 0x02;				   // 偏移到图像数据区
+		uint8_t color[3] = { 0x00 }; // 临时数据存储
+		while (length)
+		{
+			// 获取颜色数据
+			pT1 = p;
+			pT2 = p + 0x01;
+			pT3 = p + 0x02;
+			color[0] = *pT1;
+			color[1] = *pT2;
+			color[2] = *pT3;
+
+			ledarray_intensity_change(&color[0], &color[1], &color[2], change);
+
+			sx = x + Dx - 1;
+			color_input(sx, y + Dy, color);
+
+			if (Dx == breadth - 1)
+			{
+				Dx = 0; // 横向写入最后一个像素完毕，回车
+				Dy++;	// 横向写入最后一个像素完毕，回车
+				length--;
+			}
+			else
+				Dx++;
+			p += 0x03; // 地址被动偏移
+		}
+		xSemaphoreGive(refresh_Task_Mutex);
 	}
 }
 
@@ -600,13 +606,13 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 }
 
 /// @brief 通过字库芯片支持在LED阵列滚动打印任意字符
-/// @param dx 初始横坐标偏移(无范围限制)，在滚动开始位置 x = LINE_LED_NUMBER 发生的偏移(无需偏移=0,偏移>0向右偏,偏移<0向左偏)
-/// @param dy 初始纵坐标偏移(无范围限制),滚动开始位置 y = 1 发生的偏移(无需偏移=0,偏移>0向下偏,偏移<0向上偏)
+/// @param x 初始横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 初始纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
 /// @param change 亮度调制 1-100
-/// @param cartoon_handle sevetest30_UI动画支持句柄,填写NULL以使用默认效果
+/// @param cartoon_handle sevetest30_UI动画支持句柄,填写句柄启用预设的动画,填写NULL以使用默认效果
 /// @param format 形式同printf的可变参量表
-void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...) {
+void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...) {
 	const char* TAG = "font_roll_print_12x";
 
 	//申请字符unicode编码缓存
@@ -665,7 +671,7 @@ void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t chang
 	}
 
 	//绘制图像形成滚动效果
-
+	uint32_t step = 0;//当前步进值
 	int32_t x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
 	int x_base = 0;//当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平步数距离,这在计算[idx-1]号字符时完成累加
 
@@ -677,20 +683,20 @@ void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t chang
 
 	//第1种方式 - 使用默认动画绘制
 	if (!cartoon_handle) {
-		for (int step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
+		for (step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
 			//在当前step偏移下刷新一帧图像
 			for (idx = 0;idx < total_unit;idx++) {
-				x_buf = dx + LINE_LED_NUMBER + x_base - step;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+				x_buf = (x - 1) + LINE_LED_NUMBER + x_base - step;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1为初始坐标的绝对偏移坐标)
 				//仅对可视范围内字符进行绘制
 
 				if (buf_unicode[idx] >= 128) {
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, 1 + dy, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
+						separation_draw(x_buf, y, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
 					x_base += 12;
 				}
 				else {//Unicode小于128兼容ASCII字符集
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, 1 + dy, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
+						separation_draw(x_buf, y, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
 					x_base += 6;
 				}
 
@@ -704,7 +710,7 @@ void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t chang
 	if (cartoon_handle) {
 		//生成动画
 		cartoon_handle->cartoon_plan.total_step_buf = ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;//计算步数
-		cartoon_handle->create_callback(&(cartoon_handle->cartoon_plan), &(cartoon_handle->ctrl_param_list));//生成动画
+		cartoon_handle->create_callback(cartoon_handle);//生成动画
 		//创建控制对象
 		int32_t cx = 0;//需要控制的x轴坐标数据,hook函数只写     
 		int32_t cy = 0;//需要控制的y轴坐标数据,hook函数只写 
@@ -717,20 +723,20 @@ void font_roll_print_12x(int32_t dx, int32_t dy, uint8_t color[3], uint8_t chang
 			.pcolor = ccolor,
 			.pchange = &cchange,
 		};
-		for (int step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
-            //调用钩子函数调整控制对象
-			cartoon_handle->ctrl_hook(&object,cartoon_handle->ctrl_param_list);
+		for (step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
+			//调用钩子函数调整控制对象
+			cartoon_handle->ctrl_hook(cartoon_handle,&object);
 			for (idx = 0;idx < total_unit;idx++) {
-				x_buf = dx + LINE_LED_NUMBER + x_base + cx;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+				x_buf = (x - 1) + (cx - 1) + LINE_LED_NUMBER + x_base;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1 cx-1为绝对偏移坐标)
 				//仅对可视范围内字符进行绘制
 				if (buf_unicode[idx] >= 128) {
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, cy + dy, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, ccolor, cchange);
+						separation_draw(x_buf, cy + (y - 1), 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, ccolor, cchange);
 					x_base += 12;
 				}
 				else {//Unicode小于128兼容ASCII字符集
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, cy + dy, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, ccolor, cchange);
+						separation_draw(x_buf, cy + (y - 1), 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, ccolor, cchange);
 					x_base += 6;
 				}
 			}
@@ -829,40 +835,39 @@ void ledarray_set_and_write(uint8_t group_sw)
 	{
 		return; // 不在显示范围退出即可，允许在范围外但不报告
 	}
-
 	if (strip0 == NULL || strip1 == NULL)
 	{
 		ESP_LOGE("ledarray_set_and_write", "LED阵列未初始化");
 		return;
 	}
 
-	xSemaphoreTake(refresh_Task_Mutex, 0);
+	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
+		// 记录了上次调用函数刷新的组的输出IO
+		static gpio_num_t former_select0 = ledarray_gpio_info[0];
+		static gpio_num_t former_select1 = ledarray_gpio_info[1];
 
-	// 记录了上次调用函数刷新的组的输出IO
-	static gpio_num_t former_select0 = ledarray_gpio_info[0];
-	static gpio_num_t former_select1 = ledarray_gpio_info[1];
-
-	// strip0
-	gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-	color_compound(group_sw * 2 + 1);										   // 合成数据
-	rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-		strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
+		// strip0
+		gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
+		color_compound(group_sw * 2 + 1);										   // 合成数据
+		rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
+		for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
+			strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+		strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
 
 
-	// strip1
-	gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-	color_compound(group_sw * 2 + 2);	   // 合成数据
-	rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-	for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-		strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-	strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
+		// strip1
+		gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
+		color_compound(group_sw * 2 + 2);	   // 合成数据
+		rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
+		for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
+			strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+		strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
 
-	former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
-	former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
+		former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
+		former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
 
-	xSemaphoreGive(refresh_Task_Mutex);
+		xSemaphoreGive(refresh_Task_Mutex);
+	}
 }
 
 /// @brief 颜色导入,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
@@ -871,6 +876,7 @@ void ledarray_set_and_write(uint8_t group_sw)
 /// @param dat 导入的颜色RGB数据位置
 void color_input(int8_t x, int8_t y, uint8_t* dat)
 {
+
 	if (x < 0 || x > LINE_LED_NUMBER - 1 || y < 1 || y > VERTICAL_LED_NUMBER) {
 		return; // 不在显示范围退出即可，允许在范围外但不报告
 	}

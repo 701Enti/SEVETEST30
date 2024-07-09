@@ -36,13 +36,13 @@
 #define AHT21_STATUS_GET_COMMAND 0x71 //获取状态字命令
 #define AHT21_TRIGGER_COMMAND 0xAC //触发读取命令
 
-typedef struct AHT21_result_handle_t
+typedef struct AHT21_result_t
 {
   bool  flag_crc;//启用CRC校验
   bool  data_true;//数据有效(无效的话可能是数据读取失败或者CRC校验后发现问题)
   float temp;//温度,摄氏度
   float hum;//湿度,%RH
-}AHT21_result_handle_t;
+}AHT21_result_t;
 
 void AHT21_begin();
 
@@ -50,6 +50,6 @@ void AHT21_trigger();
 
 uint8_t AHT21_get_status();
 
-void AHT21_get_result(AHT21_result_handle_t* dest);
+void AHT21_get_result(AHT21_result_t* dest);
 
 

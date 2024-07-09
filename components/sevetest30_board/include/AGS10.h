@@ -60,14 +60,14 @@
 #define AGS10_I2C_FREQ_HZ (10*1000) //AGS10通讯频率,由于AGS10对通讯要求,引入频率临时变更支持
 
 
-typedef struct AGS10_result_handle_t
+typedef struct AGS10_result_t
 {
   bool  flag_crc;//启用CRC校验
   bool  data_true;//数据有效(无效的话可能是预热中或数据读取失败或者CRC校验后发现问题)
   uint32_t TVOC_data;//TVOC测量值
-}AGS10_result_handle_t;
+}AGS10_result_t;
 
 
 
-void AGS10_TVOC_result_get(AGS10_result_handle_t* dest);
+void AGS10_TVOC_result_get(AGS10_result_t* dest);
 

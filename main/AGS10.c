@@ -94,7 +94,7 @@ uint8_t Calc_CRC8(uint8_t* dat, uint8_t Num)
 }
 
 
-void AGS10_TVOC_result_get(AGS10_result_handle_t* dest) {
+void AGS10_TVOC_result_get(AGS10_result_t* dest) {
     const char* TAG = "AGS10_TVOC_result_get";
 
     if (!dest) {
@@ -103,7 +103,7 @@ void AGS10_TVOC_result_get(AGS10_result_handle_t* dest) {
     }
     else {
         bool crc_flag = dest->flag_crc;
-        memset(dest, 0, sizeof(AGS10_result_handle_t));
+        memset(dest, 0, sizeof(AGS10_result_t));
         dest->flag_crc = crc_flag;
     }
 

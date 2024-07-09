@@ -98,7 +98,6 @@ esp_err_t sevetest30_all_device_init(board_ctrl_t *board_ctrl)
     AHT21_begin();
     lsm6ds3trc_init_or_reset(); 
     vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
-
     ledarray_init();
 
     //配置设备

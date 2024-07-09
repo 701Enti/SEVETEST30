@@ -97,7 +97,7 @@ void AHT21_trigger() {
 
 /// @brief 获取测量结果
 /// @param dest 目标存储区域,同时会读取其中配置
-void AHT21_get_result(AHT21_result_handle_t* dest) {
+void AHT21_get_result(AHT21_result_t* dest) {
     const char* TAG = "AHT21_get_result";
 
     if (!dest) {
@@ -106,7 +106,7 @@ void AHT21_get_result(AHT21_result_handle_t* dest) {
     }
     else{
         bool crc_flag = dest->flag_crc;
-        memset(dest,0,sizeof(AHT21_result_handle_t));
+        memset(dest,0,sizeof(AHT21_result_t));
         dest->flag_crc = crc_flag;
     }
        

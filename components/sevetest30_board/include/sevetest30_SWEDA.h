@@ -56,8 +56,8 @@ typedef struct battery_data_t{
 }battery_data_t;
 
 
-typedef AHT21_result_handle_t env_temp_hum_data_t;
-typedef AGS10_result_handle_t env_TVOC_data_t;
+typedef AHT21_result_t env_temp_hum_data_t;
+typedef AGS10_result_t env_TVOC_data_t;
 
 
 extern systemtime_t systemtime_data;
