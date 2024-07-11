@@ -55,6 +55,8 @@
 #include "sevetest30_touch.h"
 #include "TCA6416A.h"
 
+int32_t c1b1 = 10;
+
 void app_main(void)
 {
   TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
@@ -128,12 +130,28 @@ void app_main(void)
 
   uint8_t color[3] = { 25,25,25 };
 
-  cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, true, false, false, 10);
-  if (cartoon1) {
-    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX, 1, 1, color, 1);
-    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,1, -500, 1, color, 1);
-    font_roll_print_12x(0, 0, color, 1, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
+  //屏幕测试
+  // uint8_t* rp1 = rectangle(LINE_LED_NUMBER,VERTICAL_LED_NUMBER);
+  // for(;;){
+  // separation_draw(1,1,LINE_LED_NUMBER,RECTANGLE_MATRIX(rp1),*rp1,color,3);   
+  // vTaskDelay(pdMS_TO_TICKS(100));
+  // }
+  // free(rp1);  
+
+  for (;;) {
+    cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, false, 10);
+    if (cartoon1) {
+      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color, 1);
+      uint32_t c1steg1 =
+      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color, 1);
+      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY, STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1, (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL, NULL);
+      font_roll_print_12x(1, 1, color, 1, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
+      cartoon_delete(cartoon1);
+    }
   }
+
+
+
 
 
 

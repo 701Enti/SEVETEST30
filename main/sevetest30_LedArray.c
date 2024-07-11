@@ -235,8 +235,8 @@ uint8_t* rectangle(int8_t breadth, int8_t length)
 	x_byte_num = ceil(breadth * 1.0 / 8.0);
 	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
 
-	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t));
-	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t));
+	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 1);//一个字节用于存储字模数据大小
+	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 1);
 
 	*rectangle_data = entire_byte_num; // 装载entire_byte_num
 	p = rectangle_data;
@@ -711,8 +711,8 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 		cartoon_handle->create_callback(cartoon_handle,
 		                ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER);//生成动画
 		//创建控制对象
-		int32_t cx = 0;//需要控制的x轴坐标数据,hook函数只写     
-		int32_t cy = 0;//需要控制的y轴坐标数据,hook函数只写 
+		int32_t cx = x;//需要控制的x轴坐标数据,hook函数只写     
+		int32_t cy = y;//需要控制的y轴坐标数据,hook函数只写 
 		uint8_t ccolor[3] = { color[0],color[1],color[2] };//需要控制的颜色数据,hook函数只写 
 		uint8_t cchange = change;//需要控制的亮度数据位置,hook函数只写 
 		cartoon_ctrl_object_t object = {

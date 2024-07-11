@@ -53,7 +53,7 @@ __attribute__((aligned(16))) float y_cf[FFT_N_SAMPLES * 2];
 bool volatile sevetest30_fft_ui_running_flag = false;
 
 void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg);
-
+void steganography_service(cartoon_handle_t handle, int idx);
 
 /// @brief 帧参量渲染函数-x轴坐标,根据关键帧渲染得到所有帧的x轴坐标数据保存到param_list_buf
 /// @param plan 导入动画计划,如果是步数不定动画,需要外部预处理好关键帧的实际步位置
@@ -92,7 +92,7 @@ void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list
                     }
                 }
                 else {//变化量是末始值减初始值,这里step大的为末始关键帧,不是根据param_list_buf的角标前后判断
-                        next_dp = ((plan->key_frame_database[k_buf].x - plan->key_frame_database[k].x) * CARTOON_PARAM_RENDER_PRECISION)
+                    next_dp = ((plan->key_frame_database[k_buf].x - plan->key_frame_database[k].x) * CARTOON_PARAM_RENDER_PRECISION)
                         / (int64_t)(plan->key_frame_database[k_buf].step_buf - plan->key_frame_database[k].step_buf);
                     for (int s = plan->key_frame_database[k].step_buf;s <= plan->key_frame_database[k_buf].step_buf;s++) {
                         param_list_buf[s].x = plan->key_frame_database[k].x
@@ -115,11 +115,19 @@ void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list
     //如果其后找不到这样的关键帧,填充直到最后一帧
 }
 
+
+
+
 /// @brief 预渲染运行模式-动画生成回调
 /// @param handle 动画句柄
 /// @param total_step 实际显示总细分步个数
-void _PRE_RENDER_create_callback(cartoon_handle_t handle, int64_t total_step) {
+void _PRE_RENDER_create_callback(cartoon_handle_t handle, int32_t total_step) {
     const char* TAG = "_PRE_RENDER_create_callback";
+    if (!handle) {
+        ESP_LOGE(TAG, "无效的空动画句柄");
+        return;
+    }
+
     if (total_step <= 0) {
         ESP_LOGE(TAG, "总步数异常的无效动画");
         return;
@@ -139,11 +147,18 @@ void _PRE_RENDER_create_callback(cartoon_handle_t handle, int64_t total_step) {
 
     //计算所有关键帧的所在步数
     for (int idx = 0;idx < handle->cartoon_plan.total_key_frame;idx++) {
-        if (handle->cartoon_plan.key_frame_database[idx].percentage >= 1 &&
-            handle->cartoon_plan.key_frame_database[idx].percentage <= CARTOON_KEY_FRAME_PCT_MAX)
+        if (handle->cartoon_plan.key_frame_database[idx].percentage >= 1 && handle->cartoon_plan.key_frame_database[idx].percentage <= CARTOON_KEY_FRAME_PCT_MAX)
         {
+            //关键帧数据库渲染区
             handle->cartoon_plan.key_frame_database[idx].step_buf //handle->cartoon_plan.total_step_buf-1 为 step_buf的最大允许值
                 = handle->cartoon_plan.key_frame_database[idx].percentage * (handle->cartoon_plan.total_step_buf - 1) / CARTOON_KEY_FRAME_PCT_MAX;
+        }
+        else {
+            //关键帧数据库非渲染区 
+            //隐写关键帧
+            if (handle->cartoon_plan.key_frame_database[idx].frame_attribute == KEY_FRAME_ATTR_STEGANOGRAPHY) {
+                steganography_service(handle, idx);
+            }
         }
     }
 
@@ -157,25 +172,32 @@ void _PRE_RENDER_create_callback(cartoon_handle_t handle, int64_t total_step) {
 /// @param handle 动画句柄
 /// @param object 控制对象，需要显示函数填写信息再导入
 void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* object) {
-    if (handle->cartoon_plan.x_en) {
-        *(object->px) = handle->ctrl_param_list[*(object->pstep)].x;
-    }
-    if (handle->cartoon_plan.y_en) {
-        *(object->py) = handle->ctrl_param_list[*(object->pstep)].y;
-    }
-    if (handle->cartoon_plan.change_en) {
-        *(object->pchange) = handle->ctrl_param_list[*(object->pstep)].change;
-    }
-    if (handle->cartoon_plan.color_en) {
-        (object->pcolor)[0] = handle->ctrl_param_list[*(object->pstep)].color[0];
-        (object->pcolor)[1] = handle->ctrl_param_list[*(object->pstep)].color[1];
-        (object->pcolor)[2] = handle->ctrl_param_list[*(object->pstep)].color[2];
-    }
+    const char* TAG = "_PRE_RENDER_ctrl_hook";
+    if (handle) {
+        if (handle->cartoon_plan.x_en) {
+            *(object->px) = handle->ctrl_param_list[*(object->pstep)].x;
+        }
+        if (handle->cartoon_plan.y_en) {
+            *(object->py) = handle->ctrl_param_list[*(object->pstep)].y;
+        }
+        if (handle->cartoon_plan.change_en) {
+            *(object->pchange) = handle->ctrl_param_list[*(object->pstep)].change;
+        }
+        if (handle->cartoon_plan.color_en) {
+            (object->pcolor)[0] = handle->ctrl_param_list[*(object->pstep)].color[0];
+            (object->pcolor)[1] = handle->ctrl_param_list[*(object->pstep)].color[1];
+            (object->pcolor)[2] = handle->ctrl_param_list[*(object->pstep)].color[2];
+        }
 
-    //动画显示完毕,释放参量表内存
-    if(*(object->pstep) == handle->cartoon_plan.total_step_buf - 1){
-        free(handle->ctrl_param_list);
-        handle->ctrl_param_list = NULL;
+        //动画显示完毕,释放参量表内存
+        if (*(object->pstep) == handle->cartoon_plan.total_step_buf - 1) {
+            free(handle->ctrl_param_list);
+            handle->ctrl_param_list = NULL;
+        }
+    }
+    else {
+        ESP_LOGE(TAG, "无效的空动画句柄");
+        return;
     }
 
 }
@@ -197,7 +219,7 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
     if (!support)
     {
         ESP_LOGE(TAG, "申请support资源发现问题");
-        return;
+        return NULL;
     }
     memset(support, 0, sizeof(cartoon_support_t));
 
@@ -242,24 +264,56 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
     return (cartoon_handle_t)support;
 }
 
-/// @brief 添加新的关键帧到动画中
+/// @brief 删除动画
+/// @param handle 动画句柄
+void cartoon_delete(cartoon_handle_t handle) {
+    const char* TAG = "cartoon_delete";
+    if (handle) {
+        if (handle->cartoon_plan.key_frame_database) {
+            free(handle->cartoon_plan.key_frame_database);
+            handle->cartoon_plan.key_frame_database = NULL;
+        }
+        free(handle);
+        handle = NULL;
+    }
+    else {
+        ESP_LOGE(TAG, "无效的空动画句柄");
+        return;
+    }
+}
+
+
+/// @brief 添加新的关键帧到动画中(建议先添加渲染关键帧,后添加非渲染关键帧)
 /// @param handle 动画句柄
 /// @param attr 关键帧属性
-/// @param pct 关键帧百分位置,取值0-[CARTOON_KEY_FRAME_PCT_MAX],表示播放步数百分比(末两位数表示小数部分)
+/// @param pct 对渲染关键帧:关键帧百分位置,取值0-[CARTOON_KEY_FRAME_PCT_MAX],表示播放步数百分比(末两位数表示小数部分) 对非渲染关键帧:含义特殊,需要参考上下文
+/// @param step 对渲染关键帧:无效参数填写任意值 对非渲染关键帧:含义特殊,需要参考上下文
 /// @param x x轴坐标
 /// @param y y轴坐标
 /// @param color 颜色
 /// @param change 亮度0-100
-void add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t x, int32_t y, uint8_t color[3], uint8_t change) {
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].frame_attribute = attr;
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].percentage = pct;
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].x = x;
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].y = y;
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[0] = color[0];
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[1] = color[1];
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[2] = color[2];
-    handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].change = change;
-    handle->cartoon_plan.total_key_frame++;//自增总关键帧数,这将使得下次调用该函数操作的是下一关键帧
+/// @return 这次添加完成的关键帧的角标位置
+uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change) {
+    const char* TAG = "add_new_key_frame";
+    if (handle) {
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].frame_attribute = attr;
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].percentage = pct;
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].step_buf = step;
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].x = x;
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].y = y;
+        if (color) {
+            handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[0] = color[0];
+            handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[1] = color[1];
+            handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[2] = color[2];
+        }
+        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].change = change;
+        handle->cartoon_plan.total_key_frame++;//自增总关键帧数,这将使得下次调用该函数操作的是下一关键帧    
+        return handle->cartoon_plan.total_key_frame - 1;  //这次添加完成的关键帧的角标位置  
+    }
+    else {
+        ESP_LOGE(TAG, "无效的空动画句柄");
+        return 0;
+    }
 }
 
 
@@ -16985,4 +17039,82 @@ void main_UI_1()
             sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
         }
     }
+}
+
+
+
+/// @brief 隐写支持服务
+/// @param handle 动画句柄
+/// @param idx 触发隐写的隐写关键帧在关键帧数据库的角标位置
+void steganography_service(cartoon_handle_t handle, int idx) {
+    const char* TAG = "steganography_service";
+    if (!handle) {
+        ESP_LOGE(TAG, "无效的空动画句柄");
+        return;
+    }
+    switch (handle->cartoon_plan.key_frame_database[idx].percentage)
+    {
+        //隐写模式:映射 - [警告:只有隐写关键帧设置在目标关键帧之后数据才能映射]映射内存中的数据以填充任意关键帧
+        //x y color[3] change等存储要读取的内存地址(为NULL的不读取),根据x(隐写数据位x)地址读到的数据保存到目标关键帧数据单元的x成员上,以此类推
+        //step_buf不同,存储的是要映射到的对象关键帧在key_frame_database的角标[警告:只有隐写关键帧设置在目标关键帧之后数据才能映射]
+    case STEGANOGRAPHY_MODE_MAPPING_EQUATION:
+        //相等映射,映射关系为相等,源数据直接覆盖目标位置
+        for (int pselect = 0;pselect < ((sizeof(key_frame_t) - sizeof(key_frame_attr_t) - sizeof(int32_t) - sizeof(int32_t)) / sizeof(int32_t));pselect++) {
+            if ((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t)))) {//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)
+                //对应数据位数据(预设地址数据X)非空
+                *(&(handle->cartoon_plan.key_frame_database[handle->cartoon_plan.key_frame_database[idx].step_buf].x) + pselect * sizeof(int32_t)) //对应变量的地址->对应变量
+                =
+                *((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t))));//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)->该(预设地址)对应的变量值
+            }
+        }
+        break;
+    case STEGANOGRAPHY_MODE_MAPPING_ADDITION:
+        //加法映射,覆盖目标位置的值为 [映射前目标位置的值 加上 源数据]
+        for (int pselect = 0;pselect < ((sizeof(key_frame_t) - sizeof(key_frame_attr_t) - sizeof(int32_t) - sizeof(int32_t)) / sizeof(int32_t));pselect++) {
+            if ((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t)))) {//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)
+                //对应数据位数据(预设地址数据X)非空
+                *(&(handle->cartoon_plan.key_frame_database[handle->cartoon_plan.key_frame_database[idx].step_buf].x) + pselect * sizeof(int32_t)) //对应变量的地址->对应变量
+                +=
+                *((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t))));//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)->该(预设地址)对应的变量值
+            }
+        }
+        break;
+    case STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION:
+        //减法映射,覆盖目标位置的值为 [映射前目标位置的值 减去 源数据]
+        for (int pselect = 0;pselect < ((sizeof(key_frame_t) - sizeof(key_frame_attr_t) - sizeof(int32_t) - sizeof(int32_t)) / sizeof(int32_t));pselect++) {
+            if ((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t)))) {//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)
+                //对应数据位数据(预设地址数据X)非空
+                *(&(handle->cartoon_plan.key_frame_database[handle->cartoon_plan.key_frame_database[idx].step_buf].x) + pselect * sizeof(int32_t)) //对应变量的地址->对应变量
+                -=
+                *((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t))));//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)->该(预设地址)对应的变量值
+            }
+        }
+        break;
+    case STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION:
+        //乘法映射,覆盖目标位置的值为[映射前目标位置的值 乘上 源数据]
+        for (int pselect = 0;pselect < ((sizeof(key_frame_t) - sizeof(key_frame_attr_t) - sizeof(int32_t) - sizeof(int32_t)) / sizeof(int32_t));pselect++) {
+            if ((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t)))) {//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)
+                //对应数据位数据(预设地址数据X)非空
+                *(&(handle->cartoon_plan.key_frame_database[handle->cartoon_plan.key_frame_database[idx].step_buf].x) + pselect * sizeof(int32_t)) //对应变量的地址->对应变量
+                *=
+                *((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t))));//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)->该(预设地址)对应的变量值
+            }
+        }
+        break;
+    case STEGANOGRAPHY_MODE_MAPPING_DIVISION:
+        //除法映射,覆盖目标位置的值为[映射前目标位置的值 除以 源数据]
+        for (int pselect = 0;pselect < ((sizeof(key_frame_t) - sizeof(key_frame_attr_t) - sizeof(int32_t) - sizeof(int32_t)) / sizeof(int32_t));pselect++) {
+            if ((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t)))) {//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)
+                //对应数据位数据(预设地址数据X)非空
+                *(&(handle->cartoon_plan.key_frame_database[handle->cartoon_plan.key_frame_database[idx].step_buf].x) + pselect * sizeof(int32_t)) //对应变量的地址->对应变量
+                /=
+                *((int32_t*)(*(&(handle->cartoon_plan.key_frame_database[idx].x) + pselect * sizeof(int32_t))));//隐写关键帧对应数据位地址->对应数据位数据(即预设地址)->该(预设地址)对应的变量值
+            }
+        }
+        break;
+    default:
+        ESP_LOGE(TAG, "未知的隐写模式");
+        break;
+    }
+
 }
