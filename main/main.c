@@ -130,8 +130,8 @@ void app_main(void)
 
   cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, true, false, false, 10);
   if (cartoon1) {
-    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, 0, 1, 1, color, 1);
-    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, 10000, -500, 1, color, 1);
+    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX, 1, 1, color, 1);
+    add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,1, -500, 1, color, 1);
     font_roll_print_12x(0, 0, color, 1, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
   }
 

@@ -68,20 +68,38 @@ void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list
     int64_t  next_dp = 0;//下一帧增加/减少的参量值(斜率)
 
     //1-找到所有线性关键帧和缓动关键帧,先计算间隔帧将拟合的一次函数,渲染间隔帧
-    int k_buf = 0;//缓存上一个焦点关键帧位置
+
+    //初始值赋值-1而不是0以防止k=0就符合关键帧判断条件,之后使得(k_buf == 0)两次执行丢失关键帧数据的情况
+    int k_buf = -1;//缓存上一个焦点关键帧位置
     for (int k = 0;k < plan->total_key_frame;k++) {
         if (plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_LINEAR ||
             plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_EASE_IN ||
             plan->key_frame_database[k].frame_attribute == KEY_FRAME_ATTR_EASE_OUT
             )
         {
-            if (k_buf == 0)
+            if (k_buf == -1) {//初始值赋值-1而不是0以防止k=0就符合关键帧判断条件,之后使得(k_buf == 0)两次执行丢失关键帧数据的情况
                 k_buf = k;//第一个线性关键帧或缓动关键帧
+            }
             else {
+
                 //计算参量变化斜率,遍历填充两关键帧之间的帧，保存参量到param_list_buf
-                next_dp = ((plan->key_frame_database[k].x - plan->key_frame_database[k_buf].x) * CARTOON_PARAM_RENDER_PRECISION) / (plan->key_frame_database[k].step_buf - plan->key_frame_database[k_buf].step_buf);
-                for (int s = plan->key_frame_database[k_buf].step_buf;s <= plan->key_frame_database[k].step_buf;s++)
-                    param_list_buf[s].x = plan->key_frame_database[k_buf].x + next_dp * (s - plan->key_frame_database[k_buf].step_buf) / CARTOON_PARAM_RENDER_PRECISION;
+                if (plan->key_frame_database[k].step_buf >= plan->key_frame_database[k_buf].step_buf) {
+                    next_dp = ((plan->key_frame_database[k].x - plan->key_frame_database[k_buf].x) * CARTOON_PARAM_RENDER_PRECISION)
+                        / (int64_t)(plan->key_frame_database[k].step_buf - plan->key_frame_database[k_buf].step_buf);
+                    for (int s = plan->key_frame_database[k_buf].step_buf;s <= plan->key_frame_database[k].step_buf;s++) {
+                        param_list_buf[s].x = plan->key_frame_database[k_buf].x
+                            + next_dp * (s - plan->key_frame_database[k_buf].step_buf) / CARTOON_PARAM_RENDER_PRECISION;
+                    }
+                }
+                else {//变化量是末始值减初始值,这里step大的为末始关键帧,不是根据param_list_buf的角标前后判断
+                        next_dp = ((plan->key_frame_database[k_buf].x - plan->key_frame_database[k].x) * CARTOON_PARAM_RENDER_PRECISION)
+                        / (int64_t)(plan->key_frame_database[k_buf].step_buf - plan->key_frame_database[k].step_buf);
+                    for (int s = plan->key_frame_database[k].step_buf;s <= plan->key_frame_database[k_buf].step_buf;s++) {
+                        param_list_buf[s].x = plan->key_frame_database[k].x
+                            + next_dp * (s - plan->key_frame_database[k].step_buf) / CARTOON_PARAM_RENDER_PRECISION;
+                    }
+                }
+
                 k_buf = k;
             }
         }
@@ -97,15 +115,17 @@ void frame_param_render_x(cartoon_plan_t* plan, cartoon_ctrl_param_t* param_list
     //如果其后找不到这样的关键帧,填充直到最后一帧
 }
 
-
 /// @brief 预渲染运行模式-动画生成回调
 /// @param handle 动画句柄
-void _PRE_RENDER_create_callback(cartoon_handle_t handle) {
+/// @param total_step 实际显示总细分步个数
+void _PRE_RENDER_create_callback(cartoon_handle_t handle, int64_t total_step) {
     const char* TAG = "_PRE_RENDER_create_callback";
-
-    if (handle->cartoon_plan.total_step_buf == 0) {
-        ESP_LOGE(TAG, "总步数为0的无效动画");
+    if (total_step <= 0) {
+        ESP_LOGE(TAG, "总步数异常的无效动画");
         return;
+    }
+    else {
+        handle->cartoon_plan.total_step_buf = total_step;
     }
     //申请控制参量表缓存
     cartoon_ctrl_param_t* ctrl_param_list = NULL;
@@ -119,8 +139,12 @@ void _PRE_RENDER_create_callback(cartoon_handle_t handle) {
 
     //计算所有关键帧的所在步数
     for (int idx = 0;idx < handle->cartoon_plan.total_key_frame;idx++) {
-        handle->cartoon_plan.key_frame_database[idx].step_buf
-            = handle->cartoon_plan.key_frame_database[idx].percentage * handle->cartoon_plan.total_step_buf / 10000;
+        if (handle->cartoon_plan.key_frame_database[idx].percentage >= 1 &&
+            handle->cartoon_plan.key_frame_database[idx].percentage <= CARTOON_KEY_FRAME_PCT_MAX)
+        {
+            handle->cartoon_plan.key_frame_database[idx].step_buf //handle->cartoon_plan.total_step_buf-1 为 step_buf的最大允许值
+                = handle->cartoon_plan.key_frame_database[idx].percentage * (handle->cartoon_plan.total_step_buf - 1) / CARTOON_KEY_FRAME_PCT_MAX;
+        }
     }
 
     //渲染得到所有帧数据保存到控制参量表
@@ -133,13 +157,13 @@ void _PRE_RENDER_create_callback(cartoon_handle_t handle) {
 /// @param handle 动画句柄
 /// @param object 控制对象，需要显示函数填写信息再导入
 void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* object) {
-    if (handle->cartoon_plan.x_en){
+    if (handle->cartoon_plan.x_en) {
         *(object->px) = handle->ctrl_param_list[*(object->pstep)].x;
-    }   
-    if (handle->cartoon_plan.y_en){
+    }
+    if (handle->cartoon_plan.y_en) {
         *(object->py) = handle->ctrl_param_list[*(object->pstep)].y;
-    }     
-    if (handle->cartoon_plan.change_en){
+    }
+    if (handle->cartoon_plan.change_en) {
         *(object->pchange) = handle->ctrl_param_list[*(object->pstep)].change;
     }
     if (handle->cartoon_plan.color_en) {
@@ -147,6 +171,13 @@ void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* objec
         (object->pcolor)[1] = handle->ctrl_param_list[*(object->pstep)].color[1];
         (object->pcolor)[2] = handle->ctrl_param_list[*(object->pstep)].color[2];
     }
+
+    //动画显示完毕,释放参量表内存
+    if(*(object->pstep) == handle->cartoon_plan.total_step_buf - 1){
+        free(handle->ctrl_param_list);
+        handle->ctrl_param_list = NULL;
+    }
+
 }
 
 
@@ -214,7 +245,7 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
 /// @brief 添加新的关键帧到动画中
 /// @param handle 动画句柄
 /// @param attr 关键帧属性
-/// @param pct 关键帧百分位置,取值0-10000,表示播放步数百分比(末两位数表示小数部分)
+/// @param pct 关键帧百分位置,取值0-[CARTOON_KEY_FRAME_PCT_MAX],表示播放步数百分比(末两位数表示小数部分)
 /// @param x x轴坐标
 /// @param y y轴坐标
 /// @param color 颜色
