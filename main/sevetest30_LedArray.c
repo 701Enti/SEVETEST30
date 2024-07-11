@@ -708,9 +708,8 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 	//第2种方式 - 运行sevetest30_UI提供的动画支持服务
 	if (cartoon_handle) {
-		//生成动画
-		cartoon_handle->cartoon_plan.total_step_buf = ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;//计算步数
-		cartoon_handle->create_callback(cartoon_handle);//生成动画
+		cartoon_handle->create_callback(cartoon_handle,
+		                ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER);//生成动画
 		//创建控制对象
 		int32_t cx = 0;//需要控制的x轴坐标数据,hook函数只写     
 		int32_t cy = 0;//需要控制的y轴坐标数据,hook函数只写 
