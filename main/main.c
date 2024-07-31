@@ -138,17 +138,20 @@ void app_main(void)
   // }
   // free(rp1);  
 
-  for (;;) {
-    cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, false, 10);
-    if (cartoon1) {
-      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color, 1);
-      uint32_t c1steg1 =
-      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color, 1);
-      add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY, STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1, (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL, NULL);
-      font_roll_print_12x(1, 1, color, 1, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
-      cartoon_delete(cartoon1);
-    }
-  }
+
+// ///其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段,目前稳定
+//   for (;;) {
+//     cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, false, 10);
+//     if (cartoon1) {
+//       add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color, 1);
+//       add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false,-100, 1, color, 1);
+//       uint32_t c1steg1 =
+//       add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color, 1);
+//       add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY, STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1, (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL, NULL);
+//       font_roll_print_12x(1, 1, color, 1, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
+//       cartoon_delete(cartoon1);
+//     }
+//   }
 
 
 
