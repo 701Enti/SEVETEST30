@@ -20,7 +20,7 @@ jobs:
         REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
         DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
     - name: call reusable workflow to compelete sync
-      uses: 701Enti/Github-WorkFlows/.github/workflows/sphinx-auto-code-to-doc.yml
+      uses: 701Enti/Github-WorkFlows@master/.github/workflows/sphinx-auto-code-to-doc.yml
       with:
         codeRepo: $CODE_REPO
         docRepo: $DOC_REPO
