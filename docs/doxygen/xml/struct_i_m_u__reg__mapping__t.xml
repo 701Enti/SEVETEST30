@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_i_m_u__reg__mapping__t" kind="struct" language="C++" prot="public">
+    <compoundname>IMU_reg_mapping_t</compoundname>
+    <includes refid="lsm6ds3trc_8h" local="no">lsm6ds3trc.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_i_m_u__reg__mapping__t_1a0bbdc838c5611afe00877d8742b8bda4" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t IMU_reg_mapping_t::reg_address</definition>
+        <argsstring></argsstring>
+        <name>reg_address</name>
+        <qualifiedname>IMU_reg_mapping_t::reg_address</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="340" column="11" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="340" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t IMU_reg_mapping_t::reg_value</definition>
+        <argsstring></argsstring>
+        <name>reg_value</name>
+        <qualifiedname>IMU_reg_mapping_t::reg_value</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="341" column="12" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="341" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="338" column="1" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="339" bodyend="342"/>
+    <listofallmembers>
+      <member refid="struct_i_m_u__reg__mapping__t_1a0bbdc838c5611afe00877d8742b8bda4" prot="public" virt="non-virtual"><scope>IMU_reg_mapping_t</scope><name>reg_address</name></member>
+      <member refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" prot="public" virt="non-virtual"><scope>IMU_reg_mapping_t</scope><name>reg_value</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

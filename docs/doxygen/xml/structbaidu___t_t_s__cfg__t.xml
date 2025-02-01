@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structbaidu___t_t_s__cfg__t" kind="struct" language="C++" prot="public">
+    <compoundname>baidu_TTS_cfg_t</compoundname>
+    <includes refid="sevetest30__sound_8h" local="no">sevetest30_sound.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structbaidu___t_t_s__cfg__t_1a404cecb80bf26a140f781e6ae6760ddd" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* baidu_TTS_cfg_t::tex</definition>
+        <argsstring></argsstring>
+        <name>tex</name>
+        <qualifiedname>baidu_TTS_cfg_t::tex</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="59" column="8" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___t_t_s__cfg__t_1a12acb61397a38d7f24c49795434f6236" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t baidu_TTS_cfg_t::spd</definition>
+        <argsstring></argsstring>
+        <name>spd</name>
+        <qualifiedname>baidu_TTS_cfg_t::spd</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="60" column="11" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___t_t_s__cfg__t_1a62a3d1ff224638cd7ecd2d7494af9440" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t baidu_TTS_cfg_t::pit</definition>
+        <argsstring></argsstring>
+        <name>pit</name>
+        <qualifiedname>baidu_TTS_cfg_t::pit</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="61" column="11" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___t_t_s__cfg__t_1af1f546b339a59d744071cf5b0b190cf5" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t baidu_TTS_cfg_t::vol</definition>
+        <argsstring></argsstring>
+        <name>vol</name>
+        <qualifiedname>baidu_TTS_cfg_t::vol</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="62" column="11" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___t_t_s__cfg__t_1a226cff9b2c2b139b46e5301532c4a586" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int baidu_TTS_cfg_t::per</definition>
+        <argsstring></argsstring>
+        <name>per</name>
+        <qualifiedname>baidu_TTS_cfg_t::per</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="63" column="7" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/sevetest30_sound.h" line="57" column="1" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="58" bodyend="64"/>
+    <listofallmembers>
+      <member refid="structbaidu___t_t_s__cfg__t_1a226cff9b2c2b139b46e5301532c4a586" prot="public" virt="non-virtual"><scope>baidu_TTS_cfg_t</scope><name>per</name></member>
+      <member refid="structbaidu___t_t_s__cfg__t_1a62a3d1ff224638cd7ecd2d7494af9440" prot="public" virt="non-virtual"><scope>baidu_TTS_cfg_t</scope><name>pit</name></member>
+      <member refid="structbaidu___t_t_s__cfg__t_1a12acb61397a38d7f24c49795434f6236" prot="public" virt="non-virtual"><scope>baidu_TTS_cfg_t</scope><name>spd</name></member>
+      <member refid="structbaidu___t_t_s__cfg__t_1a404cecb80bf26a140f781e6ae6760ddd" prot="public" virt="non-virtual"><scope>baidu_TTS_cfg_t</scope><name>tex</name></member>
+      <member refid="structbaidu___t_t_s__cfg__t_1af1f546b339a59d744071cf5b0b190cf5" prot="public" virt="non-virtual"><scope>baidu_TTS_cfg_t</scope><name>vol</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

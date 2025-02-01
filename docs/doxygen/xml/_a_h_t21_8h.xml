@@ -1,0 +1,250 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="_a_h_t21_8h" kind="file" language="C++">
+    <compoundname>AHT21.h</compoundname>
+    <includes local="yes">esp_types.h</includes>
+    <includedby refid="sevetest30___s_w_e_d_a_8h" local="yes">components/sevetest30_board/include/sevetest30_SWEDA.h</includedby>
+    <includedby refid="_a_h_t21_8c" local="no">main/AHT21.c</includedby>
+    <includedby refid="board__ctrl_8c" local="yes">main/board_ctrl.c</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/include/AHT21.h</label>
+        <link refid="_a_h_t21_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>esp_types.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/include/AHT21.h</label>
+        <link refid="_a_h_t21_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>components/sevetest30_board/include/sevetest30_SWEDA.h</label>
+        <link refid="sevetest30___s_w_e_d_a_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>main/AHT21.c</label>
+        <link refid="_a_h_t21_8c"/>
+      </node>
+      <node id="7">
+        <label>main/board_ctrl.c</label>
+        <link refid="board__ctrl_8c"/>
+      </node>
+      <node id="3">
+        <label>main/main.c</label>
+        <link refid="main_8c"/>
+      </node>
+      <node id="4">
+        <label>main/sevetest30_SWEDA.c</label>
+        <link refid="sevetest30___s_w_e_d_a_8c"/>
+      </node>
+      <node id="5">
+        <label>main/sevetest30_UI.c</label>
+        <link refid="sevetest30___u_i_8c"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="struct_a_h_t21__result__t" prot="public">AHT21_result_t</innerclass>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="_a_h_t21_8h_1a6cb5807c1ff36a7539ea67ece377aa69" prot="public" static="no">
+        <name>AHT21_DEVICE_ADD</name>
+        <initializer>0x38</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="34" column="9" bodyfile="components/sevetest30_board/include/AHT21.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="_a_h_t21_8h_1a95fa7d3b12746adb40c510ab6819e310" prot="public" static="no">
+        <name>AHT21_STATUS_GET_COMMAND</name>
+        <initializer>0x71</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="36" column="9" bodyfile="components/sevetest30_board/include/AHT21.h" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="_a_h_t21_8h_1ab8f3b88c6d0dc3b0b95bf2f90443e0eb" prot="public" static="no">
+        <name>AHT21_TRIGGER_COMMAND</name>
+        <initializer>0xAC</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="37" column="9" bodyfile="components/sevetest30_board/include/AHT21.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="_a_h_t21_8h_1abfcf205e91bd7d06f626626e3651edd7" prot="public" static="no">
+        <type>struct AHT21_result_t</type>
+        <definition>typedef struct AHT21_result_t AHT21_result_t</definition>
+        <argsstring></argsstring>
+        <name>AHT21_result_t</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="45" column="15"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="_a_h_t21_8h_1a93a1dec19424b87fab4cd90a028ededd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void AHT21_begin</definition>
+        <argsstring>()</argsstring>
+        <name>AHT21_begin</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="47" column="6" bodyfile="main/AHT21.c" bodystart="35" bodyend="44" declfile="components/sevetest30_board/include/AHT21.h" declline="47" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="_a_h_t21_8h_1a1c6da2f36fef6eec0e404910e77102d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void AHT21_trigger</definition>
+        <argsstring>()</argsstring>
+        <name>AHT21_trigger</name>
+        <briefdescription>
+<para>触发测量 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="49" column="6" bodyfile="main/AHT21.c" bodystart="86" bodyend="96" declfile="components/sevetest30_board/include/AHT21.h" declline="49" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="_a_h_t21_8h_1a99f6c77204fcdd4841705367b6e811dd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t AHT21_get_status</definition>
+        <argsstring>()</argsstring>
+        <name>AHT21_get_status</name>
+        <briefdescription>
+<para>获取运行状态字 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>一个字节的状态字 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="51" column="9" bodyfile="main/AHT21.c" bodystart="48" bodyend="57" declfile="components/sevetest30_board/include/AHT21.h" declline="51" declcolumn="9"/>
+      </memberdef>
+      <memberdef kind="function" id="_a_h_t21_8h_1a73ecb3c8fb53f37e054055d47cf67bd1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void AHT21_get_result</definition>
+        <argsstring>(AHT21_result_t *dest)</argsstring>
+        <name>AHT21_get_result</name>
+        <param>
+          <type><ref refid="struct_a_h_t21__result__t" kindref="compound">AHT21_result_t</ref> *</type>
+          <declname>dest</declname>
+        </param>
+        <briefdescription>
+<para>获取测量结果 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>dest</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>目标存储区域,同时会读取其中配置 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/AHT21.h" line="53" column="6" bodyfile="main/AHT21.c" bodystart="100" bodyend="151" declfile="components/sevetest30_board/include/AHT21.h" declline="53" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*<sp/>701Enti<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>©<sp/>2024<sp/>&lt;701Enti<sp/>organization&gt;</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted,<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated<sp/>documentation<sp/>files<sp/>(the<sp/>“Software”),</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including<sp/>without<sp/>limitation</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>“AS<sp/>IS”,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR<sp/>IMPLIED,</highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>WHETHER<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>OUT<sp/>OF<sp/>OR<sp/>IN<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对温湿度传感器<sp/>AHT21的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>如您发现一些问题，请及时联系我们，我们非常感谢您的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>AHT21的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢<sp/>http://www.aosong.com/products-99.html</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>github:<sp/>https://github.com/701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>bilibili:<sp/>701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;esp_types.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="comment">//<sp/>I2C相关配置宏定义在board_def.h下</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34" refid="_a_h_t21_8h_1a6cb5807c1ff36a7539ea67ece377aa69" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>AHT21_DEVICE_ADD<sp/>0x38</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="_a_h_t21_8h_1a95fa7d3b12746adb40c510ab6819e310" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>AHT21_STATUS_GET_COMMAND<sp/>0x71<sp/></highlight><highlight class="comment">//获取状态字命令</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37" refid="_a_h_t21_8h_1ab8f3b88c6d0dc3b0b95bf2f90443e0eb" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>AHT21_TRIGGER_COMMAND<sp/>0xAC<sp/></highlight><highlight class="comment">//触发读取命令</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="struct_a_h_t21__result__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="struct_a_h_t21__result__t" kindref="compound">AHT21_result_t</ref></highlight></codeline>
+<codeline lineno="40"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="41" refid="struct_a_h_t21__result__t_1a3d498aeb5c2ce730ccf607676de14671" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><ref refid="struct_a_h_t21__result__t_1a3d498aeb5c2ce730ccf607676de14671" kindref="member">flag_crc</ref>;</highlight><highlight class="comment">//启用CRC校验</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42" refid="struct_a_h_t21__result__t_1ae0d5736586c46dd7a991f2772f7a9e42" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><ref refid="struct_a_h_t21__result__t_1ae0d5736586c46dd7a991f2772f7a9e42" kindref="member">data_true</ref>;</highlight><highlight class="comment">//数据有效(无效的话可能是数据读取失败或者CRC校验后发现问题)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43" refid="struct_a_h_t21__result__t_1a71d38f4c510e978f0671f5a94c397079" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="struct_a_h_t21__result__t_1a71d38f4c510e978f0671f5a94c397079" kindref="member">temp</ref>;</highlight><highlight class="comment">//温度,摄氏度</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="44" refid="struct_a_h_t21__result__t_1a07409d91fa04cf4cee9baadae068aa5b" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="struct_a_h_t21__result__t_1a07409d91fa04cf4cee9baadae068aa5b" kindref="member">hum</ref>;</highlight><highlight class="comment">//湿度,%RH</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45" refid="_a_h_t21_8h_1abfcf205e91bd7d06f626626e3651edd7" refkind="member"><highlight class="normal">}<ref refid="struct_a_h_t21__result__t" kindref="compound">AHT21_result_t</ref>;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="_a_h_t21_8h_1a93a1dec19424b87fab4cd90a028ededd" kindref="member">AHT21_begin</ref>();</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="_a_h_t21_8h_1a1c6da2f36fef6eec0e404910e77102d4" kindref="member">AHT21_trigger</ref>();</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal">uint8_t<sp/><ref refid="_a_h_t21_8h_1a99f6c77204fcdd4841705367b6e811dd" kindref="member">AHT21_get_status</ref>();</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="_a_h_t21_8h_1a73ecb3c8fb53f37e054055d47cf67bd1" kindref="member">AHT21_get_result</ref>(<ref refid="struct_a_h_t21__result__t" kindref="compound">AHT21_result_t</ref>*<sp/>dest);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="components/sevetest30_board/include/AHT21.h"/>
+  </compounddef>
+</doxygen>

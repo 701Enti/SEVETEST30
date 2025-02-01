@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structbattery__data__t" kind="struct" language="C++" prot="public">
+    <compoundname>battery_data_t</compoundname>
+    <includes refid="sevetest30___s_w_e_d_a_8h" local="no">sevetest30_SWEDA.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structbattery__data__t_1a9a925d719be87d8de3e357cb5f3c066c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool battery_data_t::charge_flag</definition>
+        <argsstring></argsstring>
+        <name>charge_flag</name>
+        <qualifiedname>battery_data_t::charge_flag</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_SWEDA.h" line="54" column="8" bodyfile="components/sevetest30_board/include/sevetest30_SWEDA.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbattery__data__t_1ab96cf5ffcc37ddb870c192a0f7f2369b" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool battery_data_t::finished_flag</definition>
+        <argsstring></argsstring>
+        <name>finished_flag</name>
+        <qualifiedname>battery_data_t::finished_flag</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_SWEDA.h" line="55" column="8" bodyfile="components/sevetest30_board/include/sevetest30_SWEDA.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/sevetest30_SWEDA.h" line="53" column="1" bodyfile="components/sevetest30_board/include/sevetest30_SWEDA.h" bodystart="53" bodyend="56"/>
+    <listofallmembers>
+      <member refid="structbattery__data__t_1a9a925d719be87d8de3e357cb5f3c066c" prot="public" virt="non-virtual"><scope>battery_data_t</scope><name>charge_flag</name></member>
+      <member refid="structbattery__data__t_1ab96cf5ffcc37ddb870c192a0f7f2369b" prot="public" virt="non-virtual"><scope>battery_data_t</scope><name>finished_flag</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

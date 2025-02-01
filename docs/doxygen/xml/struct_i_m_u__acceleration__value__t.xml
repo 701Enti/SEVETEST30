@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_i_m_u__acceleration__value__t" kind="struct" language="C++" prot="public">
+    <compoundname>IMU_acceleration_value_t</compoundname>
+    <includes refid="lsm6ds3trc_8h" local="no">lsm6ds3trc.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_acceleration_value_t::x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <qualifiedname>IMU_acceleration_value_t::x</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="165" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="165" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_acceleration_value_t::y</definition>
+        <argsstring></argsstring>
+        <name>y</name>
+        <qualifiedname>IMU_acceleration_value_t::y</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="166" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="166" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_acceleration_value_t::z</definition>
+        <argsstring></argsstring>
+        <name>z</name>
+        <qualifiedname>IMU_acceleration_value_t::z</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="167" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="167" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="164" column="1" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="164" bodyend="168"/>
+    <listofallmembers>
+      <member refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" prot="public" virt="non-virtual"><scope>IMU_acceleration_value_t</scope><name>x</name></member>
+      <member refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" prot="public" virt="non-virtual"><scope>IMU_acceleration_value_t</scope><name>y</name></member>
+      <member refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" prot="public" virt="non-virtual"><scope>IMU_acceleration_value_t</scope><name>z</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

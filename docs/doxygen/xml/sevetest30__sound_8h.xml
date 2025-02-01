@@ -1,0 +1,678 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="sevetest30__sound_8h" kind="file" language="C++">
+    <compoundname>sevetest30_sound.h</compoundname>
+    <includes local="yes">stdbool.h</includes>
+    <includes local="yes">freertos/FreeRTOS.h</includes>
+    <includes local="yes">freertos/task.h</includes>
+    <includes local="yes">audio_event_iface.h</includes>
+    <includedby refid="main_8c" local="yes">main/main.c</includedby>
+    <includedby refid="sevetest30___i_w_e_d_a_8c" local="yes">main/sevetest30_IWEDA.c</includedby>
+    <includedby refid="sevetest30___u_i_8c" local="no">main/sevetest30_UI.c</includedby>
+    <includedby refid="sevetest30__sound_8c" local="yes">main/sevetest30_sound.c</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/include/sevetest30_sound.h</label>
+        <link refid="sevetest30__sound_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>audio_event_iface.h</label>
+      </node>
+      <node id="3">
+        <label>freertos/FreeRTOS.h</label>
+      </node>
+      <node id="4">
+        <label>freertos/task.h</label>
+      </node>
+      <node id="2">
+        <label>stdbool.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/include/sevetest30_sound.h</label>
+        <link refid="sevetest30__sound_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>main/main.c</label>
+        <link refid="main_8c"/>
+      </node>
+      <node id="3">
+        <label>main/sevetest30_IWEDA.c</label>
+        <link refid="sevetest30___i_w_e_d_a_8c"/>
+      </node>
+      <node id="4">
+        <label>main/sevetest30_UI.c</label>
+        <link refid="sevetest30___u_i_8c"/>
+      </node>
+      <node id="5">
+        <label>main/sevetest30_sound.c</label>
+        <link refid="sevetest30__sound_8c"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structbaidu___t_t_s__cfg__t" prot="public">baidu_TTS_cfg_t</innerclass>
+    <innerclass refid="structbaidu___a_s_r__cfg__t" prot="public">baidu_ASR_cfg_t</innerclass>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="sevetest30__sound_8h_1aa302efa2738c3738104a145d6daff243" prot="public" static="no">
+        <name>MUSIC_PLAY_EVT_TASK_CORE</name>
+        <initializer>(0)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="34" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1afa305e6f8b757e11c049eb840907f0a8" prot="public" static="no">
+        <name>MUSIC_PLAY_EVT_TASK_STACK_SIZE</name>
+        <initializer>(4 * 1024)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="35" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1ae4fe56fde28c9e1104703961dee26bc7" prot="public" static="no">
+        <name>MUSIC_MP3_DECODER_TASK_CORE</name>
+        <initializer>(1)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="37" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1aa012e134227f86189ce29b4ee5a3e0af" prot="public" static="no">
+        <name>VAD_FRAME_LENGTH</name>
+        <initializer>30</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="39" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1ad8bb9dfb2f1a80f7623bbc85a1522814" prot="public" static="no">
+        <name>ASR_EVT_TASK_CORE</name>
+        <initializer>(0)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="42" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a028bed87e231e7edc5d7310c0dea4d7f" prot="public" static="no">
+        <name>ASR_EVT_TASK_STACK_SIZE</name>
+        <initializer>(3*1024)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="43" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a1a2ddc985ebb790fbf4da68688fb2984" prot="public" static="no">
+        <name>ASR_HTTP_RESPONSE_BUF_MAX</name>
+        <initializer>1024</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="45" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a3b5e15fa74c6f68ed6575d9ab1c00e89" prot="public" static="no">
+        <name>ASR_FRAME_LENGTH</name>
+        <initializer>300</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="46" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1ad3921a7fe1aa7646a79d52af689a8a94" prot="public" static="no">
+        <name>ASR_TIMEOUT_MS</name>
+        <initializer>10000</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="47" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a007b1a696c21a73cc8299ee45f11d166" prot="public" static="no">
+        <name>BAIDU_TTS_ENDPOINT</name>
+        <initializer>&quot;http://tsn.baidu.com/text2audio&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="49" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1ac84ce19c81a985b3bb3f131a0b2120f2" prot="public" static="no">
+        <name>BAIDU_ASR_URL</name>
+        <initializer>&quot;http://vop.baidu.com/server_api&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="50" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a30cc824f820624c47863ac7a248bb2ff" prot="public" static="no">
+        <name>BAIDU_ASR_PRO_URL</name>
+        <initializer>&quot;http://vop.baidu.com/pro_api&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="51" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30__sound_8h_1a76fa9c6b04950974e9ff22cb81d21482" prot="public" static="no">
+        <name>BAIDU_TTS_DEFAULT_CONFIG</name>
+        <param><defname>text</defname></param>
+        <param><defname>person</defname></param>
+        <initializer>  {                                            \
+    .tex = text,                               \
+    .spd = 5,                                  \
+    .pit = 5,                                  \
+    .vol = 15,                                 \
+    .per = person,                             \
+  }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="65" column="9" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="65" bodyend="72"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1" prot="public" static="no" strong="no">
+        <type></type>
+        <name>asr_rate_t</name>
+        <enumvalue id="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1ab12ceb937c4c73d92e5b475f21b14359" prot="public">
+          <name>ASR_RATE_8K</name>
+          <initializer>= 8000</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1a635d26d637e1fe43bb7146ca0ebf6630" prot="public">
+          <name>ASR_RATE_16K</name>
+          <initializer>= 16000</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="74" column="1" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="75" bodyend="78"/>
+      </memberdef>
+      <memberdef kind="enum" id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176" prot="public" static="no" strong="no">
+        <type></type>
+        <name>asr_pid_t</name>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176aebcf8340f906dbe0dea3cef7ddb6854b" prot="public">
+          <name>ASR_PID_CM_NEAR_PRO</name>
+          <initializer>= 80001</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a31494bd5b2a1b4b682ef2cc252ce35cc" prot="public">
+          <name>ASR_PID_CM_NEAR</name>
+          <initializer>= 1537</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a2c30c7c551ae581adddccc58d7096e76" prot="public">
+          <name>ASR_PID_CM_FAR</name>
+          <initializer>= 1936</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176ad01934ba05a16c1ae98a7cdb8bee34e2" prot="public">
+          <name>ASR_PID_CC</name>
+          <initializer>= 1637</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a9e6803b593b9825fdd74792661dcd64c" prot="public">
+          <name>ASR_PID_CS</name>
+          <initializer>= 1837</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a38fc855950801740bd2238e3c29bfae3" prot="public">
+          <name>ASR_PID_EN</name>
+          <initializer>= 1737</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="80" column="1" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="81" bodyend="88"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="sevetest30__sound_8h_1ac6e9dd2f122c728acd2aca688a461de4" prot="public" static="no">
+        <type>struct baidu_TTS_cfg_t</type>
+        <definition>typedef struct baidu_TTS_cfg_t baidu_TTS_cfg_t</definition>
+        <argsstring></argsstring>
+        <name>baidu_TTS_cfg_t</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="64" column="17"/>
+      </memberdef>
+      <memberdef kind="typedef" id="sevetest30__sound_8h_1ac438ae42e0260e4e2492c22083aa2b57" prot="public" static="no">
+        <type>struct baidu_ASR_cfg_t</type>
+        <definition>typedef struct baidu_ASR_cfg_t baidu_ASR_cfg_t</definition>
+        <argsstring></argsstring>
+        <name>baidu_ASR_cfg_t</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="98" column="16"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="sevetest30__sound_8h_1aee102a99c3594bf6aa26ce6f1164c233" prot="public" static="no" extern="yes" mutable="no">
+        <type>int volatile</type>
+        <definition>int volatile running_i2s_port</definition>
+        <argsstring></argsstring>
+        <name>running_i2s_port</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="100" column="21" bodyfile="main/sevetest30_sound.c" bodystart="81" bodyend="-1" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="100" declcolumn="21"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30__sound_8h_1a50beea84d758202760e894d540aa2a94" prot="public" static="no" extern="yes" mutable="no">
+        <type>bool volatile</type>
+        <definition>bool volatile sevetest30_music_running_flag</definition>
+        <argsstring></argsstring>
+        <name>sevetest30_music_running_flag</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="101" column="22" bodyfile="main/sevetest30_sound.c" bodystart="79" bodyend="-1" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="101" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30__sound_8h_1a28294962c71042e6964c5b3a92b4d78c" prot="public" static="no" extern="yes" mutable="no">
+        <type>bool volatile</type>
+        <definition>bool volatile sevetest30_asr_running_flag</definition>
+        <argsstring></argsstring>
+        <name>sevetest30_asr_running_flag</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line=CONFIG_WIFI_SSID column="22" bodyfile="main/sevetest30_sound.c" bodystart="80" bodyend="-1" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline=CONFIG_WIFI_SSID declcolumn="22"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="sevetest30__sound_8h_1af5551e0dbaa7b1734fba448a42f09d35" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t mp3_decoder_play_time_get</definition>
+        <argsstring>()</argsstring>
+        <name>mp3_decoder_play_time_get</name>
+        <briefdescription>
+<para>获取MP3解码器播放实时时间进度 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>播放运行的实时时间(单位ms) </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="104" column="10" bodyfile="main/sevetest30_sound.c" bodystart="115" bodyend="119" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="104" declcolumn="10"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30__sound_8h_1a691a2138d2ca99fe7812ece3d5ef03b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void element_cfg_data_reset</definition>
+        <argsstring>()</argsstring>
+        <name>element_cfg_data_reset</name>
+        <briefdescription>
+<para>重置元素配置数据到默认值，之后您可以针对性修改某些参数，接着运行元素配置函数 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="106" column="6" bodyfile="main/sevetest30_sound.c" bodystart="449" bodyend="486" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="106" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30__sound_8h_1a1e06e5bb2b668e761c3dfb74abdec02b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t audio_element_all_init</definition>
+        <argsstring>(const char *link_tag[], int link_num)</argsstring>
+        <name>audio_element_all_init</name>
+        <param>
+          <type>const char *</type>
+          <declname>link_tag</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>link_num</declname>
+        </param>
+        <briefdescription>
+<para>以现在的存储的配置初始化所有选定link的音频元素 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="108" column="11" bodyfile="main/sevetest30_sound.c" bodystart="489" bodyend="566" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="108" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30__sound_8h_1a075e7e53d27ae5545b174b529f134310" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void tts_service_play</definition>
+        <argsstring>(baidu_TTS_cfg_t *tts_cfg, UBaseType_t priority)</argsstring>
+        <name>tts_service_play</name>
+        <param>
+          <type><ref refid="structbaidu___t_t_s__cfg__t" kindref="compound">baidu_TTS_cfg_t</ref> *</type>
+          <declname>tts_cfg</declname>
+        </param>
+        <param>
+          <type>UBaseType_t</type>
+          <declname>priority</declname>
+        </param>
+        <briefdescription>
+<para>请求TTS服务并播放 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>tts_cfg</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>tts配置 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>priority</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>任务优先级 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="111" column="6" bodyfile="main/sevetest30_sound.c" bodystart="644" bodyend="693" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="111" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30__sound_8h_1a97e17f0f8f18399573cafff71099a2c1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void music_uri_play</definition>
+        <argsstring>(const char *uri, UBaseType_t priority)</argsstring>
+        <name>music_uri_play</name>
+        <param>
+          <type>const char *</type>
+          <declname>uri</declname>
+        </param>
+        <param>
+          <type>UBaseType_t</type>
+          <declname>priority</declname>
+        </param>
+        <briefdescription>
+<para>uri音乐播放 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>uri</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入音乐uri </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>priority</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>任务优先级 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="112" column="6" bodyfile="main/sevetest30_sound.c" bodystart="597" bodyend="639" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="112" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30__sound_8h_1a026426bcd54a5888baba098abee58ddd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void asr_service_start</definition>
+        <argsstring>(baidu_ASR_cfg_t *asr_cfg, UBaseType_t priority)</argsstring>
+        <name>asr_service_start</name>
+        <param>
+          <type><ref refid="structbaidu___a_s_r__cfg__t" kindref="compound">baidu_ASR_cfg_t</ref> *</type>
+          <declname>asr_cfg</declname>
+        </param>
+        <param>
+          <type>UBaseType_t</type>
+          <declname>priority</declname>
+        </param>
+        <briefdescription>
+<para>启动语音识别服务，启动后不断地自动监听并完成识别,是一个不断循环识别的任务 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>asr_cfg</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>asr配置 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>priority</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>任务优先级 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="113" column="6" bodyfile="main/sevetest30_sound.c" bodystart="700" bodyend="763" declfile="components/sevetest30_board/include/sevetest30_sound.h" declline="113" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*<sp/>701Enti<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>©<sp/>2024<sp/>&lt;701Enti<sp/>organization&gt;</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted,<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining<sp/></highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated<sp/>documentation<sp/>files<sp/>(the<sp/>“Software”),<sp/></highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including<sp/>without<sp/>limitation<sp/></highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>“AS<sp/>IS”,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR<sp/>IMPLIED,<sp/></highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.<sp/></highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>WHETHER<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>OUT<sp/>OF<sp/>OR<sp/>IN<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="comment">//<sp/>该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的<sp/><sp/>音频数据获取与硬件调度，以支持TTS,语音识别，百度文心一言ERNIE<sp/>Bot<sp/>4.0对话支持<sp/>音乐API播放音乐时的硬件驱动等工作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="comment">//<sp/>如您发现一些问题，请及时联系我们，我们非常感谢您的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="comment">//<sp/>敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>github:<sp/>https://github.com/701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="comment">//<sp/>bilibili:<sp/>701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;stdbool.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;freertos/FreeRTOS.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;freertos/task.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;audio_event_iface.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34" refid="sevetest30__sound_8h_1aa302efa2738c3738104a145d6daff243" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>MUSIC_PLAY_EVT_TASK_CORE<sp/>(0)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35" refid="sevetest30__sound_8h_1afa305e6f8b757e11c049eb840907f0a8" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>MUSIC_PLAY_EVT_TASK_STACK_SIZE<sp/>(4<sp/>*<sp/>1024)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37" refid="sevetest30__sound_8h_1ae4fe56fde28c9e1104703961dee26bc7" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>MUSIC_MP3_DECODER_TASK_CORE<sp/>(1)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="sevetest30__sound_8h_1aa012e134227f86189ce29b4ee5a3e0af" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>VAD_FRAME_LENGTH<sp/>30</highlight><highlight class="comment">//<sp/>VAD<sp/>帧时长(ms)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="comment">//<sp/>i2s_filter_raw_run<sp/>任务</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42" refid="sevetest30__sound_8h_1ad8bb9dfb2f1a80f7623bbc85a1522814" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ASR_EVT_TASK_CORE<sp/>(0)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43" refid="sevetest30__sound_8h_1a028bed87e231e7edc5d7310c0dea4d7f" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ASR_EVT_TASK_STACK_SIZE<sp/>(3*1024)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45" refid="sevetest30__sound_8h_1a1a2ddc985ebb790fbf4da68688fb2984" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ASR_HTTP_RESPONSE_BUF_MAX<sp/>1024</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46" refid="sevetest30__sound_8h_1a3b5e15fa74c6f68ed6575d9ab1c00e89" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ASR_FRAME_LENGTH<sp/>300</highlight><highlight class="comment">//识别数据帧时长(ms)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47" refid="sevetest30__sound_8h_1ad3921a7fe1aa7646a79d52af689a8a94" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ASR_TIMEOUT_MS<sp/><sp/>10000</highlight><highlight class="comment">//识别超时时长(ms)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49" refid="sevetest30__sound_8h_1a007b1a696c21a73cc8299ee45f11d166" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>BAIDU_TTS_ENDPOINT<sp/>&quot;http://tsn.baidu.com/text2audio&quot;</highlight><highlight class="comment">//百度TTS<sp/>uri</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50" refid="sevetest30__sound_8h_1ac84ce19c81a985b3bb3f131a0b2120f2" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>BAIDU_ASR_URL<sp/><sp/><sp/><sp/><sp/><sp/>&quot;http://vop.baidu.com/server_api&quot;<sp/></highlight><highlight class="comment">//百度ASR<sp/>uri</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51" refid="sevetest30__sound_8h_1a30cc824f820624c47863ac7a248bb2ff" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>BAIDU_ASR_PRO_URL<sp/><sp/>&quot;http://vop.baidu.com/pro_api&quot;</highlight><highlight class="comment">//百度ASR极速版<sp/>uri</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight><highlight class="comment">//百度TTS设定配置，注释参考了官方API文档</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="57" refid="structbaidu___t_t_s__cfg__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structbaidu___t_t_s__cfg__t" kindref="compound">baidu_TTS_cfg_t</ref></highlight></codeline>
+<codeline lineno="58"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="59" refid="structbaidu___t_t_s__cfg__t_1a404cecb80bf26a140f781e6ae6760ddd" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*<ref refid="structbaidu___t_t_s__cfg__t_1a404cecb80bf26a140f781e6ae6760ddd" kindref="member">tex</ref>;<sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>必填<sp/><sp/><sp/><sp/>合成的文本，使用UTF-8编码。不超过60个汉字或者字母数字</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60" refid="structbaidu___t_t_s__cfg__t_1a12acb61397a38d7f24c49795434f6236" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><ref refid="structbaidu___t_t_s__cfg__t_1a12acb61397a38d7f24c49795434f6236" kindref="member">spd</ref>;<sp/></highlight><highlight class="comment">//<sp/>选填<sp/><sp/><sp/><sp/>语速，取值0-15，默认为5中语速</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="61" refid="structbaidu___t_t_s__cfg__t_1a62a3d1ff224638cd7ecd2d7494af9440" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><ref refid="structbaidu___t_t_s__cfg__t_1a62a3d1ff224638cd7ecd2d7494af9440" kindref="member">pit</ref>;<sp/></highlight><highlight class="comment">//<sp/>选填<sp/><sp/><sp/><sp/>音调，取值0-15，默认为5中语调</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="62" refid="structbaidu___t_t_s__cfg__t_1af1f546b339a59d744071cf5b0b190cf5" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><ref refid="structbaidu___t_t_s__cfg__t_1af1f546b339a59d744071cf5b0b190cf5" kindref="member">vol</ref>;<sp/></highlight><highlight class="comment">//<sp/>选填<sp/><sp/><sp/><sp/>音量，取值0-15</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63" refid="structbaidu___t_t_s__cfg__t_1a226cff9b2c2b139b46e5301532c4a586" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structbaidu___t_t_s__cfg__t_1a226cff9b2c2b139b46e5301532c4a586" kindref="member">per</ref>;<sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>选填<sp/><sp/><sp/><sp/>度小宇=1，度小美=0，度逍遥（基础）=3，度丫丫=4<sp/><sp/>//<sp/><sp/>度逍遥（精品）=5003，度小鹿=5118，度博文=106，度小童=110，度小萌=111，度米朵=103，度小娇=5</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="64" refid="sevetest30__sound_8h_1ac6e9dd2f122c728acd2aca688a461de4" refkind="member"><highlight class="normal">}<sp/><ref refid="structbaidu___t_t_s__cfg__t" kindref="compound">baidu_TTS_cfg_t</ref>;</highlight></codeline>
+<codeline lineno="65" refid="sevetest30__sound_8h_1a76fa9c6b04950974e9ff22cb81d21482" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>BAIDU_TTS_DEFAULT_CONFIG(text,<sp/>person)<sp/>\</highlight></codeline>
+<codeline lineno="66"><highlight class="preprocessor"><sp/><sp/>{<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="67"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>.tex<sp/>=<sp/>text,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="68"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>.spd<sp/>=<sp/>5,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="69"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>.pit<sp/>=<sp/>5,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="70"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>.vol<sp/>=<sp/>15,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="71"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>.per<sp/>=<sp/>person,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="72"><highlight class="preprocessor"><sp/><sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74" refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="76" refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1ab12ceb937c4c73d92e5b475f21b14359" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1ab12ceb937c4c73d92e5b475f21b14359" kindref="member">ASR_RATE_8K</ref><sp/>=<sp/>8000,</highlight></codeline>
+<codeline lineno="77" refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1a635d26d637e1fe43bb7146ca0ebf6630" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1a635d26d637e1fe43bb7146ca0ebf6630" kindref="member">ASR_RATE_16K</ref><sp/>=<sp/>16000,</highlight></codeline>
+<codeline lineno="78"><highlight class="normal">}<ref refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1" kindref="member">asr_rate_t</ref>;</highlight><highlight class="comment">//识别采样率</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="82" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176aebcf8340f906dbe0dea3cef7ddb6854b" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176aebcf8340f906dbe0dea3cef7ddb6854b" kindref="member">ASR_PID_CM_NEAR_PRO</ref><sp/>=<sp/>80001,<sp/></highlight><highlight class="comment">//近场<sp/>中文-普通话<sp/>极速版</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="83" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a31494bd5b2a1b4b682ef2cc252ce35cc" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a31494bd5b2a1b4b682ef2cc252ce35cc" kindref="member">ASR_PID_CM_NEAR</ref><sp/>=<sp/>1537,</highlight><highlight class="comment">//近场<sp/>中文-普通话<sp/>标准版</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="84" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a2c30c7c551ae581adddccc58d7096e76" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a2c30c7c551ae581adddccc58d7096e76" kindref="member">ASR_PID_CM_FAR</ref><sp/><sp/>=<sp/>1936,</highlight><highlight class="comment">//远场<sp/>中文-普通话<sp/>标准版</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176ad01934ba05a16c1ae98a7cdb8bee34e2" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176ad01934ba05a16c1ae98a7cdb8bee34e2" kindref="member">ASR_PID_CC</ref><sp/>=<sp/>1637,</highlight><highlight class="comment">//中文-粤语<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="86" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a9e6803b593b9825fdd74792661dcd64c" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a9e6803b593b9825fdd74792661dcd64c" kindref="member">ASR_PID_CS</ref><sp/>=<sp/>1837,</highlight><highlight class="comment">//中文-四川话</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="87" refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a38fc855950801740bd2238e3c29bfae3" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176a38fc855950801740bd2238e3c29bfae3" kindref="member">ASR_PID_EN</ref><sp/>=<sp/>1737,</highlight><highlight class="comment">//英语</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal">}<ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176" kindref="member">asr_pid_t</ref>;</highlight><highlight class="comment">//识别模型</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight><highlight class="comment">//百度ASR设定配置，注释参考了官方API文档</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="91" refid="structbaidu___a_s_r__cfg__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structbaidu___a_s_r__cfg__t" kindref="compound">baidu_ASR_cfg_t</ref></highlight></codeline>
+<codeline lineno="92"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="93" refid="structbaidu___a_s_r__cfg__t_1a0069b390b1b2e29fed110edce045b2e4" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1" kindref="member">asr_rate_t</ref><sp/><sp/><sp/><ref refid="structbaidu___a_s_r__cfg__t_1a0069b390b1b2e29fed110edce045b2e4" kindref="member">rate</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>采样速率，目前填入<sp/>16000<sp/>\<sp/>8000</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="94" refid="structbaidu___a_s_r__cfg__t_1a3ece671231f4dceff197c4f881725ca1" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176" kindref="member">asr_pid_t</ref><sp/><sp/><sp/><sp/><ref refid="structbaidu___a_s_r__cfg__t_1a3ece671231f4dceff197c4f881725ca1" kindref="member">dev_pid</ref>;<sp/><sp/><sp/><sp/></highlight><highlight class="comment">//识别模型</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95" refid="structbaidu___a_s_r__cfg__t_1a612740954d4f68d2436c2dc19c7652cb" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><sp/><ref refid="structbaidu___a_s_r__cfg__t_1a612740954d4f68d2436c2dc19c7652cb" kindref="member">stop_threshold</ref>;<sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>停止延时长度，在经过stop_threshold个周期没有监测到语音，暂停录音</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96" refid="structbaidu___a_s_r__cfg__t_1a8a7ad5122da79dd47f418657a6243d8f" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><sp/><ref refid="structbaidu___a_s_r__cfg__t_1a8a7ad5122da79dd47f418657a6243d8f" kindref="member">send_threshold</ref>;<sp/><sp/><sp/><sp/></highlight><highlight class="comment">//发送阈值，连续send_threshold个周期监测到语音,暂停录音后，这段语音将被发送处理</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="97" refid="structbaidu___a_s_r__cfg__t_1a61a2ab526eb6005b2c841c040b864878" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><sp/><ref refid="structbaidu___a_s_r__cfg__t_1a61a2ab526eb6005b2c841c040b864878" kindref="member">record_save_times_max</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//最大录制record_save_times_max帧数据后强制发送</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="98" refid="sevetest30__sound_8h_1ac438ae42e0260e4e2492c22083aa2b57" refkind="member"><highlight class="normal">}<ref refid="structbaidu___a_s_r__cfg__t" kindref="compound">baidu_ASR_cfg_t</ref>;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">volatile</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1aee102a99c3594bf6aa26ce6f1164c233" kindref="member">running_i2s_port</ref>;</highlight><highlight class="comment">//运行的I2S配置</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">volatile</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a50beea84d758202760e894d540aa2a94" kindref="member">sevetest30_music_running_flag</ref>;</highlight><highlight class="comment">//音乐播放/TTS语音合成运行标志</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno=CONFIG_WIFI_SSID><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">volatile</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a28294962c71042e6964c5b3a92b4d78c" kindref="member">sevetest30_asr_running_flag</ref>;</highlight><highlight class="comment">//语音识别运行标志</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal">uint64_t<sp/><ref refid="sevetest30__sound_8h_1af5551e0dbaa7b1734fba448a42f09d35" kindref="member">mp3_decoder_play_time_get</ref>();</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a691a2138d2ca99fe7812ece3d5ef03b6" kindref="member">element_cfg_data_reset</ref>();</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal">esp_err_t<sp/><ref refid="sevetest30__sound_8h_1a1e06e5bb2b668e761c3dfb74abdec02b" kindref="member">audio_element_all_init</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*link_tag[],<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>link_num);</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight><highlight class="comment">//<sp/>外部功能函数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a075e7e53d27ae5545b174b529f134310" kindref="member">tts_service_play</ref>(<ref refid="structbaidu___t_t_s__cfg__t" kindref="compound">baidu_TTS_cfg_t</ref>*<sp/>tts_cfg,<sp/>UBaseType_t<sp/>priority);</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a97e17f0f8f18399573cafff71099a2c1" kindref="member">music_uri_play</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*uri,<sp/>UBaseType_t<sp/>priority);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30__sound_8h_1a026426bcd54a5888baba098abee58ddd" kindref="member">asr_service_start</ref>(<ref refid="structbaidu___a_s_r__cfg__t" kindref="compound">baidu_ASR_cfg_t</ref>*<sp/>asr_cfg,UBaseType_t<sp/>priority);</highlight></codeline>
+    </programlisting>
+    <location file="components/sevetest30_board/include/sevetest30_sound.h"/>
+  </compounddef>
+</doxygen>

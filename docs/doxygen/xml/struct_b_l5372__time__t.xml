@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_b_l5372__time__t" kind="struct" language="C++" prot="public">
+    <compoundname>BL5372_time_t</compoundname>
+    <includes refid="_b_l5372_8h" local="no">BL5372.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1afa987dc6281f28c6200e81f42b5c179a" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::year</definition>
+        <argsstring></argsstring>
+        <name>year</name>
+        <qualifiedname>BL5372_time_t::year</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="124" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1a573fab5b67f284fee5e9a939c7bd52aa" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::month</definition>
+        <argsstring></argsstring>
+        <name>month</name>
+        <qualifiedname>BL5372_time_t::month</qualifiedname>
+        <briefdescription>
+<para>舍去前两位，如2024年存储24 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="125" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="125" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1aec3a1e6ba915f53a80df7a8d7b1fe2b8" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::day</definition>
+        <argsstring></argsstring>
+        <name>day</name>
+        <qualifiedname>BL5372_time_t::day</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="126" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="126" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1a1caf831ec6c4bb535952ac14b6e54128" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::week</definition>
+        <argsstring></argsstring>
+        <name>week</name>
+        <qualifiedname>BL5372_time_t::week</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="127" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="127" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1a0cb6dd7101446970d2a9e6e04120d9fc" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::hour</definition>
+        <argsstring></argsstring>
+        <name>hour</name>
+        <qualifiedname>BL5372_time_t::hour</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="128" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1af1de38e893ffc7bfa31490ef860058af" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::minute</definition>
+        <argsstring></argsstring>
+        <name>minute</name>
+        <qualifiedname>BL5372_time_t::minute</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="129" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__time__t_1a3b67966a856579903726a7d004fc1ddd" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BL5372_time_t::second</definition>
+        <argsstring></argsstring>
+        <name>second</name>
+        <qualifiedname>BL5372_time_t::second</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="130" column="9" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="130" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/BL5372.h" line="122" column="1" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="123" bodyend="131"/>
+    <listofallmembers>
+      <member refid="struct_b_l5372__time__t_1aec3a1e6ba915f53a80df7a8d7b1fe2b8" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>day</name></member>
+      <member refid="struct_b_l5372__time__t_1a0cb6dd7101446970d2a9e6e04120d9fc" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>hour</name></member>
+      <member refid="struct_b_l5372__time__t_1af1de38e893ffc7bfa31490ef860058af" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>minute</name></member>
+      <member refid="struct_b_l5372__time__t_1a573fab5b67f284fee5e9a939c7bd52aa" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>month</name></member>
+      <member refid="struct_b_l5372__time__t_1a3b67966a856579903726a7d004fc1ddd" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>second</name></member>
+      <member refid="struct_b_l5372__time__t_1a1caf831ec6c4bb535952ac14b6e54128" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>week</name></member>
+      <member refid="struct_b_l5372__time__t_1afa987dc6281f28c6200e81f42b5c179a" prot="public" virt="non-virtual"><scope>BL5372_time_t</scope><name>year</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

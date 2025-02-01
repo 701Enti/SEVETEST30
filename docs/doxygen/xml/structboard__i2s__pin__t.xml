@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structboard__i2s__pin__t" kind="struct" language="C++" prot="public">
+    <compoundname>board_i2s_pin_t</compoundname>
+    <includes refid="board__pins__config_8h" local="no">board_pins_config.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structboard__i2s__pin__t_1abaa23423cd559dd048a4cdb65c31a178" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int board_i2s_pin_t::mck_io_num</definition>
+        <argsstring></argsstring>
+        <name>mck_io_num</name>
+        <qualifiedname>board_i2s_pin_t::mck_io_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>MCK pin, output </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="47" column="9" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structboard__i2s__pin__t_1a758cdf2ec2c06f1f6960723bc342dbf9" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int board_i2s_pin_t::bck_io_num</definition>
+        <argsstring></argsstring>
+        <name>bck_io_num</name>
+        <qualifiedname>board_i2s_pin_t::bck_io_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>BCK pin, input in slave role, output in master role </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="48" column="9" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structboard__i2s__pin__t_1a0d807580eb77ac4279f3f19628e5c0bf" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int board_i2s_pin_t::ws_io_num</definition>
+        <argsstring></argsstring>
+        <name>ws_io_num</name>
+        <qualifiedname>board_i2s_pin_t::ws_io_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>WS pin, input in slave role, output in master role </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="49" column="9" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structboard__i2s__pin__t_1afd9e458fc1d8078f37004e312087fc0e" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int board_i2s_pin_t::data_out_num</definition>
+        <argsstring></argsstring>
+        <name>data_out_num</name>
+        <qualifiedname>board_i2s_pin_t::data_out_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>DATA pin, output </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="50" column="9" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structboard__i2s__pin__t_1a00caedad7d0f009d4799708337dae9c7" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int board_i2s_pin_t::data_in_num</definition>
+        <argsstring></argsstring>
+        <name>data_in_num</name>
+        <qualifiedname>board_i2s_pin_t::data_in_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>DATA pin, input </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="51" column="9" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="51" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Board i2s pin definition </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/board_pins_config.h" line="46" column="1" bodyfile="components/sevetest30_board/board_pins_config.h" bodystart="46" bodyend="52"/>
+    <listofallmembers>
+      <member refid="structboard__i2s__pin__t_1a758cdf2ec2c06f1f6960723bc342dbf9" prot="public" virt="non-virtual"><scope>board_i2s_pin_t</scope><name>bck_io_num</name></member>
+      <member refid="structboard__i2s__pin__t_1a00caedad7d0f009d4799708337dae9c7" prot="public" virt="non-virtual"><scope>board_i2s_pin_t</scope><name>data_in_num</name></member>
+      <member refid="structboard__i2s__pin__t_1afd9e458fc1d8078f37004e312087fc0e" prot="public" virt="non-virtual"><scope>board_i2s_pin_t</scope><name>data_out_num</name></member>
+      <member refid="structboard__i2s__pin__t_1abaa23423cd559dd048a4cdb65c31a178" prot="public" virt="non-virtual"><scope>board_i2s_pin_t</scope><name>mck_io_num</name></member>
+      <member refid="structboard__i2s__pin__t_1a0d807580eb77ac4279f3f19628e5c0bf" prot="public" virt="non-virtual"><scope>board_i2s_pin_t</scope><name>ws_io_num</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

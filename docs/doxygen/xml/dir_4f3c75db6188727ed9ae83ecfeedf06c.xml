@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="dir_4f3c75db6188727ed9ae83ecfeedf06c" kind="dir">
+    <compoundname>build/bootloader/CMakeFiles/3.23.1/CompilerIdCXX</compoundname>
+    <innerfile refid="bootloader_2_c_make_files_23_823_81_2_compiler_id_c_x_x_2_c_make_c_x_x_compiler_id_8cpp">CMakeCXXCompilerId.cpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="build/bootloader/CMakeFiles/3.23.1/CompilerIdCXX/"/>
+  </compounddef>
+</doxygen>

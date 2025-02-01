@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structcartoon__support__t" kind="struct" language="C++" prot="public">
+    <compoundname>cartoon_support_t</compoundname>
+    <includes refid="sevetest30___u_i_8h" local="no">sevetest30_UI.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structcartoon__support__t_1a17689d6b40789a632e4b467800f68138" prot="public" static="no" mutable="no">
+        <type><ref refid="structcartoon__plan__t" kindref="compound">cartoon_plan_t</ref></type>
+        <definition>cartoon_plan_t cartoon_support_t::cartoon_plan</definition>
+        <argsstring></argsstring>
+        <name>cartoon_plan</name>
+        <qualifiedname>cartoon_support_t::cartoon_plan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="169" column="19" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="169" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__support__t_1a2dad4f18126dfadee4177b604573f538" prot="public" static="no" mutable="no">
+        <type><ref refid="structcartoon__ctrl__param__t" kindref="compound">cartoon_ctrl_param_t</ref> *</type>
+        <definition>cartoon_ctrl_param_t* cartoon_support_t::ctrl_param_list</definition>
+        <argsstring></argsstring>
+        <name>ctrl_param_list</name>
+        <qualifiedname>cartoon_support_t::ctrl_param_list</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="170" column="25" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="170" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__support__t_1a38f3bb6b5c5280ef788e28cc66cf6888" prot="public" static="no" mutable="no">
+        <type><ref refid="sevetest30___u_i_8h_1ad991613a2204caa270ce8d3ce16a17f6" kindref="member">cartoon_create_callback_func_t</ref></type>
+        <definition>cartoon_create_callback_func_t cartoon_support_t::create_callback</definition>
+        <argsstring></argsstring>
+        <name>create_callback</name>
+        <qualifiedname>cartoon_support_t::create_callback</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="171" column="35" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="171" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__support__t_1a128d932d98718b9f813b2e7727805dce" prot="public" static="no" mutable="no">
+        <type><ref refid="sevetest30___u_i_8h_1a0bc600f38331b4acbf6716c0e4ff772f" kindref="member">cartoon_ctrl_hook_func_t</ref></type>
+        <definition>cartoon_ctrl_hook_func_t cartoon_support_t::ctrl_hook</definition>
+        <argsstring></argsstring>
+        <name>ctrl_hook</name>
+        <qualifiedname>cartoon_support_t::ctrl_hook</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="172" column="29" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="172" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="5">
+        <label>cartoon_ctrl_object_t</label>
+        <link refid="structcartoon__ctrl__object__t"/>
+      </node>
+      <node id="4">
+        <label>cartoon_ctrl_param_t</label>
+        <link refid="structcartoon__ctrl__param__t"/>
+      </node>
+      <node id="2">
+        <label>cartoon_plan_t</label>
+        <link refid="structcartoon__plan__t"/>
+        <childnode refid="3" relation="usage">
+          <edgelabel>key_frame_database</edgelabel>
+        </childnode>
+      </node>
+      <node id="1">
+        <label>cartoon_support_t</label>
+        <link refid="structcartoon__support__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>cartoon_plan</edgelabel>
+        </childnode>
+        <childnode refid="4" relation="usage">
+          <edgelabel>ctrl_param_list</edgelabel>
+        </childnode>
+        <childnode refid="5" relation="usage">
+          <edgelabel>ctrl_hook</edgelabel>
+        </childnode>
+      </node>
+      <node id="3">
+        <label>key_frame_t</label>
+        <link refid="structkey__frame__t"/>
+      </node>
+    </collaborationgraph>
+    <location file="components/sevetest30_board/include/sevetest30_UI.h" line="168" column="1" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="168" bodyend="173"/>
+    <listofallmembers>
+      <member refid="structcartoon__support__t_1a17689d6b40789a632e4b467800f68138" prot="public" virt="non-virtual"><scope>cartoon_support_t</scope><name>cartoon_plan</name></member>
+      <member refid="structcartoon__support__t_1a38f3bb6b5c5280ef788e28cc66cf6888" prot="public" virt="non-virtual"><scope>cartoon_support_t</scope><name>create_callback</name></member>
+      <member refid="structcartoon__support__t_1a128d932d98718b9f813b2e7727805dce" prot="public" virt="non-virtual"><scope>cartoon_support_t</scope><name>ctrl_hook</name></member>
+      <member refid="structcartoon__support__t_1a2dad4f18126dfadee4177b604573f538" prot="public" virt="non-virtual"><scope>cartoon_support_t</scope><name>ctrl_param_list</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

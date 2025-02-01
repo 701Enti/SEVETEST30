@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structaudio__board__handle" kind="struct" language="C++" prot="public">
+    <compoundname>audio_board_handle</compoundname>
+    <includes refid="board_8h" local="no">board.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structaudio__board__handle_1a827dbdfe01bc2955124b0675d8498102" prot="public" static="no" mutable="no">
+        <type>audio_hal_handle_t</type>
+        <definition>audio_hal_handle_t audio_board_handle::audio_hal</definition>
+        <argsstring></argsstring>
+        <name>audio_hal</name>
+        <qualifiedname>audio_board_handle::audio_hal</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>audio hardware abstract layer handle </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board.h" line="50" column="28" bodyfile="components/sevetest30_board/board.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Audio board handle </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/board.h" line="49" column="5" bodyfile="components/sevetest30_board/board.h" bodystart="49" bodyend="51"/>
+    <listofallmembers>
+      <member refid="structaudio__board__handle_1a827dbdfe01bc2955124b0675d8498102" prot="public" virt="non-virtual"><scope>audio_board_handle</scope><name>audio_hal</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

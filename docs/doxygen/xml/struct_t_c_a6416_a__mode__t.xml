@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_t_c_a6416_a__mode__t" kind="struct" language="C++" prot="public">
+    <compoundname>TCA6416A_mode_t</compoundname>
+    <includes refid="_t_c_a6416_a_8h" local="no">TCA6416A.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a7eb0237befa021ea577e798c432dffd1" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p00</definition>
+        <argsstring></argsstring>
+        <name>p00</name>
+        <qualifiedname>TCA6416A_mode_t::p00</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="57" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1abf3c69bd138050842b50c3a7ed37d313" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p01</definition>
+        <argsstring></argsstring>
+        <name>p01</name>
+        <qualifiedname>TCA6416A_mode_t::p01</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="58" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a18a41803649704d46564d6fad558643e" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p02</definition>
+        <argsstring></argsstring>
+        <name>p02</name>
+        <qualifiedname>TCA6416A_mode_t::p02</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="59" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a2fcc5ab429c2049fed2fe9aa1aac8249" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p03</definition>
+        <argsstring></argsstring>
+        <name>p03</name>
+        <qualifiedname>TCA6416A_mode_t::p03</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="60" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a34300f8eb0753e104c3f499103f2585c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p04</definition>
+        <argsstring></argsstring>
+        <name>p04</name>
+        <qualifiedname>TCA6416A_mode_t::p04</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="61" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a50b2bd1f50d61fb40ddc345d61e5ddf8" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p05</definition>
+        <argsstring></argsstring>
+        <name>p05</name>
+        <qualifiedname>TCA6416A_mode_t::p05</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="62" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1acc970dcbd1bbb661cbb1c0febae9e091" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p06</definition>
+        <argsstring></argsstring>
+        <name>p06</name>
+        <qualifiedname>TCA6416A_mode_t::p06</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="63" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1ae031344c4e799635e7e68bfc15e5af42" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p07</definition>
+        <argsstring></argsstring>
+        <name>p07</name>
+        <qualifiedname>TCA6416A_mode_t::p07</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="64" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a156e984e6171a98cec77815fc1ab1ed2" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p10</definition>
+        <argsstring></argsstring>
+        <name>p10</name>
+        <qualifiedname>TCA6416A_mode_t::p10</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="65" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a9b521a1bfb4d4718260ca995d33ad68a" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p11</definition>
+        <argsstring></argsstring>
+        <name>p11</name>
+        <qualifiedname>TCA6416A_mode_t::p11</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="66" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a434276eac57bb1d3dc7c3c3e30607d15" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p12</definition>
+        <argsstring></argsstring>
+        <name>p12</name>
+        <qualifiedname>TCA6416A_mode_t::p12</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="67" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a733943146be8f4eafc5e3bc21a96dcbc" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p13</definition>
+        <argsstring></argsstring>
+        <name>p13</name>
+        <qualifiedname>TCA6416A_mode_t::p13</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="68" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a9ba853d9195a8d1ea3911e6c58e3ca24" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p14</definition>
+        <argsstring></argsstring>
+        <name>p14</name>
+        <qualifiedname>TCA6416A_mode_t::p14</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="69" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1abbb827932136595ac3ab31984acf379f" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p15</definition>
+        <argsstring></argsstring>
+        <name>p15</name>
+        <qualifiedname>TCA6416A_mode_t::p15</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="70" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a2c87aa4e575b3a190400fc64524fdb6e" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p16</definition>
+        <argsstring></argsstring>
+        <name>p16</name>
+        <qualifiedname>TCA6416A_mode_t::p16</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="71" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1adf8d56cf85759b808293ab2baecce639" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::p17</definition>
+        <argsstring></argsstring>
+        <name>p17</name>
+        <qualifiedname>TCA6416A_mode_t::p17</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="72" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__mode__t_1a8e2e5363cab8a1be64dbc5f0c2f7ab67" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_mode_t::addr</definition>
+        <argsstring></argsstring>
+        <name>addr</name>
+        <qualifiedname>TCA6416A_mode_t::addr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="74" column="10" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="74" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/TCA6416A.h" line="55" column="1" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="56" bodyend="75"/>
+    <listofallmembers>
+      <member refid="struct_t_c_a6416_a__mode__t_1a8e2e5363cab8a1be64dbc5f0c2f7ab67" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>addr</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a7eb0237befa021ea577e798c432dffd1" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p00</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1abf3c69bd138050842b50c3a7ed37d313" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p01</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a18a41803649704d46564d6fad558643e" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p02</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a2fcc5ab429c2049fed2fe9aa1aac8249" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p03</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a34300f8eb0753e104c3f499103f2585c" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p04</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a50b2bd1f50d61fb40ddc345d61e5ddf8" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p05</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1acc970dcbd1bbb661cbb1c0febae9e091" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p06</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1ae031344c4e799635e7e68bfc15e5af42" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p07</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a156e984e6171a98cec77815fc1ab1ed2" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p10</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a9b521a1bfb4d4718260ca995d33ad68a" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p11</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a434276eac57bb1d3dc7c3c3e30607d15" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p12</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a733943146be8f4eafc5e3bc21a96dcbc" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p13</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a9ba853d9195a8d1ea3911e6c58e3ca24" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p14</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1abbb827932136595ac3ab31984acf379f" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p15</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1a2c87aa4e575b3a190400fc64524fdb6e" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p16</name></member>
+      <member refid="struct_t_c_a6416_a__mode__t_1adf8d56cf85759b808293ab2baecce639" prot="public" virt="non-virtual"><scope>TCA6416A_mode_t</scope><name>p17</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,737 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="gt32l32s0140_8c" kind="file" language="C++">
+    <compoundname>gt32l32s0140.c</compoundname>
+    <includes refid="gt32l32s0140_8h" local="yes">gt32l32s0140.h</includes>
+    <includes refid="board__pins__config_8h" local="yes">board_pins_config.h</includes>
+    <includes refid="board__ctrl_8h" local="yes">board_ctrl.h</includes>
+    <includes local="yes">driver/gpio.h</includes>
+    <includes local="yes">esp_intr_alloc.h</includes>
+    <includes local="yes">esp_log.h</includes>
+    <incdepgraph>
+      <node id="4">
+        <label>board_ctrl.h</label>
+        <link refid="board__ctrl_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>board_def.h</label>
+        <link refid="board__def_8h"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+      </node>
+      <node id="19">
+        <label>board_pins_config.h</label>
+        <link refid="board__pins__config_8h"/>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>BL5372.h</label>
+        <link refid="_b_l5372_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>TCA6416A.h</label>
+        <link refid="_t_c_a6416_a_8h"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>gt32l32s0140.h</label>
+        <link refid="gt32l32s0140_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="12">
+        <label>sevetest30_gpio.h</label>
+        <link refid="sevetest30__gpio_8h"/>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>main/gt32l32s0140.c</label>
+        <link refid="gt32l32s0140_8c"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+      </node>
+      <node id="8">
+        <label>audio_hal.h</label>
+      </node>
+      <node id="22">
+        <label>driver/gpio.h</label>
+      </node>
+      <node id="9">
+        <label>driver/i2c.h</label>
+      </node>
+      <node id="20">
+        <label>driver/i2s.h</label>
+      </node>
+      <node id="15">
+        <label>driver/spi_common.h</label>
+      </node>
+      <node id="16">
+        <label>driver/spi_master.h</label>
+      </node>
+      <node id="21">
+        <label>driver/spi_slave.h</label>
+      </node>
+      <node id="3">
+        <label>esp_err.h</label>
+      </node>
+      <node id="10">
+        <label>esp_gatts_api.h</label>
+      </node>
+      <node id="23">
+        <label>esp_intr_alloc.h</label>
+      </node>
+      <node id="24">
+        <label>esp_log.h</label>
+      </node>
+      <node id="17">
+        <label>esp_peripherals.h</label>
+      </node>
+      <node id="5">
+        <label>esp_types.h</label>
+      </node>
+      <node id="11">
+        <label>esxxx_common.h</label>
+      </node>
+      <node id="14">
+        <label>stdbool.h</label>
+      </node>
+      <node id="6">
+        <label>string.h</label>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" prot="public" static="no" mutable="no">
+        <type>spi_device_handle_t</type>
+        <definition>spi_device_handle_t fonts_chip_handle</definition>
+        <argsstring></argsstring>
+        <name>fonts_chip_handle</name>
+        <initializer>= NULL</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="35" column="21" bodyfile="main/gt32l32s0140.c" bodystart="35" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="gt32l32s0140_8c_1a91f3a05d283bbe44c0bbe0fb31431c47" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t fonts_chip_init</definition>
+        <argsstring>()</argsstring>
+        <name>fonts_chip_init</name>
+        <briefdescription>
+<para>通用字库芯片基本初始化工作 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>board_device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>ESP_OK/ESP_FAIL </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="41" column="11" bodyfile="main/gt32l32s0140.c" bodystart="41" bodyend="89"/>
+      </memberdef>
+      <memberdef kind="function" id="gt32l32s0140_8c_1a02e04d0261683a301b35efc9c8be1c29" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fonts_read_zh_CN_12x</definition>
+        <argsstring>(uint32_t Unicode, uint8_t *dest)</argsstring>
+        <name>fonts_read_zh_CN_12x</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>Unicode</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>dest</declname>
+        </param>
+        <briefdescription>
+<para>从字库读取12x12汉字字模,可以作为绘制函数的字模参数 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>Unicode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>汉字字模的Unicode编码 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>dest</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入读取缓存位置,内部不会自动清理缓存,缓存必须足够FONT_READ_CN_12X_BYTES </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="94" column="6" bodyfile="main/gt32l32s0140.c" bodystart="94" bodyend="139"/>
+      </memberdef>
+      <memberdef kind="function" id="gt32l32s0140_8c_1a1857cd2f981e757d81419e790eac43b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fonts_read_ASCII_6x12</definition>
+        <argsstring>(uint32_t Unicode, uint8_t *dest)</argsstring>
+        <name>fonts_read_ASCII_6x12</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>Unicode</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>dest</declname>
+        </param>
+        <briefdescription>
+<para>从字库读取6x12 ASCII字符字模,可以作为绘制函数的字模参数 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>Unicode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ASCII字符字模的Unicode编码 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>dest</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入读取缓存位置,内部不会自动清理缓存,缓存必须足够FONT_READ_ASCII_6X12_BYTES </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="144" column="6" bodyfile="main/gt32l32s0140.c" bodystart="144" bodyend="181"/>
+      </memberdef>
+      <memberdef kind="function" id="gt32l32s0140_8c_1a3c32b8061c4ca4e0f45567f00f3ba6c0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t UTF8_Unicode_get</definition>
+        <argsstring>(char *utf_dat, uint32_t *Unicode_dest, int dest_len)</argsstring>
+        <name>UTF8_Unicode_get</name>
+        <param>
+          <type>char *</type>
+          <declname>utf_dat</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>Unicode_dest</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>dest_len</declname>
+        </param>
+        <briefdescription>
+<para>(计算不需要硬件字库通信)获取字符串即UTF-8再编码数据 对应到的 Unicode编码数据 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>utf_dat</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入一个字符串(本质是UTF-8代码数据链指针)或者说是UTF-8再编码数据区首地址(如果使用char数组,请在末尾单元加上&apos;\0&apos;) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>Unicode_dest</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Unicode编码数据缓存位置,一个uint32_t单元对应一个文字或符号的Unicode编码 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>dest_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Unicode_dest缓存中能够存储uint32_t单元的个数(缓存最大可映射字符数) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>总共识别到的字符数 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="214" column="10" bodyfile="main/gt32l32s0140.c" bodystart="214" bodyend="273"/>
+      </memberdef>
+      <memberdef kind="function" id="gt32l32s0140_8c_1a8c409b37c60589a885a8d416595ad3b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t UnicodeToGB2312</definition>
+        <argsstring>(uint32_t code)</argsstring>
+        <name>UnicodeToGB2312</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>code</declname>
+        </param>
+        <briefdescription>
+<para>(计算需要硬件字库通信)将Unicode编码转换为对应GB2312编码,计算方法来自高通字库 <ulink url="https://www.hmi.gaotongfont.cn/">https://www.hmi.gaotongfont.cn/</ulink> </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>code</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Unicode编码 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>对应GB2312编码 设备未初始化: 0xFFFF </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="278" column="10" bodyfile="main/gt32l32s0140.c" bodystart="278" bodyend="328"/>
+      </memberdef>
+      <memberdef kind="function" id="gt32l32s0140_8c_1af4a59ba2661aa4108c7a90a72b069581" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t ASCII_number_count</definition>
+        <argsstring>(uint32_t *unicode_buf, int total_unit)</argsstring>
+        <name>ASCII_number_count</name>
+        <param>
+          <type>uint32_t *</type>
+          <declname>unicode_buf</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>total_unit</declname>
+        </param>
+        <briefdescription>
+<para>计算unicode格式数据中含有的ASCII字符个数 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>unicode_buf</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>要扫描的unicode编码数据缓存 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>total_unit</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>unicode_buf含有的总字符个数 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>ASCII字符个数 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/gt32l32s0140.c" line="334" column="10" bodyfile="main/gt32l32s0140.c" bodystart="334" bodyend="344"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*<sp/>701Enti<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>©<sp/>2024<sp/>&lt;701Enti<sp/>organization&gt;</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted,<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated<sp/>documentation<sp/>files<sp/>(the<sp/>“Software”),</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including<sp/>without<sp/>limitation</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>“AS<sp/>IS”,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR<sp/>IMPLIED,</highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>WHETHER<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>OUT<sp/>OF<sp/>OR<sp/>IN<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，对语言文字显示的硬件字库GT32L32S0140的访问支持，包含对字体特别是中文汉字的搜索工作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>如您发现一些问题，请及时联系我们，我们非常感谢您的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>计算方法来自高通字库<sp/>https://www.hmi.gaotongfont.cn/<sp/>非常感谢</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>github:<sp/>https://github.com/701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>bilibili:<sp/>701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="gt32l32s0140_8h" kindref="compound">gt32l32s0140.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="board__pins__config_8h" kindref="compound">board_pins_config.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="board__ctrl_8h" kindref="compound">board_ctrl.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/gpio.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;esp_intr_alloc.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;esp_log.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal">spi_device_handle_t<sp/><ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref><sp/>=<sp/>NULL;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal">esp_err_t<sp/><ref refid="gt32l32s0140_8c_1a91f3a05d283bbe44c0bbe0fb31431c47" kindref="member">fonts_chip_init</ref>()</highlight></codeline>
+<codeline lineno="42"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(</highlight><highlight class="stringliteral">&quot;fonts_chip_init&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;字库设备已经初始化&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>ret<sp/>=<sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//配置spi总线</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_bus_config_t<sp/>bus_config<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.mosi_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.miso_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.sclk_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.quadwp_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.quadhd_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.max_transfer_sz<sp/>=<sp/>SOC_SPI_MAXIMUM_BUFFER_SIZE,</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.flags<sp/>=<sp/>SPICOMMON_BUSFLAG_MASTER,</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_device_interface_config_t<sp/>interface_config<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.command_bits<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a8ad87e757264a30d8f5d817008efdabf" kindref="member">FONT_READ_COMMAND_BITS</ref>,</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.address_bits<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a9fdefa60db7c3bb6e4fa3376ca9ad3f8" kindref="member">FONT_READ_ADDRESS_BITS</ref>,</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.dummy_bits<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a19f96d20fb623bae160142c93f8ad4c7" kindref="member">FONT_READ_DUMMY_BITS</ref>,</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.mode<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a791375ca1953bff9c94cf49ce9b44b05" kindref="member">FONT_SPI_MODE</ref>,</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.clock_speed_hz<sp/>=<sp/><ref refid="board__def_8h_1afb4546b467ff076f7eea8c3aa9b72987" kindref="member">FONT_SPI_FREQ</ref>,</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.spics_io_num<sp/>=<sp/>-1,</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.queue_size<sp/>=<sp/>7,</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>=<sp/><ref refid="board__pins__config_8c_1a366b83a4cdbc36b4d80933b901f1b9eb" kindref="member">get_spi_pins</ref>(&amp;bus_config,<sp/>&amp;interface_config);</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>=<sp/>spi_bus_initialize(<ref refid="board__def_8h_1a1747cbf806b7810d7996c04df14c2432" kindref="member">FONTS_CHIP_SPI_ID</ref>,<sp/>&amp;bus_config,<sp/>SPI_DMA_CH_AUTO);</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//载入字库芯片设备</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>=<sp/>spi_bus_add_device(<ref refid="board__def_8h_1a1747cbf806b7810d7996c04df14c2432" kindref="member">FONTS_CHIP_SPI_ID</ref>,<sp/>&amp;interface_config,<sp/>&amp;(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>));</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//设置片选CS的GPIO</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>1);</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_config_t<sp/>spics_cfg<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.pin_bit_mask<sp/>=<sp/>BIT64(interface_config.spics_io_num),</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>.mode<sp/>=<sp/>GPIO_MODE_OUTPUT,</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_config(&amp;spics_cfg);</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(ret<sp/>==<sp/>ESP_OK){</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGI(</highlight><highlight class="stringliteral">&quot;fonts_chip_init&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;字库设备初始化成功&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="89"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="gt32l32s0140_8c_1a02e04d0261683a301b35efc9c8be1c29" kindref="member">fonts_read_zh_CN_12x</ref>(uint32_t<sp/>Unicode,<sp/>uint8_t*<sp/>dest)</highlight></codeline>
+<codeline lineno="95"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;fonts_read_zh_CN_12x&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>ret<sp/>=<sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno=CONFIG_WIFI_SSID><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取对应GB2312编码</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/>GB2312_buf<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>GB2312_buf<sp/>=<sp/><ref refid="gt32l32s0140_8c_1a8c409b37c60589a885a8d416595ad3b8" kindref="member">UnicodeToGB2312</ref>(Unicode);</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_transaction_t<sp/>transaction;</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//计算内部地址</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>((GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>&gt;=<sp/>0xA1<sp/>&amp;&amp;<sp/>(GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>&lt;=<sp/>0XA9<sp/>&amp;&amp;<sp/>(GB2312_buf<sp/>&amp;<sp/>0xFF)<sp/>&gt;=<sp/>0xA1)</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transaction.addr<sp/>=<sp/>(((GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>-<sp/>0xA1)<sp/>*<sp/>94<sp/>+<sp/>((GB2312_buf<sp/>&amp;<sp/>0xFF)<sp/>-<sp/>0xA1))<sp/>*<sp/>24<sp/>+<sp/><ref refid="gt32l32s0140_8h_1a4d593ef25667f329586304c323053662" kindref="member">FONT_ZH_CN_12x_BASE_ADD</ref>;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>((GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>&gt;=<sp/>0xB0<sp/>&amp;&amp;<sp/>(GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>&lt;=<sp/>0xF7<sp/>&amp;&amp;<sp/>(GB2312_buf<sp/>&amp;<sp/>0xFF)<sp/>&gt;=<sp/>0xA1)</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transaction.addr<sp/>=<sp/>(((GB2312_buf<sp/>&gt;&gt;<sp/>8)<sp/>-<sp/>0xB0)<sp/>*<sp/>94<sp/>+<sp/>((GB2312_buf<sp/>&amp;<sp/>0xFF)<sp/>-<sp/>0xA1)<sp/>+<sp/>846)<sp/>*<sp/>24<sp/>+<sp/><ref refid="gt32l32s0140_8h_1a4d593ef25667f329586304c323053662" kindref="member">FONT_ZH_CN_12x_BASE_ADD</ref>;</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.length<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a83d046665b7600df8b85b8c6184ebb3f" kindref="member">FONT_READ_ZH_CN_12X_BYTES</ref><sp/>*<sp/>8;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rxlength<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.cmd<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a84f50b436e51b3ff3b765d52c73e1e81" kindref="member">FONT_READ_CMD</ref>;</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.flags<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rx_buffer<sp/>=<sp/>dest;</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.tx_buffer<sp/>=<sp/>NULL;</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取CS引脚GPIO_NUM</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_device_interface_config_t<sp/>interface_config;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="board__pins__config_8c_1a366b83a4cdbc36b4d80933b901f1b9eb" kindref="member">get_spi_pins</ref>(NULL,<sp/>&amp;interface_config);</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯开始</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>0);</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯传输</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>|=<sp/>spi_device_polling_start(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>,<sp/>&amp;transaction,<sp/>portMAX_DELAY);</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>|=<sp/>spi_device_polling_end(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>,<sp/>pdMS_TO_TICKS(<ref refid="gt32l32s0140_8h_1a66cff30b4bb3e790ffeb4405cbca4746" kindref="member">FONT_READ_TIMEOUT_MS</ref>));</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯结束</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>1);</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ret<sp/>!=<sp/>ESP_OK)<sp/>{</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;与字库芯片通讯时发现问题<sp/>描述：<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>esp_err_to_name(ret));</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="139"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="gt32l32s0140_8c_1a1857cd2f981e757d81419e790eac43b9" kindref="member">fonts_read_ASCII_6x12</ref>(uint32_t<sp/>Unicode,<sp/>uint8_t*<sp/>dest)<sp/>{</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;fonts_read_ASCII_6x12&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>ret<sp/>=<sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"></highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_transaction_t<sp/>transaction;</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"></highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>((Unicode<sp/>&gt;=<sp/>0x20)<sp/>&amp;&amp;<sp/>(Unicode<sp/>&lt;=<sp/>0x7E))</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transaction.addr<sp/>=<sp/>(Unicode<sp/>-<sp/>0x20)<sp/>*<sp/>12<sp/>+<sp/><ref refid="gt32l32s0140_8h_1afbfdb4a09c98c28026eba5a8faa26d9c" kindref="member">FONT_ASCII_6X12_BASE_ADD</ref>;</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"></highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.length<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a16bdee40048a6b366aefc94f7d8eae71" kindref="member">FONT_READ_ASCII_6X12_BYTES</ref><sp/>*<sp/>8;</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rxlength<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.cmd<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a84f50b436e51b3ff3b765d52c73e1e81" kindref="member">FONT_READ_CMD</ref>;</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.flags<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rx_buffer<sp/>=<sp/>dest;</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.tx_buffer<sp/>=<sp/>NULL;</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"></highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取CS引脚GPIO_NUM</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_device_interface_config_t<sp/>interface_config;</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="board__pins__config_8c_1a366b83a4cdbc36b4d80933b901f1b9eb" kindref="member">get_spi_pins</ref>(NULL,<sp/>&amp;interface_config);</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"></highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯开始</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>0);</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"></highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯传输</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>|=<sp/>spi_device_polling_start(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>,<sp/>&amp;transaction,<sp/>portMAX_DELAY);</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/>ret<sp/>|=<sp/>spi_device_polling_end(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>,<sp/>pdMS_TO_TICKS(<ref refid="gt32l32s0140_8h_1a66cff30b4bb3e790ffeb4405cbca4746" kindref="member">FONT_READ_TIMEOUT_MS</ref>));</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"></highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯结束</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>1);</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"></highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ret<sp/>!=<sp/>ESP_OK)<sp/>{</highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;与字库芯片通讯时发现问题<sp/>描述：<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>esp_err_to_name(ret));</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="181"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"></highlight></codeline>
+<codeline lineno="183"><highlight class="normal"></highlight></codeline>
+<codeline lineno="184"><highlight class="normal"></highlight><highlight class="comment">//标准C下字符串的数据基于UTF-8编码,由于UTF-8编码本是unicode编码的再编码</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="185"><highlight class="normal"></highlight><highlight class="comment">//如果我们有一个字符串,我们可以读取它指向的字符数据即UTF-8编码格式数据串</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="186"><highlight class="normal"></highlight><highlight class="comment">//再使用下面的函数UTF8_Unicode_get,就可以进行格式转换,转成unicode编码格式数据串</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="187"><highlight class="normal"></highlight><highlight class="comment">//从而借此unicode数据计算字符串每个字符在字库芯片的位置,读到对应字符点阵数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="188"><highlight class="normal"></highlight><highlight class="comment">//获取<sp/>UTF-8再编码数据<sp/>对应到的<sp/>Unicode编码数据此处思路</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="189"><highlight class="normal"></highlight><highlight class="comment">//(这可能需要您预先了解UTF-8编码格式)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="190"><highlight class="normal"></highlight><highlight class="comment">//<sp/>1.由于utf_idx累加,某时刻找到非[10]开头的字节,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="191"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>如果为0开头,直接导入unicode_dest[dest_idx],dest_idx++,继续utf_idx累加</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="192"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>否则根据其获取<sp/>[剩余]字节数last_unit</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="193"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>同时缓存这个时候的utf_idx值保存到utf_idx_buf</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="194"><highlight class="normal"></highlight><highlight class="comment">//<sp/>2.根据last_unit<sp/>+1<sp/>使用位与获取头字节内含的有效数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="195"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>如[111]0<sp/>0110<sp/>保存uint8_t<sp/>ubuf1为0000<sp/>0110<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="196"><highlight class="normal"></highlight><highlight class="comment">//<sp/>3.utf_idx+=last_unit之后,索引utf_dat用0x3F取出字节有效数据,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="197"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/>从最低位开始,保存到unicode_dest[dest_idx],每个有效数据是6位,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="198"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>unicode_dest[dest_idx]<sp/>|=<sp/><sp/>有效数据&lt;&lt;((last_unit<sp/>-<sp/>(utf_idx<sp/>-<sp/>utf_idx_buf))*6)<sp/>无间隔拼接</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="199"><highlight class="normal"></highlight><highlight class="comment">//<sp/>4.每取一次结束<sp/>之后<sp/>utf_idx--</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="200"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>直到utf_idx=utf_idx_buf时不再像刚才一样取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="201"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>执行unicode_dest[dest_idx]<sp/>|=<sp/><sp/>ubuf1<sp/>&lt;&lt;<sp/>(last_unit*6)<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="202"><highlight class="normal"></highlight><highlight class="comment">//<sp/>5.utf_idx+=last_unit;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="203"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>dest_idx++;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="204"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>ubuf1=0;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="205"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>last_unit=0<sp/>;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="206"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/>utf_idx_buf<sp/>=<sp/>0;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="207"><highlight class="normal"></highlight><highlight class="comment">//<sp/>6.回到1</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="208"><highlight class="normal"></highlight></codeline>
+<codeline lineno="214"><highlight class="normal">uint32_t<sp/><ref refid="gt32l32s0140_8c_1a3c32b8061c4ca4e0f45567f00f3ba6c0" kindref="member">UTF8_Unicode_get</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/>utf_dat,<sp/>uint32_t*<sp/>Unicode_dest,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>dest_len)<sp/>{</highlight></codeline>
+<codeline lineno="215"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;UTF8_Unicode_get&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="216"><highlight class="normal"></highlight></codeline>
+<codeline lineno="217"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>utf_idx<sp/>=<sp/>0;</highlight><highlight class="comment">//UTF-8再编码数据区索引变量</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="218"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>utf_idx_buf<sp/>=<sp/>0;</highlight><highlight class="comment">//utf_idx的缓存</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>dest_idx<sp/>=<sp/>0;</highlight><highlight class="comment">//Unicode编码数据区索引变量</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>last_unit<sp/>=<sp/>0;</highlight><highlight class="comment">//[剩余]字节数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/>uint8_t<sp/>ubuf1<sp/>=<sp/>0;</highlight><highlight class="comment">//Unicode编码临时缓存1</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="222"><highlight class="normal"></highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>!=<sp/></highlight><highlight class="charliteral">&apos;\0&apos;</highlight><highlight class="normal"><sp/>&amp;&amp;<sp/>dest_idx<sp/>&lt;<sp/>dest_len)</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//单字节表示<sp/>-<sp/>在0x7F内<sp/>直接等于ASCII</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="226"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&lt;=<sp/>0x7F)<sp/>{</highlight></codeline>
+<codeline lineno="227"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Unicode_dest[dest_idx]<sp/>=<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>dest_idx++;</highlight></codeline>
+<codeline lineno="229"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="230"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="231"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//多字节表示<sp/>-<sp/>出现此外非10开头字节</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="232"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>((utf_dat[utf_idx]<sp/>&gt;&gt;<sp/>6)<sp/>!=<sp/>0x02)<sp/>{</highlight></codeline>
+<codeline lineno="233"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取后接的剩余字节,UTF-8最大6字节表示一个Unicode编码</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&gt;=<sp/>0xC0<sp/>&amp;&amp;<sp/>utf_dat[utf_idx]<sp/>&lt;<sp/>0xE0)last_unit<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&gt;=<sp/>0xE0<sp/>&amp;&amp;<sp/>utf_dat[utf_idx]<sp/>&lt;<sp/>0xF0)last_unit<sp/>=<sp/>2;</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&gt;=<sp/>0xF0<sp/>&amp;&amp;<sp/>utf_dat[utf_idx]<sp/>&lt;<sp/>0xF8)last_unit<sp/>=<sp/>3;</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&gt;=<sp/>0xF8<sp/>&amp;&amp;<sp/>utf_dat[utf_idx]<sp/>&lt;<sp/>0xFC)last_unit<sp/>=<sp/>4;</highlight></codeline>
+<codeline lineno="238"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(utf_dat[utf_idx]<sp/>&gt;=<sp/>0xFC<sp/>&amp;&amp;<sp/>utf_dat[utf_idx]<sp/>&lt;<sp/>0xFE)last_unit<sp/>=<sp/>5;</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//缓存这个时候的utf_idx值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx_buf<sp/>=<sp/>utf_idx;</highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//缓存头标志有效数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(last_unit<sp/>==<sp/>1)ubuf1<sp/>=<sp/>0x1F<sp/>&amp;<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="243"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(last_unit<sp/>==<sp/>2)ubuf1<sp/>=<sp/>0x0F<sp/>&amp;<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(last_unit<sp/>==<sp/>3)ubuf1<sp/>=<sp/>0x07<sp/>&amp;<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="245"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(last_unit<sp/>==<sp/>4)ubuf1<sp/>=<sp/>0x03<sp/>&amp;<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="246"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(last_unit<sp/>==<sp/>5)ubuf1<sp/>=<sp/>0x01<sp/>&amp;<sp/>utf_dat[utf_idx];</highlight></codeline>
+<codeline lineno="247"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//拼接剩余数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="248"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx<sp/>+=<sp/>last_unit;</highlight><highlight class="comment">//跳转到字符UTF-8码末尾字节</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(utf_idx<sp/>!=<sp/>utf_idx_buf)<sp/>{</highlight></codeline>
+<codeline lineno="250"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Unicode_dest[dest_idx]<sp/>|=<sp/>(utf_dat[utf_idx]<sp/>&amp;<sp/>0x3F)<sp/>&lt;&lt;<sp/>((last_unit<sp/>-<sp/>(utf_idx<sp/>-<sp/>utf_idx_buf))<sp/>*<sp/>6);</highlight><highlight class="comment">//每个有效数据是6位,无间隔拼接</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx--;</highlight><highlight class="comment">//反方向遍历</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="252"><highlight class="normal"></highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"></highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//追加头标志的有效数据,结束</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Unicode_dest[dest_idx]<sp/>|=<sp/>ubuf1<sp/>&lt;&lt;<sp/>(last_unit<sp/>*<sp/>6);</highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>dest_idx++;</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx<sp/>+=<sp/>last_unit;</highlight><highlight class="comment">//跳转到字符UTF-8码末尾字节</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="259"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//复位缓存</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ubuf1<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>last_unit<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="262"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx_buf<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="263"><highlight class="normal"></highlight></codeline>
+<codeline lineno="264"><highlight class="normal"></highlight></codeline>
+<codeline lineno="265"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="266"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;处理UTF-8源数据发现解析异常&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="269"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>utf_idx++;</highlight></codeline>
+<codeline lineno="271"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>dest_idx;</highlight><highlight class="comment">//返回总字符数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="273"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="274"><highlight class="normal"></highlight></codeline>
+<codeline lineno="278"><highlight class="normal">uint32_t<sp/><ref refid="gt32l32s0140_8c_1a8c409b37c60589a885a8d416595ad3b8" kindref="member">UnicodeToGB2312</ref>(uint32_t<sp/>code)</highlight></codeline>
+<codeline lineno="279"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;UnicodeToGB2312&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="281"><highlight class="normal"></highlight></codeline>
+<codeline lineno="282"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="283"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;字库设备未初始化&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>0xFF;</highlight></codeline>
+<codeline lineno="285"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="286"><highlight class="normal"></highlight></codeline>
+<codeline lineno="287"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取索引地址</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="288"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/>U_Addr;</highlight></codeline>
+<codeline lineno="289"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0x00a0<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0x0451)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0xA0);</highlight></codeline>
+<codeline lineno="290"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0x2010<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0x2642)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0x2010)<sp/>+<sp/>1892;</highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0x3000<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0x33d5)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0x3000)<sp/>+<sp/>5066;</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0x4E00<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0x9FA5)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0x4E00)<sp/>+<sp/>7030;</highlight></codeline>
+<codeline lineno="293"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0xfe30<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0xfe6b)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0xfe30)<sp/>+<sp/>48834;</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0xff01<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0xFF5e)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0xff01)<sp/>+<sp/>48954;</highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>&gt;=<sp/>0xffe0<sp/>&amp;&amp;<sp/>code<sp/>&lt;=<sp/>0xFFe5)<sp/>U_Addr<sp/>=<sp/>2<sp/>*<sp/>(code<sp/>-<sp/>0xff01)<sp/>+<sp/>49142;</highlight></codeline>
+<codeline lineno="296"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>U_Addr<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="297"><highlight class="normal"></highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//得到存储对应GB2312编码的缓存的地址<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/>dest_addr<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a91cde5cdb4729ee4521c4509fbc0c696" kindref="member">FONT_GB2312_MAP_BASE_ADD</ref><sp/>+<sp/>U_Addr;</highlight></codeline>
+<codeline lineno="300"><highlight class="normal"></highlight></codeline>
+<codeline lineno="301"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//读取转换结果</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="302"><highlight class="normal"><sp/><sp/><sp/><sp/>uint8_t<sp/>result_code[2]<sp/>=<sp/>{<sp/>0<sp/>};</highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_transaction_t<sp/>transaction;</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.length<sp/>=<sp/>2<sp/>*<sp/>8;</highlight></codeline>
+<codeline lineno="305"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rxlength<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="306"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.cmd<sp/>=<sp/><ref refid="gt32l32s0140_8h_1a84f50b436e51b3ff3b765d52c73e1e81" kindref="member">FONT_READ_CMD</ref>;</highlight></codeline>
+<codeline lineno="307"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.addr<sp/>=<sp/>dest_addr;</highlight></codeline>
+<codeline lineno="308"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.flags<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="309"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.rx_buffer<sp/>=<sp/>result_code;</highlight></codeline>
+<codeline lineno="310"><highlight class="normal"><sp/><sp/><sp/><sp/>transaction.tx_buffer<sp/>=<sp/>NULL;</highlight></codeline>
+<codeline lineno="311"><highlight class="normal"></highlight></codeline>
+<codeline lineno="312"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//获取CS引脚GPIO_NUM</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="313"><highlight class="normal"><sp/><sp/><sp/><sp/>spi_device_interface_config_t<sp/>interface_config;</highlight></codeline>
+<codeline lineno="314"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="board__pins__config_8c_1a366b83a4cdbc36b4d80933b901f1b9eb" kindref="member">get_spi_pins</ref>(NULL,<sp/>&amp;interface_config);</highlight></codeline>
+<codeline lineno="315"><highlight class="normal"></highlight></codeline>
+<codeline lineno="316"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯开始</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="317"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>0);</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"></highlight></codeline>
+<codeline lineno="319"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯传输</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="320"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>ret<sp/>=<sp/>spi_device_polling_transmit(<ref refid="gt32l32s0140_8c_1aff46211b8826c0e5f7727c09e69a7967" kindref="member">fonts_chip_handle</ref>,<sp/>&amp;transaction);</highlight></codeline>
+<codeline lineno="321"><highlight class="normal"></highlight></codeline>
+<codeline lineno="322"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//通讯结束</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="323"><highlight class="normal"><sp/><sp/><sp/><sp/>gpio_set_level(interface_config.spics_io_num,<sp/>1);</highlight></codeline>
+<codeline lineno="324"><highlight class="normal"></highlight></codeline>
+<codeline lineno="325"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ret<sp/>!=<sp/>ESP_OK)ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;与字库芯片通讯时发现问题<sp/>描述：<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>esp_err_to_name(ret));</highlight></codeline>
+<codeline lineno="326"><highlight class="normal"></highlight></codeline>
+<codeline lineno="327"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(result_code[0]<sp/>&lt;&lt;<sp/>8)<sp/>|<sp/>result_code[1];</highlight></codeline>
+<codeline lineno="328"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="329"><highlight class="normal"></highlight></codeline>
+<codeline lineno="334"><highlight class="normal">uint32_t<sp/><ref refid="gt32l32s0140_8c_1af4a59ba2661aa4108c7a90a72b069581" kindref="member">ASCII_number_count</ref>(uint32_t*<sp/>unicode_buf,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>total_unit)<sp/>{</highlight></codeline>
+<codeline lineno="335"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/>ASCII_num<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="336"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(unicode_buf)<sp/>{</highlight></codeline>
+<codeline lineno="337"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j=0;j&lt;total_unit;j++)</highlight></codeline>
+<codeline lineno="338"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(unicode_buf[j]&lt;128)ASCII_num++;</highlight></codeline>
+<codeline lineno="339"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="340"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(</highlight><highlight class="stringliteral">&quot;ASCII_number_count&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;导入了无法处理的空指针&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="342"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="343"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ASCII_num;</highlight></codeline>
+<codeline lineno="344"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="345"><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="main/gt32l32s0140.c"/>
+  </compounddef>
+</doxygen>

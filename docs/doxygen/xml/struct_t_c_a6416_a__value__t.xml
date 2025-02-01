@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_t_c_a6416_a__value__t" kind="struct" language="C++" prot="public">
+    <compoundname>TCA6416A_value_t</compoundname>
+    <includes refid="_t_c_a6416_a_8h" local="no">TCA6416A.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1aac08d1e0a50d6bd6365c3d367ff65c5e" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::main_button</definition>
+        <argsstring></argsstring>
+        <name>main_button</name>
+        <qualifiedname>TCA6416A_value_t::main_button</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="82" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1aeda76fb1ad51bc1abe5f7c3370583188" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::en_led_board</definition>
+        <argsstring></argsstring>
+        <name>en_led_board</name>
+        <qualifiedname>TCA6416A_value_t::en_led_board</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="83" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a93405114510308df92bcaf97086f9a49" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::hp_detect</definition>
+        <argsstring></argsstring>
+        <name>hp_detect</name>
+        <qualifiedname>TCA6416A_value_t::hp_detect</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="84" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="84" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1abf23cf714534994e554bade1bc97ad6c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::s2</definition>
+        <argsstring></argsstring>
+        <name>s2</name>
+        <qualifiedname>TCA6416A_value_t::s2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="85" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1abdafcb490ed7d8f8cee68e5c03f02e89" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::s1</definition>
+        <argsstring></argsstring>
+        <name>s1</name>
+        <qualifiedname>TCA6416A_value_t::s1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="86" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a0351c1376c43b0cdc12111e10e477144" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::ir</definition>
+        <argsstring></argsstring>
+        <name>ir</name>
+        <qualifiedname>TCA6416A_value_t::ir</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="87" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a5da2ab8fc2d63deebc1ec7564f8d9e1b" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::s4</definition>
+        <argsstring></argsstring>
+        <name>s4</name>
+        <qualifiedname>TCA6416A_value_t::s4</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="88" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a84ffb0cba17d5d10692b299df9ed561c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::s3</definition>
+        <argsstring></argsstring>
+        <name>s3</name>
+        <qualifiedname>TCA6416A_value_t::s3</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="89" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a3e8917befb48d37aa36d11283f5d5b76" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::amplifier_SD</definition>
+        <argsstring></argsstring>
+        <name>amplifier_SD</name>
+        <qualifiedname>TCA6416A_value_t::amplifier_SD</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="90" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1ae941d55f57f7ccf7b8bdcf0db0186514" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::IMU_INT</definition>
+        <argsstring></argsstring>
+        <name>IMU_INT</name>
+        <qualifiedname>TCA6416A_value_t::IMU_INT</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="91" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1aebca08e0d0fbd1913a7420a619db93bb" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::ALS_INT</definition>
+        <argsstring></argsstring>
+        <name>ALS_INT</name>
+        <qualifiedname>TCA6416A_value_t::ALS_INT</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="92" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1ac8f3e8daf4caf9d14b48ed0eb9d86e4f" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::thumbwheel_CCW</definition>
+        <argsstring></argsstring>
+        <name>thumbwheel_CCW</name>
+        <qualifiedname>TCA6416A_value_t::thumbwheel_CCW</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="93" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1acb4b72f67215d78f5a7d1e1fba138f98" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::thumbwheel_CW</definition>
+        <argsstring></argsstring>
+        <name>thumbwheel_CW</name>
+        <qualifiedname>TCA6416A_value_t::thumbwheel_CW</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="94" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="94" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1aadb27b9ca6afb9b73de990baefc23945" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::OTG_EN</definition>
+        <argsstring></argsstring>
+        <name>OTG_EN</name>
+        <qualifiedname>TCA6416A_value_t::OTG_EN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="95" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a39273cce24224ea9f4cbe0f3a53c7b86" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::charge_SIGN</definition>
+        <argsstring></argsstring>
+        <name>charge_SIGN</name>
+        <qualifiedname>TCA6416A_value_t::charge_SIGN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="96" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="96" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1a28be9cee9a060cd67184cdff7382f451" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::ALARM_INT</definition>
+        <argsstring></argsstring>
+        <name>ALARM_INT</name>
+        <qualifiedname>TCA6416A_value_t::ALARM_INT</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="97" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_t_c_a6416_a__value__t_1aad4c7f009a1c0ab91f1e86439f04a836" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool TCA6416A_value_t::addr</definition>
+        <argsstring></argsstring>
+        <name>addr</name>
+        <qualifiedname>TCA6416A_value_t::addr</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/TCA6416A.h" line="99" column="9" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="99" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/TCA6416A.h" line="79" column="1" bodyfile="components/sevetest30_board/include/TCA6416A.h" bodystart="80" bodyend="100"/>
+    <listofallmembers>
+      <member refid="struct_t_c_a6416_a__value__t_1aad4c7f009a1c0ab91f1e86439f04a836" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>addr</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a28be9cee9a060cd67184cdff7382f451" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>ALARM_INT</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1aebca08e0d0fbd1913a7420a619db93bb" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>ALS_INT</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a3e8917befb48d37aa36d11283f5d5b76" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>amplifier_SD</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a39273cce24224ea9f4cbe0f3a53c7b86" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>charge_SIGN</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1aeda76fb1ad51bc1abe5f7c3370583188" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>en_led_board</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a93405114510308df92bcaf97086f9a49" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>hp_detect</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1ae941d55f57f7ccf7b8bdcf0db0186514" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>IMU_INT</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a0351c1376c43b0cdc12111e10e477144" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>ir</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1aac08d1e0a50d6bd6365c3d367ff65c5e" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>main_button</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1aadb27b9ca6afb9b73de990baefc23945" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>OTG_EN</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1abdafcb490ed7d8f8cee68e5c03f02e89" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>s1</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1abf23cf714534994e554bade1bc97ad6c" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>s2</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a84ffb0cba17d5d10692b299df9ed561c" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>s3</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1a5da2ab8fc2d63deebc1ec7564f8d9e1b" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>s4</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1ac8f3e8daf4caf9d14b48ed0eb9d86e4f" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>thumbwheel_CCW</name></member>
+      <member refid="struct_t_c_a6416_a__value__t_1acb4b72f67215d78f5a7d1e1fba138f98" prot="public" virt="non-virtual"><scope>TCA6416A_value_t</scope><name>thumbwheel_CW</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

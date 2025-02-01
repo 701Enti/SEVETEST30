@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_i_m_u__angular__rate__value__t" kind="struct" language="C++" prot="public">
+    <compoundname>IMU_angular_rate_value_t</compoundname>
+    <includes refid="lsm6ds3trc_8h" local="no">lsm6ds3trc.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_angular_rate_value_t::x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <qualifiedname>IMU_angular_rate_value_t::x</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="171" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="171" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_angular_rate_value_t::y</definition>
+        <argsstring></argsstring>
+        <name>y</name>
+        <qualifiedname>IMU_angular_rate_value_t::y</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="172" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="172" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int IMU_angular_rate_value_t::z</definition>
+        <argsstring></argsstring>
+        <name>z</name>
+        <qualifiedname>IMU_angular_rate_value_t::z</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="173" column="7" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="173" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/lsm6ds3trc.h" line="170" column="1" bodyfile="components/sevetest30_board/include/lsm6ds3trc.h" bodystart="170" bodyend="174"/>
+    <listofallmembers>
+      <member refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" prot="public" virt="non-virtual"><scope>IMU_angular_rate_value_t</scope><name>x</name></member>
+      <member refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" prot="public" virt="non-virtual"><scope>IMU_angular_rate_value_t</scope><name>y</name></member>
+      <member refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" prot="public" virt="non-virtual"><scope>IMU_angular_rate_value_t</scope><name>z</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

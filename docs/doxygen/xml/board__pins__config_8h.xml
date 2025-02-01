@@ -1,0 +1,724 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="board__pins__config_8h" kind="file" language="C++">
+    <compoundname>board_pins_config.h</compoundname>
+    <includes local="yes">driver/i2c.h</includes>
+    <includes local="yes">driver/i2s.h</includes>
+    <includes local="yes">driver/spi_common.h</includes>
+    <includes local="yes">driver/spi_master.h</includes>
+    <includes local="yes">driver/spi_slave.h</includes>
+    <includedby refid="board_8h" local="yes">components/sevetest30_board/board.h</includedby>
+    <includedby refid="gt32l32s0140_8c" local="yes">main/gt32l32s0140.c</includedby>
+    <includedby refid="main_8c" local="yes">main/main.c</includedby>
+    <includedby refid="sevetest30__touch_8c" local="yes">main/sevetest30_touch.c</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/board_pins_config.h</label>
+        <link refid="board__pins__config_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>driver/i2c.h</label>
+      </node>
+      <node id="3">
+        <label>driver/i2s.h</label>
+      </node>
+      <node id="4">
+        <label>driver/spi_common.h</label>
+      </node>
+      <node id="5">
+        <label>driver/spi_master.h</label>
+      </node>
+      <node id="6">
+        <label>driver/spi_slave.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="3">
+        <label>components/sevetest30_board/board.c</label>
+        <link refid="board_8c"/>
+      </node>
+      <node id="2">
+        <label>components/sevetest30_board/board.h</label>
+        <link refid="board_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>components/sevetest30_board/board_pins_config.c</label>
+        <link refid="board__pins__config_8c"/>
+      </node>
+      <node id="1">
+        <label>components/sevetest30_board/board_pins_config.h</label>
+        <link refid="board__pins__config_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>main/board_ctrl.c</label>
+        <link refid="board__ctrl_8c"/>
+      </node>
+      <node id="8">
+        <label>main/gt32l32s0140.c</label>
+        <link refid="gt32l32s0140_8c"/>
+      </node>
+      <node id="9">
+        <label>main/main.c</label>
+        <link refid="main_8c"/>
+      </node>
+      <node id="6">
+        <label>main/sevetest30_IWEDA.c</label>
+        <link refid="sevetest30___i_w_e_d_a_8c"/>
+      </node>
+      <node id="7">
+        <label>main/sevetest30_sound.c</label>
+        <link refid="sevetest30__sound_8c"/>
+      </node>
+      <node id="10">
+        <label>main/sevetest30_touch.c</label>
+        <link refid="sevetest30__touch_8c"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structboard__i2s__pin__t" prot="public">board_i2s_pin_t</innerclass>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="board__pins__config_8h_1a94ca09238793c8085c0497fbec3199ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t get_i2c_pins</definition>
+        <argsstring>(i2c_port_t port, i2c_config_t *i2c_config)</argsstring>
+        <name>get_i2c_pins</name>
+        <param>
+          <type>i2c_port_t</type>
+          <declname>port</declname>
+        </param>
+        <param>
+          <type>i2c_config_t *</type>
+          <declname>i2c_config</declname>
+        </param>
+        <briefdescription>
+<para>Get i2c pins configuration </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>port</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>i2c port number to get configuration </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>i2c_config</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>i2c configuration parameters</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><itemizedlist>
+<listitem><para>ESP_OK</para>
+</listitem><listitem><para>ESP_FAIL </para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="64" column="11" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="44" bodyend="62" declfile="components/sevetest30_board/board_pins_config.h" declline="64" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a231e8d192d94c889801d731c387cf135" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t get_i2s_pins</definition>
+        <argsstring>(i2s_port_t port, board_i2s_pin_t *i2s_config)</argsstring>
+        <name>get_i2s_pins</name>
+        <param>
+          <type>i2s_port_t</type>
+          <declname>port</declname>
+        </param>
+        <param>
+          <type><ref refid="structboard__i2s__pin__t" kindref="compound">board_i2s_pin_t</ref> *</type>
+          <declname>i2s_config</declname>
+        </param>
+        <briefdescription>
+<para>Get i2s pins configuration </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>port</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>i2s port number to get configuration </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>i2s_config</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>i2s configuration parameters</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><itemizedlist>
+<listitem><para>ESP_OK</para>
+</listitem><listitem><para>ESP_FAIL </para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="76" column="11" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="64" bodyend="80" declfile="components/sevetest30_board/board_pins_config.h" declline="76" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a366b83a4cdbc36b4d80933b901f1b9eb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t get_spi_pins</definition>
+        <argsstring>(spi_bus_config_t *spi_config, spi_device_interface_config_t *spi_device_interface_config)</argsstring>
+        <name>get_spi_pins</name>
+        <param>
+          <type>spi_bus_config_t *</type>
+          <declname>spi_config</declname>
+        </param>
+        <param>
+          <type>spi_device_interface_config_t *</type>
+          <declname>spi_device_interface_config</declname>
+        </param>
+        <briefdescription>
+<para>Get spi pins configuration </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>spi_config</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>spi bus configuration parameters </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>spi_device_interface_config</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>spi device configuration parameters</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><itemizedlist>
+<listitem><para>ESP_OK</para>
+</listitem><listitem><para>ESP_FAIL </para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="88" column="11" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="82" bodyend="94" declfile="components/sevetest30_board/board_pins_config.h" declline="88" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a537f373ad606272a1d1d4eb16156a198" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_sdcard_intr_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_sdcard_intr_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the gpio number for sdcard interrupt </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others sdcard interrupt gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="96" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="96" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a310661eabba011b427b3f74df87eaf43" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_sdcard_open_file_num_max</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_sdcard_open_file_num_max</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get sdcard maximum number of open files </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 error Others max num </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="104" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="104" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a9acc5900bc1b442d94619fab63d7f338" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_auxin_detect_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_auxin_detect_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the gpio number for auxin detection </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="112" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="112" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a1066d6c9f6f21c01201f8bf5d09e9e2b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_headphone_detect_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_headphone_detect_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the gpio number for headphone detection </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="120" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="120" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a53b5d2267ec30ccfd45fe026c147d544" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_pa_enable_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_pa_enable_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the gpio number for PA enable </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="128" column="8" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="96" bodyend="99" declfile="components/sevetest30_board/board_pins_config.h" declline="128" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1acef9994906f13a28b70f15ff79428efb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_adc_detect_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_adc_detect_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the gpio number for adc detection </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="136" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="136" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a512780f4bc7571f5b7fa6064c27aa6b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_es7243_mclk_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_es7243_mclk_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the mclk gpio number of es7243 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="144" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="144" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a4ccd101da4c422fba93c496004febd49" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_rec_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_rec_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the record-button id for adc-button </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others button id </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="152" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="152" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a679828c18b8e6cfe7260881198b52760" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_mode_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_mode_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get the number for mode-button </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="160" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="160" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a193187a84acedbf2e517b4c0e31d812d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_set_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_set_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get number for set function </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="168" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="168" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1af15920c4cef305544a856d50442ea633" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_play_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_play_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get number for play function </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="176" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="176" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a301759707f40f6c7b9c7016791c4559d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_volup_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_volup_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>number for volume up function </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="184" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="184" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a0ff56db61d95c430d7aa7012fb910dea" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_input_voldown_id</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_input_voldown_id</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get number for volume down function </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="192" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="192" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1adb2c7284ef27a0ea6644a0ecaa7c2c9c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_reset_codec_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_reset_codec_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get green led gpio number </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="200" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="200" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1ab7c0ddfe17847a323a03eb762f6fb377" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_reset_board_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_reset_board_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get DSP reset gpio number </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="208" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="208" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a4381dca7f25bf86ac47b2445d9826ac3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_green_led_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_green_led_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get DSP reset gpio number </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="216" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="216" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a9663f7f68ddcb4163ac2c462f7180170" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_blue_led_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_blue_led_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Get green led gpio number </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>-1 non-existent Others gpio number </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="224" column="8" declfile="components/sevetest30_board/board_pins_config.h" declline="224" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1a8da69a51af751d8fb41f161637ad9172" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_vibra_motor_IN1_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_vibra_motor_IN1_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="226" column="8" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="101" bodyend="104" declfile="components/sevetest30_board/board_pins_config.h" declline="226" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="board__pins__config_8h_1aa9c9b2f96abd633bd05d5ab2ee095f7b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t get_vibra_motor_IN2_gpio</definition>
+        <argsstring>(void)</argsstring>
+        <name>get_vibra_motor_IN2_gpio</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/board_pins_config.h" line="227" column="8" bodyfile="components/sevetest30_board/board_pins_config.c" bodystart="106" bodyend="109" declfile="components/sevetest30_board/board_pins_config.h" declline="227" declcolumn="8"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/>*<sp/>ESPRESSIF<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2019<sp/>&lt;ESPRESSIF<sp/>SYSTEMS<sp/>(SHANGHAI)<sp/>CO.,<sp/>LTD&gt;</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted<sp/>for<sp/>use<sp/>on<sp/>all<sp/>ESPRESSIF<sp/>SYSTEMS<sp/>products,<sp/>in<sp/>which<sp/>case,</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>it<sp/>is<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>documentation<sp/>files<sp/>(the<sp/>&quot;Software&quot;),<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>without<sp/>limitation<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>&quot;AS<sp/>IS&quot;,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>IMPLIED,<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,<sp/>WHETHER</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,<sp/>OUT<sp/>OF<sp/>OR<sp/>IN</highlight></codeline>
+<codeline lineno="21"><highlight class="comment"><sp/>*<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="22"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="23"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/></highlight><highlight class="comment">//这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/></highlight><highlight class="comment">//更改为项目需要的形式或设置</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/></highlight><highlight class="comment">//这个修改为适应硬件环境的一个项目需求,<sp/>不是否认原作者设计的可靠性</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/></highlight><highlight class="comment">//为了明确原作者信息,此文件API帮助及相关内容不在文档中显示</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>_BOARD_PINS_CONFIG_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_BOARD_PINS_CONFIG_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/i2c.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/i2s.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/spi_common.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/spi_master.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/spi_slave.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46" refid="structboard__i2s__pin__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="47" refid="structboard__i2s__pin__t_1abaa23423cd559dd048a4cdb65c31a178" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structboard__i2s__pin__t_1abaa23423cd559dd048a4cdb65c31a178" kindref="member">mck_io_num</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="48" refid="structboard__i2s__pin__t_1a758cdf2ec2c06f1f6960723bc342dbf9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structboard__i2s__pin__t_1a758cdf2ec2c06f1f6960723bc342dbf9" kindref="member">bck_io_num</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="49" refid="structboard__i2s__pin__t_1a0d807580eb77ac4279f3f19628e5c0bf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structboard__i2s__pin__t_1a0d807580eb77ac4279f3f19628e5c0bf" kindref="member">ws_io_num</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="50" refid="structboard__i2s__pin__t_1afd9e458fc1d8078f37004e312087fc0e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structboard__i2s__pin__t_1afd9e458fc1d8078f37004e312087fc0e" kindref="member">data_out_num</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="51" refid="structboard__i2s__pin__t_1a00caedad7d0f009d4799708337dae9c7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structboard__i2s__pin__t_1a00caedad7d0f009d4799708337dae9c7" kindref="member">data_in_num</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="52"><highlight class="normal">}<sp/><ref refid="structboard__i2s__pin__t" kindref="compound">board_i2s_pin_t</ref>;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal">esp_err_t<sp/><ref refid="board__pins__config_8h_1a94ca09238793c8085c0497fbec3199ed" kindref="member">get_i2c_pins</ref>(i2c_port_t<sp/>port,<sp/>i2c_config_t<sp/>*i2c_config);</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal">esp_err_t<sp/><ref refid="board__pins__config_8h_1a231e8d192d94c889801d731c387cf135" kindref="member">get_i2s_pins</ref>(i2s_port_t<sp/>port,<sp/><ref refid="structboard__i2s__pin__t" kindref="compound">board_i2s_pin_t</ref><sp/>*i2s_config);</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal">esp_err_t<sp/><ref refid="board__pins__config_8h_1a366b83a4cdbc36b4d80933b901f1b9eb" kindref="member">get_spi_pins</ref>(spi_bus_config_t<sp/>*spi_config,<sp/>spi_device_interface_config_t<sp/>*spi_device_interface_config);</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96" refid="board__pins__config_8h_1a537f373ad606272a1d1d4eb16156a198" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a537f373ad606272a1d1d4eb16156a198" kindref="member">get_sdcard_intr_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104" refid="board__pins__config_8h_1a310661eabba011b427b3f74df87eaf43" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a310661eabba011b427b3f74df87eaf43" kindref="member">get_sdcard_open_file_num_max</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight></codeline>
+<codeline lineno="112" refid="board__pins__config_8h_1a9acc5900bc1b442d94619fab63d7f338" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a9acc5900bc1b442d94619fab63d7f338" kindref="member">get_auxin_detect_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120" refid="board__pins__config_8h_1a1066d6c9f6f21c01201f8bf5d09e9e2b" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a1066d6c9f6f21c01201f8bf5d09e9e2b" kindref="member">get_headphone_detect_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a53b5d2267ec30ccfd45fe026c147d544" kindref="member">get_pa_enable_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"></highlight></codeline>
+<codeline lineno="136" refid="board__pins__config_8h_1acef9994906f13a28b70f15ff79428efb" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1acef9994906f13a28b70f15ff79428efb" kindref="member">get_adc_detect_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144" refid="board__pins__config_8h_1a512780f4bc7571f5b7fa6064c27aa6b9" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a512780f4bc7571f5b7fa6064c27aa6b9" kindref="member">get_es7243_mclk_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="152" refid="board__pins__config_8h_1a4ccd101da4c422fba93c496004febd49" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a4ccd101da4c422fba93c496004febd49" kindref="member">get_input_rec_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"></highlight></codeline>
+<codeline lineno="160" refid="board__pins__config_8h_1a679828c18b8e6cfe7260881198b52760" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a679828c18b8e6cfe7260881198b52760" kindref="member">get_input_mode_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"></highlight></codeline>
+<codeline lineno="168" refid="board__pins__config_8h_1a193187a84acedbf2e517b4c0e31d812d" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a193187a84acedbf2e517b4c0e31d812d" kindref="member">get_input_set_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"></highlight></codeline>
+<codeline lineno="176" refid="board__pins__config_8h_1af15920c4cef305544a856d50442ea633" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1af15920c4cef305544a856d50442ea633" kindref="member">get_input_play_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"></highlight></codeline>
+<codeline lineno="184" refid="board__pins__config_8h_1a301759707f40f6c7b9c7016791c4559d" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a301759707f40f6c7b9c7016791c4559d" kindref="member">get_input_volup_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"></highlight></codeline>
+<codeline lineno="192" refid="board__pins__config_8h_1a0ff56db61d95c430d7aa7012fb910dea" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a0ff56db61d95c430d7aa7012fb910dea" kindref="member">get_input_voldown_id</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"></highlight></codeline>
+<codeline lineno="200" refid="board__pins__config_8h_1adb2c7284ef27a0ea6644a0ecaa7c2c9c" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1adb2c7284ef27a0ea6644a0ecaa7c2c9c" kindref="member">get_reset_codec_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"></highlight></codeline>
+<codeline lineno="208" refid="board__pins__config_8h_1ab7c0ddfe17847a323a03eb762f6fb377" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1ab7c0ddfe17847a323a03eb762f6fb377" kindref="member">get_reset_board_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"></highlight></codeline>
+<codeline lineno="216" refid="board__pins__config_8h_1a4381dca7f25bf86ac47b2445d9826ac3" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a4381dca7f25bf86ac47b2445d9826ac3" kindref="member">get_green_led_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="217"><highlight class="normal"></highlight></codeline>
+<codeline lineno="224" refid="board__pins__config_8h_1a9663f7f68ddcb4163ac2c462f7180170" refkind="member"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a9663f7f68ddcb4163ac2c462f7180170" kindref="member">get_blue_led_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"></highlight></codeline>
+<codeline lineno="226"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1a8da69a51af751d8fb41f161637ad9172" kindref="member">get_vibra_motor_IN1_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="227"><highlight class="normal">int8_t<sp/><ref refid="board__pins__config_8h_1aa9c9b2f96abd633bd05d5ab2ee095f7b" kindref="member">get_vibra_motor_IN2_gpio</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"></highlight></codeline>
+<codeline lineno="229"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="230"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="231"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="232"><highlight class="normal"></highlight></codeline>
+<codeline lineno="233"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="components/sevetest30_board/board_pins_config.h"/>
+  </compounddef>
+</doxygen>

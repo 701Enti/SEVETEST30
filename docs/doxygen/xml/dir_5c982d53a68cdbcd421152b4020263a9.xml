@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="dir_5c982d53a68cdbcd421152b4020263a9" kind="dir">
+    <compoundname>main</compoundname>
+    <innerfile refid="_a_g_s10_8c">AGS10.c</innerfile>
+    <innerfile refid="_a_h_t21_8c">AHT21.c</innerfile>
+    <innerfile refid="_b_l5372_8c">BL5372.c</innerfile>
+    <innerfile refid="board__ctrl_8c">board_ctrl.c</innerfile>
+    <innerfile refid="gt32l32s0140_8c">gt32l32s0140.c</innerfile>
+    <innerfile refid="lsm6ds3trc_8c">lsm6ds3trc.c</innerfile>
+    <innerfile refid="main_8c">main.c</innerfile>
+    <innerfile refid="sevetest30___b_w_e_d_a_8c">sevetest30_BWEDA.c</innerfile>
+    <innerfile refid="sevetest30__gpio_8c">sevetest30_gpio.c</innerfile>
+    <innerfile refid="sevetest30___i_w_e_d_a_8c">sevetest30_IWEDA.c</innerfile>
+    <innerfile refid="sevetest30___led_array_8c">sevetest30_LedArray.c</innerfile>
+    <innerfile refid="sevetest30__sound_8c">sevetest30_sound.c</innerfile>
+    <innerfile refid="sevetest30___s_w_e_d_a_8c">sevetest30_SWEDA.c</innerfile>
+    <innerfile refid="sevetest30__touch_8c">sevetest30_touch.c</innerfile>
+    <innerfile refid="sevetest30___u_i_8c">sevetest30_UI.c</innerfile>
+    <innerfile refid="_t_c_a6416_a_8c">TCA6416A.c</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="main/"/>
+  </compounddef>
+</doxygen>

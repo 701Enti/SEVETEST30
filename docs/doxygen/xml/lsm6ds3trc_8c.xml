@@ -1,0 +1,2082 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="lsm6ds3trc_8c" kind="file" language="C++">
+    <compoundname>lsm6ds3trc.c</compoundname>
+    <includes refid="lsm6ds3trc_8h" local="yes">lsm6ds3trc.h</includes>
+    <includes local="yes">esp_log.h</includes>
+    <includes refid="board__def_8h" local="yes">board_def.h</includes>
+    <includes local="yes">driver/i2c.h</includes>
+    <includes local="no">string.h</includes>
+    <includes local="no">math.h</includes>
+    <incdepgraph>
+      <node id="6">
+        <label>board_def.h</label>
+        <link refid="board__def_8h"/>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>lsm6ds3trc.h</label>
+        <link refid="lsm6ds3trc_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>main/lsm6ds3trc.c</label>
+        <link refid="lsm6ds3trc_8c"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>audio_hal.h</label>
+      </node>
+      <node id="8">
+        <label>driver/i2c.h</label>
+      </node>
+      <node id="4">
+        <label>esp_err.h</label>
+      </node>
+      <node id="9">
+        <label>esp_gatts_api.h</label>
+      </node>
+      <node id="5">
+        <label>esp_log.h</label>
+      </node>
+      <node id="3">
+        <label>esp_types.h</label>
+      </node>
+      <node id="11">
+        <label>math.h</label>
+      </node>
+      <node id="10">
+        <label>string.h</label>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="lsm6ds3trc_8c_1aa9d174d2cf4409dbb580cf88262b1a57" prot="public" static="no">
+        <name>LSM6DS3TRC_DEVICE_ADD</name>
+        <initializer>0x6A</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="45" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="45" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ab8c1d34398dd66cde3da659309fde72e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t lsm6ds3trc_database_map_set</definition>
+        <argsstring>(IMU_reg_mapping_t *reg_database, int map_num)</argsstring>
+        <name>lsm6ds3trc_database_map_set</name>
+        <param>
+          <type><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref> *</type>
+          <declname>reg_database</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>map_num</declname>
+        </param>
+        <briefdescription>
+<para>映射数据库中的配置到LSM6DS3TRC硬件寄存器,即通过数据库写入设定的寄存器 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>reg_database</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入数据库，这是一个以IMU_reg_mapping_t的数组，其中的条目即单个IMU_reg_mapping_t数据的个数没有规定， 并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>map_num</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>ESP_OK / ESP_FAIL </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="52" column="11" bodyfile="main/lsm6ds3trc.c" bodystart="52" bodyend="77"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t lsm6ds3trc_database_map_read</definition>
+        <argsstring>(IMU_reg_mapping_t *reg_database, int map_num)</argsstring>
+        <name>lsm6ds3trc_database_map_read</name>
+        <param>
+          <type><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref> *</type>
+          <declname>reg_database</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>map_num</declname>
+        </param>
+        <briefdescription>
+<para>映射LSM6DS3TRC硬件寄存器的数据到数据库,即读取设定的寄存器到数据库 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>reg_database</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入数据库，这是一个以IMU_reg_mapping_t的数组，其中的条目即单个IMU_reg_mapping_t数据的个数没有规定， 并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>map_num</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>ESP_OK / ESP_FAIL </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="85" column="11" bodyfile="main/lsm6ds3trc.c" bodystart="85" bodyend="109"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a36d23681d5f803f809601324608ec184" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>esp_err_t</type>
+        <definition>esp_err_t lsm6ds3trc_FIFO_map</definition>
+        <argsstring>(IMU_reg_mapping_t *FIFO_database, int map_num, int read_num)</argsstring>
+        <name>lsm6ds3trc_FIFO_map</name>
+        <param>
+          <type><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref> *</type>
+          <declname>FIFO_database</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>map_num</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>read_num</declname>
+        </param>
+        <briefdescription>
+<para>[FIFO数据映射] </para>
+        </briefdescription>
+        <detaileddescription>
+<para>FIFO是姿态传感器中一种常用的缓存策略,FIFO具有抽取功能,可以采集大量的传感数据的一小部分用于参考</para>
+<para>同时也压缩了数据,因为数据实时性需求大,一帧FIFO数据往往包含多个传感器的数据</para>
+<para>配置抽取的方式不同,FIFO中各种数据的顺序会发生一定变化,通过配置映射数据库来告知读取函数这些数据的顺序含义</para>
+<para>FIFO映射数据库使用寄存器值配置数据库的完全相同逻辑,但是不同单元的读写顺序显然相比更加重要</para>
+<para>键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址</para>
+<para>键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式</para>
+<para>每次读取从这些地址开始导入,在data_num控制下偏移地址地存储数据 <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>FIFO_database</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FIFO映射数据库,条目键值对的 value 设置为NULL表示舍弃该条目数据读取 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>map_num</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>(必须准确)数据库的条目数量即MAP_BASE个数 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>read_num</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>(必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>ESP_OK / ESP_FAIL </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="123" column="11" bodyfile="main/lsm6ds3trc.c" bodystart="123" bodyend="171"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1aa26d2387af3001abe5809e9ba5fcd9c4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void lsm6ds3trc_init_or_reset</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_init_or_reset</name>
+        <briefdescription>
+<para>以默认配置初始化LSM6DS3TRC姿态传感器，或者重置其到默认配置 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="175" column="6" bodyfile="main/lsm6ds3trc.c" bodystart="175" bodyend="179"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1af9289ed6975d2a4f1122c9c4be5f7e87" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t lsm6ds3trc_get_step_counter</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_get_step_counter</name>
+        <briefdescription>
+<para>获取步数计数值 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>步数计数值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="183" column="10" bodyfile="main/lsm6ds3trc.c" bodystart="183" bodyend="193"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1aec78c8d80e1a0ecef27bbf42954d44be" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="struct_i_m_u___d6_d__data__value__t" kindref="compound">IMU_D6D_data_value_t</ref></type>
+        <definition>IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_get_D6D_data_value</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="196" column="22" bodyfile="main/lsm6ds3trc.c" bodystart="196" bodyend="213"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a8aaae71782145d70d4670637a15407bf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool lsm6ds3trc_get_free_fall_status</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_get_free_fall_status</name>
+        <briefdescription>
+<para>检测是否处于自由落体状态 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>自由落体状态标志 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="218" column="6" bodyfile="main/lsm6ds3trc.c" bodystart="218" bodyend="225"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1aaf0042004ca7f0dffcb0cebe2823e44b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int lsm6ds3trc_get_now_temperature</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_get_now_temperature</name>
+        <briefdescription>
+<para>获取传感器的实时温度(1000 = 1摄氏温度) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>实时温度(1000 = 1摄氏温度) </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="231" column="5" bodyfile="main/lsm6ds3trc.c" bodystart="231" bodyend="246"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ab302c2f3c2e51730da253a704643bcb2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="struct_i_m_u__acceleration__value__t" kindref="compound">IMU_acceleration_value_t</ref></type>
+        <definition>IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_gat_now_acceleration</name>
+        <briefdescription>
+<para>获取实时的加速度偏移(支持DRDY_MASK下无效样本过滤) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>实时的加速度值偏移 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="251" column="26" bodyfile="main/lsm6ds3trc.c" bodystart="251" bodyend="329"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ad3e5286502aa1f5a9158e976e30f981a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="struct_i_m_u__angular__rate__value__t" kindref="compound">IMU_angular_rate_value_t</ref></type>
+        <definition>IMU_angular_rate_value_t lsm6ds3trc_gat_now_angular_rate</definition>
+        <argsstring>()</argsstring>
+        <name>lsm6ds3trc_gat_now_angular_rate</name>
+        <briefdescription>
+<para>获取实时的角速率偏移(支持DRDY_MASK下无效样本过滤) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>实时的角速率偏移值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="333" column="26" bodyfile="main/lsm6ds3trc.c" bodystart="333" bodyend="416"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a32e7c8785938fbad63ba6528b7119a3d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL1_XL</definition>
+        <argsstring>(IMU_ORD_XL_t ODR_XL, IMU_FS_XL_t FS_XL, bool LPF1_BW_SEL, bool BW0_XL)</argsstring>
+        <name>value_compound_CTRL1_XL</name>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a0676337036621fd7c3b19d85fe028f00" kindref="member">IMU_ORD_XL_t</ref></type>
+          <declname>ODR_XL</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386f" kindref="member">IMU_FS_XL_t</ref></type>
+          <declname>FS_XL</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LPF1_BW_SEL</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>BW0_XL</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL1_XL : ODR_XL [3:0] | FS_XL [1:0] | LPF1_BW_SEL | BW0_XL </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ODR_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计数据输出速率(枚举) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>FS_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计量程(枚举) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LPF1_BW_SEL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>应用加速度计数字滤波器1带宽选择 false/true </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>BW0_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计模拟链带宽选择（仅适用于数据输出速率≥1.67 kHz) false=1.5kHz / true=400Hz </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="424" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="424" bodyend="426"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a42b9a0c8a3b4afa9d476e9a3d8d28a08" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL2_G</definition>
+        <argsstring>(IMU_ORD_G_t ODR_G, IMU_FS_G_t FS_G)</argsstring>
+        <name>value_compound_CTRL2_G</name>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1aad3b123b92080e7504fd6ebc4a2c70bc" kindref="member">IMU_ORD_G_t</ref></type>
+          <declname>ODR_G</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9b" kindref="member">IMU_FS_G_t</ref></type>
+          <declname>FS_G</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL2_G : ODR_G [3:0] | FS_G [1:0] | FS_125 | [0] (FS_G [1:0]和FS_125的组合在IMU_FS_G_t已经处理) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ODR_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>陀螺仪数据输出速率(枚举) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>FS_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>陀螺仪量程(枚举) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="433" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="433" bodyend="435"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a3b961b103c5063bc56e28550e865a386" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL3_C</definition>
+        <argsstring>(bool BOOT, bool BDU, bool H_LACTIVE, bool PP_OD, bool SIM, bool IF_INC, bool BLE, bool SW_RESET)</argsstring>
+        <name>value_compound_CTRL3_C</name>
+        <param>
+          <type>bool</type>
+          <declname>BOOT</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>BDU</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>H_LACTIVE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>PP_OD</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>SIM</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>IF_INC</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>BLE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>SW_RESET</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL3_C : BOOT | BDU | H_LACTIVE | PP_OD | SIM | IF_INC | BLE | SW_RESET </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>BOOT</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>重置所有寄存器到硬件默认值 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>BDU</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在读取输出寄存器的MSB和LSB之前，禁止输出寄存器更新 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>H_LACTIVE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>反转中断引脚输出电平为低电平 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>PP_OD</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在中断引脚上使用开漏输出 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SIM</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SPI通讯模式选择, false = 4线SPI(4-wire interface) / true = 3线SPI(3-wire interface) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>IF_INC</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>多字节访问寄存器时地址自动递增 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>BLE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>反转多字节数据值MSB LSB的寄存器存储位置 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SW_RESET</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>软复位,同时会重置所有寄存器到硬件默认值 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="447" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="447" bodyend="449"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a1f0545d55ec9b87141b48931d33e77ca" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL4_C</definition>
+        <argsstring>(bool DEN_XL_EN, bool SLEEP, bool INT2_on_INT1, bool DEN_DRDY_INT1, bool DRDY_MASK, bool I2C_disable, bool LPF1_SEL_G)</argsstring>
+        <name>value_compound_CTRL4_C</name>
+        <param>
+          <type>bool</type>
+          <declname>DEN_XL_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>SLEEP</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_on_INT1</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>DEN_DRDY_INT1</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>DRDY_MASK</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>I2C_disable</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LPF1_SEL_G</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL4_C : DEN_XL_EN | SLEEP | INT2_on_INT1 | DEN_DRDY_INT1 | DRDY_MASK | I2C_disable | LPF1_SEL_G | [0] </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>DEN_XL_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>将DEN功能扩展到加速度计 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SLEEP</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用陀螺仪的睡眠模式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_on_INT1</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>把所有中断信号仅路由到INT1 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>DEN_DRDY_INT1</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>把DEN_DRDY信号路由到INT1 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>DRDY_MASK</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用DRDY_MASK功能 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>I2C_disable</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>禁用I2C通讯 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LPF1_SEL_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用陀螺仪数字低通滤波器(LPF1) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="460" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="460" bodyend="462"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a93d3c844cf9c862500964536d3a34806" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL6_C</definition>
+        <argsstring>(bool TRIG_EN, bool LVL_EN, bool LVL2_EN, bool XL_HM_MODE, bool USR_OFF_W, IMU_FTYPE_t FTYPE)</argsstring>
+        <name>value_compound_CTRL6_C</name>
+        <param>
+          <type>bool</type>
+          <declname>TRIG_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LVL_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LVL2_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>XL_HM_MODE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>USR_OFF_W</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a1d708eede7b470fba175529fd422e176" kindref="member">IMU_FTYPE_t</ref></type>
+          <declname>FTYPE</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL6_C: TRIG_EN | LVL_EN | LVL2_EN | XL_HM_MODE | USR_OFF_W | [0] | FTYPE[1:0] </para>
+        </briefdescription>
+        <detaileddescription>
+<para>这里请格外注意该高级配置的合理性,不合理的滤波配置会对全局的数据处理产生影响,甚至使如自由落体等中断检测过敏感而无法正常工作 <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>TRIG_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用DEN数据边缘触发器 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LVL_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用DEN数据水平触发器 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LVL2_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用DEN数据水平触发器的锁存功能 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>XL_HM_MODE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>禁用加速度计的高性能工作模式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>USR_OFF_W</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计自定义偏移位的权重 false = 2^-10 g/LSB | true = 2^-6 g/LSB </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>FTYPE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>陀螺仪低通滤波器（LPF1）带宽选择位 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="473" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="473" bodyend="475"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a2e40054ca6b4854dab9582925aca63b7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL7_G</definition>
+        <argsstring>(bool G_HM_MODE, bool HP_EN_G, IMU_HPM_G_t HPM_G, bool ROUNDING_STATUS)</argsstring>
+        <name>value_compound_CTRL7_G</name>
+        <param>
+          <type>bool</type>
+          <declname>G_HM_MODE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>HP_EN_G</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a10d34fb6a811711de4a3dbf530bf706c" kindref="member">IMU_HPM_G_t</ref></type>
+          <declname>HPM_G</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>ROUNDING_STATUS</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL7_G : G_HM_MODE | HP_EN_G | HPM_G[1:0] | [0] | ROUNDING_STATUS | [0] | [0] </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>G_HM_MODE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>禁用陀螺仪的高性能工作模式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>HP_EN_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>为陀螺仪启用数字高通滤波器。只有当陀螺仪处于HP模式时，它才会生效 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>HPM_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>高通滤波器截止频率 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ROUNDING_STATUS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用舍入函数,舍入函数使得在一次连续读取中锁定地连续读取某些寄存器而不常规递增地址,包括 WAKE_UP_SRC TAP_SRC D6D_SRC STATUS_REG FUNC_SRC </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="484" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="484" bodyend="486"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ab682a36dd9493f862225f2021b0bdc48" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL8_XL</definition>
+        <argsstring>(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_REF_MODE, bool INPUT_COMPOSITE, bool HP_SLOPE_XL_EN, bool LOW_PASS_ON_6D)</argsstring>
+        <name>value_compound_CTRL8_XL</name>
+        <param>
+          <type>bool</type>
+          <declname>LPF2_XL_EN</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a604b73f6ae6abe0cb2032fe1c9129748" kindref="member">IMU_HPCF_XL_t</ref></type>
+          <declname>HPCF_XL</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>HP_REF_MODE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INPUT_COMPOSITE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>HP_SLOPE_XL_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LOW_PASS_ON_6D</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL8_XL : LPF2_XL_EN | HPCF_XL[1:0] | HP_REF_MODE | INPUT_COMPOSITE | HP_SLOPE_XL_EN | [0] | LOW_PASS_ON_6D </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>LPF2_XL_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用滤波器LPF2 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>HPCF_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计滤波器截止设置(部分生效的) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>HP_REF_MODE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用高通滤波器的参考模式 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INPUT_COMPOSITE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>复合滤波器输入选择 false = ODR/2低通滤波 | true = ODR/4低通滤波 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>HP_SLOPE_XL_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>选择使用的是高通滤波器 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LOW_PASS_ON_6D</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在6D检测功能使用滤波器LPF2 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="497" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="497" bodyend="499"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a76ffb927430ce46212f80dc9a4b6e575" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_CTRL10_C</definition>
+        <argsstring>(bool WRIST_TILT_EN, bool TIMER_EN, bool PEDO_EN, bool TILT_EN, bool FUNC_EN, bool PEDO_RST_STEP, bool SIGN_MOTION_EN)</argsstring>
+        <name>value_compound_CTRL10_C</name>
+        <param>
+          <type>bool</type>
+          <declname>WRIST_TILT_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>TIMER_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>PEDO_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>TILT_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>FUNC_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>PEDO_RST_STEP</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>SIGN_MOTION_EN</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 CTRL10_C : WRIST_TILT_EN | [0] | TIMER_EN | PEDO_EN | TILT_EN | FUNC_EN | PEDO_RST_STEP | SIGN_MOTION_EN </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>WRIST_TILT_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用wrist斜率运算程序 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>TIMER_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用计数时间戳 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>PEDO_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用计步器运算程序 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>TILT_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>使能斜率计算 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>FUNC_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>启用嵌入式功能(包括但不限于计步器等) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>PEDO_RST_STEP</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>重置计步器的计数值 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SIGN_MOTION_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>使能显著运动检测功能 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="511" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="511" bodyend="513"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a6059287180f65ebea961e674515ed16d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_INT1_CTRL</definition>
+        <argsstring>(bool INT1_STEP_DETECTOR, bool INT1_SIGN_MOT, bool INT1_FULL_FLAG, bool INT1_FIFO_OVR, bool INT1_FTH, bool INT1_BOOT, bool INT1_DRDY_G, bool INT1_DRDY_XL)</argsstring>
+        <name>value_compound_INT1_CTRL</name>
+        <param>
+          <type>bool</type>
+          <declname>INT1_STEP_DETECTOR</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_SIGN_MOT</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_FULL_FLAG</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_FIFO_OVR</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_FTH</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_BOOT</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_DRDY_G</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_DRDY_XL</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 INT1_CTRL : INT1_STEP_DETECTOR | INT1_SIGN_MOT | INT1_FULL_FLAG | INT1_FIFO_OVR | INT1_FTH | INT1_BOOT | INT1_DRDY_G | INT1_DRDY_XL </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>INT1_STEP_DETECTOR</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- 计步器计数 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_SIGN_MOT</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- 显著运动检测 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_FULL_FLAG</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- FIFO数据填充完成 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_FIFO_OVR</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- FIFO数据溢出 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_FTH</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- FIFO阈值中断 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_BOOT</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- BOOT引导状态 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_DRDY_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- 陀螺仪数据准备完毕 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_DRDY_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT1启用中断- 加速度计数据准备完毕 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="526" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="526" bodyend="528"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a0ee6b0194066c4221e4006a0b06c64f6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_INT2_CTRL</definition>
+        <argsstring>(bool INT2_STEP_DELTA, bool INT2_STEP_COUNT_OV, bool INT2_FULL_FLAG, bool INT2_FIFO_OVR, bool INT2_FTH, bool INT2_DRDY_TEMP, bool INT2_DRDY_G, bool INT2_DRDY_XL)</argsstring>
+        <name>value_compound_INT2_CTRL</name>
+        <param>
+          <type>bool</type>
+          <declname>INT2_STEP_DELTA</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_STEP_COUNT_OV</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_FULL_FLAG</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_FIFO_OVR</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_FTH</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_DRDY_TEMP</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_DRDY_G</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT2_DRDY_XL</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 INT2_CTRL : INT2_STEP_DELTA | INT2_STEP_COUNT_OV | INT2_FULL_FLAG | INT2_FIFO_OVR | INT2_FTH | INT2_DRDY_TEMP | INT2_DRDY_G | INT2_DRDY_XL </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>INT2_STEP_DELTA</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- 计步器计数 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_STEP_COUNT_OV</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- 计步器计数溢出中断 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_FULL_FLAG</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- FIFO数据填充完成 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_FIFO_OVR</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- FIFO数据溢出 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_FTH</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- FIFO阈值中断 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_DRDY_TEMP</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- 温度数据就绪 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_DRDY_G</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- 陀螺仪数据准备完毕 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT2_DRDY_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在INT2启用中断- 加速度计数据准备完毕 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="542" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="542" bodyend="544"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ab280d350d67ef7b3d177ad1e682fe1af" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_MD1_CFG</definition>
+        <argsstring>(bool INT1_INACT_STATE, bool INT1_SINGLE_TAP, bool INT1_WU, bool INT1_FF, bool INT1_DOUBLE_TAP, bool INT1_6D, bool INT1_TILT, bool INT1_TIMER)</argsstring>
+        <name>value_compound_MD1_CFG</name>
+        <param>
+          <type>bool</type>
+          <declname>INT1_INACT_STATE</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_SINGLE_TAP</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_WU</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_FF</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_DOUBLE_TAP</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_6D</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_TILT</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>INT1_TIMER</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 MD1_CFG : INT1_INACT_STATE | INT1_SINGLE_TAP | INT1_WU | INT1_FF | INT1_DOUBLE_TAP | INT1_6D | INT1_TILT | INT1_TIMER </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>INT1_INACT_STATE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 静默事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_SINGLE_TAP</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - Single-tap识别事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_WU</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 唤醒事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_FF</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 自由落体事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_DOUBLE_TAP</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - double-tap识别事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_6D</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 6D相关事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_TILT</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 倾斜事件 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INT1_TIMER</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>INT1上路由 - 计时器停止事件 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="557" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="557" bodyend="559"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a03d89ba0020bf84c87bb909e526cd711" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_partly_FREE_FALL</definition>
+        <argsstring>(IMU_FF_THS_t FF_THS)</argsstring>
+        <name>value_compound_partly_FREE_FALL</name>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a6b3baba753e30808e0972e6f759a8a58" kindref="member">IMU_FF_THS_t</ref></type>
+          <declname>FF_THS</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值的一部分 FREE_FALL : FF_DUR4(未包含,默认值0)|FF_DUR3(未包含,默认值0)|FF_DUR2(未包含,默认值0)|FF_DUR1(未包含,默认值0)|FF_DUR0(未包含,默认值0) | FF_THS2 | FF_THS1 | FF_THS0 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>FF_THS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>自由落体检测触发阈值 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>可能需要继续加工的实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="564" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="564" bodyend="566"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ae1231da0750610f64e1f9fdf6c2ad743" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_partly_TAP_THS_6D</definition>
+        <argsstring>(bool D4D_EN, IMU_SIXD_THS_t SIXD_THS)</argsstring>
+        <name>value_compound_partly_TAP_THS_6D</name>
+        <param>
+          <type>bool</type>
+          <declname>D4D_EN</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a6cafbe08461f831bffb0bab596ba1deb" kindref="member">IMU_SIXD_THS_t</ref></type>
+          <declname>SIXD_THS</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值的一部分 TAP_THS_6D : D4D_EN | SIXD_THS[1:0] | TAP_THS[4:0](未包含,默认值00000) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>D4D_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>关闭4D检测,使用6D检测 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SIXD_THS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>4D/6D检测功能的阈值 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>可能需要继续加工的实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="572" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="572" bodyend="574"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a1b3022693003b7f67bdfee48a259c006" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_TAP_CFG</definition>
+        <argsstring>(bool INTERRUPTS_ENABLE, IMU_INACT_EN_t INACT_EN, bool SLOPE_FDS, bool TAP_X_EN, bool TAP_Y_EN, bool TAP_Z_EN, bool LIR)</argsstring>
+        <name>value_compound_TAP_CFG</name>
+        <param>
+          <type>bool</type>
+          <declname>INTERRUPTS_ENABLE</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1af25db59065d1e39841d495e50d7e99af" kindref="member">IMU_INACT_EN_t</ref></type>
+          <declname>INACT_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>SLOPE_FDS</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>TAP_X_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>TAP_Y_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>TAP_Z_EN</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>LIR</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 TAP_CFG : INTERRUPTS_ENABLE | INACT_EN1 INACT_EN0 | SLOPE_FDS | TAP_X_EN | TAP_Y_EN | TAP_Z_EN | LIR </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>INTERRUPTS_ENABLE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>使能基本中断(6D/4D 自由落体检测 唤醒事件 静默事件 Single-tap/double-tap) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>INACT_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>静默功能的设置 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SLOPE_FDS</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在唤醒和静默/活动检测上选择高通滤波 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>TAP_X_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在tap识别中启用X方向 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>TAP_Y_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在tap识别中启用Y方向 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>TAP_Z_EN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>在tap识别中启用Z方向 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>LIR</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>中断锁存 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="585" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="585" bodyend="587"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1a1e9151d80c2684fe83e771295ce4c60f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_FIFO_CTRL3</definition>
+        <argsstring>(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO, IMU_DEC_FIFO_XL_t DEC_FIFO_XL)</argsstring>
+        <name>value_compound_FIFO_CTRL3</name>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a702e742030ae594bd389d5f514ff58a1" kindref="member">IMU_DEC_FIFO_GYRO_t</ref></type>
+          <declname>DEC_FIFO_GYRO</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1abae73eeaa9040884fdb7492a44b054c8" kindref="member">IMU_DEC_FIFO_XL_t</ref></type>
+          <declname>DEC_FIFO_XL</declname>
+        </param>
+        <briefdescription>
+<para>合成寄存器配置值 FIFO_CTRL3 : [0] [0] | DEC_FIFO_GYRO[2:0] | DEC_FIFO_XL[2:0] </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>DEC_FIFO_GYRO</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>陀螺仪FIFO数据集抽取设置 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>DEC_FIFO_XL</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>加速度计FIFO数据集抽取设置 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="595" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="595" bodyend="597"/>
+      </memberdef>
+      <memberdef kind="function" id="lsm6ds3trc_8c_1ad0713884fd1155be756799573b1c8a6b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t value_compound_FIFO_CTRL5</definition>
+        <argsstring>(IMU_ODR_FIFO_t ODR_FIFO, IMU_FIFO_MODE_t FIFO_MODE)</argsstring>
+        <name>value_compound_FIFO_CTRL5</name>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1a8571e017c1cdde054ec8480cd15e9c0f" kindref="member">IMU_ODR_FIFO_t</ref></type>
+          <declname>ODR_FIFO</declname>
+        </param>
+        <param>
+          <type><ref refid="lsm6ds3trc_8h_1afcd74e48a5a0c50ca3ee4beb67409154" kindref="member">IMU_FIFO_MODE_t</ref></type>
+          <declname>FIFO_MODE</declname>
+        </param>
+        <briefdescription>
+<para>// 合成寄存器配置值 FIFO_CTRL5 : [0] | ODR_FIFO[3:0] | FIFO_MODE[2:0] </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ODR_FIFO</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FIFO_ORD选择 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>FIFO_MODE</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FIFO运行模式 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>实际寄存器值 </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main/lsm6ds3trc.c" line="606" column="9" bodyfile="main/lsm6ds3trc.c" bodystart="606" bodyend="608"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/>*<sp/>701Enti<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>©<sp/>2024<sp/>&lt;701Enti<sp/>organization&gt;</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted,<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated<sp/>documentation<sp/>files<sp/>(the<sp/>“Software”),</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including<sp/>without<sp/>limitation</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>“AS<sp/>IS”,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR<sp/>IMPLIED,</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.</highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>WHETHER<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>OUT<sp/>OF<sp/>OR<sp/>IN<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对姿态传感器LSM6DS3TR-C的操作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>如您发现一些问题，请及时联系我们，我们非常感谢您的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/>对于功能设计需求，并不是所有寄存器都被考虑，都要求配置，实际上可以遵从默认设置</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/>FIFO读出数据可能存在无效样本,需要自行过滤,(过滤大于等于0x7FF0样本)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路<sp/>https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>github:<sp/>https://github.com/701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>bilibili:<sp/>701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>[基本初始化]<sp/>设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>开启BDU和DRDY_MASK<sp/>配置INT1<sp/>配置自动记录相关模块</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>设置FIFO抽取系数<sp/>设置FIFO_ORD<sp/><sp/><sp/>设置<sp/>加速度<sp/>角速率<sp/>数据源到FIFO<sp/><sp/><sp/>配置为FIFO<sp/>Continuous<sp/>mode模式<sp/>不使用中断</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>[读取步骤]<sp/>读出FIFO存储的数据<sp/>/<sp/>读出自动记录的数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>[快捷监测]<sp/>6D/4D检测<sp/>自由落体检测<sp/>计步器</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>[默认中断]<sp/>INT1上路由<sp/>-<sp/>自由落体事件</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/></highlight><highlight class="comment">//<sp/>[中断锁存]<sp/>默认启用</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="lsm6ds3trc_8h" kindref="compound">lsm6ds3trc.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;esp_log.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="board__def_8h" kindref="compound">board_def.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;driver/i2c.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;math.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight><highlight class="comment">//<sp/>I2C相关配置宏定义在board_def.h下</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LSM6DS3TRC_DEVICE_ADD<sp/>0x6A</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal">esp_err_t<sp/><ref refid="lsm6ds3trc_8c_1ab8c1d34398dd66cde3da659309fde72e" kindref="member">lsm6ds3trc_database_map_set</ref>(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>reg_database,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>map_num)</highlight></codeline>
+<codeline lineno="53"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;lsm6ds3trc_database_map_set&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!reg_database)</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;导入了为空的数据库&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>用于偏移到指定数据库内存区域获取数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>mapping_buf<sp/>=<sp/>reg_database;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idx<sp/>=<sp/>0;<sp/>idx<sp/>&lt;<sp/>map_num;<sp/>idx++)</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>mapping_buf<sp/>=<sp/>&amp;reg_database[idx];</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/>uint8_t<sp/>write_buf[2]<sp/>=<sp/>{<sp/>mapping_buf-&gt;<ref refid="struct_i_m_u__reg__mapping__t_1a0bbdc838c5611afe00877d8742b8bda4" kindref="member">reg_address</ref>,<sp/>mapping_buf-&gt;<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>};</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>err<sp/>=<sp/>i2c_master_write_to_device(<ref refid="board__def_8h_1a6c09d42369f3cc4c366118ce5241ba68" kindref="member">DEVICE_I2C_PORT</ref>,<sp/><ref refid="lsm6ds3trc_8c_1aa9d174d2cf4409dbb580cf88262b1a57" kindref="member">LSM6DS3TRC_DEVICE_ADD</ref>,<sp/>write_buf,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(write_buf),<sp/>1000<sp/>/<sp/>portTICK_PERIOD_MS);</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(err<sp/>!=<sp/>ESP_OK)</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;与姿态传感器LSM6DS3TRC通讯时发现问题<sp/>描述：<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>esp_err_to_name(err));</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/>ESP_LOGI(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;成功映射配置到姿态传感器LSM6DS3TRC&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="77"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>完成读取后,数据库中寄存器的值将更新,因此在初始化数据库设定寄存器时的值任意如0x00</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal">esp_err_t<sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>reg_database,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>map_num)</highlight></codeline>
+<codeline lineno="86"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;lsm6ds3trc_database_map_read&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!reg_database)</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;导入了为空的数据库&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>用于偏移到指定数据库内存区域写入数据库</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>mapping_buf<sp/>=<sp/>reg_database;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idx<sp/>=<sp/>0;<sp/>idx<sp/>&lt;<sp/>map_num;<sp/>idx++)</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>mapping_buf<sp/>=<sp/>&amp;reg_database[idx];</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>esp_err_t<sp/>err<sp/>=<sp/>i2c_master_write_read_device(<ref refid="board__def_8h_1a6c09d42369f3cc4c366118ce5241ba68" kindref="member">DEVICE_I2C_PORT</ref>,<sp/><ref refid="lsm6ds3trc_8c_1aa9d174d2cf4409dbb580cf88262b1a57" kindref="member">LSM6DS3TRC_DEVICE_ADD</ref>,<sp/>&amp;(mapping_buf-&gt;<ref refid="struct_i_m_u__reg__mapping__t_1a0bbdc838c5611afe00877d8742b8bda4" kindref="member">reg_address</ref>),<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(uint8_t),<sp/>&amp;(mapping_buf-&gt;<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref>),<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(uint8_t),<sp/>1000<sp/>/<sp/>portTICK_PERIOD_MS);</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(err<sp/>!=<sp/>ESP_OK)</highlight></codeline>
+<codeline lineno=CONFIG_WIFI_SSID><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;与姿态传感器LSM6DS3TRC通讯时发现问题<sp/>描述：<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>esp_err_to_name(err));</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="109"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal">esp_err_t<sp/><ref refid="lsm6ds3trc_8c_1a36d23681d5f803f809601324608ec184" kindref="member">lsm6ds3trc_FIFO_map</ref>(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>FIFO_database,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>map_num,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>read_num){</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;lsm6ds3trc_FIFO_map&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//参数合法性检查</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(!FIFO_database){</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;导入了为空的FIFO映射数据库&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"></highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//初始化读取缓存</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*<sp/>buf_db<sp/>=<sp/>NULL;</highlight><highlight class="comment">//创建用于缓存的寄存器数据库</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/>buf_db<sp/>=<sp/>(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>*)malloc(</highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>)*map_num);</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/>memset(buf_db,0,</highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(<ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref>)*map_num);</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>a=0;a&lt;map_num;a++)</highlight><highlight class="comment">//映射需要依次读取的寄存器地址</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/>buf_db[a].reg_address<sp/>=<sp/>FIFO_database[a].reg_address;</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//读取循环,共映射read_num帧数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idx=0;</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(idx&lt;read_num){</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//读取一帧数据,FIFO内部会根据读取数据次数偏移到存储区,如果合理,每次读到的顺序是FIFO_database设置的顺序</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(<ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(buf_db,map_num)<sp/>!=<sp/>ESP_OK){</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGW(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;数据读取意外终止,数据被部分映射<sp/>第<sp/>%d<sp/>个无法读取<sp/>/<sp/>共有<sp/>%d<sp/>个,等待重试&quot;</highlight><highlight class="normal">,idx+1,read_num);</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(<ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(buf_db,map_num)<sp/>!=<sp/>ESP_OK){</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ESP_LOGW(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;重试读取失败,等待下次调用&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//映射这帧数据到所有预设内存区域</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>dp=0;dp&lt;map_num;dp++){</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//遍历所有条目,在预设的内存区域写入,用idx偏移到指定数组元素,而FIFO_database[dp].reg_value的值不变</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">((uint8_t*)FIFO_database[dp].reg_value){</highlight><highlight class="comment">//条目键值对的<sp/>value<sp/>设置为NULL表示舍弃该条目数据读取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>*((uint8_t*)(FIFO_database[dp].reg_value<sp/>+<sp/>idx))<sp/>=<sp/><sp/>buf_db[dp].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref>;</highlight><highlight class="comment">//FIFO_database[dp].reg_value的值不变</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"></highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/>idx++;</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//释放内存</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/>free(buf_db);</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/>buf_db<sp/>=<sp/>NULL;</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"></highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(idx<sp/>&lt;<sp/>read_num)</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_FAIL;</highlight><highlight class="comment">//idx的值将不会复位,使得下次开始从错误位置再次读取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/>idx<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ESP_OK;</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="171"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"></highlight></codeline>
+<codeline lineno="173"><highlight class="normal"></highlight></codeline>
+<codeline lineno="175"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8c_1aa26d2387af3001abe5809e9ba5fcd9c4" kindref="member">lsm6ds3trc_init_or_reset</ref>()</highlight></codeline>
+<codeline lineno="176"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[<ref refid="lsm6ds3trc_8h_1a781b2821def45206f9bfdde2639a025e" kindref="member">IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM</ref>]<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a97e07b76fad384c9d3cfb7647f7717ea" kindref="member">IMU_INIT_DEFAULT_MAPPING_DATABASE</ref>;<sp/></highlight><highlight class="comment">//<sp/>寄存器映射数据库</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><ref refid="lsm6ds3trc_8c_1ab8c1d34398dd66cde3da659309fde72e" kindref="member">lsm6ds3trc_database_map_set</ref>(reg_database,<sp/><ref refid="lsm6ds3trc_8h_1a781b2821def45206f9bfdde2639a025e" kindref="member">IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM</ref>);</highlight></codeline>
+<codeline lineno="179"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"></highlight></codeline>
+<codeline lineno="183"><highlight class="normal">uint16_t<sp/><ref refid="lsm6ds3trc_8c_1af9289ed6975d2a4f1122c9c4be5f7e87" kindref="member">lsm6ds3trc_get_step_counter</ref>()</highlight></codeline>
+<codeline lineno="184"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[2]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="186"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a6151a6d8568b44e911425bf418d2f534" kindref="member">STEP_COUNTER_L</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="187"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a1b635e9fe75b2dd4824a92bbf1affedb" kindref="member">STEP_COUNTER_H</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="188"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="189"><highlight class="normal"><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,<sp/>2);</highlight></codeline>
+<codeline lineno="190"><highlight class="normal"></highlight></codeline>
+<codeline lineno="191"><highlight class="normal"><sp/><sp/>uint16_t<sp/>ret<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>(reg_database[1].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8);</highlight></codeline>
+<codeline lineno="192"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="193"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="194"><highlight class="normal"></highlight></codeline>
+<codeline lineno="195"><highlight class="normal"></highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><ref refid="struct_i_m_u___d6_d__data__value__t" kindref="compound">IMU_D6D_data_value_t</ref><sp/><ref refid="lsm6ds3trc_8c_1aec78c8d80e1a0ecef27bbf42954d44be" kindref="member">lsm6ds3trc_get_D6D_data_value</ref>()</highlight></codeline>
+<codeline lineno="197"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="198"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[1]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="199"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a24a8bee6eaed049685c473f0c06c5f3f" kindref="member">D6D_SRC</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="200"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,<sp/>1);</highlight></codeline>
+<codeline lineno="202"><highlight class="normal"></highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u___d6_d__data__value__t" kindref="compound">IMU_D6D_data_value_t</ref><sp/>data_value<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/>.XL<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref>,</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"><sp/><sp/><sp/><sp/>.XH<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>1,</highlight></codeline>
+<codeline lineno="206"><highlight class="normal"><sp/><sp/><sp/><sp/>.YL<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>2,</highlight></codeline>
+<codeline lineno="207"><highlight class="normal"><sp/><sp/><sp/><sp/>.YH<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>3,</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/>.ZL<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>4,</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"><sp/><sp/><sp/><sp/>.ZH<sp/>=<sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>5,</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="211"><highlight class="normal"></highlight></codeline>
+<codeline lineno="212"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>data_value;</highlight></codeline>
+<codeline lineno="213"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="214"><highlight class="normal"></highlight></codeline>
+<codeline lineno="215"><highlight class="normal"></highlight></codeline>
+<codeline lineno="218"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8c_1a8aaae71782145d70d4670637a15407bf" kindref="member">lsm6ds3trc_get_free_fall_status</ref>(){</highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//构建映射数据库设置读取的目标</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[1]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a62d412c6a8e02262a4f306d820ea4c0b" kindref="member">WAKE_UP_SRC</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,1);</highlight><highlight class="comment">//执行映射读取操作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>reg_database[0].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&gt;&gt;<sp/>5;</highlight></codeline>
+<codeline lineno="225"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"></highlight></codeline>
+<codeline lineno="227"><highlight class="normal"></highlight></codeline>
+<codeline lineno="228"><highlight class="normal"></highlight></codeline>
+<codeline lineno="231"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8c_1aaf0042004ca7f0dffcb0cebe2823e44b" kindref="member">lsm6ds3trc_get_now_temperature</ref>()</highlight></codeline>
+<codeline lineno="232"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="233"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//构建映射数据库设置读取的目标</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[3]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4ada4f76d38c3c05f8508d6c6e3af88bdc" kindref="member">OUT_TEMP_H</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a6290d2d8aaee6f22894dc06e7dc20f1b" kindref="member">OUT_TEMP_L</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a3afff7bc5df59d1d61acc81ccff13b23" kindref="member">STATUS_REG</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="238"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"></highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//等待数据成功获取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(!(reg_database[2].reg_value<sp/>&amp;<sp/>0x04))<sp/>{</highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,3);</highlight><highlight class="comment">//执行映射读取操作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="243"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>((<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4ada4f76d38c3c05f8508d6c6e3af88bdc" kindref="member">OUT_TEMP_H</ref><sp/>&lt;&lt;<sp/>8)<sp/>|<sp/><ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a6290d2d8aaee6f22894dc06e7dc20f1b" kindref="member">OUT_TEMP_L</ref>)*1000/256<sp/>+<sp/>25;</highlight></codeline>
+<codeline lineno="246"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="247"><highlight class="normal"></highlight></codeline>
+<codeline lineno="248"><highlight class="normal"></highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><ref refid="struct_i_m_u__acceleration__value__t" kindref="compound">IMU_acceleration_value_t</ref><sp/><ref refid="lsm6ds3trc_8c_1ab302c2f3c2e51730da253a704643bcb2" kindref="member">lsm6ds3trc_gat_now_acceleration</ref>()</highlight></codeline>
+<codeline lineno="252"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;lsm6ds3trc_gat_now_acceleration&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"></highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/><ref refid="struct_i_m_u__acceleration__value__t" kindref="compound">IMU_acceleration_value_t</ref><sp/>value_buf<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储上次的数据以计算偏移量</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__acceleration__value__t" kindref="compound">IMU_acceleration_value_t</ref><sp/>acceleration_value<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储本次数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__acceleration__value__t" kindref="compound">IMU_acceleration_value_t</ref><sp/>ret<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储返回值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="258"><highlight class="normal"></highlight></codeline>
+<codeline lineno="259"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//构建映射数据库设置读取的目标</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[8]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4ab4c8f6db648194d0c01fea104467e24d" kindref="member">CTRL1_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="262"><highlight class="normal"></highlight></codeline>
+<codeline lineno="263"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a16df6ba30fc82730db1a79d3b87ad742" kindref="member">OUTX_L_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="264"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a5340f6ffbc6a8aebc9f52971f75ff9ec" kindref="member">OUTX_H_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="265"><highlight class="normal"></highlight></codeline>
+<codeline lineno="266"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a0d5e7d0080ee0f14d57b5855600e0dcb" kindref="member">OUTY_L_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a8f7caabc2a31b4f7c416a33a79747f43" kindref="member">OUTY_H_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"></highlight></codeline>
+<codeline lineno="269"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a89edd2f73fcf2502ade42b60404572b9" kindref="member">OUTZ_L_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a8bbd4d5f4bdb810323487efde5e8f1ce" kindref="member">OUTZ_H_XL</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="271"><highlight class="normal"></highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a3afff7bc5df59d1d61acc81ccff13b23" kindref="member">STATUS_REG</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="273"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="274"><highlight class="normal"></highlight></codeline>
+<codeline lineno="275"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//等待加速度数据成功获取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="276"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(!(reg_database[7].reg_value<sp/>&amp;<sp/>0x01))<sp/>{</highlight></codeline>
+<codeline lineno="277"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,<sp/>8);</highlight><highlight class="comment">//执行映射读取操作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="278"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="279"><highlight class="normal"></highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>LA_SO_buf<sp/>=<sp/>0;</highlight><highlight class="comment">//通过设置的量程获取对应缩放因数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="281"><highlight class="normal"><sp/><sp/>uint32_t<sp/>max_buf<sp/>=<sp/>0;</highlight><highlight class="comment">//量程内允许最大绝对值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="282"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">switch</highlight><highlight class="normal"><sp/>(reg_database[0].reg_value<sp/>&gt;&gt;<sp/>2<sp/>&amp;<sp/>0x03)</highlight></codeline>
+<codeline lineno="283"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386fa0723537d372388300013fef93d98e7f5" kindref="member">IMU_FS_XL_2G</ref>:</highlight></codeline>
+<codeline lineno="285"><highlight class="normal"><sp/><sp/><sp/><sp/>LA_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a46b76b622d1ea33bbdaa20d34383e312" kindref="member">IMU_LA_SO_FS_2G</ref>;</highlight></codeline>
+<codeline lineno="286"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>2<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="287"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="288"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386fa6bc3e37e5636ebcd6db07cb8511fe609" kindref="member">IMU_FS_XL_4G</ref>:</highlight></codeline>
+<codeline lineno="289"><highlight class="normal"><sp/><sp/><sp/><sp/>LA_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a2a4fbd6c772c6ff6ad5da5519fed408a" kindref="member">IMU_LA_SO_FS_4G</ref>;</highlight></codeline>
+<codeline lineno="290"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>4<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386fa1bf45ee02a91ff35a12400397e195dca" kindref="member">IMU_FS_XL_8G</ref>:</highlight></codeline>
+<codeline lineno="293"><highlight class="normal"><sp/><sp/><sp/><sp/>LA_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a3e3519d5b4d860ee9afb50baa3ce4426" kindref="member">IMU_LA_SO_FS_8G</ref>;</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>8<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="296"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386fa8fa54438616bb3ea16852b952a48418a" kindref="member">IMU_FS_XL_16G</ref>:</highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/>LA_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a8a065300624568f9c324c7595db6ad81" kindref="member">IMU_LA_SO_FS_16G</ref>;</highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>16<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="300"><highlight class="normal"></highlight></codeline>
+<codeline lineno="301"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">default</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="302"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;未知的加速度量程配置&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="305"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="306"><highlight class="normal"></highlight></codeline>
+<codeline lineno="307"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//计算实际加速度</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="308"><highlight class="normal"><sp/><sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref><sp/>=<sp/>(reg_database[1].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[2].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>LA_SO_buf;</highlight></codeline>
+<codeline lineno="309"><highlight class="normal"><sp/><sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref><sp/>=<sp/>(reg_database[3].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[4].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>LA_SO_buf;</highlight></codeline>
+<codeline lineno="310"><highlight class="normal"><sp/><sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref><sp/>=<sp/>(reg_database[5].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[6].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>LA_SO_buf;</highlight></codeline>
+<codeline lineno="311"><highlight class="normal"></highlight></codeline>
+<codeline lineno="312"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//如果在量程范围内,处理相关数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="313"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="314"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref>;</highlight><highlight class="comment">//计算偏移量作为返回值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="315"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a5e77067f52adc8d5f4d2e07a10176e8b" kindref="member">x</ref>;</highlight><highlight class="comment">//存储本次的数据以准备为下次读取计算偏移量</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="316"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="317"><highlight class="normal"></highlight></codeline>
+<codeline lineno="318"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="319"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="320"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a72a2cb48d08d1aa3242a73859d5a4ecc" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="321"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="322"><highlight class="normal"></highlight></codeline>
+<codeline lineno="323"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="324"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref>;</highlight></codeline>
+<codeline lineno="325"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref><sp/>=<sp/>acceleration_value.<ref refid="struct_i_m_u__acceleration__value__t_1a6bbb9e099279da532711c4b91e34b084" kindref="member">z</ref>;</highlight></codeline>
+<codeline lineno="326"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="327"><highlight class="normal"></highlight></codeline>
+<codeline lineno="328"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="329"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="330"><highlight class="normal"></highlight></codeline>
+<codeline lineno="333"><highlight class="normal"><ref refid="struct_i_m_u__angular__rate__value__t" kindref="compound">IMU_angular_rate_value_t</ref><sp/><ref refid="lsm6ds3trc_8c_1ad3e5286502aa1f5a9158e976e30f981a" kindref="member">lsm6ds3trc_gat_now_angular_rate</ref>()</highlight></codeline>
+<codeline lineno="334"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="335"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;lsm6ds3trc_gat_now_angular_rate&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="336"><highlight class="normal"></highlight></codeline>
+<codeline lineno="337"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/><ref refid="struct_i_m_u__angular__rate__value__t" kindref="compound">IMU_angular_rate_value_t</ref><sp/>value_buf<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储上次的数据以计算偏移量</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="338"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__angular__rate__value__t" kindref="compound">IMU_angular_rate_value_t</ref><sp/>angular_rate_value<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储本次数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="339"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__angular__rate__value__t" kindref="compound">IMU_angular_rate_value_t</ref><sp/>ret<sp/>=<sp/>{<sp/>0,0,0<sp/>};</highlight><highlight class="comment">//存储返回值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="340"><highlight class="normal"></highlight></codeline>
+<codeline lineno="341"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//构建映射数据库设置读取的目标</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="342"><highlight class="normal"><sp/><sp/><ref refid="struct_i_m_u__reg__mapping__t" kindref="compound">IMU_reg_mapping_t</ref><sp/>reg_database[8]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="343"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a3ab5c902b7a14eb72408fcba85ef0da4" kindref="member">CTRL2_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="344"><highlight class="normal"></highlight></codeline>
+<codeline lineno="345"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4ae1c6711eb27791eeec187c164177b645" kindref="member">OUTX_L_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="346"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a8e95cb17fad8221656b7455c5280c6ae" kindref="member">OUTX_H_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="347"><highlight class="normal"></highlight></codeline>
+<codeline lineno="348"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4ad341f68583ed1b1961d583423bc63bd9" kindref="member">OUTY_L_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="349"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a9e5069c928eaebcab9fa2b874c26de41" kindref="member">OUTY_H_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="350"><highlight class="normal"></highlight></codeline>
+<codeline lineno="351"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a7e6dbd48b3e11996b0580519fa28dd8f" kindref="member">OUTZ_L_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="352"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a04c265eada98b0c8ff5810adfe04e797" kindref="member">OUTZ_H_G</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="353"><highlight class="normal"></highlight></codeline>
+<codeline lineno="354"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8h_1a22ad46818115840df5af15abda84dc47" kindref="member">MAP_BASE</ref>(<ref refid="lsm6ds3trc_8h_1a9f49a7327b97ad4eca50a513ad5658c4a3afff7bc5df59d1d61acc81ccff13b23" kindref="member">STATUS_REG</ref>,<sp/>0x00),</highlight></codeline>
+<codeline lineno="355"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="356"><highlight class="normal"></highlight></codeline>
+<codeline lineno="357"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//等待数据成功获取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="358"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(!(reg_database[7].reg_value<sp/>&amp;<sp/>0x02))<sp/>{</highlight></codeline>
+<codeline lineno="359"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="lsm6ds3trc_8c_1a734fd62aae65d8a0dd2314c3db61a7a2" kindref="member">lsm6ds3trc_database_map_read</ref>(reg_database,<sp/>8);</highlight><highlight class="comment">//执行映射读取操作</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="360"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="361"><highlight class="normal"></highlight></codeline>
+<codeline lineno="362"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//通过设置的量程获取对应缩放因数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="363"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>G_SO_buf<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="364"><highlight class="normal"><sp/><sp/>uint32_t<sp/>max_buf<sp/>=<sp/>0;</highlight><highlight class="comment">//量程内允许最大绝对值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="365"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">switch</highlight><highlight class="normal"><sp/>(reg_database[0].reg_value<sp/>&gt;&gt;<sp/>1<sp/>&amp;<sp/>0x07)</highlight></codeline>
+<codeline lineno="366"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="367"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9baa3749b00373d0b390e53b39202ad5de4" kindref="member">IMU_FS_G_125DPS</ref>:</highlight></codeline>
+<codeline lineno="368"><highlight class="normal"><sp/><sp/><sp/><sp/>G_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1af9d96c39d76ed26ff8366293649786ce" kindref="member">IMU_G_SO_FS_125DPS</ref>;</highlight></codeline>
+<codeline lineno="369"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>125<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="370"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="371"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9bacddb65a2c7021cad3f87ad3b6820057c" kindref="member">IMU_FS_G_250DPS</ref>:</highlight></codeline>
+<codeline lineno="372"><highlight class="normal"><sp/><sp/><sp/><sp/>G_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1aae8480eb889df0080a79f143daa275f9" kindref="member">IMU_G_SO_FS_250DPS</ref>;</highlight></codeline>
+<codeline lineno="373"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>250<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="374"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="375"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9bacdfa62b47de0504dd46603f6d7b6ed36" kindref="member">IMU_FS_G_500DPS</ref>:</highlight></codeline>
+<codeline lineno="376"><highlight class="normal"><sp/><sp/><sp/><sp/>G_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1ad1a4419de1344bef9c709b767bbf3a95" kindref="member">IMU_G_SO_FS_500DPS</ref>;</highlight></codeline>
+<codeline lineno="377"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>500<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="378"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="379"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9ba5872b758b7943283f5057f8d2655e692" kindref="member">IMU_FS_G_1000DPS</ref>:</highlight></codeline>
+<codeline lineno="380"><highlight class="normal"><sp/><sp/><sp/><sp/>G_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1a1822a0b7ce35665c3d8d3d678925944c" kindref="member">IMU_G_SO_FS_1000DPS</ref>;</highlight></codeline>
+<codeline lineno="381"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>1000<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="382"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="383"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9ba1904b38c44356892f9213ab8b54d5cc0" kindref="member">IMU_FS_G_2000DPS</ref>:</highlight></codeline>
+<codeline lineno="384"><highlight class="normal"><sp/><sp/><sp/><sp/>G_SO_buf<sp/>=<sp/><ref refid="lsm6ds3trc_8h_1aef4704b13006ec493e40ae8629fc2115" kindref="member">IMU_G_SO_FS_2000DPS</ref>;</highlight></codeline>
+<codeline lineno="385"><highlight class="normal"><sp/><sp/><sp/><sp/>max_buf<sp/>=<sp/>2000<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="386"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="387"><highlight class="normal"></highlight></codeline>
+<codeline lineno="388"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">default</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="389"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP_LOGE(<ref refid="board_8c_1a5a85b9c772bbeb480b209a3e6ea92b4c" kindref="member">TAG</ref>,<sp/></highlight><highlight class="stringliteral">&quot;未知的陀螺仪量程配置&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="390"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="391"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="392"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="393"><highlight class="normal"></highlight></codeline>
+<codeline lineno="394"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//计算测量得到的角速率</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="395"><highlight class="normal"><sp/><sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref><sp/>=<sp/>(reg_database[1].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[2].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>G_SO_buf;</highlight></codeline>
+<codeline lineno="396"><highlight class="normal"><sp/><sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref><sp/>=<sp/>(reg_database[3].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[4].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>G_SO_buf;</highlight></codeline>
+<codeline lineno="397"><highlight class="normal"><sp/><sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref><sp/>=<sp/>(reg_database[5].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>|<sp/>reg_database[6].<ref refid="struct_i_m_u__reg__mapping__t_1a59e98e375b883a05767def2d741a98f8" kindref="member">reg_value</ref><sp/>&lt;&lt;<sp/>8)<sp/>*<sp/>G_SO_buf;</highlight></codeline>
+<codeline lineno="398"><highlight class="normal"></highlight></codeline>
+<codeline lineno="399"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//如果在量程范围内,处理相关数据</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="400"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="401"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref>;</highlight><highlight class="comment">//计算偏移量作为返回值</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="402"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a75ca5134a04c47cfd51d6596ca6c8973" kindref="member">x</ref>;</highlight><highlight class="comment">//存储本次的数据以准备为下次读取计算偏移量<sp/><sp/><sp/><sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="403"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="404"><highlight class="normal"></highlight></codeline>
+<codeline lineno="405"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="406"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="407"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1ab12062171fc346a5cf02e7d3010ef00f" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="408"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="409"><highlight class="normal"></highlight></codeline>
+<codeline lineno="410"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(abs(angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref>)<sp/>&lt;=<sp/>max_buf)<sp/>{</highlight></codeline>
+<codeline lineno="411"><highlight class="normal"><sp/><sp/><sp/><sp/>ret.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref><sp/>-<sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref>;</highlight></codeline>
+<codeline lineno="412"><highlight class="normal"><sp/><sp/><sp/><sp/>value_buf.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref><sp/>=<sp/>angular_rate_value.<ref refid="struct_i_m_u__angular__rate__value__t_1a2bd25c243c79012d3c5bd82c6ae6d242" kindref="member">z</ref>;</highlight></codeline>
+<codeline lineno="413"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="414"><highlight class="normal"></highlight></codeline>
+<codeline lineno="415"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ret;</highlight></codeline>
+<codeline lineno="416"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="417"><highlight class="normal"></highlight></codeline>
+<codeline lineno="424"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a32e7c8785938fbad63ba6528b7119a3d" kindref="member">value_compound_CTRL1_XL</ref>(<ref refid="lsm6ds3trc_8h_1a0676337036621fd7c3b19d85fe028f00" kindref="member">IMU_ORD_XL_t</ref><sp/>ODR_XL,<sp/><ref refid="lsm6ds3trc_8h_1a88b25ef8fb4cea1c5a9d6e683d1a386f" kindref="member">IMU_FS_XL_t</ref><sp/>FS_XL,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LPF1_BW_SEL,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>BW0_XL)<sp/>{</highlight></codeline>
+<codeline lineno="425"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(ODR_XL<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(FS_XL<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(LPF1_BW_SEL<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>BW0_XL;</highlight></codeline>
+<codeline lineno="426"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="427"><highlight class="normal"></highlight></codeline>
+<codeline lineno="428"><highlight class="normal"></highlight></codeline>
+<codeline lineno="433"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a42b9a0c8a3b4afa9d476e9a3d8d28a08" kindref="member">value_compound_CTRL2_G</ref>(<ref refid="lsm6ds3trc_8h_1aad3b123b92080e7504fd6ebc4a2c70bc" kindref="member">IMU_ORD_G_t</ref><sp/>ODR_G,<sp/><ref refid="lsm6ds3trc_8h_1adc2e317c0bbb146eddae39a692f07e9b" kindref="member">IMU_FS_G_t</ref><sp/>FS_G)<sp/>{</highlight></codeline>
+<codeline lineno="434"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><sp/>(ODR_G<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(FS_G<sp/>&lt;&lt;<sp/>1);</highlight></codeline>
+<codeline lineno="435"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="436"><highlight class="normal"></highlight></codeline>
+<codeline lineno="447"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a3b961b103c5063bc56e28550e865a386" kindref="member">value_compound_CTRL3_C</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>BOOT,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>BDU,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>H_LACTIVE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>PP_OD,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>SIM,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>IF_INC,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>BLE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>SW_RESET)<sp/>{</highlight></codeline>
+<codeline lineno="448"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(BOOT<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(BDU<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(H_LACTIVE<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(PP_OD<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(SIM<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(IF_INC<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(BLE<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>SW_RESET;</highlight></codeline>
+<codeline lineno="449"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="450"><highlight class="normal"></highlight></codeline>
+<codeline lineno="460"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a1f0545d55ec9b87141b48931d33e77ca" kindref="member">value_compound_CTRL4_C</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>DEN_XL_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>SLEEP,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_on_INT1,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>DEN_DRDY_INT1,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>DRDY_MASK,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>I2C_disable,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LPF1_SEL_G)<sp/>{</highlight></codeline>
+<codeline lineno="461"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(DEN_XL_EN<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(SLEEP<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(INT2_on_INT1<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(DEN_DRDY_INT1<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(DRDY_MASK<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(I2C_disable<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(LPF1_SEL_G<sp/>&lt;&lt;<sp/>1);</highlight></codeline>
+<codeline lineno="462"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="463"><highlight class="normal"></highlight></codeline>
+<codeline lineno="473"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a93d3c844cf9c862500964536d3a34806" kindref="member">value_compound_CTRL6_C</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TRIG_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LVL_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LVL2_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>XL_HM_MODE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>USR_OFF_W,<sp/><ref refid="lsm6ds3trc_8h_1a1d708eede7b470fba175529fd422e176" kindref="member">IMU_FTYPE_t</ref><sp/>FTYPE)<sp/>{</highlight></codeline>
+<codeline lineno="474"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(TRIG_EN<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(LVL_EN<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(LVL2_EN<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(XL_HM_MODE<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(USR_OFF_W<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>FTYPE;</highlight></codeline>
+<codeline lineno="475"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="476"><highlight class="normal"></highlight></codeline>
+<codeline lineno="477"><highlight class="normal"></highlight></codeline>
+<codeline lineno="484"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a2e40054ca6b4854dab9582925aca63b7" kindref="member">value_compound_CTRL7_G</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>G_HM_MODE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>HP_EN_G,<sp/><ref refid="lsm6ds3trc_8h_1a10d34fb6a811711de4a3dbf530bf706c" kindref="member">IMU_HPM_G_t</ref><sp/>HPM_G,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>ROUNDING_STATUS)<sp/>{</highlight></codeline>
+<codeline lineno="485"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><sp/>(G_HM_MODE<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(HP_EN_G<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(HPM_G<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(ROUNDING_STATUS<sp/>&lt;&lt;<sp/>2);</highlight></codeline>
+<codeline lineno="486"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="487"><highlight class="normal"></highlight></codeline>
+<codeline lineno="488"><highlight class="normal"></highlight></codeline>
+<codeline lineno="497"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1ab682a36dd9493f862225f2021b0bdc48" kindref="member">value_compound_CTRL8_XL</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LPF2_XL_EN,<sp/><ref refid="lsm6ds3trc_8h_1a604b73f6ae6abe0cb2032fe1c9129748" kindref="member">IMU_HPCF_XL_t</ref><sp/>HPCF_XL,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>HP_REF_MODE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INPUT_COMPOSITE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>HP_SLOPE_XL_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LOW_PASS_ON_6D)<sp/>{</highlight></codeline>
+<codeline lineno="498"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(LPF2_XL_EN<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(HPCF_XL<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(HP_REF_MODE<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(INPUT_COMPOSITE<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(HP_SLOPE_XL_EN<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>LOW_PASS_ON_6D;</highlight></codeline>
+<codeline lineno="499"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="500"><highlight class="normal"></highlight></codeline>
+<codeline lineno="501"><highlight class="normal"></highlight></codeline>
+<codeline lineno="511"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a76ffb927430ce46212f80dc9a4b6e575" kindref="member">value_compound_CTRL10_C</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>WRIST_TILT_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TIMER_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>PEDO_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TILT_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>FUNC_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>PEDO_RST_STEP,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>SIGN_MOTION_EN)<sp/>{</highlight></codeline>
+<codeline lineno="512"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">(WRIST_TILT_EN<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(TIMER_EN<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(PEDO_EN<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(TILT_EN<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(FUNC_EN<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(PEDO_RST_STEP<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>SIGN_MOTION_EN;</highlight></codeline>
+<codeline lineno="513"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="514"><highlight class="normal"></highlight></codeline>
+<codeline lineno="515"><highlight class="normal"></highlight></codeline>
+<codeline lineno="526"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a6059287180f65ebea961e674515ed16d" kindref="member">value_compound_INT1_CTRL</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_STEP_DETECTOR,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_SIGN_MOT,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_FULL_FLAG,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_FIFO_OVR,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_FTH,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_BOOT,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_DRDY_G,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_DRDY_XL)<sp/>{</highlight></codeline>
+<codeline lineno="527"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(INT1_STEP_DETECTOR<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(INT1_SIGN_MOT<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(INT1_FULL_FLAG<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(INT1_FIFO_OVR<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(INT1_FTH<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(INT1_BOOT<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(INT1_DRDY_G<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>INT1_DRDY_XL;</highlight></codeline>
+<codeline lineno="528"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="529"><highlight class="normal"></highlight></codeline>
+<codeline lineno="530"><highlight class="normal"></highlight></codeline>
+<codeline lineno="531"><highlight class="normal"></highlight></codeline>
+<codeline lineno="542"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a0ee6b0194066c4221e4006a0b06c64f6" kindref="member">value_compound_INT2_CTRL</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_STEP_DELTA,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_STEP_COUNT_OV,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_FULL_FLAG,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_FIFO_OVR,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_FTH,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_DRDY_TEMP,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_DRDY_G,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT2_DRDY_XL)<sp/>{</highlight></codeline>
+<codeline lineno="543"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(INT2_STEP_DELTA<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(INT2_STEP_COUNT_OV<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(INT2_FULL_FLAG<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(INT2_FIFO_OVR<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(INT2_FTH<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(INT2_DRDY_TEMP<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(INT2_DRDY_G<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>INT2_DRDY_XL;</highlight></codeline>
+<codeline lineno="544"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="545"><highlight class="normal"></highlight></codeline>
+<codeline lineno="546"><highlight class="normal"></highlight></codeline>
+<codeline lineno="557"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1ab280d350d67ef7b3d177ad1e682fe1af" kindref="member">value_compound_MD1_CFG</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_INACT_STATE,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_SINGLE_TAP,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_WU,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_FF,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_DOUBLE_TAP,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_6D,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_TILT,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INT1_TIMER)<sp/>{</highlight></codeline>
+<codeline lineno="558"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(INT1_INACT_STATE<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(INT1_SINGLE_TAP<sp/>&lt;&lt;<sp/>6)<sp/>|<sp/>(INT1_WU<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(INT1_FF<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(INT1_DOUBLE_TAP<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(INT1_6D<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(INT1_TILT<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>INT1_TIMER;</highlight></codeline>
+<codeline lineno="559"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="560"><highlight class="normal"></highlight></codeline>
+<codeline lineno="564"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a03d89ba0020bf84c87bb909e526cd711" kindref="member">value_compound_partly_FREE_FALL</ref>(<ref refid="lsm6ds3trc_8h_1a6b3baba753e30808e0972e6f759a8a58" kindref="member">IMU_FF_THS_t</ref><sp/>FF_THS)<sp/>{</highlight></codeline>
+<codeline lineno="565"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>FF_THS;</highlight></codeline>
+<codeline lineno="566"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="567"><highlight class="normal"></highlight></codeline>
+<codeline lineno="572"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1ae1231da0750610f64e1f9fdf6c2ad743" kindref="member">value_compound_partly_TAP_THS_6D</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>D4D_EN,<sp/><ref refid="lsm6ds3trc_8h_1a6cafbe08461f831bffb0bab596ba1deb" kindref="member">IMU_SIXD_THS_t</ref><sp/>SIXD_THS)<sp/>{</highlight></codeline>
+<codeline lineno="573"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(D4D_EN<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(SIXD_THS<sp/>&lt;&lt;<sp/>5);</highlight></codeline>
+<codeline lineno="574"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="575"><highlight class="normal"></highlight></codeline>
+<codeline lineno="585"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a1b3022693003b7f67bdfee48a259c006" kindref="member">value_compound_TAP_CFG</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>INTERRUPTS_ENABLE,<sp/><ref refid="lsm6ds3trc_8h_1af25db59065d1e39841d495e50d7e99af" kindref="member">IMU_INACT_EN_t</ref><sp/>INACT_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>SLOPE_FDS,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TAP_X_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TAP_Y_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>TAP_Z_EN,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>LIR)<sp/>{</highlight></codeline>
+<codeline lineno="586"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(INTERRUPTS_ENABLE<sp/>&lt;&lt;<sp/>7)<sp/>|<sp/>(INACT_EN<sp/>&lt;&lt;<sp/>5)<sp/>|<sp/>(SLOPE_FDS<sp/>&lt;&lt;<sp/>4)<sp/>|<sp/>(TAP_X_EN<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>(TAP_Y_EN<sp/>&lt;&lt;<sp/>2)<sp/>|<sp/>(TAP_Z_EN<sp/>&lt;&lt;<sp/>1)<sp/>|<sp/>LIR;</highlight></codeline>
+<codeline lineno="587"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="588"><highlight class="normal"></highlight></codeline>
+<codeline lineno="589"><highlight class="normal"></highlight></codeline>
+<codeline lineno="590"><highlight class="normal"></highlight></codeline>
+<codeline lineno="595"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1a1e9151d80c2684fe83e771295ce4c60f" kindref="member">value_compound_FIFO_CTRL3</ref>(<ref refid="lsm6ds3trc_8h_1a702e742030ae594bd389d5f514ff58a1" kindref="member">IMU_DEC_FIFO_GYRO_t</ref><sp/>DEC_FIFO_GYRO,<sp/><ref refid="lsm6ds3trc_8h_1abae73eeaa9040884fdb7492a44b054c8" kindref="member">IMU_DEC_FIFO_XL_t</ref><sp/>DEC_FIFO_XL)<sp/>{</highlight></codeline>
+<codeline lineno="596"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(DEC_FIFO_GYRO<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>DEC_FIFO_XL;</highlight></codeline>
+<codeline lineno="597"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="598"><highlight class="normal"></highlight></codeline>
+<codeline lineno="599"><highlight class="normal"></highlight></codeline>
+<codeline lineno="600"><highlight class="normal"></highlight></codeline>
+<codeline lineno="601"><highlight class="normal"></highlight></codeline>
+<codeline lineno="606"><highlight class="normal">uint8_t<sp/><ref refid="lsm6ds3trc_8c_1ad0713884fd1155be756799573b1c8a6b" kindref="member">value_compound_FIFO_CTRL5</ref>(<ref refid="lsm6ds3trc_8h_1a8571e017c1cdde054ec8480cd15e9c0f" kindref="member">IMU_ODR_FIFO_t</ref><sp/>ODR_FIFO,<sp/><ref refid="lsm6ds3trc_8h_1afcd74e48a5a0c50ca3ee4beb67409154" kindref="member">IMU_FIFO_MODE_t</ref><sp/>FIFO_MODE)<sp/>{</highlight></codeline>
+<codeline lineno="607"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(ODR_FIFO<sp/>&lt;&lt;<sp/>3)<sp/>|<sp/>FIFO_MODE;</highlight></codeline>
+<codeline lineno="608"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="main/lsm6ds3trc.c"/>
+  </compounddef>
+</doxygen>

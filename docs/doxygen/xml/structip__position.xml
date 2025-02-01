@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structip__position" kind="struct" language="C++" prot="public">
+    <compoundname>ip_position</compoundname>
+    <includes refid="sevetest30___i_w_e_d_a_8h" local="no">sevetest30_IWEDA.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structip__position_1abac51dcb3b80267fbccf523f4cc14d1a" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::postcode</definition>
+        <argsstring></argsstring>
+        <name>postcode</name>
+        <qualifiedname>ip_position::postcode</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="115" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a91c254fb5c25ad2567fbe2780c98b1ab" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::lng</definition>
+        <argsstring></argsstring>
+        <name>lng</name>
+        <qualifiedname>ip_position::lng</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="116" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1aec7e6b14aae035ab3c29e46750a8ee63" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::lat</definition>
+        <argsstring></argsstring>
+        <name>lat</name>
+        <qualifiedname>ip_position::lat</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="117" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="117" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a9450a3b689003454e830412177ce0ef4" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::country</definition>
+        <argsstring></argsstring>
+        <name>country</name>
+        <qualifiedname>ip_position::country</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="119" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="119" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a3849bdd31bbb379a4b8416b436c1c542" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::adm1</definition>
+        <argsstring></argsstring>
+        <name>adm1</name>
+        <qualifiedname>ip_position::adm1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="120" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a981f833a38bee57bf913286823ef3e4e" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::adm2</definition>
+        <argsstring></argsstring>
+        <name>adm2</name>
+        <qualifiedname>ip_position::adm2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="121" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="121" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a9fa50ab70dac50305d68a2fffe3b4d26" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::name</definition>
+        <argsstring></argsstring>
+        <name>name</name>
+        <qualifiedname>ip_position::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="122" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structip__position_1a2d0d5631cdfa535a9eaa437607270a5e" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* ip_position::id</definition>
+        <argsstring></argsstring>
+        <name>id</name>
+        <qualifiedname>ip_position::id</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="124" column="10" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="124" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/sevetest30_IWEDA.h" line="113" column="1" bodyfile="components/sevetest30_board/include/sevetest30_IWEDA.h" bodystart="114" bodyend="125"/>
+    <listofallmembers>
+      <member refid="structip__position_1a3849bdd31bbb379a4b8416b436c1c542" prot="public" virt="non-virtual"><scope>ip_position</scope><name>adm1</name></member>
+      <member refid="structip__position_1a981f833a38bee57bf913286823ef3e4e" prot="public" virt="non-virtual"><scope>ip_position</scope><name>adm2</name></member>
+      <member refid="structip__position_1a9450a3b689003454e830412177ce0ef4" prot="public" virt="non-virtual"><scope>ip_position</scope><name>country</name></member>
+      <member refid="structip__position_1a2d0d5631cdfa535a9eaa437607270a5e" prot="public" virt="non-virtual"><scope>ip_position</scope><name>id</name></member>
+      <member refid="structip__position_1aec7e6b14aae035ab3c29e46750a8ee63" prot="public" virt="non-virtual"><scope>ip_position</scope><name>lat</name></member>
+      <member refid="structip__position_1a91c254fb5c25ad2567fbe2780c98b1ab" prot="public" virt="non-virtual"><scope>ip_position</scope><name>lng</name></member>
+      <member refid="structip__position_1a9fa50ab70dac50305d68a2fffe3b4d26" prot="public" virt="non-virtual"><scope>ip_position</scope><name>name</name></member>
+      <member refid="structip__position_1abac51dcb3b80267fbccf523f4cc14d1a" prot="public" virt="non-virtual"><scope>ip_position</scope><name>postcode</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

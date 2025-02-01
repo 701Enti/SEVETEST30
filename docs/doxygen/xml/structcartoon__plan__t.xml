@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structcartoon__plan__t" kind="struct" language="C++" prot="public">
+    <compoundname>cartoon_plan_t</compoundname>
+    <includes refid="sevetest30___u_i_8h" local="no">sevetest30_UI.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structcartoon__plan__t_1a70fa9b63ca21ab1cb23b6235bdce5984" prot="public" static="no" mutable="no">
+        <type><ref refid="structkey__frame__t" kindref="compound">key_frame_t</ref> *</type>
+        <definition>key_frame_t* cartoon_plan_t::key_frame_database</definition>
+        <argsstring></argsstring>
+        <name>key_frame_database</name>
+        <qualifiedname>cartoon_plan_t::key_frame_database</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="150" column="16" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="150" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1a23904beb6bf0def3af78ddaad50f5e57" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool cartoon_plan_t::x_en</definition>
+        <argsstring></argsstring>
+        <name>x_en</name>
+        <qualifiedname>cartoon_plan_t::x_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="151" column="9" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="151" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1a65962bcc60030c656ffc531d069cfddb" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool cartoon_plan_t::y_en</definition>
+        <argsstring></argsstring>
+        <name>y_en</name>
+        <qualifiedname>cartoon_plan_t::y_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="152" column="9" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1aed705fa7beffc009b9a2e5c75ec999e0" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool cartoon_plan_t::color_en</definition>
+        <argsstring></argsstring>
+        <name>color_en</name>
+        <qualifiedname>cartoon_plan_t::color_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="153" column="9" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1a999a76e96763a1bfcebb96d891289edf" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool cartoon_plan_t::change_en</definition>
+        <argsstring></argsstring>
+        <name>change_en</name>
+        <qualifiedname>cartoon_plan_t::change_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="154" column="9" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="154" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1abd59ea8722bcae2e2a74faca7c2c6ba9" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t cartoon_plan_t::total_key_frame</definition>
+        <argsstring></argsstring>
+        <name>total_key_frame</name>
+        <qualifiedname>cartoon_plan_t::total_key_frame</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="155" column="13" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="155" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__plan__t_1add97917ca1cdf01b36f6cf15bedb67b5" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t cartoon_plan_t::total_step_buf</definition>
+        <argsstring></argsstring>
+        <name>total_step_buf</name>
+        <qualifiedname>cartoon_plan_t::total_step_buf</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="156" column="13" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="156" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>cartoon_plan_t</label>
+        <link refid="structcartoon__plan__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>key_frame_database</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>key_frame_t</label>
+        <link refid="structkey__frame__t"/>
+      </node>
+    </collaborationgraph>
+    <location file="components/sevetest30_board/include/sevetest30_UI.h" line="149" column="1" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="149" bodyend="157"/>
+    <listofallmembers>
+      <member refid="structcartoon__plan__t_1a999a76e96763a1bfcebb96d891289edf" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>change_en</name></member>
+      <member refid="structcartoon__plan__t_1aed705fa7beffc009b9a2e5c75ec999e0" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>color_en</name></member>
+      <member refid="structcartoon__plan__t_1a70fa9b63ca21ab1cb23b6235bdce5984" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>key_frame_database</name></member>
+      <member refid="structcartoon__plan__t_1abd59ea8722bcae2e2a74faca7c2c6ba9" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>total_key_frame</name></member>
+      <member refid="structcartoon__plan__t_1add97917ca1cdf01b36f6cf15bedb67b5" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>total_step_buf</name></member>
+      <member refid="structcartoon__plan__t_1a23904beb6bf0def3af78ddaad50f5e57" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>x_en</name></member>
+      <member refid="structcartoon__plan__t_1a65962bcc60030c656ffc531d069cfddb" prot="public" virt="non-virtual"><scope>cartoon_plan_t</scope><name>y_en</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="struct_b_l5372__cfg__t" kind="struct" language="C++" prot="public">
+    <compoundname>BL5372_cfg_t</compoundname>
+    <includes refid="_b_l5372_8h" local="no">BL5372.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1afa21af661684d4a504b088a4f5fb10a7" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::alarm_A_en</definition>
+        <argsstring></argsstring>
+        <name>alarm_A_en</name>
+        <qualifiedname>BL5372_cfg_t::alarm_A_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="90" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a5e87cce37b6270657c4a83d7dfd3d867" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::alarm_B_en</definition>
+        <argsstring></argsstring>
+        <name>alarm_B_en</name>
+        <qualifiedname>BL5372_cfg_t::alarm_B_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="91" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1aaec074a7a1e1b8546502b1c4a164f307" prot="public" static="no" mutable="no">
+        <type><ref refid="_b_l5372_8h_1a0042441c665a855a21ce8e2b014e64b8" kindref="member">BL5372_intr_out_mode_t</ref></type>
+        <definition>BL5372_intr_out_mode_t BL5372_cfg_t::intr_out_mode</definition>
+        <argsstring></argsstring>
+        <name>intr_out_mode</name>
+        <qualifiedname>BL5372_cfg_t::intr_out_mode</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="92" column="28" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1aa1f54ad5b9db98eb2a234363e8087408" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::test_en</definition>
+        <argsstring></argsstring>
+        <name>test_en</name>
+        <qualifiedname>BL5372_cfg_t::test_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="93" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a269f548fb364ae9c7be7b599b1b22a0a" prot="public" static="no" mutable="no">
+        <type><ref refid="_b_l5372_8h_1ab6a4d8a2e4c5bee14457d3d1be60577d" kindref="member">BL5372_INT_module_mode_t</ref></type>
+        <definition>BL5372_INT_module_mode_t BL5372_cfg_t::INT_module_mode</definition>
+        <argsstring></argsstring>
+        <name>INT_module_mode</name>
+        <qualifiedname>BL5372_cfg_t::INT_module_mode</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="94" column="30" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="94" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a5f2e785ac7b3622b0bc37c9e4d7ced89" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::hour_24_clock_en</definition>
+        <argsstring></argsstring>
+        <name>hour_24_clock_en</name>
+        <qualifiedname>BL5372_cfg_t::hour_24_clock_en</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="98" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a6839ad32e3caf5a2c47155330e13c26b" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::adj_en_or_xstp</definition>
+        <argsstring></argsstring>
+        <name>adj_en_or_xstp</name>
+        <qualifiedname>BL5372_cfg_t::adj_en_or_xstp</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="103" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a542d6826c3c9ce1edda43e3d56ff15fa" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::out_32KHz_false</definition>
+        <argsstring></argsstring>
+        <name>out_32KHz_false</name>
+        <qualifiedname>BL5372_cfg_t::out_32KHz_false</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="105" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1ab85201ec0dddeb054b51cf223f7fd0ec" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::INT_out_flag_or_out_keep</definition>
+        <argsstring></argsstring>
+        <name>INT_out_flag_or_out_keep</name>
+        <qualifiedname>BL5372_cfg_t::INT_out_flag_or_out_keep</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="110" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1ad57eba2f0e560bd7ca0a154ff502636d" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::alarm_A_out_flag_or_out_keep</definition>
+        <argsstring></argsstring>
+        <name>alarm_A_out_flag_or_out_keep</name>
+        <qualifiedname>BL5372_cfg_t::alarm_A_out_flag_or_out_keep</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="115" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_b_l5372__cfg__t_1a6ae3e18c2a3b2c2a7da15205a51a5657" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool BL5372_cfg_t::alarm_B_out_flag_or_out_keep</definition>
+        <argsstring></argsstring>
+        <name>alarm_B_out_flag_or_out_keep</name>
+        <qualifiedname>BL5372_cfg_t::alarm_B_out_flag_or_out_keep</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/BL5372.h" line="117" column="10" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="117" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/BL5372.h" line="86" column="1" bodyfile="components/sevetest30_board/include/BL5372.h" bodystart="87" bodyend="119"/>
+    <listofallmembers>
+      <member refid="struct_b_l5372__cfg__t_1a6839ad32e3caf5a2c47155330e13c26b" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>adj_en_or_xstp</name></member>
+      <member refid="struct_b_l5372__cfg__t_1afa21af661684d4a504b088a4f5fb10a7" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>alarm_A_en</name></member>
+      <member refid="struct_b_l5372__cfg__t_1ad57eba2f0e560bd7ca0a154ff502636d" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>alarm_A_out_flag_or_out_keep</name></member>
+      <member refid="struct_b_l5372__cfg__t_1a5e87cce37b6270657c4a83d7dfd3d867" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>alarm_B_en</name></member>
+      <member refid="struct_b_l5372__cfg__t_1a6ae3e18c2a3b2c2a7da15205a51a5657" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>alarm_B_out_flag_or_out_keep</name></member>
+      <member refid="struct_b_l5372__cfg__t_1a5f2e785ac7b3622b0bc37c9e4d7ced89" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>hour_24_clock_en</name></member>
+      <member refid="struct_b_l5372__cfg__t_1a269f548fb364ae9c7be7b599b1b22a0a" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>INT_module_mode</name></member>
+      <member refid="struct_b_l5372__cfg__t_1ab85201ec0dddeb054b51cf223f7fd0ec" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>INT_out_flag_or_out_keep</name></member>
+      <member refid="struct_b_l5372__cfg__t_1aaec074a7a1e1b8546502b1c4a164f307" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>intr_out_mode</name></member>
+      <member refid="struct_b_l5372__cfg__t_1a542d6826c3c9ce1edda43e3d56ff15fa" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>out_32KHz_false</name></member>
+      <member refid="struct_b_l5372__cfg__t_1aa1f54ad5b9db98eb2a234363e8087408" prot="public" virt="non-virtual"><scope>BL5372_cfg_t</scope><name>test_en</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

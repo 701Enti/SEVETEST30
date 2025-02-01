@@ -1,0 +1,1446 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="sevetest30___led_array_8h" kind="file" language="C++">
+    <compoundname>sevetest30_LedArray.h</compoundname>
+    <includes local="no">string.h</includes>
+    <includes refid="sevetest30___u_i_8h" local="no">sevetest30_UI.h</includes>
+    <includes local="yes">esp_types.h</includes>
+    <includedby refid="board__ctrl_8c" local="yes">main/board_ctrl.c</includedby>
+    <includedby refid="main_8c" local="yes">main/main.c</includedby>
+    <includedby refid="sevetest30___led_array_8c" local="yes">main/sevetest30_LedArray.c</includedby>
+    <includedby refid="sevetest30___u_i_8c" local="no">main/sevetest30_UI.c</includedby>
+    <incdepgraph>
+      <node id="9">
+        <label>board_ctrl.h</label>
+        <link refid="board__ctrl_8h"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+      </node>
+      <node id="11">
+        <label>board_def.h</label>
+        <link refid="board__def_8h"/>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+      </node>
+      <node id="21">
+        <label>BL5372.h</label>
+        <link refid="_b_l5372_8h"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+      </node>
+      <node id="17">
+        <label>TCA6416A.h</label>
+        <link refid="_t_c_a6416_a_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>components/sevetest30_board/include/sevetest30_LedArray.h</label>
+        <link refid="sevetest30___led_array_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>sevetest30_UI.h</label>
+        <link refid="sevetest30___u_i_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="16">
+        <label>sevetest30_gpio.h</label>
+        <link refid="sevetest30__gpio_8h"/>
+        <childnode refid="17" relation="include">
+        </childnode>
+      </node>
+      <node id="12">
+        <label>audio_hal.h</label>
+      </node>
+      <node id="13">
+        <label>driver/i2c.h</label>
+      </node>
+      <node id="8">
+        <label>driver/i2s.h</label>
+      </node>
+      <node id="18">
+        <label>driver/spi_common.h</label>
+      </node>
+      <node id="19">
+        <label>driver/spi_master.h</label>
+      </node>
+      <node id="5">
+        <label>esp_err.h</label>
+      </node>
+      <node id="14">
+        <label>esp_gatts_api.h</label>
+      </node>
+      <node id="20">
+        <label>esp_peripherals.h</label>
+      </node>
+      <node id="10">
+        <label>esp_types.h</label>
+      </node>
+      <node id="15">
+        <label>esxxx_common.h</label>
+      </node>
+      <node id="6">
+        <label>freertos/FreeRTOS.h</label>
+      </node>
+      <node id="7">
+        <label>freertos/task.h</label>
+      </node>
+      <node id="4">
+        <label>stdbool.h</label>
+      </node>
+      <node id="2">
+        <label>string.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>components/sevetest30_board/include/sevetest30_LedArray.h</label>
+        <link refid="sevetest30___led_array_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>main/board_ctrl.c</label>
+        <link refid="board__ctrl_8c"/>
+      </node>
+      <node id="3">
+        <label>main/main.c</label>
+        <link refid="main_8c"/>
+      </node>
+      <node id="4">
+        <label>main/sevetest30_LedArray.c</label>
+        <link refid="sevetest30___led_array_8c"/>
+      </node>
+      <node id="5">
+        <label>main/sevetest30_UI.c</label>
+        <link refid="sevetest30___u_i_8c"/>
+      </node>
+    </invincdepgraph>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a71aa3c15f3f7e62530d2ada18ffe2773" prot="public" static="no">
+        <name>_SEVETEST30_LEDARRAY_H_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="35" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a18ff66448700e8d0184a01b54e05f340" prot="public" static="no">
+        <name>FIGURE</name>
+        <initializer>4</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="38" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1ab042d2d448a216c0570d1a147af03adb" prot="public" static="no">
+        <name>LINE_LED_NUMBER</name>
+        <initializer>24</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="39" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a8412ebaff2eca2bda07acae207229394" prot="public" static="no">
+        <name>VERTICAL_LED_NUMBER</name>
+        <initializer>12</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="40" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a7eebbaa5b8e0a2e58d079d7990de0ea3" prot="public" static="no">
+        <name>RECTANGLE_MATRIX</name>
+        <param><defname>pRECTANGLE</defname></param>
+        <initializer>(pRECTANGLE+0x01)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="41" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a543c7297f480deb68423813a2aba5b13" prot="public" static="no">
+        <name>RECTANGLE_SIZE_MAX</name>
+        <initializer>36</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="42" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a040fd7a36c7bade335b19df6c8ccf925" prot="public" static="no">
+        <name>FONT_PRINT_NUM_MAX</name>
+        <initializer>128</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="45" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a7e587c17cee27d7a1d748472306ec17b" prot="public" static="no">
+        <name>FONT_PRINT_FMT_BUF_SIZE</name>
+        <initializer>(<ref refid="sevetest30___led_array_8h_1a040fd7a36c7bade335b19df6c8ccf925" kindref="member">FONT_PRINT_NUM_MAX</ref>*10)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="46" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a7397500f61c23a1abea851012874bd3d" prot="public" static="no">
+        <name>LEDARRAY_REFRESH_TASK_CORE</name>
+        <initializer>(1)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="48" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1a604ddda5b43efb35391391758c9d8b03" prot="public" static="no">
+        <name>LEDARRAY_REFRESH_TASK_PRIO</name>
+        <initializer>(1)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="49" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="sevetest30___led_array_8h_1ac1338a63be3ce085ed1707b3cd37a8c7" prot="public" static="no">
+        <name>LEDARRAY_REFRESH_INIT_MODE</name>
+        <initializer><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eadd4d1b30cc7e6a4bbceee0a073bf49e6" kindref="member">LEDARRAY_REFRESH_ALL_ONCE</ref></initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="62" column="9" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="62" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46e" prot="public" static="no" strong="no">
+        <type></type>
+        <name>ledarray_refresh_mode_t</name>
+        <enumvalue id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea5befe4eb59c860532f3f3287eae868d9" prot="public">
+          <name>LEDARRAY_REFRESH_DISABLE</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eadd4d1b30cc7e6a4bbceee0a073bf49e6" prot="public">
+          <name>LEDARRAY_REFRESH_ALL_ONCE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea75f5782064dc57b7bdf8f2641a839d3d" prot="public">
+          <name>LEDARRAY_REFRESH_ALL_MULTIPLE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaa47c4d025e54bcb08511a20420ee96de" prot="public">
+          <name>LEDARRAY_REFRESH_PART_ONCE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaba1737e697aceb7d95d172c23bc7075a" prot="public">
+          <name>LEDARRAY_REFRESH_PART_MULTIPLE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="53" column="1" bodyfile="components/sevetest30_board/include/sevetest30_LedArray.h" bodystart="54" bodyend="60"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a6a364ef03edff14164920dfaf30cf726" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_1[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="68" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="111" bodyend="111" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="68" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a152f124ec09f393e61d48ae1a1a2d1d1" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_2[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="69" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="112" bodyend="112" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="69" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a785387d63238f0281285b05ffd8aebbf" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_3[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="70" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="113" bodyend="113" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="70" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1aa610aec253c352d60c19198e811bc961" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_4[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_4</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="71" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="114" bodyend="114" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="71" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a6c3758a3b5c2352f7795951029f08106" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_5[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_5</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="72" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="115" bodyend="115" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="72" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a0acc37d8391e6bf93cd8e30d00cef34d" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_6[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_6</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="73" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="116" bodyend="116" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="73" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1a2367a8d20a980cf8add1d5aa01dae14d" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_7[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_7</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="74" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="117" bodyend="117" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="74" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1aabb41927fed94381819288e1d3271fb2" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_8[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_8</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="75" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="118" bodyend="118" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="75" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="variable" id="sevetest30___led_array_8h_1abfc2482a77212755a828b723e0928ad9" prot="public" static="no" extern="yes" mutable="no">
+        <type>const uint8_t</type>
+        <definition>const uint8_t matrix_9[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>matrix_9</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="76" column="22" bodyfile="main/sevetest30_LedArray.c" bodystart="119" bodyend="119" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="76" declcolumn="22"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a350204007e04d378da6acbc29c1c816c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ledarray_set_refresh_mode</definition>
+        <argsstring>(ledarray_refresh_mode_t mode)</argsstring>
+        <name>ledarray_set_refresh_mode</name>
+        <param>
+          <type><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46e" kindref="member">ledarray_refresh_mode_t</ref></type>
+          <declname>mode</declname>
+        </param>
+        <briefdescription>
+<para>设置LED阵列的刷新模式 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>mode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>刷新模式 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="80" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="172" bodyend="213" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="80" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1af2dce94d7dcbda0dd03daf92d029147e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void separation_draw</definition>
+        <argsstring>(int32_t x, int32_t y, uint8_t breadth, const uint8_t *p, uint8_t byte_number, uint8_t *color_in, uint8_t change)</argsstring>
+        <name>separation_draw</name>
+        <param>
+          <type>int32_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>breadth</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>byte_number</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>color_in</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>change</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="94" column="6" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="94" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1ad4691147267eedfb4323ab9781b2dd62" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void direct_draw</definition>
+        <argsstring>(int32_t x, int32_t y, const uint8_t *p, uint8_t change)</argsstring>
+        <name>direct_draw</name>
+        <param>
+          <type>int32_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>change</declname>
+        </param>
+        <briefdescription>
+<para>彩色图像直显方式 取模方式适配Img2Lcd </para>
+        </briefdescription>
+        <detaileddescription>
+<para>[水平扫描，从左到右，从顶到底扫描，24位真彩（RGB顺序），需要图像数据头]</para>
+<para>将自动获取图像头参数,之后ledarray_set_and_write需要被调用才可显示 <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入图像指针 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>change</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="104" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="342" bodyend="395" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="104" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1ab5ecd4e3eb3636ecc41c3f0a0c67e626" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void clean_draw</definition>
+        <argsstring>()</argsstring>
+        <name>clean_draw</name>
+        <briefdescription>
+<para>清除屏幕上的所有图案以及数据缓存 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="108" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="399" bodyend="406" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="108" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a92ce28a239503c364726b5673f2915e5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void clean_draw_buf</definition>
+        <argsstring>(int8_t y)</argsstring>
+        <name>clean_draw_buf</name>
+        <param>
+          <type>int8_t</type>
+          <declname>y</declname>
+        </param>
+        <briefdescription>
+<para>清空指定行的图像 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>指定行纵坐标(从1开始) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="111" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="410" bodyend="415" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="111" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a4c4efd3188ccd65c9a42b5e67e6c21d2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void progress_draw_buf</definition>
+        <argsstring>(int8_t y, uint8_t step, uint8_t *color)</argsstring>
+        <name>progress_draw_buf</name>
+        <param>
+          <type>int8_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>step</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>color</declname>
+        </param>
+        <briefdescription>
+<para>渐进指定行的图像，使得颜色向目标颜色以步进值偏移一步，这只会对绘制状态非活动的区域起作用 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>指定行纵坐标 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>step</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>步进值 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>目标颜色 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="113" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="421" bodyend="453" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="113" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1aa49fb91e47f7a6f6e916239164d8ee4b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t *</type>
+        <definition>uint8_t * rectangle</definition>
+        <argsstring>(int8_t breadth, int8_t length)</argsstring>
+        <name>rectangle</name>
+        <param>
+          <type>int8_t</type>
+          <declname>breadth</declname>
+        </param>
+        <param>
+          <type>int8_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+<para>生成一个矩形字模(需要释放) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>breadth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>矩形横向长度(1-LINE_LED_NUMBER) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>length</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>矩形纵向长度(1-VERTICAL_LED_NUMBER) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小（Byte） <ref refid="sevetest30___led_array_8h_1a7eebbaa5b8e0a2e58d079d7990de0ea3" kindref="member">RECTANGLE_MATRIX(rectangle_data)</ref> 为 矩形字模 </para>
+</simplesect>
+<simplesect kind="return"><para>例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p); </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="115" column="9" bodyfile="main/sevetest30_LedArray.c" bodystart="221" bodyend="268" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="115" declcolumn="9"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a54022fb8ab5a3af59f5864d71250597b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void print_number</definition>
+        <argsstring>(int32_t x, int32_t y, int8_t figure, uint8_t *color, uint8_t change)</argsstring>
+        <name>print_number</name>
+        <param>
+          <type>int32_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int8_t</type>
+          <declname>figure</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>color</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>change</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="117" column="6" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="117" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1ab7ec88320017091e65a906970e06dafd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void font_roll_print_12x</definition>
+        <argsstring>(int32_t x, int32_t y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char *format,...)</argsstring>
+        <name>font_roll_print_12x</name>
+        <param>
+          <type>int32_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>color</declname>
+          <array>[3]</array>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>change</declname>
+        </param>
+        <param>
+          <type><ref refid="sevetest30___u_i_8h_1a62944b735214a319f7aa83ce4214b8fd" kindref="member">cartoon_handle_t</ref></type>
+          <declname>cartoon_handle</declname>
+        </param>
+        <param>
+          <type>char *</type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>...</type>
+        </param>
+        <briefdescription>
+<para>通过字库芯片支持在LED阵列滚动打印任意字符 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>初始横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>初始纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>字符颜色 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>change</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>亮度调制 1-100 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>cartoon_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>sevetest30_UI动画支持句柄,填写句柄启用预设的动画,填写NULL以使用默认效果 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>format</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>形式同printf的可变参量表 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="119" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="615" bodyend="758" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="119" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1afbd085293d3f3dbf3083dd048cb5a8d6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void font_raw_print_12x</definition>
+        <argsstring>(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char *format,...)</argsstring>
+        <name>font_raw_print_12x</name>
+        <param>
+          <type>int32_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>color</declname>
+          <array>[3]</array>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>change</declname>
+        </param>
+        <param>
+          <type>char *</type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>...</type>
+        </param>
+        <briefdescription>
+<para>通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>字符颜色 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>change</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>亮度调制 1-100 </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>format</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>形式同printf的可变参量表 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="121" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="524" bodyend="606" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="121" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1aefd30405e1080808060dc92054df0bdb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ledarray_init</definition>
+        <argsstring>()</argsstring>
+        <name>ledarray_init</name>
+        <briefdescription>
+<para>初始化灯板阵列 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="123" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="763" bodyend="803" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="123" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1af09cfa198e2fb90a5aa9654d886f3664" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ledarray_deinit</definition>
+        <argsstring>()</argsstring>
+        <name>ledarray_deinit</name>
+        <briefdescription>
+<para>去初始化灯板阵列 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="125" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="806" bodyend="827" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="125" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a670cb7e9249c70161c21ac2aae2b4e4e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void color_compound</definition>
+        <argsstring>(uint8_t line_sw)</argsstring>
+        <name>color_compound</name>
+        <param>
+          <type>uint8_t</type>
+          <declname>line_sw</declname>
+        </param>
+        <briefdescription>
+<para>颜色数据合成,将R red_y(x) G green_y(x) B blue_y(x) 合成为 为WS2812发送的数据 </para>
+        </briefdescription>
+        <detaileddescription>
+<para>SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数 <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>line_sw</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>合成选定的行(1-VERTICAL_LED_NUMBER) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="130" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="1060" bodyend="1144" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="130" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a0aa50fecb446229afaf4d7b4808254d8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ledarray_set_and_write</definition>
+        <argsstring>(uint8_t group_sw)</argsstring>
+        <name>ledarray_set_and_write</name>
+        <param>
+          <type>uint8_t</type>
+          <declname>group_sw</declname>
+        </param>
+        <briefdescription>
+<para>灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>group_sw</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="132" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="831" bodyend="870" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="132" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a6e36c132215af27002355b2ff9d8b072" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void color_input</definition>
+        <argsstring>(int8_t x, int8_t y, uint8_t *dat)</argsstring>
+        <name>color_input</name>
+        <param>
+          <type>int8_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int8_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>dat</declname>
+        </param>
+        <briefdescription>
+<para>颜色导入,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>绝对横坐标(0 到 LINE_LED_NUMBER-1) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>一般纵坐标(1 到 VERTICAL_LED_NUMBER) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>dat</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导入的颜色RGB数据位置 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="137" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="876" bodyend="963" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="137" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1afe36c756b8e5400fbe11f1168eeebab8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void color_output</definition>
+        <argsstring>(int8_t x, int8_t y, uint8_t *dat)</argsstring>
+        <name>color_output</name>
+        <param>
+          <type>int8_t</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int8_t</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>dat</declname>
+        </param>
+        <briefdescription>
+<para>颜色导出,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数 </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>绝对横坐标(0 到 LINE_LED_NUMBER-1) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>一般纵坐标(1 到 LINE_LED_NUMBER) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>dat</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>导出存储的颜色RGB数据的位置 </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="139" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="969" bodyend="1054" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="139" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a56a0725fa7f743bec9d665033a24faec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double value_max</definition>
+        <argsstring>(double value1, double value2, double value3)</argsstring>
+        <name>value_max</name>
+        <param>
+          <type>double</type>
+          <declname>value1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>value2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>value3</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="141" column="8" bodyfile="main/sevetest30_LedArray.c" bodystart="1171" bodyend="1188" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="141" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1aaef76fa03766a31368f86fdb404319d7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double value_min</definition>
+        <argsstring>(double value1, double value2, double value3)</argsstring>
+        <name>value_min</name>
+        <param>
+          <type>double</type>
+          <declname>value1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>value2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>value3</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="144" column="8" bodyfile="main/sevetest30_LedArray.c" bodystart="1191" bodyend="1208" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="144" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1acf17011d8638511cc2a6ea72883b0bdb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ledarray_intensity_change</definition>
+        <argsstring>(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t intensity)</argsstring>
+        <name>ledarray_intensity_change</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>g</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>intensity</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="147" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="1149" bodyend="1168" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="147" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1af86abda8c11bbccc90993c7b4e18fd37" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void rgb_to_hvs</definition>
+        <argsstring>(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t *p_h, uint32_t *p_s, uint32_t *p_v)</argsstring>
+        <name>rgb_to_hvs</name>
+        <param>
+          <type>uint8_t</type>
+          <declname>red_buf</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>green_buf</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>blue_buf</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>p_h</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>p_s</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>p_v</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="149" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="1213" bodyend="1260" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="149" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="sevetest30___led_array_8h_1a1d9fe3c8e1488269731f114f65493de9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void led_strip_hsv2rgb</definition>
+        <argsstring>(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t *g, uint32_t *b)</argsstring>
+        <name>led_strip_hsv2rgb</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>g</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Simple helper function, converting HSV color space to RGB color space </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Wiki: <ulink url="https://en.wikipedia.org/wiki/HSL_and_HSV">https://en.wikipedia.org/wiki/HSL_and_HSV</ulink> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_LedArray.h" line="159" column="6" bodyfile="main/sevetest30_LedArray.c" bodystart="1270" bodyend="1315" declfile="components/sevetest30_board/include/sevetest30_LedArray.h" declline="159" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/>*<sp/>701Enti<sp/>MIT<sp/>License</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>©<sp/>2024<sp/>&lt;701Enti<sp/>organization&gt;</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*<sp/>Permission<sp/>is<sp/>hereby<sp/>granted,<sp/>free<sp/>of<sp/>charge,<sp/>to<sp/>any<sp/>person<sp/>obtaining<sp/></highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>a<sp/>copy<sp/>of<sp/>this<sp/>software<sp/>and<sp/>associated<sp/>documentation<sp/>files<sp/>(the<sp/>“Software”),<sp/></highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>to<sp/>deal<sp/>in<sp/>the<sp/>Software<sp/>without<sp/>restriction,<sp/>including<sp/>without<sp/>limitation<sp/></highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>the<sp/>rights<sp/>to<sp/>use,<sp/>copy,<sp/>modify,<sp/>merge,<sp/>publish,<sp/>distribute,<sp/>sublicense,<sp/>and/or<sp/>sell<sp/>copies<sp/>of<sp/>the<sp/>Software,</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>and<sp/>to<sp/>permit<sp/>persons<sp/>to<sp/>whom<sp/>the<sp/>Software<sp/>is<sp/>furnished<sp/>to<sp/>do<sp/>so,<sp/>subject<sp/>to<sp/>the<sp/>following<sp/>conditions:</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*<sp/>The<sp/>above<sp/>copyright<sp/>notice<sp/>and<sp/>this<sp/>permission<sp/>notice<sp/>shall<sp/>be<sp/>included<sp/>in<sp/>all<sp/>copies<sp/>or<sp/>substantial<sp/>portions<sp/>of<sp/>the<sp/>Software.</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*<sp/>THE<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>“AS<sp/>IS”,<sp/>WITHOUT<sp/>WARRANTY<sp/>OF<sp/>ANY<sp/>KIND,<sp/>EXPRESS<sp/>OR<sp/>IMPLIED,<sp/></highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>INCLUDING<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO<sp/>THE<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY,<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE<sp/>AND<sp/>NONINFRINGEMENT.<sp/></highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>AUTHORS<sp/>OR<sp/>COPYRIGHT<sp/>HOLDERS<sp/>BE<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>CLAIM,<sp/>DAMAGES<sp/>OR<sp/>OTHER<sp/>LIABILITY,</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>WHETHER<sp/>IN<sp/>AN<sp/>ACTION<sp/>OF<sp/>CONTRACT,<sp/>TORT<sp/>OR<sp/>OTHERWISE,<sp/>ARISING<sp/>FROM,</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>OUT<sp/>OF<sp/>OR<sp/>IN<sp/>CONNECTION<sp/>WITH<sp/>THE<sp/>SOFTWARE<sp/>OR<sp/>THE<sp/>USE<sp/>OR<sp/>OTHER<sp/>DEALINGS<sp/>IN<sp/>THE<sp/>SOFTWARE.</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="comment">//<sp/>该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="comment">//<sp/>如您发现一些问题，请及时联系我们，我们非常感谢您的支持</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="comment">//<sp/>敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="comment">//<sp/>ESP-IDF项目地址<sp/>https://github.com/espressif/esp-idf</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="comment">//<sp/>官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="comment">//<sp/>github:<sp/>https://github.com/701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="comment">//<sp/>bilibili:<sp/>701Enti</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="sevetest30___u_i_8h" kindref="compound">sevetest30_UI.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;esp_types.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>_SEVETEST30_LEDARRAY_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35" refid="sevetest30___led_array_8h_1a71aa3c15f3f7e62530d2ada18ffe2773" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_SEVETEST30_LEDARRAY_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38" refid="sevetest30___led_array_8h_1a18ff66448700e8d0184a01b54e05f340" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>FIGURE<sp/>4<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//数字<sp/>4x7</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="sevetest30___led_array_8h_1ab042d2d448a216c0570d1a147af03adb" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LINE_LED_NUMBER<sp/><sp/>24<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//灯板横向长度(每一根通讯线连接的WS2812数量)<sp/>此处“横向”始终表示通讯线延伸方向</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40" refid="sevetest30___led_array_8h_1a8412ebaff2eca2bda07acae207229394" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>VERTICAL_LED_NUMBER<sp/>12<sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//灯板纵向长度(通讯线数量)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>此处“纵向”始终垂直通讯线延伸方向</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="41" refid="sevetest30___led_array_8h_1a7eebbaa5b8e0a2e58d079d7990de0ea3" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>RECTANGLE_MATRIX(pRECTANGLE)<sp/>(pRECTANGLE+0x01)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42" refid="sevetest30___led_array_8h_1a543c7297f480deb68423813a2aba5b13" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>RECTANGLE_SIZE_MAX<sp/>36</highlight><highlight class="comment">//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是<sp/>12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45" refid="sevetest30___led_array_8h_1a040fd7a36c7bade335b19df6c8ccf925" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>FONT_PRINT_NUM_MAX<sp/>128<sp/></highlight><highlight class="comment">//字库打印函数最大单次打印字符数</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46" refid="sevetest30___led_array_8h_1a7e587c17cee27d7a1d748472306ec17b" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>FONT_PRINT_FMT_BUF_SIZE<sp/>(FONT_PRINT_NUM_MAX*10)</highlight><highlight class="comment">//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48" refid="sevetest30___led_array_8h_1a7397500f61c23a1abea851012874bd3d" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LEDARRAY_REFRESH_TASK_CORE<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>(1)</highlight><highlight class="comment">//屏幕刷新任务运行核心</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="49" refid="sevetest30___led_array_8h_1a604ddda5b43efb35391391758c9d8b03" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LEDARRAY_REFRESH_TASK_PRIO<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>(1)</highlight><highlight class="comment">//屏幕刷新任务优先级</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46e" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="55" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea5befe4eb59c860532f3f3287eae868d9" refkind="member"><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea5befe4eb59c860532f3f3287eae868d9" kindref="member">LEDARRAY_REFRESH_DISABLE</ref><sp/>=<sp/>0,</highlight><highlight class="comment">//禁用屏幕刷新</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eadd4d1b30cc7e6a4bbceee0a073bf49e6" refkind="member"><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eadd4d1b30cc7e6a4bbceee0a073bf49e6" kindref="member">LEDARRAY_REFRESH_ALL_ONCE</ref>,</highlight><highlight class="comment">//[单次全刷]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="57" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea75f5782064dc57b7bdf8f2641a839d3d" refkind="member"><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46ea75f5782064dc57b7bdf8f2641a839d3d" kindref="member">LEDARRAY_REFRESH_ALL_MULTIPLE</ref>,</highlight><highlight class="comment">//[多次全刷]分多步进地完成刷新整个屏幕所有行,每步之后发生延时</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaa47c4d025e54bcb08511a20420ee96de" refkind="member"><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaa47c4d025e54bcb08511a20420ee96de" kindref="member">LEDARRAY_REFRESH_PART_ONCE</ref>,</highlight><highlight class="comment">//[单次局刷]一次性刷新所有发生绘制活动的行,刷新之后才发生延时</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59" refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaba1737e697aceb7d95d172c23bc7075a" refkind="member"><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46eaba1737e697aceb7d95d172c23bc7075a" kindref="member">LEDARRAY_REFRESH_PART_MULTIPLE</ref>,</highlight><highlight class="comment">//[多次局刷]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal">}<ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46e" kindref="member">ledarray_refresh_mode_t</ref>;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="62" refid="sevetest30___led_array_8h_1ac1338a63be3ce085ed1707b3cd37a8c7" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LEDARRAY_REFRESH_INIT_MODE<sp/>LEDARRAY_REFRESH_ALL_ONCE<sp/></highlight><highlight class="comment">//初始化时设置的默认屏幕刷新模式</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight><highlight class="comment">//数字<sp/>0-9</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a6a364ef03edff14164920dfaf30cf726" kindref="member">matrix_1</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a152f124ec09f393e61d48ae1a1a2d1d1" kindref="member">matrix_2</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a785387d63238f0281285b05ffd8aebbf" kindref="member">matrix_3</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1aa610aec253c352d60c19198e811bc961" kindref="member">matrix_4</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a6c3758a3b5c2352f7795951029f08106" kindref="member">matrix_5</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a0acc37d8391e6bf93cd8e30d00cef34d" kindref="member">matrix_6</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1a2367a8d20a980cf8add1d5aa01dae14d" kindref="member">matrix_7</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1aabb41927fed94381819288e1d3271fb2" kindref="member">matrix_8</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="sevetest30___led_array_8h_1abfc2482a77212755a828b723e0928ad9" kindref="member">matrix_9</ref><sp/>[7];</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a350204007e04d378da6acbc29c1c816c" kindref="member">ledarray_set_refresh_mode</ref>(<ref refid="sevetest30___led_array_8h_1a43484d7921da2388b427cde75836f46e" kindref="member">ledarray_refresh_mode_t</ref><sp/>mode);</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>以下函数将数据存储到缓冲区，不包含发送</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//sevetest30支持两种显示解析<sp/>三色分离方式<sp/>和<sp/>彩色图像直显方式</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//后者直接读取存储了RGB数据的数组，直接写入WS2812,便于显示复杂，颜色丰富的图形</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight><highlight class="comment">//三色分离方式<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//取模适配PCtoLCD2002</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//取模说明：从第一行开始向右每取8个点作为一个字节，如果最后不足8个点就补满8位。</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94" refid="sevetest30___led_array_8h_1af2dce94d7dcbda0dd03daf92d029147e" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1af2dce94d7dcbda0dd03daf92d029147e" kindref="member">separation_draw</ref>(int32_t<sp/>x,<sp/>int32_t<sp/>y,<sp/>uint8_t<sp/>breadth,</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/>*p,<sp/>uint8_t<sp/>byte_number,<sp/>uint8_t*<sp/>color_in,uint8_t<sp/>change);</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight><highlight class="comment">//彩色图像直显方式<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/></highlight><highlight class="comment">//取模方式适配Img2Lcd</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/></highlight><highlight class="comment">//水平扫描，从左到右，从顶到底扫描，24位真彩（RGB顺序），需要图像数据头</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/></highlight><highlight class="comment">//图像编辑可以用系统自带的画板工具，像素调到合适值如12x24,不显示的地方要填充黑色</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/></highlight><highlight class="comment">//选择带数据头的图案数据，长宽会自动获取</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno=CONFIG_WIFI_SSID><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1ad4691147267eedfb4323ab9781b2dd62" kindref="member">direct_draw</ref>(int32_t<sp/>x,<sp/>int32_t<sp/>y,</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/>*p,uint8_t<sp/>change);</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1ab5ecd4e3eb3636ecc41c3f0a0c67e626" kindref="member">clean_draw</ref>();</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a92ce28a239503c364726b5673f2915e5" kindref="member">clean_draw_buf</ref>(int8_t<sp/>y);</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a4c4efd3188ccd65c9a42b5e67e6c21d2" kindref="member">progress_draw_buf</ref>(int8_t<sp/>y,uint8_t<sp/>step,<sp/>uint8_t*<sp/>color);</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal">uint8_t<sp/>*<ref refid="sevetest30___led_array_8h_1aa49fb91e47f7a6f6e916239164d8ee4b" kindref="member">rectangle</ref>(int8_t<sp/>breadth,<sp/>int8_t<sp/>length);</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"></highlight></codeline>
+<codeline lineno="117" refid="sevetest30___led_array_8h_1a54022fb8ab5a3af59f5864d71250597b" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a54022fb8ab5a3af59f5864d71250597b" kindref="member">print_number</ref>(int32_t<sp/>x,int32_t<sp/>y,int8_t<sp/>figure,uint8_t*<sp/>color,uint8_t<sp/>change);</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1ab7ec88320017091e65a906970e06dafd" kindref="member">font_roll_print_12x</ref>(int32_t<sp/>x,<sp/>int32_t<sp/>y,<sp/>uint8_t<sp/>color[3],<sp/>uint8_t<sp/>change,<sp/><ref refid="sevetest30___u_i_8h_1a62944b735214a319f7aa83ce4214b8fd" kindref="member">cartoon_handle_t</ref><sp/>cartoon_handle,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/>format,<sp/>...);</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"></highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1afbd085293d3f3dbf3083dd048cb5a8d6" kindref="member">font_raw_print_12x</ref>(int32_t<sp/>x,<sp/>int32_t<sp/>y,<sp/>uint8_t<sp/>color[3],<sp/>uint8_t<sp/>change,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/>format,<sp/>...);</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1aefd30405e1080808060dc92054df0bdb" kindref="member">ledarray_init</ref>();</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1af09cfa198e2fb90a5aa9654d886f3664" kindref="member">ledarray_deinit</ref>();</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"></highlight><highlight class="comment">//以下函数处理上面的函数产生的颜色数据，配置传输数据发送</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a670cb7e9249c70161c21ac2aae2b4e4e" kindref="member">color_compound</ref>(uint8_t<sp/>line_sw);</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"></highlight></codeline>
+<codeline lineno="132"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a0aa50fecb446229afaf4d7b4808254d8" kindref="member">ledarray_set_and_write</ref>(uint8_t<sp/>group_sw);</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"></highlight><highlight class="comment">//以下是内部私有函数，一般不会在外部调用</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a6e36c132215af27002355b2ff9d8b072" kindref="member">color_input</ref>(int8_t<sp/>x,<sp/>int8_t<sp/>y,<sp/>uint8_t*<sp/>dat);</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1afe36c756b8e5400fbe11f1168eeebab8" kindref="member">color_output</ref>(int8_t<sp/>x,<sp/>int8_t<sp/>y,<sp/>uint8_t*<sp/>dat);</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a56a0725fa7f743bec9d665033a24faec" kindref="member">value_max</ref>(</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value1,</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value2,</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value3);</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1aaef76fa03766a31368f86fdb404319d7" kindref="member">value_min</ref>(</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value1,</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value2,</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>value3);</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="146"><highlight class="normal"></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1acf17011d8638511cc2a6ea72883b0bdb" kindref="member">ledarray_intensity_change</ref>(uint8_t<sp/>*r,uint8_t<sp/>*g,uint8_t<sp/>*b,uint8_t<sp/>intensity);</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"></highlight></codeline>
+<codeline lineno="149"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1af86abda8c11bbccc90993c7b4e18fd37" kindref="member">rgb_to_hvs</ref>(uint8_t<sp/>red_buf,<sp/>uint8_t<sp/>green_buf,<sp/>uint8_t<sp/>blue_buf,uint32_t<sp/>*p_h,<sp/>uint32_t<sp/>*p_s,<sp/>uint32_t<sp/>*p_v);</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//以下函数来自ESP-IDFv4.4<sp/>led_strip.c<sp/>例程文件，以及源文件声明</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight></codeline>
+<codeline lineno="159"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="sevetest30___led_array_8h_1a1d9fe3c8e1488269731f114f65493de9" kindref="member">led_strip_hsv2rgb</ref>(uint32_t<sp/>h,<sp/>uint32_t<sp/>s,<sp/>uint32_t<sp/>v,<sp/>uint32_t<sp/>*r,<sp/>uint32_t<sp/>*g,<sp/>uint32_t<sp/>*b);</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"></highlight></codeline>
+<codeline lineno="162"><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="components/sevetest30_board/include/sevetest30_LedArray.h"/>
+  </compounddef>
+</doxygen>

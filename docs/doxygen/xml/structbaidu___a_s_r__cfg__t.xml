@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structbaidu___a_s_r__cfg__t" kind="struct" language="C++" prot="public">
+    <compoundname>baidu_ASR_cfg_t</compoundname>
+    <includes refid="sevetest30__sound_8h" local="no">sevetest30_sound.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structbaidu___a_s_r__cfg__t_1a0069b390b1b2e29fed110edce045b2e4" prot="public" static="no" mutable="no">
+        <type><ref refid="sevetest30__sound_8h_1a30cd5df0702c2b8175a1f6bc28886be1" kindref="member">asr_rate_t</ref></type>
+        <definition>asr_rate_t baidu_ASR_cfg_t::rate</definition>
+        <argsstring></argsstring>
+        <name>rate</name>
+        <qualifiedname>baidu_ASR_cfg_t::rate</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="93" column="16" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___a_s_r__cfg__t_1a3ece671231f4dceff197c4f881725ca1" prot="public" static="no" mutable="no">
+        <type><ref refid="sevetest30__sound_8h_1ae9869b0988563d3fd3b7c9a8366da176" kindref="member">asr_pid_t</ref></type>
+        <definition>asr_pid_t baidu_ASR_cfg_t::dev_pid</definition>
+        <argsstring></argsstring>
+        <name>dev_pid</name>
+        <qualifiedname>baidu_ASR_cfg_t::dev_pid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="94" column="16" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="94" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___a_s_r__cfg__t_1a612740954d4f68d2436c2dc19c7652cb" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int baidu_ASR_cfg_t::stop_threshold</definition>
+        <argsstring></argsstring>
+        <name>stop_threshold</name>
+        <qualifiedname>baidu_ASR_cfg_t::stop_threshold</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="95" column="8" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___a_s_r__cfg__t_1a8a7ad5122da79dd47f418657a6243d8f" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int baidu_ASR_cfg_t::send_threshold</definition>
+        <argsstring></argsstring>
+        <name>send_threshold</name>
+        <qualifiedname>baidu_ASR_cfg_t::send_threshold</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="96" column="8" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="96" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structbaidu___a_s_r__cfg__t_1a61a2ab526eb6005b2c841c040b864878" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int baidu_ASR_cfg_t::record_save_times_max</definition>
+        <argsstring></argsstring>
+        <name>record_save_times_max</name>
+        <qualifiedname>baidu_ASR_cfg_t::record_save_times_max</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_sound.h" line="97" column="8" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="97" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/sevetest30_sound.h" line="91" column="1" bodyfile="components/sevetest30_board/include/sevetest30_sound.h" bodystart="92" bodyend="98"/>
+    <listofallmembers>
+      <member refid="structbaidu___a_s_r__cfg__t_1a3ece671231f4dceff197c4f881725ca1" prot="public" virt="non-virtual"><scope>baidu_ASR_cfg_t</scope><name>dev_pid</name></member>
+      <member refid="structbaidu___a_s_r__cfg__t_1a0069b390b1b2e29fed110edce045b2e4" prot="public" virt="non-virtual"><scope>baidu_ASR_cfg_t</scope><name>rate</name></member>
+      <member refid="structbaidu___a_s_r__cfg__t_1a61a2ab526eb6005b2c841c040b864878" prot="public" virt="non-virtual"><scope>baidu_ASR_cfg_t</scope><name>record_save_times_max</name></member>
+      <member refid="structbaidu___a_s_r__cfg__t_1a8a7ad5122da79dd47f418657a6243d8f" prot="public" virt="non-virtual"><scope>baidu_ASR_cfg_t</scope><name>send_threshold</name></member>
+      <member refid="structbaidu___a_s_r__cfg__t_1a612740954d4f68d2436c2dc19c7652cb" prot="public" virt="non-virtual"><scope>baidu_ASR_cfg_t</scope><name>stop_threshold</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

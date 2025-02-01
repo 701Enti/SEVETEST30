@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="structcartoon__ctrl__object__t" kind="struct" language="C++" prot="public">
+    <compoundname>cartoon_ctrl_object_t</compoundname>
+    <includes refid="sevetest30___u_i_8h" local="no">sevetest30_UI.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structcartoon__ctrl__object__t_1a4d376bf1ce8c36e692325dec3b4c5f34" prot="public" static="no" mutable="no">
+        <type>uint32_t *</type>
+        <definition>uint32_t* cartoon_ctrl_object_t::pstep</definition>
+        <argsstring></argsstring>
+        <name>pstep</name>
+        <qualifiedname>cartoon_ctrl_object_t::pstep</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="87" column="13" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__ctrl__object__t_1ab1f68d07dd6d1de105a4b779eba1c85e" prot="public" static="no" mutable="no">
+        <type>int32_t *</type>
+        <definition>int32_t* cartoon_ctrl_object_t::px</definition>
+        <argsstring></argsstring>
+        <name>px</name>
+        <qualifiedname>cartoon_ctrl_object_t::px</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="88" column="12" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__ctrl__object__t_1a092f870455d5bcaddbfeda083ed21cb0" prot="public" static="no" mutable="no">
+        <type>int32_t *</type>
+        <definition>int32_t* cartoon_ctrl_object_t::py</definition>
+        <argsstring></argsstring>
+        <name>py</name>
+        <qualifiedname>cartoon_ctrl_object_t::py</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="89" column="12" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__ctrl__object__t_1a2812ad8960e8885ac5b20bf18ad02c3b" prot="public" static="no" mutable="no">
+        <type>uint8_t *</type>
+        <definition>uint8_t* cartoon_ctrl_object_t::pcolor</definition>
+        <argsstring></argsstring>
+        <name>pcolor</name>
+        <qualifiedname>cartoon_ctrl_object_t::pcolor</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="90" column="12" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcartoon__ctrl__object__t_1a4ecc08b32613cc5943c5ca5aa685bb31" prot="public" static="no" mutable="no">
+        <type>uint8_t *</type>
+        <definition>uint8_t* cartoon_ctrl_object_t::pchange</definition>
+        <argsstring></argsstring>
+        <name>pchange</name>
+        <qualifiedname>cartoon_ctrl_object_t::pchange</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="components/sevetest30_board/include/sevetest30_UI.h" line="91" column="12" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/include/sevetest30_UI.h" line="86" column="1" bodyfile="components/sevetest30_board/include/sevetest30_UI.h" bodystart="86" bodyend="92"/>
+    <listofallmembers>
+      <member refid="structcartoon__ctrl__object__t_1a4ecc08b32613cc5943c5ca5aa685bb31" prot="public" virt="non-virtual"><scope>cartoon_ctrl_object_t</scope><name>pchange</name></member>
+      <member refid="structcartoon__ctrl__object__t_1a2812ad8960e8885ac5b20bf18ad02c3b" prot="public" virt="non-virtual"><scope>cartoon_ctrl_object_t</scope><name>pcolor</name></member>
+      <member refid="structcartoon__ctrl__object__t_1a4d376bf1ce8c36e692325dec3b4c5f34" prot="public" virt="non-virtual"><scope>cartoon_ctrl_object_t</scope><name>pstep</name></member>
+      <member refid="structcartoon__ctrl__object__t_1ab1f68d07dd6d1de105a4b779eba1c85e" prot="public" virt="non-virtual"><scope>cartoon_ctrl_object_t</scope><name>px</name></member>
+      <member refid="structcartoon__ctrl__object__t_1a092f870455d5bcaddbfeda083ed21cb0" prot="public" virt="non-virtual"><scope>cartoon_ctrl_object_t</scope><name>py</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

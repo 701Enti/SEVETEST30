@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.13.2" xml:lang="zh">
+  <compounddef id="dir_7c248e60cc65cb3496ca29923b77bb83" kind="dir">
+    <compoundname>components/sevetest30_board</compoundname>
+    <innerdir refid="dir_093d3a29e6ea19b39be97ff26f05d1dd">components/sevetest30_board/include</innerdir>
+    <innerfile refid="base64__re_8c">base64_re.c</innerfile>
+    <innerfile refid="base64__re_8h">base64_re.h</innerfile>
+    <innerfile refid="board_8c">board.c</innerfile>
+    <innerfile refid="board_8h">board.h</innerfile>
+    <innerfile refid="board__ctrl_8h">board_ctrl.h</innerfile>
+    <innerfile refid="board__def_8h">board_def.h</innerfile>
+    <innerfile refid="board__pins__config_8c">board_pins_config.c</innerfile>
+    <innerfile refid="board__pins__config_8h">board_pins_config.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="components/sevetest30_board/"/>
+  </compounddef>
+</doxygen>
