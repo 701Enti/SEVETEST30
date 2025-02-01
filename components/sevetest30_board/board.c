@@ -28,7 +28,12 @@
 #include "audio_mem.h"
 #include "es8388.h"
 
-static const char *TAG = "SEVETEST30_BOARD";
+ //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
+ //更改为项目需要的形式或设置
+ //这个修改为适应硬件环境的一个项目需求, 不是否认原作者设计的可靠性
+ //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
+static const char* TAG = "SEVETEST30_BOARD";
 
 static audio_board_handle_t board_handle = NULL;
 extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
@@ -77,20 +82,20 @@ esp_err_t audio_board_deinit(audio_board_handle_t audio_board)
     return ret;
 }
 
-void codec_set_mic_gain(board_ctrl_t *board_ctrl)
+void codec_set_mic_gain(board_ctrl_t* board_ctrl)
 {
- if (es8388_set_mic_gain(board_ctrl->codec_adc_gain) != ESP_OK)
- ESP_LOGE("board","设置麦克风增益发现问题");
+    if (es8388_set_mic_gain(board_ctrl->codec_adc_gain) != ESP_OK)
+        ESP_LOGE("board", "设置麦克风增益发现问题");
 }
 
-void codec_config_adc_input(board_ctrl_t *board_ctrl)
+void codec_config_adc_input(board_ctrl_t* board_ctrl)
 {
- if (es8388_config_adc_input(board_ctrl->codec_adc_pin) != ESP_OK)
- ESP_LOGE("board","设置麦克风端口发现问题");
+    if (es8388_config_adc_input(board_ctrl->codec_adc_pin) != ESP_OK)
+        ESP_LOGE("board", "设置麦克风端口发现问题");
 }
 
-void codec_config_dac_output(board_ctrl_t *board_ctrl)
+void codec_config_dac_output(board_ctrl_t* board_ctrl)
 {
- if (es8388_config_dac_output(board_ctrl->codec_dac_pin) != ESP_OK)
- ESP_LOGE("board","设置音频输出端口发现问题");
+    if (es8388_config_dac_output(board_ctrl->codec_dac_pin) != ESP_OK)
+        ESP_LOGE("board", "设置音频输出端口发现问题");
 }

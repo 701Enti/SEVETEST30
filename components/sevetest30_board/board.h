@@ -34,53 +34,58 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif    
 
-extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
+    extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 
-/**
- * @brief Audio board handle
- */
-struct audio_board_handle {
-    audio_hal_handle_t audio_hal; /*!< audio hardware abstract layer handle */
-};
+    //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
+    //更改为项目需要的形式或设置
+    //这个修改为适应硬件环境的一个项目需求, 不是否认原作者设计的可靠性
+    //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
 
-typedef struct audio_board_handle *audio_board_handle_t;
+    /**
+     * @brief Audio board handle
+     */
+    struct audio_board_handle {
+        audio_hal_handle_t audio_hal; /*!< audio hardware abstract layer handle */
+    };
 
-/**
- * @brief Initialize audio board
- *
- * @return The audio board handle
- */
-audio_board_handle_t audio_board_init(void);
+    typedef struct audio_board_handle* audio_board_handle_t;
 
-/**
- * @brief Initialize codec chip
- *
- * @return The audio hal handle
- */
-audio_hal_handle_t audio_board_codec_init(void);
+    /**
+     * @brief Initialize audio board
+     *
+     * @return The audio board handle
+     */
+    audio_board_handle_t audio_board_init(void);
 
-/**
- * @brief Query audio_board_handle
- *
- * @return The audio board handle
- */
-audio_board_handle_t audio_board_get_handle(void);
+    /**
+     * @brief Initialize codec chip
+     *
+     * @return The audio hal handle
+     */
+    audio_hal_handle_t audio_board_codec_init(void);
 
-/**
- * @brief Uninitialize the audio board
- *
- * @param audio_board The handle of audio board
- *
- * @return  0       success,
- *          others  fail
- */
-esp_err_t audio_board_deinit(audio_board_handle_t audio_board);
+    /**
+     * @brief Query audio_board_handle
+     *
+     * @return The audio board handle
+     */
+    audio_board_handle_t audio_board_get_handle(void);
 
-void codec_set_mic_gain(board_ctrl_t *board_ctrl);
-void codec_config_adc_input(board_ctrl_t *board_ctrl);
-void codec_config_dac_output(board_ctrl_t *board_ctrl);
+    /**
+     * @brief Uninitialize the audio board
+     *
+     * @param audio_board The handle of audio board
+     *
+     * @return  0       success,
+     *          others  fail
+     */
+    esp_err_t audio_board_deinit(audio_board_handle_t audio_board);
+
+    void codec_set_mic_gain(board_ctrl_t* board_ctrl);
+    void codec_config_adc_input(board_ctrl_t* board_ctrl);
+    void codec_config_dac_output(board_ctrl_t* board_ctrl);
 
 #ifdef __cplusplus
 }

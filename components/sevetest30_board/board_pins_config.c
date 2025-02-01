@@ -21,6 +21,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+
+ //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
+ //更改为项目需要的形式或设置
+ //这个修改为适应硬件环境的一个项目需求, 不是否认原作者设计的可靠性
+ //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
 #include "esp_log.h"
 #include "sdkconfig.h"
 #include "driver/gpio.h"
@@ -33,19 +39,19 @@
 
 #include "board_def.h"
 
-static const char *TAG = "SEVETEST30_BOARD";
+static const char* TAG = "SEVETEST30_BOARD";
 
-esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t *i2c_config)
+esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t* i2c_config)
 {
     AUDIO_NULL_CHECK(TAG, i2c_config, return ESP_FAIL);
     if (port == AUDIO_I2C_PORT) {
         i2c_config->sda_io_num = AUDIO_I2C_SDA_IO;
         i2c_config->scl_io_num = AUDIO_I2C_SCL_IO;
-    } 
+    }
     else if (port == DEVICE_I2C_PORT) {
         i2c_config->sda_io_num = DEVICE_I2C_SDA_IO;
         i2c_config->scl_io_num = DEVICE_I2C_SCL_IO;
-    } 
+    }
     else {
         i2c_config->sda_io_num = -1;
         i2c_config->scl_io_num = -1;
@@ -55,16 +61,17 @@ esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t *i2c_config)
     return ESP_OK;
 }
 
-esp_err_t get_i2s_pins(i2s_port_t port, board_i2s_pin_t *i2s_config)
+esp_err_t get_i2s_pins(i2s_port_t port, board_i2s_pin_t* i2s_config)
 {
     AUDIO_NULL_CHECK(TAG, i2s_config, return ESP_FAIL);
     if (port == I2S_NUM_0 || port == I2S_NUM_1) {
         i2s_config->mck_io_num = I2S_MCK_IO;
         i2s_config->bck_io_num = I2S_BCK_IO;
-        i2s_config->ws_io_num  = I2S_WS_IO;
+        i2s_config->ws_io_num = I2S_WS_IO;
         i2s_config->data_out_num = I2S_DAC_DATA_IO;
-        i2s_config->data_in_num  = I2S_ADC_DATA_IO;
-    } else {
+        i2s_config->data_in_num = I2S_ADC_DATA_IO;
+    }
+    else {
         memset(i2s_config, -1, sizeof(board_i2s_pin_t));
         ESP_LOGE(TAG, "i2s port %d is not supported", port);
         return ESP_FAIL;
@@ -72,13 +79,13 @@ esp_err_t get_i2s_pins(i2s_port_t port, board_i2s_pin_t *i2s_config)
     return ESP_OK;
 }
 
-esp_err_t get_spi_pins(spi_bus_config_t *spi_config, spi_device_interface_config_t *spi_device_interface_config)
+esp_err_t get_spi_pins(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config)
 {
     //获取为字库芯片提供的SPI通讯IO定义
-    if(spi_device_interface_config == NULL)return ESP_FAIL;
+    if (spi_device_interface_config == NULL)return ESP_FAIL;
     spi_device_interface_config->spics_io_num = SPI_CS_IO;
-    
-    if(spi_config == NULL)return ESP_FAIL;
+
+    if (spi_config == NULL)return ESP_FAIL;
     spi_config->mosi_io_num = SPI_MOSI_IO;
     spi_config->miso_io_num = SPI_MISO_IO;
     spi_config->sclk_io_num = SPI_SCLK_IO;
