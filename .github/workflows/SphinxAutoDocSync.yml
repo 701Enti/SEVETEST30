@@ -13,7 +13,7 @@ jobs:
         BRANCH_NAME_BUF=$(echo $GITHUB_REF | sed -e 's/.*\///')
         echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV
   
-    - name: Get codeRepo and docRepo
+    - name: Prepare Variables
       run: |
         CODE_REPO=${{ github.repository }}
         OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
