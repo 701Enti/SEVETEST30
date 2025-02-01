@@ -19,9 +19,8 @@ jobs:
         OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
         REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
         DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
-        echo "OWNER=$OWNER" >> $GITHUB_ENV
     - name: call reusable workflow to compelete sync
-      uses: ${{ env.OWNER }}/Github-WorkFlows/sphinx-auto-code-to-doc.yml@master
+      uses: ${OWNER}/Github-WorkFlows/sphinx-auto-code-to-doc.yml@master
       with:
         codeRepo: $CODE_REPO
         docRepo: $DOC_REPO
