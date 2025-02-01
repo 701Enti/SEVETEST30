@@ -6,22 +6,27 @@
  * See README for more details.
  */
 
+ //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
+ //禁止了base64编码的"\n"操作, 因为将音频编码为base64时添加"\n"引起了后端无法识别的问题, 
+ //这个修改为适应后端兼容问题的一个项目需求, 不是否认原作者设计的可靠性, 事实上添加"\n"是一个标准规范操作
+ //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
 #include <stdint.h>
 
 #include "os.h"
 #include "base64_re.h"
 
 static const char base64_table[65] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const char base64_url_table[65] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 
-static char * base64_gen_encode(const unsigned char *src, size_t len,
-				size_t *out_len, const char *table, int add_pad)
+static char* base64_gen_encode(const unsigned char* src, size_t len,
+	size_t* out_len, const char* table, int add_pad)
 {
-	char *out, *pos;
-	const unsigned char *end, *in;
+	char* out, * pos;
+	const unsigned char* end, * in;
 	size_t olen;
 	int line_len;
 
@@ -60,9 +65,10 @@ static char * base64_gen_encode(const unsigned char *src, size_t len,
 			*pos++ = table[((in[0] & 0x03) << 4) & 0x3f];
 			if (add_pad)
 				*pos++ = '=';
-		} else {
+		}
+		else {
 			*pos++ = table[(((in[0] & 0x03) << 4) |
-					(in[1] >> 4)) & 0x3f];
+				(in[1] >> 4)) & 0x3f];
 			*pos++ = table[((in[1] & 0x0f) << 2) & 0x3f];
 		}
 		if (add_pad)
@@ -73,29 +79,29 @@ static char * base64_gen_encode(const unsigned char *src, size_t len,
 	if (add_pad && line_len)
 		// *pos++ = '\n';
 
-	*pos = '\0';
+		*pos = '\0';
 	if (out_len)
 		*out_len = pos - out;
 	return out;
 }
 
 
-static unsigned char * base64_gen_decode(const char *src, size_t len,
-					 size_t *out_len, const char *table)
+static unsigned char* base64_gen_decode(const char* src, size_t len,
+	size_t* out_len, const char* table)
 {
-	unsigned char dtable[256], *out, *pos, block[4], tmp;
+	unsigned char dtable[256], * out, * pos, block[4], tmp;
 	size_t i, count, olen;
 	int pad = 0;
 	size_t extra_pad;
 
 	os_memset(dtable, 0x80, 256);
 	for (i = 0; i < sizeof(base64_table) - 1; i++)
-		dtable[(unsigned char) table[i]] = (unsigned char) i;
+		dtable[(unsigned char)table[i]] = (unsigned char)i;
 	dtable['='] = 0;
 
 	count = 0;
 	for (i = 0; i < len; i++) {
-		if (dtable[(unsigned char) src[i]] != 0x80)
+		if (dtable[(unsigned char)src[i]] != 0x80)
 			count++;
 	}
 
@@ -161,13 +167,13 @@ static unsigned char * base64_gen_decode(const char *src, size_t len,
  * nul terminated to make it easier to use as a C string. The nul terminator is
  * not included in out_len.
  */
-char * base64_encode_re(const void *src, size_t len, size_t *out_len)
+char* base64_encode_re(const void* src, size_t len, size_t* out_len)
 {
 	return base64_gen_encode(src, len, out_len, base64_table, 1);
 }
 
 
-char * base64_url_encode_re(const void *src, size_t len, size_t *out_len)
+char* base64_url_encode_re(const void* src, size_t len, size_t* out_len)
 {
 	return base64_gen_encode(src, len, out_len, base64_url_table, 0);
 }
