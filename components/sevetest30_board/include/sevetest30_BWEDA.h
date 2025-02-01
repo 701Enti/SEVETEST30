@@ -27,7 +27,6 @@
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 // 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
 // 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
-// 敬告：以下注释为某个成员的理解，不是实际意义
 // SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
 // github: https://github.com/701Enti
 // bilibili: 701Enti

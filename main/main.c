@@ -139,7 +139,7 @@ void app_main(void)
   // free(rp1);  
 
 
-// ///其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段,目前稳定
+// ///其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段
 //   for (;;) {
 //     cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, false, 10);
 //     if (cartoon1) {
@@ -244,132 +244,139 @@ void app_main(void)
 
 
 
-
-  // bluetooth_connect();
+  bluetooth_connect();
 
 
   // for (int i = 0; i <= 5; i++)
   //   ledarray_set_and_write(i);
 
 
-// //网络音乐播放
-// const char* url1 = "http://m801.music.126.net/20240512231007/5cb8f90dc01396a4ee9e26c2324bc5f0/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/31271000729/d21b/e9a7/ccf9/610fb06e731b320af25af6b5d8cb60b0.mp3";
-// // 检查资源可用性
-// if (http_check_common_url(url1) == ESP_OK)
-// {
-//   music_uri_play(url1, 1);
-//   vTaskDelay(pdMS_TO_TICKS(500));
-//   music_FFT_UI_start(&UI_cfg, 1);
-
-//   uint8_t color[3] = { 0 };
-
-//   while (sevetest30_music_running_flag)
-//   {
-
-//     mp3_duration_calculate();
-
-//       if (ext_io_ctrl.auto_read_INT == true)
-//       {
-//         ext_io_ctrl.auto_read_INT = false;
-//         ext_io_value_service();
-//       }
-
-//     music_FFT_UI_draw(&UI_cfg);
-//     main_UI_1();
-
-//     for (int i = 0; i <= 5; i++)
-//     {
-//       ledarray_set_and_write(i);
-//       progress_draw_buf(i * 2 + 1, 1, color);
-//       progress_draw_buf(i * 2 + 2, 1, color);
-//     }
-//   }
-//   sevetest30_music_running_flag = false;
-
-// }
+//网络音乐播放
+  const char* url1 = "http://m801.music.126.net/20250128014553/e72e32ad30b5b6c87c53ba4012cc0e85/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/55887218111/a108/1108/7d6a/9454939550e799fe6437e2f191a3020c.mp3?vuutv=V0zEj81p906CzefZCofi1Dwm4EBNySyves7SSduWs2eyGKAATJz9N6qukbPZQI41WAxoNFyGSeBDhCPGM6bXQzMjAZXO15eEjZd3wEVwDys=";
+  // 检查资源可用性
+  if (http_check_common_url(url1) == ESP_OK)
+  {
+    music_uri_play(url1, 1);
+    // vTaskDelay(pdMS_TO_TICKS(5000));
+    // board_ctrl_t* b = board_status_get();
+    // b->amplifier_mute = false;
+    // b->amplifier_volume = 10;
+    // sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
 
 
 
-//震动马达
-    //   for(;;){
-    //   vibra_motor_start();
+
+    // music_FFT_UI_start(&UI_cfg, 1);
+
+    // uint8_t color[3] = { 0 };
+
+    // while (sevetest30_music_running_flag)
+    // {
+
+    //   // mp3_duration_calculate();
+
+    //     if (ext_io_ctrl.auto_read_INT == true)
+    //     {
+    //       ext_io_ctrl.auto_read_INT = false;
+    //       ext_io_value_service();
+    //     }
+
+    //   music_FFT_UI_draw(&UI_cfg);
+    //   main_UI_1();
+
+    //   for (int i = 0; i <= 5; i++)
+    //   {
+    //     ledarray_set_and_write(i);
+    //     progress_draw_buf(i * 2 + 1, 1, color);
+    //     progress_draw_buf(i * 2 + 2, 1, color);
+    //   }
+    // }
+    // sevetest30_music_running_flag = false;
+  }
+
+
+
+
+  //震动马达
+      //   for(;;){
+      //   vibra_motor_start();
+      //   vTaskDelay(pdMS_TO_TICKS(500));
+      //   vibra_motor_stop();
+      //   vTaskDelay(pdMS_TO_TICKS(500));
+      //  }
+
+
+    // //AI交流例程
+    //   uint8_t color[3] = { 0 };
+    //   baidu_ASR_cfg_t asr_cfg;
+    //   asr_cfg.dev_pid = ASR_PID_CM_NEAR;
+    //   asr_cfg.rate = ASR_RATE_16K;
+    //   asr_cfg.stop_threshold = 5;
+    //   asr_cfg.send_threshold = 3;
+    //   asr_cfg.record_save_times_max = 20;
+
+    //   // 启动ASR服务
+    //   asr_service_start(&asr_cfg, 1);
+
     //   vTaskDelay(pdMS_TO_TICKS(500));
-    //   vibra_motor_stop();
-    //   vTaskDelay(pdMS_TO_TICKS(500));
-    //  }
 
+    //   //运行FFT任务,全程监视
+    //   music_FFT_UI_start(&UI_cfg, 1);
 
-  // //AI交流例程
-  //   uint8_t color[3] = { 0 };
-  //   baidu_ASR_cfg_t asr_cfg;
-  //   asr_cfg.dev_pid = ASR_PID_CM_NEAR;
-  //   asr_cfg.rate = ASR_RATE_16K;
-  //   asr_cfg.stop_threshold = 5;
-  //   asr_cfg.send_threshold = 3;
-  //   asr_cfg.record_save_times_max = 20;
+    //   char* text1 = NULL;
 
-  //   // 启动ASR服务
-  //   asr_service_start(&asr_cfg, 1);
+    //   while (1)
+    //   {
 
-  //   vTaskDelay(pdMS_TO_TICKS(500));
+    //     while (1)
+    //     {
+    //       music_FFT_UI_draw(&UI_cfg);
+    //       //刷新屏幕
+    //       for (int i = 0; i <= 5; i++)
+    //       {
+    //         ledarray_set_and_write(i);
+    //         progress_draw_buf(i * 2 + 1, 1.0, color);
+    //         progress_draw_buf(i * 2 + 2, 1.0, color);
+    //       }
 
-  //   //运行FFT任务,全程监视
-  //   music_FFT_UI_start(&UI_cfg, 1);
+    //       //如果内存申请并且数据有效,退出
+    //       if (sevetest30_asr_result_tex) {
+    //         if (sevetest30_asr_result_tex[1] != 0) {
+    //           //获取到样本,强制终止ASR服务
+    //           sevetest30_asr_running_flag = false;
+    //           break;
+    //         }
+    //       }
+    //     }
 
-  //   char* text1 = NULL;
+    //     //发送文本内容给GPT
+    //     text1 = ERNIE_Bot_4_chat_tex_exchange(sevetest30_asr_result_tex);
+    //     //如果正常回复,TTS语音播放
+    //     if (text1)
+    //       if (text1[1] != 0)
+    //       {
+    //         baidu_TTS_cfg_t tts_cfg = BAIDU_TTS_DEFAULT_CONFIG(text1, 1);
+    //         //启动TTS服务
+    //         tts_service_play(&tts_cfg, 1);
 
-  //   while (1)
-  //   {
+    //         while (sevetest30_music_running_flag)
+    //         {
+    //           music_FFT_UI_draw(&UI_cfg);
+    //           for (int i = 0; i <= 5; i++)
+    //           {
+    //             ledarray_set_and_write(i);
+    //             progress_draw_buf(i * 2 + 1, 1.0, color);
+    //             progress_draw_buf(i * 2 + 2, 1.0, color);
+    //           }
+    //         }
+    //       }
+    //     //重置缓存
+    //     if (text1)memset(text1, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
 
-  //     while (1)
-  //     {
-  //       music_FFT_UI_draw(&UI_cfg);
-  //       //刷新屏幕
-  //       for (int i = 0; i <= 5; i++)
-  //       {
-  //         ledarray_set_and_write(i);
-  //         progress_draw_buf(i * 2 + 1, 1.0, color);
-  //         progress_draw_buf(i * 2 + 2, 1.0, color);
-  //       }
-
-  //       //如果内存申请并且数据有效,退出
-  //       if (sevetest30_asr_result_tex) {
-  //         if (sevetest30_asr_result_tex[1] != 0) {
-  //           //获取到样本,强制终止ASR服务
-  //           sevetest30_asr_running_flag = false;
-  //           break;
-  //         }
-  //       }
-  //     }
-
-  //     //发送文本内容给GPT
-  //     text1 = ERNIE_Bot_4_chat_tex_exchange(sevetest30_asr_result_tex);
-  //     //如果正常回复,TTS语音播放
-  //     if (text1)
-  //       if (text1[1] != 0)
-  //       {
-  //         baidu_TTS_cfg_t tts_cfg = BAIDU_TTS_DEFAULT_CONFIG(text1, 1);
-  //         //启动TTS服务
-  //         tts_service_play(&tts_cfg, 1);
-
-  //         while (sevetest30_music_running_flag)
-  //         {
-  //           music_FFT_UI_draw(&UI_cfg);
-  //           for (int i = 0; i <= 5; i++)
-  //           {
-  //             ledarray_set_and_write(i);
-  //             progress_draw_buf(i * 2 + 1, 1.0, color);
-  //             progress_draw_buf(i * 2 + 2, 1.0, color);
-  //           }
-  //         }
-  //       }
-  //     //重置缓存
-  //     if (text1)memset(text1, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
-
-  //     memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
-  //     asr_service_start(&asr_cfg, 1);
-  //   }
+    //     memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
+    //     asr_service_start(&asr_cfg, 1);
+    //   }
 
 
 
@@ -379,13 +386,13 @@ void app_main(void)
 
 
 
-    // init_time_data_sntp();
+      // init_time_data_sntp();
 
-    // refresh_position_data();
-    // refresh_weather_data();
+      // refresh_position_data();
+      // refresh_weather_data();
 
-    // weather_UI_1(1, 1, 1);
+      // weather_UI_1(1, 1, 1);
 
-    // for (int i = 0; i < 6; i++)
-    // ledarray_set_and_write(i);
+      // for (int i = 0; i < 6; i++)
+      // ledarray_set_and_write(i);
 }

@@ -81,6 +81,10 @@ esp_err_t fonts_chip_init()
     };
     gpio_config(&spics_cfg);
 
+    if(ret == ESP_OK){
+        ESP_LOGI("fonts_chip_init", "字库设备初始化成功");
+    }
+
     return ret;
 }
 
@@ -93,7 +97,6 @@ void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest)
     esp_err_t ret = ESP_OK;
 
     if (!fonts_chip_handle) {
-        ESP_LOGE(TAG, "字库设备未初始化");
         return;
     }
 
@@ -143,7 +146,6 @@ void fonts_read_ASCII_6x12(uint32_t Unicode, uint8_t* dest) {
     esp_err_t ret = ESP_OK;
 
     if (!fonts_chip_handle) {
-        ESP_LOGE(TAG, "字库设备未初始化");
         return;
     }
 

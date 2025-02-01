@@ -27,7 +27,6 @@
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 // 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
 // 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
-// 敬告：以下注释为某个成员的理解，不是实际意义
 // SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
 // github: https://github.com/701Enti
 // bilibili: 701Enti
@@ -184,7 +183,7 @@ static const uint16_t io_ctrl_uuid_buf_1 = SE30_CHAR_UUID_1;
 
 static uint8_t io_ctrl_display_en = true;
 
-// 服务数据库，可以包含BLE中一个服务和n个特性的属性数据以及响应模式，注意，这里的属性不是指代BLE中特征值的读写权限属性，而是所有描述属性
+// 服务数据库，可以包含BLE中一个服务和n个特性的属性数据以及响应模式，注意，这里的属性不是指代BLE中特征值的读写权限属性，而是所有描述属性,包括服务本身也是有属性配置的
 // 数据库使用结构体数组加枚举类型索引，数组每个单元由 响应模式控制类型 和 属性描述结构体 构成，
 // 属性描述结构体包含属性的 UUID长度 +指向UUID的指针(uint8_t *) + 属性许可 +  数据值最大大小 +  数据值实际大小 + 指向数据值的指针(uint8_t *)构成
 //(UUID 数据值单位 都需要遵循 SIG 的定义)
@@ -238,7 +237,7 @@ static uint8_t media_ctrl_amp_mute_buf = false;
 static uint16_t media_ctrl_cfg_buf1 = 0x0000;
 static uint16_t media_ctrl_cfg_buf2 = 0x0000;
 
-// 服务数据库，可以包含BLE中一个服务和n个特性的属性数据以及响应模式，注意，这里的属性不是指代BLE中特征值的读写权限属性，而是所有描述属性
+// 服务数据库，可以包含BLE中一个服务和n个特性的属性数据以及响应模式，注意，这里的属性不是指代BLE中特征值的读写权限属性，而是所有描述属性,包括服务本身也是有属性配置的
 // 数据库使用结构体数组加枚举类型索引，数组每个单元由 响应模式控制类型 和 属性描述结构体 构成，
 // 属性描述结构体包含服务或特性的 UUID长度 +指向UUID的指针(uint8_t *) + 属性许可 +  数据值最大大小 +  数据值实际大小 + 指向数据值的指针(uint8_t *)构成
 //(UUID 数据值单位 都需要遵循 SIG 的定义)
@@ -288,9 +287,9 @@ static uint8_t adv_key_service_uuid[ESP_UUID_LEN_128] = BLE_SERVICE_UUID_BASE(BL
 
 // 蓝牙广播数据
 static esp_ble_adv_data_t adv_data = {
-    .set_scan_rsp = false,                                                // 以下内容不是为扫描响应配置的
-    .include_name = true,                                                 // 在广播数据中添加设备名称
-    .include_txpower = true,                                              // 在广播数据中添加发射功率
+    .set_scan_rsp = false,                                                // 以下内容是否为扫描响应配置
+    .include_name = true,                                                 // 是否在广播数据中添加设备名称
+    .include_txpower = true,                                              // 是否在广播数据中添加发射功率
     .min_interval = 0x0006,                                               // 从设备连接窗口最小间隔数,最小间隔时间为min_interval * 1.25毫秒
     .max_interval = 0x0010,                                               // 从设备连接窗口最大间隔数,最大间隔时间为max_interval * 1.25毫秒
     .appearance = BLE_DEVICE_APPEARANCE_VALUE,                            // 蓝牙设备外观特征值，描述产品基本类型
@@ -305,9 +304,9 @@ static esp_ble_adv_data_t adv_data = {
 
 // 扫描响应数据,广播启动后，当ESP32接收到其他设备扫描请求，回复扫描响应，这往往是广播数据的补充，使用了与广播数据一样的数据结构处理
 static esp_ble_adv_data_t scan_rsp_data = {
-    .set_scan_rsp = true,     // 以下内容是为扫描响应配置的
-    .include_name = false,    // 在扫描响应中添加设备名称
-    .include_txpower = false, // 在扫描响应中添加发射功率
+    .set_scan_rsp = true,     // 以下内容是否为扫描响应配置
+    .include_name = false,    // 是否在扫描响应中添加设备名称
+    .include_txpower = false, // 是否在扫描响应中添加发射功率
     .min_interval = 0x0006,
     .max_interval = 0x0010,
     .appearance = BLE_DEVICE_APPEARANCE_VALUE, // 蓝牙设备外观特征值，描述产品基本类型
