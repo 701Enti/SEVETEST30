@@ -25,7 +25,7 @@ jobs:
     with:
       codeRepo: $CODE_REPO
       docRepo: $DOC_REPO
-      BRANCH_NAME: ${{ env.BRANCH_NAME }}
-      docRepoSecret: ${{ secrets.DOC_REPO_SYNC_SECRET}}
+      BRANCH_NAME: ${ env.BRANCH_NAME }
+      docRepoSecret: ${ secrets.DOC_REPO_SYNC_SECRET }
       
         
