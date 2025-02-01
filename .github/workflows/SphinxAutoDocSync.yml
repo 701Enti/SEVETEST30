@@ -1,1 +1,31 @@
+name: SphinxAutoDocSync
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
+    - name: Extract Branch Name
+      id: extract_branch_name
+      run: |
+        BRANCH_NAME_BUF=$(echo $GITHUB_REF | sed -e 's/.*\///')
+        echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV
+  
+    - name: Get codeRepo and docRepo
+      run: |
+        CODE_REPO=${{ github.repository }}
+        OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
+        REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
+        DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
+        echo "OWNER=$OWNER" >> $GITHUB_ENV
+    - name: call reusable workflow to compelete sync
+      uses: ${{ env.OWNER }}/Github-WorkFlows/sphinx-auto-code-to-doc.yml@master
+      with:
+        codeRepo: $CODE_REPO
+        docRepo: $DOC_REPO
+        BRANCH_NAME: ${{ env.BRANCH_NAME }}
+        docRepoSecret: ${{ secrets.DOC_REPO_SYNC_SECRET}}
+      
+        
