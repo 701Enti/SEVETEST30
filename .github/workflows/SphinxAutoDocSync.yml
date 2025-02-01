@@ -19,13 +19,15 @@ jobs:
         OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
         REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
         DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
+        BRANCH_NAME=${{ env.BRANCH_NAME }}
+        SECRET=${{ secrets.DOC_REPO_SYNC_SECRET }}
   call-reusable-workflow:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/sphinx-auto-code-to-doc.yml@master
     with:
       codeRepo: $CODE_REPO
       docRepo: $DOC_REPO
-      BRANCH_NAME: ${ env.BRANCH_NAME }
-      docRepoSecret: ${ secrets.DOC_REPO_SYNC_SECRET }
+      BRANCH_NAME: $BRANCH_NAME
+      docRepoSecret: $SECRET
       
         
