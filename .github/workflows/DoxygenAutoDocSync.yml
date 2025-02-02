@@ -4,7 +4,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
     - name: Checkout code with submodules
       uses: actions/checkout@v3
       with:
@@ -15,7 +14,7 @@ jobs:
       run: |
         BRANCH_NAME_BUF=$(echo $GITHUB_REF | sed -e 's/.*\///')
         echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV 
-  
+      
     - name: Prepare Variables
       run: |
         CODE_REPO=${{ github.repository }}
@@ -24,14 +23,14 @@ jobs:
         DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
         BRANCH_NAME=${{ env.BRANCH_NAME }}
         SECRET=${{ secrets.DOC_REPO_SYNC_SECRET }}
-  call-reusable-workflow:
-    needs: build
-    uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
-    with:
-      codeRepo: $CODE_REPO
-      docRepo: $DOC_REPO
-      BRANCH_NAME: $BRANCH_NAME
-    secrets:
-      docRepoSecret: $SECRET
+        
+    - name: Call the workflow
+      uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
+      with:
+        codeRepo: $CODE_REPO
+        docRepo: $DOC_REPO
+        BRANCH_NAME: $BRANCH_NAME
+      secrets:
+        docRepoSecret: $SECRET
       
         
