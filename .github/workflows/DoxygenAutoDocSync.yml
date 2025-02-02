@@ -22,8 +22,8 @@ jobs:
         OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
         REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
         DOC_REPO="${OWNER}/DOC-${REPO_NAME}"
-        BRANCH_NAME=${{ env.BRANCH_NAME }}
-        SECRET=${{ secrets.DOC_REPO_SYNC_SECRET }}
+        echo "CODE_REPO=$CODE_REPO" >> $GITHUB_ENV 
+        echo "DOC_REPO=$DOC_REPO" >> $GITHUB_ENV 
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -35,10 +35,10 @@ jobs:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
-      codeRepo: $CODE_REPO
-      docRepo: $DOC_REPO
-      BRANCH_NAME: $BRANCH_NAME
+      codeRepo: ${{ env.CODE_REPO }}
+      docRepo: ${{ env.DOC_REPO }}
+      BRANCH_NAME: ${{ env.BRANCH_NAME }}
     secrets:
-      docRepoSecret: $SECRET
+      docRepoSecret: ${{ secrets.DOC_REPO_SYNC_SECRET }}
       
         
