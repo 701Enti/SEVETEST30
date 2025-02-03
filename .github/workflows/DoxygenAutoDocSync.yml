@@ -38,7 +38,8 @@ jobs:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
-      BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}   
       docRepo: ${{ needs.build.outputs.DOC_REPO }}
+      BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}   
+
       
         
