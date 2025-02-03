@@ -252,7 +252,7 @@ void app_main(void)
 
 
 //网络音乐播放
-  const char* url1 = "http://m801.music.126.net/20250128014553/e72e32ad30b5b6c87c53ba4012cc0e85/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/55887218111/a108/1108/7d6a/9454939550e799fe6437e2f191a3020c.mp3?vuutv=V0zEj81p906CzefZCofi1Dwm4EBNySyves7SSduWs2eyGKAATJz9N6qukbPZQI41WAxoNFyGSeBDhCPGM6bXQzMjAZXO15eEjZd3wEVwDys=";
+  const char* url1 = "";
   // 检查资源可用性
   if (http_check_common_url(url1) == ESP_OK)
   {
