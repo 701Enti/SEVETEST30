@@ -22,9 +22,10 @@ jobs:
         REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
         echo "OWNER=$OWNER" >> $GITHUB_ENV 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
-        echo "DOC_REPO=${{ env.OWNER }}" | grep "DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
+        echo "DOC_REPO=${{ env.OWNER }}\\/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-    
+        echo "$DOC_REPO"
+        
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
