@@ -3,7 +3,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     outputs:
       BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
       DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
