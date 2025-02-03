@@ -40,7 +40,6 @@ jobs:
     with:
       BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}   
       docRepo: ${{ needs.build.outputs.DOC_REPO }}
-      
     secrets:
       docRepoSecret: ${{ secrets.ORG_DOC_SYNC_SECRET }}
 
