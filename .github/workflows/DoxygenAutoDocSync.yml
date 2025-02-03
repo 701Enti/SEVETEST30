@@ -10,19 +10,20 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Extract Branch Name
-      id: extract_branch_name
+    - name: Set env
       run: |
         BRANCH_NAME_BUF=$(echo $GITHUB_REF | sed -e 's/.*\///')
+        OWNER=$(echo ${{ github.repository }} | cut -d'/' -f1)
+        REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
         echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV 
+        echo "OWNER=$OWNER" >> $GITHUB_ENV 
+        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
   
     - name: Prepare Variables
       run: |
-        export OWNER=$(echo ${{ github.repository }} | cut -d'/' -f1)
-        export REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
-        echo "DOC_REPO=$OWNER/DOC-$REPO_NAME" >> $GITHUB_OUTPUT
-        echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-        
+        echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT   
+        echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
+      
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
