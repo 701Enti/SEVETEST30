@@ -18,10 +18,8 @@ jobs:
   
     - name: Prepare Variables
       run: |
-        OWNER=$(echo ${{ github.repository }} | cut -d'/' -f1)
-        REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
-        echo "OWNER=$OWNER" >> $GITHUB_ENV 
-        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
+        export OWNER=$(echo ${{ github.repository }} | cut -d'/' -f1)
+        export REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
         echo "DOC_REPO=$OWNER/DOC-$REPO_NAME" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
         
