@@ -19,11 +19,8 @@ jobs:
     - name: Prepare Variables
       run: |
         CODE_REPO=${{ github.repository }}
-        OWNER=$(echo $CODE_REPO | cut -d'/' -f1)
-        REPO_NAME=$(echo $CODE_REPO | cut -d'/' -f2)
-        DOC_REPO="{$OWNER}/DOC-{$REPO_NAME}"
         echo "CODE_REPO=$CODE_REPO" >> $GITHUB_OUTPUT
-        echo "DOC_REPO=$DOC_REPO" >> $GITHUB_OUTPUT
+        echo "DOC_REPO=$(echo $CODE_REPO | cut -d'/' -f1)/$(echo $CODE_REPO | cut -d'/' -f2)" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
     
     - name: Upload artifact
