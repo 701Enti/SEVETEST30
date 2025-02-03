@@ -54,14 +54,14 @@ PROJECT_NUMBER         =
 # for a project that appears at the top of each page and should give viewers a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "物联网AI个性化智能时钟"
+PROJECT_BRIEF          = 物联网AI个性化智能时钟
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = 
+PROJECT_LOGO           =
 
 # With the PROJECT_ICON tag one can specify an icon that is included in the tabs
 # when the HTML document is shown. Doxygen will copy the logo to the output
@@ -1469,7 +1469,7 @@ HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome-css/doxygen-awesome.css \
                          docs/doxygen-awesome-css/doxygen-custom/custom.css \
                          docs/doxygen-awesome-css/doxygen-awesome-sidebar-only.css \
                          docs/doxygen-awesome-css/doxygen-awesome-sidebar-only-darkmode-toggle.css \
-                         docs/doxygen-awesome-css/doxygen-custom/custom-alternative.css \
+                         docs/doxygen-awesome-css/doxygen-custom/custom-alternative.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1485,7 +1485,6 @@ HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggl
                          docs/doxygen-awesome-css/doxygen-custom/toggle-alternative-theme.js \
                          docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js \
                          docs/doxygen-awesome-css/doxygen-awesome-tabs.js
-
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
@@ -2701,7 +2700,7 @@ CLASS_GRAPH            = YES
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-COLLABORATION_GRAPH    = NO
+COLLABORATION_GRAPH    = YES
 
 # If the GROUP_GRAPHS tag is set to YES then Doxygen will generate a graph for
 # groups, showing the direct groups dependencies. Explicit enabling a group
