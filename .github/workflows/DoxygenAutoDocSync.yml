@@ -3,8 +3,11 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
+      DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
+
     steps:
-    
     - name: Checkout code with submodules
       uses: actions/checkout@v3
       with:
@@ -19,11 +22,11 @@ jobs:
         echo "OWNER=$OWNER" >> $GITHUB_ENV 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
   
-    - name: Prepare Variables
+    - name: Set output
       id: set_output
       run: |
-        echo "::set-output name=BRANCH_NAME::${{ env.BRANCH_NAME }}"
-        echo "::set-output name=DOC_REPO::${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}"
+        echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+        echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -35,8 +38,8 @@ jobs:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
-      docRepo: ${{ needs.build.steps.set_output.outputs.DOC_REPO }}
-      BRANCH_NAME: ${{ needs.build.steps.set_output.outputs.BRANCH_NAME }}
+      docRepo: ${{ needs.build.outputs.DOC_REPO }}
+      BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}
     secrets:
       docRepoSecret: ${{ secrets.DOC_REPO_SYNC_SECRET }}
       
