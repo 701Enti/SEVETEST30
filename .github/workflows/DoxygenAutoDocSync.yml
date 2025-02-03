@@ -34,7 +34,6 @@ jobs:
         name: artifact
         path: ./
 
-        
   call-reusable-workflow:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
