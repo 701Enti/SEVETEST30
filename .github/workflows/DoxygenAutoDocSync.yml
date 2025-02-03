@@ -39,7 +39,5 @@ jobs:
     with:
       BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}   
       docRepo: ${{ needs.build.outputs.DOC_REPO }}
-    secrets:
-      docRepoSecret: ${{ secrets.DOC_REPO_SYNC_SECRET }}
       
         
