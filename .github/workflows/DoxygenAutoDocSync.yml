@@ -21,7 +21,7 @@ jobs:
         echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV 
         echo "OWNER=$OWNER" >> $GITHUB_ENV 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
-  
+
     - name: Set output
       id: set_output
       run: |
