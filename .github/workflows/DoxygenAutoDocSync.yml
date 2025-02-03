@@ -19,7 +19,6 @@ jobs:
     - name: Prepare Variables
       run: |
         CODE_REPO=${{ github.repository }}
-        echo "CODE_REPO=$CODE_REPO" >> $GITHUB_OUTPUT
         echo "DOC_REPO=$(echo $CODE_REPO | cut -d'/' -f1)/$(echo $CODE_REPO | cut -d'/' -f2)" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
     
@@ -33,7 +32,6 @@ jobs:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
-      codeRepo: ${{ needs.build.outputs.CODE_REPO }}
       docRepo: ${{ needs.build.outputs.DOC_REPO }}
       BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}
     secrets:
