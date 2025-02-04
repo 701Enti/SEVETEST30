@@ -991,7 +991,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = . docs/doxygen-awesome-css/logo.drawio.svg
+INPUT                  = . 
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1484,7 +1484,8 @@ HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggl
                          docs/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
                          docs/doxygen-awesome-css/doxygen-custom/toggle-alternative-theme.js \
                          docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js \
-                         docs/doxygen-awesome-css/doxygen-awesome-tabs.js
+                         docs/doxygen-awesome-css/doxygen-awesome-tabs.js \
+                         docs/doxygen-awesome-css/logo.drawio.svg
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
