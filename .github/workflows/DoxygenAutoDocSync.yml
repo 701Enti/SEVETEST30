@@ -6,8 +6,11 @@ jobs:
     outputs:
       BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
       DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
-      
+
     steps:
+    - name: Wait for push to complete (estimate for a nearly 500MB repo)
+      run: sleep 60
+    
     - name: Checkout code with submodules
       uses: actions/checkout@v3
       with:
