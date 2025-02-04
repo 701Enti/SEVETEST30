@@ -21,19 +21,20 @@ jobs:
         echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV 
         echo "OWNER=$OWNER" >> $GITHUB_ENV 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
-
+        
     - name: Set output
       id: set_output
       run: |
         echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
         echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
-      
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: artifact
         path: ./
-     
+
+
   call-reusable-workflow:
     needs: build
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
