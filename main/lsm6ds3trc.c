@@ -33,7 +33,7 @@
  // [快捷监测] 6D/4D检测 自由落体检测 计步器
  // [默认中断] INT1上路由 - 自由落体事件
  // [中断锁存] 默认启用
- 
+
 #include "lsm6ds3trc.h"
 #include "esp_log.h"
 #include "board_def.h"
@@ -108,50 +108,51 @@ esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_
   return ESP_OK;
 }
 
-/// @brief [FIFO数据映射]
-/// @brief FIFO是姿态传感器中一种常用的缓存策略,FIFO具有抽取功能,可以采集大量的传感数据的一小部分用于参考
-/// @brief 同时也压缩了数据,因为数据实时性需求大,一帧FIFO数据往往包含多个传感器的数据
-/// @brief 配置抽取的方式不同,FIFO中各种数据的顺序会发生一定变化,通过配置映射数据库来告知读取函数这些数据的顺序含义
-/// @brief FIFO映射数据库使用寄存器值配置数据库的完全相同逻辑,但是不同单元的读写顺序显然相比更加重要
-/// @brief 键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址
-/// @brief 键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
-/// @brief 每次读取从这些地址开始导入,在data_num控制下偏移地址地存储数据
+/// @brief 
+/// [FIFO数据映射]
+/// FIFO是姿态传感器中一种常用的缓存策略,FIFO具有抽取功能,可以采集大量的传感数据的一小部分用于参考
+/// 同时也压缩了数据,因为数据实时性需求大,一帧FIFO数据往往包含多个传感器的数据
+/// 配置抽取的方式不同,FIFO中各种数据的顺序会发生一定变化,通过配置映射数据库来告知读取函数这些数据的顺序含义
+/// FIFO映射数据库使用寄存器值配置数据库的完全相同逻辑,但是不同单元的读写顺序显然相比更加重要
+/// 键值对的 address 表示姿态传感器寄存器读取目标,显然它们是FIFO数据寄存器的地址
+/// 键值对的 value 表示该寄存器值读取之后,存储到uint8_t的数组的首地址,不同数据显然需要保存在不同uint8_t的数组,取决于外部函数的数据处理方式
+/// 每次读取从这些地址开始导入,在data_num控制下偏移地址地存储数据
 /// @param FIFO_database FIFO映射数据库,条目键值对的 value 设置为NULL表示舍弃该条目数据读取
 /// @param map_num  (必须准确)数据库的条目数量即MAP_BASE个数
 /// @param read_num (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据
 /// @return ESP_OK / ESP_FAIL
-esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num){
+esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num) {
   const char* TAG = "lsm6ds3trc_FIFO_map";
 
   //参数合法性检查
-  if(!FIFO_database){
+  if (!FIFO_database) {
     ESP_LOGE(TAG, "导入了为空的FIFO映射数据库");
     return ESP_FAIL;
   }
 
   //初始化读取缓存
   IMU_reg_mapping_t* buf_db = NULL;//创建用于缓存的寄存器数据库
-  buf_db = (IMU_reg_mapping_t*)malloc(sizeof(IMU_reg_mapping_t)*map_num);
-  memset(buf_db,0,sizeof(IMU_reg_mapping_t)*map_num);
-  for (int a=0;a<map_num;a++)//映射需要依次读取的寄存器地址
+  buf_db = (IMU_reg_mapping_t*)malloc(sizeof(IMU_reg_mapping_t) * map_num);
+  memset(buf_db, 0, sizeof(IMU_reg_mapping_t) * map_num);
+  for (int a = 0;a < map_num;a++)//映射需要依次读取的寄存器地址
     buf_db[a].reg_address = FIFO_database[a].reg_address;
-  
+
   //读取循环,共映射read_num帧数据
-  static int idx=0;
-  while (idx<read_num){
+  static int idx = 0;
+  while (idx < read_num) {
     //读取一帧数据,FIFO内部会根据读取数据次数偏移到存储区,如果合理,每次读到的顺序是FIFO_database设置的顺序
-    if(lsm6ds3trc_database_map_read(buf_db,map_num) != ESP_OK){
-      ESP_LOGW(TAG, "数据读取意外终止,数据被部分映射 第 %d 个无法读取 / 共有 %d 个,等待重试",idx+1,read_num);
-      if(lsm6ds3trc_database_map_read(buf_db,map_num) != ESP_OK){
+    if (lsm6ds3trc_database_map_read(buf_db, map_num) != ESP_OK) {
+      ESP_LOGW(TAG, "数据读取意外终止,数据被部分映射 第 %d 个无法读取 / 共有 %d 个,等待重试", idx + 1, read_num);
+      if (lsm6ds3trc_database_map_read(buf_db, map_num) != ESP_OK) {
         ESP_LOGW(TAG, "重试读取失败,等待下次调用");
         break;
       }
     }
     //映射这帧数据到所有预设内存区域
-    for(int dp=0;dp<map_num;dp++){
+    for (int dp = 0;dp < map_num;dp++) {
       //遍历所有条目,在预设的内存区域写入,用idx偏移到指定数组元素,而FIFO_database[dp].reg_value的值不变
-      if((uint8_t*)FIFO_database[dp].reg_value){//条目键值对的 value 设置为NULL表示舍弃该条目数据读取
-        *((uint8_t*)(FIFO_database[dp].reg_value + idx)) =  buf_db[dp].reg_value;//FIFO_database[dp].reg_value的值不变
+      if ((uint8_t*)FIFO_database[dp].reg_value) {//条目键值对的 value 设置为NULL表示舍弃该条目数据读取
+        *((uint8_t*)(FIFO_database[dp].reg_value + idx)) = buf_db[dp].reg_value;//FIFO_database[dp].reg_value的值不变
       }
     }
 
@@ -162,12 +163,12 @@ esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int r
   free(buf_db);
   buf_db = NULL;
 
-  if(idx < read_num)
-   return ESP_FAIL;//idx的值将不会复位,使得下次开始从错误位置再次读取
-   
+  if (idx < read_num)
+    return ESP_FAIL;//idx的值将不会复位,使得下次开始从错误位置再次读取
+
   idx = 0;
   return ESP_OK;
-  
+
 }
 
 
@@ -215,12 +216,12 @@ IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value()
 
 /// @brief 检测是否处于自由落体状态
 /// @return 自由落体状态标志
-bool lsm6ds3trc_get_free_fall_status(){
+bool lsm6ds3trc_get_free_fall_status() {
   //构建映射数据库设置读取的目标
   IMU_reg_mapping_t reg_database[1] = {
       MAP_BASE(WAKE_UP_SRC, 0x00),
   };
-  lsm6ds3trc_database_map_read(reg_database,1);//执行映射读取操作
+  lsm6ds3trc_database_map_read(reg_database, 1);//执行映射读取操作
   return reg_database[0].reg_value >> 5;
 }
 
@@ -239,10 +240,10 @@ int lsm6ds3trc_get_now_temperature()
 
   //等待数据成功获取
   while (!(reg_database[2].reg_value & 0x04)) {
-    lsm6ds3trc_database_map_read(reg_database,3);//执行映射读取操作
+    lsm6ds3trc_database_map_read(reg_database, 3);//执行映射读取操作
   }
 
-  return ((OUT_TEMP_H << 8) | OUT_TEMP_L)*1000/256 + 25;
+  return ((OUT_TEMP_H << 8) | OUT_TEMP_L) * 1000 / 256 + 25;
 }
 
 
