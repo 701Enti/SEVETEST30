@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+ // 包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件,同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
  // 绘制函数本身不会刷新屏幕,需要运行屏幕刷新,才会在屏幕上点亮
@@ -709,7 +709,7 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 	//第2种方式 - 运行sevetest30_UI提供的动画支持服务
 	if (cartoon_handle) {
 		cartoon_handle->create_callback(cartoon_handle,
-		                ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER);//生成动画
+			ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER);//生成动画
 		//创建控制对象
 		int32_t cx = x;//需要控制的x轴坐标数据,hook函数只写     
 		int32_t cy = y;//需要控制的y轴坐标数据,hook函数只写 
@@ -724,7 +724,7 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 		};
 		for (step = 0;step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER;step++) {
 			//调用钩子函数调整控制对象
-			cartoon_handle->ctrl_hook(cartoon_handle,&object);
+			cartoon_handle->ctrl_hook(cartoon_handle, &object);
 			for (idx = 0;idx < total_unit;idx++) {
 				x_buf = (x - 1) + (cx - 1) + LINE_LED_NUMBER + x_base;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1 cx-1为绝对偏移坐标)
 				//仅对可视范围内字符进行绘制

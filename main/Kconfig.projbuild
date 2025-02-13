@@ -13,13 +13,14 @@ menu "sevetest30 Configuration"
 # 		WiFi password (WPA or WPA2) for the example to use.
 # 		Can be left blank if the network has no security set.
 
-    
+# 时区设置
 config LOCAL_TZ 
     string "the time zone of your area"
     default "CST-8"
     help
         the time zone of your area
 
+# NTP时间服务器
 config NTP_SERVER_0
     string "the first ntp server name"
     default "ntp.aliyun.com"
@@ -39,7 +40,7 @@ config NTP_SERVER_2
         the third ntp server name
 
 
-
+# 百度语音服务的API相关
 config BAIDU_SPEECH_ACCESS_KEY
     string "Baidu speech access key ID"
     default ""
@@ -52,6 +53,9 @@ config BAIDU_SPEECH_SECRET_KEY
     help
         Baidu speech Access secret
 
+
+
+# GPT的API相关 - 百度文心一言 
 config BAIDU_ERNIE_BOT_ACCESS_KEY
     string "Baidu ERNIE-Bot access key ID"
     default ""
@@ -65,6 +69,12 @@ config BAIDU_ERNIE_BOT_SECRET_KEY
         Baidu ERNIE-Bot Access secret
 
 
+# GPT的API相关 - DeepSeek 
+config DEEPSEEK_ACCESS_KEY
+    string "DeepSeek access key"
+    default ""
+    help
+        DeepSeek access key
 
 
 

@@ -3,28 +3,28 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
-//      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
-// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
+ //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
+ // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #ifndef _SEVETEST30_IWEDA_H_
 #define _SEVETEST30_IWEDA_H_
@@ -82,7 +82,7 @@
 
 
 //和风天气API-实时天气,顺序是在UI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
-typedef struct Real_time_weather{
+typedef struct Real_time_weather {
 
     int icon;//天气状况代码，匹配合适的图案
     int text;//天气文字描述例如多云
@@ -100,9 +100,9 @@ typedef struct Real_time_weather{
 
     int windScale;//风力等级
     int windSpeed;//风速
-    
+
     int pressure;//大气压强
-    
+
     int cloud;//云量，可能为空
 
     int dew;//露点温度，可能为空（搜索了一下，可以理解是空气中水蒸气变为露珠时的温度,越低于环境温度，越不易液化结露，天气就越干燥）
@@ -129,19 +129,19 @@ typedef struct ip_position
 
 extern char http_get_out_buf[HTTP_BUF_MAX]; // 输出数据缓存
 extern char http_get_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
-extern char *ip_address;//公网IP
-extern char *sevetest30_asr_result_tex;//语音识别结果
+extern char* ip_address;//公网IP
+extern char* sevetest30_asr_result_tex;//语音识别结果
 
-extern ip_position *ip_position_data;
-extern Real_time_weather *real_time_weather_data;
+extern ip_position* ip_position_data;
+extern Real_time_weather* real_time_weather_data;
 extern esp_periph_handle_t se30_wifi_periph_handle;
 
 
 //内外部共享函数
 
-void gzip_decompress(void *input,void *output, int len);
+void gzip_decompress(void* input, void* output, int len);
 
-int json_line_unit_num_get(char* data,int len);
+int json_line_unit_num_get(char* data, int len);
 
 void json_line_unit_copy(char* dest, char* src, int unit_id, int max_len);
 
@@ -151,7 +151,7 @@ int http_check_response_content(esp_http_client_handle_t client_handle);
 
 void http_init_get_request();
 
-void http_get_request_send(bool *flag);
+void http_get_request_send(bool* flag);
 
 //库定制函数
 
@@ -170,6 +170,6 @@ void refresh_position_data();
 
 void refresh_weather_data();
 
-char *ERNIE_Bot_4_chat_tex_exchange(char *user_content);
+char* ERNIE_Bot_4_chat_tex_exchange(char* user_content);
 
 esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken);

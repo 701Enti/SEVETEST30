@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对温湿度传感器 AHT21的支持
+ // 包含各种SE30对温湿度传感器 AHT21的支持
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  // AHT21的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢 http://www.aosong.com/products-99.html

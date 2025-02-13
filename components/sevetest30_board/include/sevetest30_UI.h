@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含对传感器数据，网络API等数据的 整理显示与动画交互工作
+ // 包含对传感器数据，网络API等数据的 整理显示与动画交互工作
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明
  // 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
@@ -36,19 +36,21 @@
 #include <driver/i2s.h>
 #include "board_ctrl.h"
 
+//FFT相关
 #define FFT_UI_TASK_CORE (1)     // FFT UI绘制任务核心
 #define FFT_UI_TASK_STACK_SIZE (3*1024)//FFT UI绘制任务堆栈大小
 
-#define DSP_MAX_FFT_SIZE    32768     //最大FFT大小
-
-// FFT 点数N 取2的整数次幂,测试发现4096及以下点数运行较稳定,8192及以上任务运行过程中可能崩溃
-#define FFT_N_SAMPLES 4096     
+#define FFT_N_SAMPLES 2048    // FFT 点数N 取2的整数次幂
+#define DSP_MAX_FFT_SIZE    8192     //最大FFT缓冲区大小
 
 #define FFT_DAMPEN_MULTIPLES 50 // FFT 音频数据衰减倍数
 #define FFT_VIEW_DATA_MIN 0   // FFT UI视口音频数据最小值
 #define FFT_VIEW_DATA_MAX 500// FFT UI视口音频数据最大值
+
 #define FFT_VIEW_WIDTH_MAX 100 //// FFT UI视口宽度最大值
 
+
+//动画相关
 #define CARTOON_PARAM_RENDER_PRECISION 10000 //动画渲染参数计算精度
 #define CARTOON_KEY_FRAME_PCT_MAX 10000 //动画关键帧百分位置标识的最大值 1标识动画开始一帧 [CARTOON_KEY_FRAME_PCT_MAX]标识最后一帧
 
@@ -119,15 +121,15 @@ typedef enum {
 //percentage参数的标定使得可以运行多种隐写模式,实现多种操作,隐写模式类型如下,枚举选择需要的隐写模式
 
 
-typedef enum{
- //隐写模式:映射 - [警告:只有隐写关键帧设置在目标关键帧之后数据才能运行]映射内存中的数据以填充任意关键帧
- //x y color[3] change 存储要读取的内存地址(为NULL的不读取),根据x(隐写数据位x)地址读到的数据根据映射关系映射到目标关键帧数据单元的x成员上,以此类推
- //step_buf不同,存储的是要映射到的对象关键帧在key_frame_database的角标
- STEGANOGRAPHY_MODE_MAPPING_EQUATION = CARTOON_KEY_FRAME_PCT_MAX + 1, //相等映射,映射关系为相等,源数据直接覆盖目标位置
- STEGANOGRAPHY_MODE_MAPPING_ADDITION,//加法映射,覆盖目标位置的值为 [映射前目标位置的值 加上 源数据]
- STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION,//减法映射,覆盖目标位置的值为 [映射前目标位置的值 减去 源数据]
- STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION,//乘法映射,覆盖目标位置的值为[映射前目标位置的值 乘上 源数据]
- STEGANOGRAPHY_MODE_MAPPING_DIVISION,//除法映射,覆盖目标位置的值为[映射前目标位置的值 除以 源数据]
+typedef enum {
+   //隐写模式:映射 - [警告:只有隐写关键帧设置在目标关键帧之后数据才能运行]映射内存中的数据以填充任意关键帧
+   //x y color[3] change 存储要读取的内存地址(为NULL的不读取),根据x(隐写数据位x)地址读到的数据根据映射关系映射到目标关键帧数据单元的x成员上,以此类推
+   //step_buf不同,存储的是要映射到的对象关键帧在key_frame_database的角标
+   STEGANOGRAPHY_MODE_MAPPING_EQUATION = CARTOON_KEY_FRAME_PCT_MAX + 1, //相等映射,映射关系为相等,源数据直接覆盖目标位置
+   STEGANOGRAPHY_MODE_MAPPING_ADDITION,//加法映射,覆盖目标位置的值为 [映射前目标位置的值 加上 源数据]
+   STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION,//减法映射,覆盖目标位置的值为 [映射前目标位置的值 减去 源数据]
+   STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION,//乘法映射,覆盖目标位置的值为[映射前目标位置的值 乘上 源数据]
+   STEGANOGRAPHY_MODE_MAPPING_DIVISION,//除法映射,覆盖目标位置的值为[映射前目标位置的值 除以 源数据]
 }steganography_mode_t;//隐写操作模式类型
 
 
@@ -159,10 +161,10 @@ typedef struct cartoon_plan_t {
 
 
 //动画生成回调函数类型,根据动画计划转换为控制参量表格式
-typedef void(*cartoon_create_callback_func_t)(int,int32_t);
+typedef void(*cartoon_create_callback_func_t)(int, int32_t);
 
 //动画控制钩子类型,用于控制和运用动画参量
-typedef void(*cartoon_ctrl_hook_func_t)(int,cartoon_ctrl_object_t*);
+typedef void(*cartoon_ctrl_hook_func_t)(int, cartoon_ctrl_object_t*);
 
 
 typedef struct cartoon_support_t {
@@ -196,16 +198,16 @@ void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t* objec
 
 //动画支持通用函数
 
-cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode,bool en_x,bool en_y,bool en_color,bool en_change,int key_frame_max);
+cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, bool en_color, bool en_change, int key_frame_max);
 void cartoon_delete(cartoon_handle_t handle);
-uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change) ;
+uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change);
 
 
 
 
 void weather_UI_1(int16_t x, int16_t y, uint8_t change);
 
-void time_UI_1(int16_t x, int16_t y, uint8_t change); 
+void time_UI_1(int16_t x, int16_t y, uint8_t change);
 
 void time_UI_2(int16_t x, int16_t y, uint8_t change);
 

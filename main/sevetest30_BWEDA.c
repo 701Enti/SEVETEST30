@@ -1,35 +1,34 @@
-
 /*
  * 701Enti MIT License
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
-// 蓝牙配置使用了ESP-IDF官方例程并进行修改，ESP-IDF项目地址 https://github.com/espressif/esp-idf 
-// 使用的例程地址 https://github.com/espressif/esp-idf/tree/release/v4.4/examples/bluetooth/bluedroid/ble/gatt_server_service_table
-// 此处修改了 服务属性数据库 服务数量 以及 gatts_event_handler回调 根据某个成员的理解添加了中文注释 添加 外部源文件board_ctrl的控制数据联动 提供了蓝牙数据存储与全局控制API的对接思路
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
-// 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
-// SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
+ // 蓝牙配置使用了ESP-IDF官方例程并进行修改，ESP-IDF项目地址 https://github.com/espressif/esp-idf 
+ // 使用的例程地址 https://github.com/espressif/esp-idf/tree/release/v4.4/examples/bluetooth/bluedroid/ble/gatt_server_service_table
+ // 此处修改了 服务属性数据库 服务数量 以及 gatts_event_handler回调 根据某个成员的理解添加了中文注释 添加 外部源文件board_ctrl的控制数据联动 提供了蓝牙数据存储与全局控制API的对接思路
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+ // 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
+ // 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
+ // SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #include "sevetest30_BWEDA.h"
 #include "board_def.h"
@@ -61,7 +60,7 @@ static uint8_t adv_config_done = 0; // 广播状态
 // 准备写入事件缓存类型
 typedef struct
 {
-    uint8_t *prepare_buf;
+    uint8_t* prepare_buf;
     int prepare_len;
 } prepare_type_env_t;
 
@@ -95,8 +94,8 @@ typedef enum
     PROFILE_NUM,
 };
 
-static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param);
+static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param);
 
 // 应用表
 static struct gatts_profile_inst app_profile_table[PROFILE_NUM] = {
@@ -117,9 +116,25 @@ static struct gatts_profile_inst app_profile_table[PROFILE_NUM] = {
 #define SERV_UUID_AUTOMATION_IO 0x1815         // 自动IO控制
 #define SERV_UUID_GENERIC_MEDIA_CONTROL 0x1849 // 通用媒体控制
 
-// 特征UUID，因为可能同一个服务有多个相同属性特征，所以一般使用下面的自定义特征UUID
+// 特征UUID
 #define CHAR_UUID_ACS_DATA_OUT_NOTIFY 0x2B31
 #define CHAR_UUID_ACS_DATA_OUT_INDICATE 0x2B32
+#define CHAR_UUID_VOLUME_STATE 0x2B7D
+
+//因为可能同一个服务有多个相同性质的特征,而预定义特征又比较宽泛，
+//比如音量有媒体音量,闹钟音量等,他们可能都被设置为表示音量的特征UUID
+//而如果他们被设置在同一服务中,根据标准这是禁止的,可以通过以下两种方法解决
+//1.自定义特征UUID,标准中允许开发者自定义一套UUID,比如0x0001,0x0002...
+//  这需要开发者处理额外的硬件到软件映射问题,
+//  比如在Frequency中(701Enti组织开发的一款硬件管理调试Android手机软件:https://github.com/701Enti/Frequency)
+//  使用生成式UI模式可能需要您手动映射系统无法确认硬件逻辑,尽管它具有一定的通过特征值数据类型猜测特征性质来获取控制方式的能力
+//  但是这也需要较标准的硬件设置,而特征的UUID对识别特征非常关键
+//  如果作为开源运用,使用标准预定义UUID可能更利于开发者的识别和调试,以及后续的维护工作
+//2.继续使用预定义UUID,但是把他们放在不同服务中,如果服务也可能重复,完全可以使用自定义UUID当作服务UUID,比如0x0001,0x0002...(同一设备服务UUID不可重复)
+//  在Frequency中,使用特征预定义UUID对特征识别的支持一般不受服务UUID的影响,会正常生成控件,但是服务信息和图标可能因无法识别而不再显示
+
+//这里选择第二种策略来支持Frequency和其他调试软件
+
 ///////////////////////////////////////////////////////////////////
 
 ////////////////////////自定义特征UUID////////////////////////
@@ -188,16 +203,16 @@ static uint8_t io_ctrl_display_en = true;
 // 属性描述结构体包含属性的 UUID长度 +指向UUID的指针(uint8_t *) + 属性许可 +  数据值最大大小 +  数据值实际大小 + 指向数据值的指针(uint8_t *)构成
 //(UUID 数据值单位 都需要遵循 SIG 的定义)
 static const esp_gatts_attr_db_t io_ctrl_gatt_database[IO_CTRL_IDX_NB] =
-    {
-        [IO_CTRL_SERVICE] = {
-            {ESP_GATT_AUTO_RSP},
-            {ESP_UUID_LEN_16, (uint8_t *)&primary_service_uuid,
-             ESP_GATT_PERM_READ,
-             sizeof(uint16_t), sizeof(io_ctrl_service_uuid), (uint8_t *)&io_ctrl_service_uuid}},
+{
+    [IO_CTRL_SERVICE] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t*)&primary_service_uuid,
+         ESP_GATT_PERM_READ,
+         sizeof(uint16_t), sizeof(io_ctrl_service_uuid), (uint8_t*)&io_ctrl_service_uuid}},
 
-        [IO_CTRL_EN_DISPLAY_CHAR] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ, sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&char_prop_read_write_notify}},
+    [IO_CTRL_EN_DISPLAY_CHAR] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t*)&character_declaration_uuid, ESP_GATT_PERM_READ, sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&char_prop_read_write_notify}},
 
-        [IO_CTRL_EN_DISPLAY_VALUE] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&io_ctrl_uuid_buf_1, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&io_ctrl_display_en}},
+    [IO_CTRL_EN_DISPLAY_VALUE] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t*)&io_ctrl_uuid_buf_1, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&io_ctrl_display_en}},
 
 };
 /**********************************************************************************************************************************/
@@ -242,44 +257,44 @@ static uint16_t media_ctrl_cfg_buf2 = 0x0000;
 // 属性描述结构体包含服务或特性的 UUID长度 +指向UUID的指针(uint8_t *) + 属性许可 +  数据值最大大小 +  数据值实际大小 + 指向数据值的指针(uint8_t *)构成
 //(UUID 数据值单位 都需要遵循 SIG 的定义)
 static const esp_gatts_attr_db_t media_ctrl_gatt_database[MEDIA_CTRL_IDX_NB] =
-    {
-        [MEDIA_CTRL_SERVICE] = {
-            {ESP_GATT_AUTO_RSP},
-            {ESP_UUID_LEN_16, (uint8_t *)&primary_service_uuid,
-             ESP_GATT_PERM_READ,
-             sizeof(uint16_t), sizeof(media_ctrl_service_uuid), (uint8_t *)&media_ctrl_service_uuid}},
+{
+    [MEDIA_CTRL_SERVICE] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t*)&primary_service_uuid,
+         ESP_GATT_PERM_READ,
+         sizeof(uint16_t), sizeof(media_ctrl_service_uuid), (uint8_t*)&media_ctrl_service_uuid}},
 
-        [MEDIA_CTRL_VOL_AMP_CHAR] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
-          ESP_GATT_PERM_READ,
-           sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&char_prop_read_write_notify}},
+    [MEDIA_CTRL_VOL_AMP_CHAR] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16, (uint8_t*)&character_declaration_uuid,
+      ESP_GATT_PERM_READ,
+       sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&char_prop_read_write_notify}},
 
-        [MEDIA_CTRL_VOL_AMP_VALUE] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16,
-          (uint8_t *)&media_ctrl_uuid_buf_1,
-           ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-            sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&media_ctrl_amp_vol_buf}},
+    [MEDIA_CTRL_VOL_AMP_VALUE] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16,
+      (uint8_t*)&media_ctrl_uuid_buf_1,
+       ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+        sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&media_ctrl_amp_vol_buf}},
 
-        [MEDIA_CTRL_VOL_AMP_CFG] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16,
-          (uint8_t *)&character_client_config_uuid,
-           ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-            sizeof(uint16_t), sizeof(uint16_t), (uint8_t *)&media_ctrl_cfg_buf1}},
+    [MEDIA_CTRL_VOL_AMP_CFG] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16,
+      (uint8_t*)&character_client_config_uuid,
+       ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+        sizeof(uint16_t), sizeof(uint16_t), (uint8_t*)&media_ctrl_cfg_buf1}},
 
-        [MEDIA_CTRL_MUTE_AMP_CHAR] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
-          ESP_GATT_PERM_READ,
-           sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&char_prop_read_write_notify}},
+    [MEDIA_CTRL_MUTE_AMP_CHAR] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16, (uint8_t*)&character_declaration_uuid,
+      ESP_GATT_PERM_READ,
+       sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&char_prop_read_write_notify}},
 
-        [MEDIA_CTRL_MUTE_AMP_VALUE] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16,(uint8_t *)&media_ctrl_uuid_buf_2,
-           ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-            sizeof(uint8_t), sizeof(uint8_t), (uint8_t *)&media_ctrl_amp_mute_buf}},
+    [MEDIA_CTRL_MUTE_AMP_VALUE] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16,(uint8_t*)&media_ctrl_uuid_buf_2,
+       ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+        sizeof(uint8_t), sizeof(uint8_t), (uint8_t*)&media_ctrl_amp_mute_buf}},
 
-        [MEDIA_CTRL_MUTE_AMP_CFG] = {{ESP_GATT_AUTO_RSP},
-         {ESP_UUID_LEN_16,(uint8_t *)&character_client_config_uuid,
-           ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-            sizeof(uint16_t), sizeof(uint16_t), (uint8_t *)&media_ctrl_cfg_buf2}}};
+    [MEDIA_CTRL_MUTE_AMP_CFG] = {{ESP_GATT_AUTO_RSP},
+     {ESP_UUID_LEN_16,(uint8_t*)&character_client_config_uuid,
+       ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+        sizeof(uint16_t), sizeof(uint16_t), (uint8_t*)&media_ctrl_cfg_buf2}} };
 /**********************************************************************************************************************************/
 
 // 广播传输的服务UUID，BLE可以设置多个服务，然而，在广播时只传输一个关键服务的UUID,方便其他设备快速了解功能，这个UUID是否存在不影响基本功能
@@ -333,9 +348,9 @@ static esp_ble_adv_params_t adv_params = {
 /// @param gatts_if gatts接口类型
 /// @param prepare_write_env 准备写入配置
 /// @param param 回调参数
-void prepare_write_event(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param)
+void prepare_write_event(esp_gatt_if_t gatts_if, prepare_type_env_t* prepare_write_env, esp_ble_gatts_cb_param_t* param)
 {
-    const char *TAG = "prepare_write_event";
+    const char* TAG = "prepare_write_event";
 
     ESP_LOGI(TAG, "准备写入,数据长度 %d", param->write.len);
 
@@ -347,7 +362,7 @@ void prepare_write_event(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_wri
 
         prepare_write_env->prepare_len = 0;
 
-        prepare_write_env->prepare_buf = (uint8_t *)malloc(BLE_PREPARE_BUF_SIZE_MAX * sizeof(uint8_t));
+        prepare_write_env->prepare_buf = (uint8_t*)malloc(BLE_PREPARE_BUF_SIZE_MAX * sizeof(uint8_t));
         if (!prepare_write_env->prepare_buf)
         {
             ESP_LOGE(TAG, "申请prepare_buf缓存时发现问题");
@@ -371,7 +386,7 @@ void prepare_write_event(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_wri
     if (param->write.need_rsp)
     {
         // 申请内存保存gatt参数
-        esp_gatt_rsp_t *gatt_rsp = (esp_gatt_rsp_t *)malloc(sizeof(esp_gatt_rsp_t));
+        esp_gatt_rsp_t* gatt_rsp = (esp_gatt_rsp_t*)malloc(sizeof(esp_gatt_rsp_t));
         if (gatt_rsp)
         {
 
@@ -412,10 +427,10 @@ void prepare_write_event(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_wri
 /// @brief 执行写入 事件，在回调函数中使用，为写操作判断是否执行
 /// @param prepare_write_env 准备写入配置
 /// @param param 回调参数
-void execute_write_event(prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param)
+void execute_write_event(prepare_type_env_t* prepare_write_env, esp_ble_gatts_cb_param_t* param)
 {
 
-    const char *TAG = "execute_write_event";
+    const char* TAG = "execute_write_event";
 
     // 如果写入标识为执行状态，并且准备写入缓存非空
     if (param->exec_write.exec_write_flag == ESP_GATT_PREP_WRITE_EXEC && prepare_write_env->prepare_buf)
@@ -440,13 +455,13 @@ void execute_write_event(prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb
 /// @brief gap相关事件处理回调函数,GAP与广播活动相关，一般无需个性化的修改
 /// @param event 回调事件
 /// @param param 回调参数
-static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
+static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t* param)
 {
-    const char *TAG = "gap_event_handler";
+    const char* TAG = "gap_event_handler";
 
     switch (event)
     {
-    // 广播数据设置完成
+        // 广播数据设置完成
     case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
         adv_config_done &= (~ADV_CONFIG_FLAG);
         if (adv_config_done == 0)
@@ -455,7 +470,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         break;
 
-    // 扫描响应数据设置完成
+        // 扫描响应数据设置完成
     case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
         adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
         if (adv_config_done == 0)
@@ -464,7 +479,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         break;
 
-    // 广播启动工作结束
+        // 广播启动工作结束
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
         if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS)
         {
@@ -476,7 +491,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         break;
 
-    // 广播终止工作结束
+        // 广播终止工作结束
     case ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
         if (param->adv_stop_cmpl.status != ESP_BT_STATUS_SUCCESS)
         {
@@ -488,15 +503,15 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         break;
 
-    // 上传连接参数
+        // 上传连接参数
     case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
         ESP_LOGI(TAG, "上传连接参数 状态-%d 最小连接间隔-%d 最大连接间隔-%d 连接间隔-%d 从机延迟-%d 超时时间-%d",
-                 param->update_conn_params.status,
-                 param->update_conn_params.min_int,
-                 param->update_conn_params.max_int,
-                 param->update_conn_params.conn_int,
-                 param->update_conn_params.latency,
-                 param->update_conn_params.timeout);
+            param->update_conn_params.status,
+            param->update_conn_params.min_int,
+            param->update_conn_params.max_int,
+            param->update_conn_params.conn_int,
+            param->update_conn_params.latency,
+            param->update_conn_params.timeout);
         break;
     default:
         ESP_LOGW(TAG, "其他事件触发了,但是处理方式没有被设置");
@@ -530,10 +545,10 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 /// @param event 回调触发事件类型
 /// @param gatts_if  GATT服务器访问接口
 /// @param param    回调触发的参数
-static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param)
 {
 
-    const char *TAG = "gatts_event_handler";
+    const char* TAG = "gatts_event_handler";
 
     static int idx = 0;
 
@@ -610,13 +625,13 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 /// @param event 回调触发事件类型
 /// @param gatts_if  GATT服务器访问接口
 /// @param param    回调触发的参数
-static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param)
 {
-    const char *TAG = "IO_CTRL_SERVICE_profile_handler";
+    const char* TAG = "IO_CTRL_SERVICE_profile_handler";
 
     switch (event)
     {
-    // 存储应用
+        // 存储应用
     case ESP_GATTS_REG_EVT:
     {
         esp_ble_gatts_create_attr_tab(io_ctrl_gatt_database, gatts_if, IO_CTRL_IDX_NB, SVC_INST_ID);
@@ -649,7 +664,7 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt
         ESP_LOGI(TAG, "读操作");
         break;
 
-    // 写操作
+        // 写操作
     case ESP_GATTS_WRITE_EVT:
         if (!param->write.is_prep)
         {
@@ -701,20 +716,20 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt
         }
         break;
 
-    ////执行写操作
+        ////执行写操作
     case ESP_GATTS_EXEC_WRITE_EVT:
         ESP_LOGI(TAG, "执行写操作");
         execute_write_event(&prepare_write_env, param);
         break;
 
-    // 连接
+        // 连接
     case ESP_GATTS_CONNECT_EVT:
 
         ESP_LOGI(TAG, "蓝牙连接 连接ID %d", param->connect.conn_id);
         esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
 
         // 上传连接参数
-        esp_ble_conn_update_params_t conn_params = {0};
+        esp_ble_conn_update_params_t conn_params = { 0 };
         memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
         conn_params.latency = BLE_CONNECT_SLAVE_LATENCY;
         conn_params.min_int = BLE_CONNECT_MIN_INTERVAL;
@@ -724,7 +739,7 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt
 
         break;
 
-    // 断开连接
+        // 断开连接
     case ESP_GATTS_DISCONNECT_EVT:
         ESP_LOGI(TAG, "连接断开, 因为 0x%x", param->disconnect.reason);
         //-----------------------------------------------------------------------------------------------------------------------------------------//复位传输配置
@@ -765,15 +780,15 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt
 /// @param event 回调触发事件类型
 /// @param gatts_if  GATT服务器访问接口
 /// @param param    回调触发的参数
-static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param)
 {
-    const char *TAG = "MEDIA_CTRL_SERVICE_profile_handler";
+    const char* TAG = "MEDIA_CTRL_SERVICE_profile_handler";
 
     static uint16_t media_ctrl_conn_id_buf1 = 0;
 
     switch (event)
     {
-    // 存储应用
+        // 存储应用
     case ESP_GATTS_REG_EVT:
     {
         esp_ble_gatts_create_attr_tab(media_ctrl_gatt_database, gatts_if, MEDIA_CTRL_IDX_NB, SVC_INST_ID);
@@ -801,7 +816,7 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
         }
 
         // 数据映射到缓存
-        board_ctrl_t *board_ctrl = NULL;
+        board_ctrl_t* board_ctrl = NULL;
         board_ctrl = board_status_get();
         if (board_ctrl)
         {
@@ -829,7 +844,7 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
             if (param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_CFG] && param->write.len == 2)
             {
                 if (descr_value == 0x0000)
-                    media_ctrl_cfg_buf1 = 0x0000;                
+                    media_ctrl_cfg_buf1 = 0x0000;
                 if (descr_value == 0x0001)
                     media_ctrl_cfg_buf1 = CHAR_UUID_ACS_DATA_OUT_NOTIFY;
                 if (descr_value == 0x0002)
@@ -838,7 +853,7 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
             if (param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_CFG] && param->write.len == 2)
             {
                 if (descr_value == 0x0000)
-                    media_ctrl_cfg_buf2 = 0x0000;                
+                    media_ctrl_cfg_buf2 = 0x0000;
                 if (descr_value == 0x0001)
                     media_ctrl_cfg_buf2 = CHAR_UUID_ACS_DATA_OUT_NOTIFY;
                 if (descr_value == 0x0002)
@@ -849,15 +864,15 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
             // 同步控制数据
             board_ctrl_t* board_ctrl = NULL;
             board_ctrl = board_status_get();
-            if(board_ctrl){
-              if(param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE]){
-                board_ctrl->amplifier_volume = param->write.value[0];
-                sevetest30_board_ctrl(board_ctrl,BOARD_CTRL_AMPLIFIER);//完成配置后，函数会推送数据更新，特征值会保存在本地
-              }
-              if(param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE]){
-                board_ctrl->amplifier_mute = param->write.value[0];
-                sevetest30_board_ctrl(board_ctrl,BOARD_CTRL_AMPLIFIER);//完成配置后，函数会推送数据更新，特征值会保存在本地
-              }
+            if (board_ctrl) {
+                if (param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE]) {
+                    board_ctrl->amplifier_volume = param->write.value[0];
+                    sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);//完成配置后，函数会推送数据更新，特征值会保存在本地
+                }
+                if (param->write.handle == media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE]) {
+                    board_ctrl->amplifier_mute = param->write.value[0];
+                    sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);//完成配置后，函数会推送数据更新，特征值会保存在本地
+                }
             }
             // 如果存在响应需求，传输响应信息
             if (param->write.need_rsp)
@@ -881,14 +896,14 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
         ESP_LOGI(TAG, "%d", media_ctrl_amp_vol_buf);
         break;
 
-    // 连接
+        // 连接
     case ESP_GATTS_CONNECT_EVT:
 
         ESP_LOGI(TAG, "蓝牙连接 连接ID %d", param->connect.conn_id);
         esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
 
         // 上传连接参数
-        esp_ble_conn_update_params_t conn_params = {0};
+        esp_ble_conn_update_params_t conn_params = { 0 };
         memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
         conn_params.latency = BLE_CONNECT_SLAVE_LATENCY;
         conn_params.min_int = BLE_CONNECT_MIN_INTERVAL;
@@ -898,7 +913,7 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
 
         break;
 
-    // 断开连接
+        // 断开连接
     case ESP_GATTS_DISCONNECT_EVT:
         ESP_LOGI(TAG, "连接断开, 因为 0x%x", param->disconnect.reason);
         media_ctrl_cfg_buf1 = 0x0000; // 复位传输配置
@@ -933,16 +948,16 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
         // 在notify或indicate机制下主动发送数据
         if (media_ctrl_cfg_buf1 == CHAR_UUID_ACS_DATA_OUT_NOTIFY || media_ctrl_cfg_buf1 == CHAR_UUID_ACS_DATA_OUT_INDICATE)
         {
-            ESP_LOGI(TAG, "扬声器音量 - %d",media_ctrl_amp_vol_buf);
+            ESP_LOGI(TAG, "扬声器音量 - %d", media_ctrl_amp_vol_buf);
             esp_ble_gatts_send_indicate(gatts_if, media_ctrl_conn_id_buf1, media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE],
-                                        sizeof(uint8_t), &(media_ctrl_amp_vol_buf),(media_ctrl_cfg_buf1 == CHAR_UUID_ACS_DATA_OUT_INDICATE));
-        }   
+                sizeof(uint8_t), &(media_ctrl_amp_vol_buf), (media_ctrl_cfg_buf1 == CHAR_UUID_ACS_DATA_OUT_INDICATE));
+        }
         if (media_ctrl_cfg_buf2 == CHAR_UUID_ACS_DATA_OUT_NOTIFY || media_ctrl_cfg_buf2 == CHAR_UUID_ACS_DATA_OUT_INDICATE)
         {
-            ESP_LOGI(TAG, "静音扬声器 - %d",media_ctrl_amp_mute_buf);
+            ESP_LOGI(TAG, "静音扬声器 - %d", media_ctrl_amp_mute_buf);
             esp_ble_gatts_send_indicate(gatts_if, media_ctrl_conn_id_buf1, media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE],
-                                        sizeof(uint8_t), &(media_ctrl_amp_mute_buf),(media_ctrl_cfg_buf2 == CHAR_UUID_ACS_DATA_OUT_INDICATE));  
-        }   
+                sizeof(uint8_t), &(media_ctrl_amp_mute_buf), (media_ctrl_cfg_buf2 == CHAR_UUID_ACS_DATA_OUT_INDICATE));
+        }
 
 
     }
@@ -958,7 +973,7 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
 /// @return ESP_OK / ESP_FAIL
 esp_err_t bluetooth_connect()
 {
-    const char *TAG = "bluetooth_connect";
+    const char* TAG = "bluetooth_connect";
 
     // 初始化NVS存储
     esp_err_t ret = nvs_flash_init();
@@ -1039,7 +1054,7 @@ esp_err_t bluetooth_connect()
 /// @brief 进行一次蓝牙数据推送,如果notify或indicate机制启动，会直接向客户端推送更新的特征值，否则它将只保存在本地属性表中,推送工作实际发生在服务配置回调下,推送数据来源为board_ctrl.c申请的堆缓存board_ctrl_buf
 void sevetest30_ble_attr_value_push()
 {
-    board_ctrl_t *board_ctrl = NULL;
+    board_ctrl_t* board_ctrl = NULL;
     board_ctrl = board_status_get();
     if (board_ctrl)
     {
@@ -1049,7 +1064,7 @@ void sevetest30_ble_attr_value_push()
 
         media_ctrl_amp_mute_buf = board_ctrl->amplifier_mute;
         esp_ble_gatts_set_attr_value(media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE], sizeof(uint8_t), &(media_ctrl_amp_mute_buf));
-        
-        
+
+
     }
 }

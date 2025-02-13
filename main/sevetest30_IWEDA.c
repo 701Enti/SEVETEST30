@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+ // 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
  //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
@@ -790,7 +790,7 @@ int ERNIE_Bot_4_chat_over_status(char* chat_response)
     }
 }
 
-/// @brief ERNIE-4.0聊天传输任务,使用POST请求
+/// @brief [使用流式传输模式]ERNIE-4.0聊天传输任务,使用POST请求
 /// @param flag 传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
 void ERNIE_Bot_4_chat_http_Task(bool* flag)
 {
@@ -974,7 +974,8 @@ void ERNIE_Bot_4_chat_http_Task(bool* flag)
     }
 }
 
-/// @brief 文心一言ERNIE-Bot 4.0文本对话
+
+/// @brief [使用流式传输模式]文心一言ERNIE-Bot 4.0文本交互
 /// @param user_content 用户内容
 /// @return 对话返回结果/NULL(错误)
 char* ERNIE_Bot_4_chat_tex_exchange(char* user_content)

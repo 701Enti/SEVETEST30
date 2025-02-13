@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，，包含各种SE30针对性硬件控制
+ // 包含各种SE30针对性硬件控制
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件包含 DEVICE_I2C_PORT i2c通讯的初始化配置,需要调用device_i2c_init(),此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化
  //     API规范: sevetest30_board_ctrl  外部函数应该调用board_status_get获取控制缓存变量,修改值后导入
@@ -104,13 +104,13 @@ esp_err_t sevetest30_all_device_init(board_ctrl_t* board_ctrl)
     // 初始化所有设备
     audio_board_init();
 
-    // sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);
-    // fonts_chip_init();
-    // BL5372_config_init();
-    // AHT21_begin();
-    // lsm6ds3trc_init_or_reset();
-    // vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
-    // ledarray_init();
+    sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);
+    fonts_chip_init();
+    BL5372_config_init();
+    AHT21_begin();
+    lsm6ds3trc_init_or_reset();
+    vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
+    ledarray_init();
 
     //初始化之后配置所有设备到指定模式
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
@@ -123,6 +123,11 @@ esp_err_t sevetest30_all_device_init(board_ctrl_t* board_ctrl)
 /// @param ctrl_select 选择控制的对象，这是一个枚举类型
 void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select)
 {
+    if (!board_ctrl) {
+        ESP_LOGE("sevetest30_board_ctrl", "无法处理的空指针");
+        return;
+    }
+
     switch (ctrl_select)
     {
     case BOARD_CTRL_ALL:
@@ -318,7 +323,7 @@ void amplifier_set(board_ctrl_t* board_ctrl)
     if (err != ESP_OK)
         ESP_LOGE("amplifier_set", "与音量控制器通讯时发现问题 描述： %s", esp_err_to_name(err));
     else
-        ESP_LOGI("amplifier_set", "扬声器配置已更新");
+        ESP_LOGI("amplifier_set", "扬声器配置已更新 功放音量 %d", board_ctrl->amplifier_volume);
 }
 
 // 辅助电压设置，电压调整值 取值为 0 - (board_def.h中常量BV_VOL_MAX的值(24))

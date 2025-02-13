@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对空气质量传感器AGS10 的支持
+ // 包含各种SE30对空气质量传感器AGS10 的支持
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  // AGS10推荐I2C最高通讯频率为15kHz,而大部分器件目前使用100kHz,所以在库函数内提供临时频率变更支持,目前已经在AGS10_TVOC_result_get()应用,之后库中追加的API也应该调用频率变更支持
@@ -128,7 +128,7 @@ void AGS10_TVOC_result_get(AGS10_result_t* dest) {
     else {
         //传感器状态检查
         if (read_buf[0] & 0x01) {
-            ESP_LOGW(TAG,"数据未更新或传感器正在预热,无法读取");
+            ESP_LOGW(TAG, "数据未更新或传感器正在预热,无法读取");
             return;
         }
         else {

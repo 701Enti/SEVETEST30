@@ -4,26 +4,26 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，百度文心一言ERNIE Bot 4.0对话支持 音乐API播放音乐时的硬件驱动等工作
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含一些sevetest30的  音频数据获取与硬件调度，以支持TTS,语音识别，百度文心一言ERNIE Bot 4.0对话支持 音乐API播放音乐时的硬件驱动等工作
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 #pragma once
 
 #include "stdbool.h"
@@ -56,7 +56,7 @@
 //百度TTS设定配置，注释参考了官方API文档
 typedef struct baidu_TTS_cfg_t
 {
-  char *tex;   // 必填	合成的文本，使用UTF-8编码。不超过60个汉字或者字母数字
+  char* tex;   // 必填	合成的文本，使用UTF-8编码。不超过60个汉字或者字母数字
   uint8_t spd; // 选填	语速，取值0-15，默认为5中语速
   uint8_t pit; // 选填	音调，取值0-15，默认为5中语调
   uint8_t vol; // 选填	音量，取值0-15
@@ -81,7 +81,7 @@ typedef enum
 {
   ASR_PID_CM_NEAR_PRO = 80001, //近场 中文-普通话 极速版
   ASR_PID_CM_NEAR = 1537,//近场 中文-普通话 标准版
-  ASR_PID_CM_FAR  = 1936,//远场 中文-普通话 标准版
+  ASR_PID_CM_FAR = 1936,//远场 中文-普通话 标准版
   ASR_PID_CC = 1637,//中文-粤语 
   ASR_PID_CS = 1837,//中文-四川话
   ASR_PID_EN = 1737,//英语
@@ -105,9 +105,9 @@ uint64_t mp3_decoder_play_time_get();
 
 void element_cfg_data_reset();
 
-esp_err_t audio_element_all_init(const char *link_tag[], int link_num);
+esp_err_t audio_element_all_init(const char* link_tag[], int link_num);
 
 // 外部功能函数
 void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority);
-void music_uri_play(const char *uri, UBaseType_t priority);
-void asr_service_start(baidu_ASR_cfg_t* asr_cfg,UBaseType_t priority);
+void music_uri_play(const char* uri, UBaseType_t priority);
+void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority);

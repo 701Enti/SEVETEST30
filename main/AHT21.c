@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对温湿度传感器 AHT21的支持
+ // 包含各种SE30对温湿度传感器 AHT21的支持
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  // AHT21的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢 http://www.aosong.com/products-99.html
@@ -65,7 +65,7 @@ uint8_t CheckCrc8(uint8_t* pDat, uint8_t Lenth)
     uint8_t crc = 0xff, i, j;
 
     if (!pDat) {
-        ESP_LOGE("AHT21.c - CheckCrc8","导入了为空的数据地址");
+        ESP_LOGE("AHT21.c - CheckCrc8", "导入了为空的数据地址");
         return crc;
     }
 
@@ -104,12 +104,12 @@ void AHT21_get_result(AHT21_result_t* dest) {
         ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
-    else{
+    else {
         bool crc_flag = dest->flag_crc;
-        memset(dest,0,sizeof(AHT21_result_t));
+        memset(dest, 0, sizeof(AHT21_result_t));
         dest->flag_crc = crc_flag;
     }
-       
+
     if ((AHT21_get_status() & 0x80)) {
         ESP_LOGE(TAG, "温湿度传感器AHT21正在测量中,无法读取");
         return;
@@ -132,16 +132,16 @@ void AHT21_get_result(AHT21_result_t* dest) {
             //计算最终数据
             dest->temp = ((float)(((read_buf[3] & 0x0F) << 16) | (read_buf[4] << 8) | (read_buf[5])) / (1048576) * 200) - 50;
             dest->hum = ((float)((read_buf[1] << 12) | (read_buf[2] << 4) | (read_buf[3] >> 4)) / (1048576)) * 100;
-           
+
             //CRC校验
             if (dest->flag_crc) {
-                if (CheckCrc8(&read_buf[1], 6) != read_buf[7]){
+                if (CheckCrc8(&read_buf[1], 6) != read_buf[7]) {
                     ESP_LOGE(TAG, "数据CRC校验后发现问题");
                     return;
                 }
             }
 
-            ESP_LOGI(TAG, "温度 %f\u2103     湿度 %f%%RH", dest->temp, dest->hum);  
+            ESP_LOGI(TAG, "温度 %f\u2103     湿度 %f%%RH", dest->temp, dest->hum);
 
             //数据有效标记
             dest->data_true = true;

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的 离线环境 数据获取（SWEDA）
+ // 包含一些sevetest30的 离线环境 数据获取（SWEDA）
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
  //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
@@ -34,10 +34,10 @@
 #include "esp_adc_cal.h"
 #include "sevetest30_gpio.h"
 
-systemtime_t systemtime_data = {0};
-battery_data_t battery_data = {0};
-env_temp_hum_data_t env_temp_hum_data = {0};
-env_TVOC_data_t env_TVOC_data = {0};
+systemtime_t systemtime_data = { 0 };
+battery_data_t battery_data = { 0 };
+env_temp_hum_data_t env_temp_hum_data = { 0 };
+env_TVOC_data_t env_TVOC_data = { 0 };
 
 uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
@@ -179,16 +179,16 @@ void refresh_battery_data()
 
 /// @brief 刷新当前环境的温度湿度数据,使用硬件传感器
 /// @param crc_flag 启用CRC校验
-void refresh_env_temp_hum_data(bool crc_flag){
-    AHT21_trigger();
-    vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
-    env_temp_hum_data.flag_crc = crc_flag;
-    AHT21_get_result(&env_temp_hum_data);
+void refresh_env_temp_hum_data(bool crc_flag) {
+  AHT21_trigger();
+  vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
+  env_temp_hum_data.flag_crc = crc_flag;
+  AHT21_get_result(&env_temp_hum_data);
 }
 
 /// @brief 刷新当前环境的空气质量数据,使用硬件传感器
 /// @param crc_flag 启用CRC校验
-void refresh_env_TVOC_data(bool crc_flag){
+void refresh_env_TVOC_data(bool crc_flag) {
   env_TVOC_data.flag_crc = crc_flag;
   AGS10_TVOC_result_get(&env_TVOC_data);
 }

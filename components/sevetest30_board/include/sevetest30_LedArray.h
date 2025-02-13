@@ -3,29 +3,29 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
-// ESP-IDF项目地址 https://github.com/espressif/esp-idf
-// 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
-// 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+ // ESP-IDF项目地址 https://github.com/espressif/esp-idf
+ // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
+ // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #include <string.h>
 #include <sevetest30_UI.h>
@@ -52,11 +52,11 @@
 
 typedef enum
 {
- LEDARRAY_REFRESH_DISABLE = 0,//禁用屏幕刷新
- LEDARRAY_REFRESH_ALL_ONCE,//[单次全刷]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
- LEDARRAY_REFRESH_ALL_MULTIPLE,//[多次全刷]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
- LEDARRAY_REFRESH_PART_ONCE,//[单次局刷]一次性刷新所有发生绘制活动的行,刷新之后才发生延时
- LEDARRAY_REFRESH_PART_MULTIPLE,//[多次局刷]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
+    LEDARRAY_REFRESH_DISABLE = 0,//禁用屏幕刷新
+    LEDARRAY_REFRESH_ALL_ONCE,//[单次全刷]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
+    LEDARRAY_REFRESH_ALL_MULTIPLE,//[多次全刷]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
+    LEDARRAY_REFRESH_PART_ONCE,//[单次局刷]一次性刷新所有发生绘制活动的行,刷新之后才发生延时
+    LEDARRAY_REFRESH_PART_MULTIPLE,//[多次局刷]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
 }ledarray_refresh_mode_t;
 
 #define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_REFRESH_ALL_ONCE //初始化时设置的默认屏幕刷新模式
@@ -65,24 +65,24 @@ typedef enum
 
 
 //数字 0-9
-extern const uint8_t matrix_1 [7];
-extern const uint8_t matrix_2 [7];
-extern const uint8_t matrix_3 [7];
-extern const uint8_t matrix_4 [7];
-extern const uint8_t matrix_5 [7];
-extern const uint8_t matrix_6 [7];
-extern const uint8_t matrix_7 [7];
-extern const uint8_t matrix_8 [7];
-extern const uint8_t matrix_9 [7];
+extern const uint8_t matrix_1[7];
+extern const uint8_t matrix_2[7];
+extern const uint8_t matrix_3[7];
+extern const uint8_t matrix_4[7];
+extern const uint8_t matrix_5[7];
+extern const uint8_t matrix_6[7];
+extern const uint8_t matrix_7[7];
+extern const uint8_t matrix_8[7];
+extern const uint8_t matrix_9[7];
 
 
 
 void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode);
 
-    // 以下函数将数据存储到缓冲区，不包含发送
-    //sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
-    //前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换
-    //后者直接读取存储了RGB数据的数组，直接写入WS2812,便于显示复杂，颜色丰富的图形
+// 以下函数将数据存储到缓冲区，不包含发送
+//sevetest30支持两种显示解析 三色分离方式 和 彩色图像直显方式
+//前者如上面的思路，将彩色图像分成三个图层处理，便于图形变换
+//后者直接读取存储了RGB数据的数组，直接写入WS2812,便于显示复杂，颜色丰富的图形
 
 
 //三色分离方式 
@@ -91,7 +91,7 @@ void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode);
     //取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
 
-void separation_draw(int32_t x, int32_t y, uint8_t breadth,const uint8_t *p, uint8_t byte_number, uint8_t* color_in,uint8_t change);
+void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t* color_in, uint8_t change);
 
 
 //彩色图像直显方式 
@@ -101,7 +101,7 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth,const uint8_t *p, uin
    //选择带数据头的图案数据，长宽会自动获取
 
 
-void direct_draw(int32_t x, int32_t y,const uint8_t *p,uint8_t change);
+void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change);
 
 
 ///清除屏幕上的所有图案以及数据缓存
@@ -110,11 +110,11 @@ void clean_draw();
 
 void clean_draw_buf(int8_t y);
 
-void progress_draw_buf(int8_t y,uint8_t step, uint8_t* color);
+void progress_draw_buf(int8_t y, uint8_t step, uint8_t* color);
 
-uint8_t *rectangle(int8_t breadth, int8_t length);
+uint8_t* rectangle(int8_t breadth, int8_t length);
 
-void print_number(int32_t x,int32_t y,int8_t figure,uint8_t* color,uint8_t change);
+void print_number(int32_t x, int32_t y, int8_t figure, uint8_t* color, uint8_t change);
 
 void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...);
 
@@ -138,17 +138,17 @@ void color_input(int8_t x, int8_t y, uint8_t* dat);
 
 void color_output(int8_t x, int8_t y, uint8_t* dat);
 
-double value_max(double value1,double value2,double value3);
+double value_max(double value1, double value2, double value3);
 
 
-double value_min(double value1,double value2,double value3);
+double value_min(double value1, double value2, double value3);
 
 
-void ledarray_intensity_change(uint8_t *r,uint8_t *g,uint8_t *b,uint8_t intensity);
+void ledarray_intensity_change(uint8_t* r, uint8_t* g, uint8_t* b, uint8_t intensity);
 
-void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf,uint32_t *p_h, uint32_t *p_s, uint32_t *p_v);
+void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t* p_h, uint32_t* p_s, uint32_t* p_v);
 
-    //以下函数来自ESP-IDFv4.4 led_strip.c 例程文件，以及源文件声明
+//以下函数来自ESP-IDFv4.4 led_strip.c 例程文件，以及源文件声明
 
 /**
  * @brief Simple helper function, converting HSV color space to RGB color space
@@ -156,7 +156,7 @@ void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf,uint32_t *p
  * Wiki: https://en.wikipedia.org/wiki/HSL_and_HSV
  *
  */
-void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t *g, uint32_t *b);
+void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t* r, uint32_t* g, uint32_t* b);
 
 
 

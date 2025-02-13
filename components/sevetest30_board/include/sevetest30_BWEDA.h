@@ -4,32 +4,32 @@
  *
  * Copyright © 2024 <701Enti organization>
  *
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the “Software”), 
- * to deal in the Software without restriction, including without limitation 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
-// 蓝牙配置使用了ESP-IDF官方例程并进行修改，ESP-IDF项目地址 https://github.com/espressif/esp-idf 
-// 使用的例程地址 https://github.com/espressif/esp-idf/tree/release/v4.4/examples/bluetooth/bluedroid/ble/gatt_server_service_table
-// 此处修改了 服务属性数据库 服务数量 以及 gatts_event_handler回调 根据某个成员的理解添加了中文注释 添加 外部源文件board_ctrl的控制数据联动 提供了蓝牙数据存储与全局控制API的对接思路
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
-// 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
-// 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
-// SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含一些sevetest30的  低功耗蓝牙BLE环境中  数据获取（BWEDA）以及其他设备的蓝牙交互活动
+ // 蓝牙配置使用了ESP-IDF官方例程并进行修改，ESP-IDF项目地址 https://github.com/espressif/esp-idf 
+ // 使用的例程地址 https://github.com/espressif/esp-idf/tree/release/v4.4/examples/bluetooth/bluedroid/ble/gatt_server_service_table
+ // 此处修改了 服务属性数据库 服务数量 以及 gatts_event_handler回调 根据某个成员的理解添加了中文注释 添加 外部源文件board_ctrl的控制数据联动 提供了蓝牙数据存储与全局控制API的对接思路
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+ // 敬告：ESP32S3目前只支持BLE,不支持经典蓝牙的音频传输，这里没有音频通讯的功能
+ // 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
+ // SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #ifndef _SEVETEST30_BWEDA_H_
 #define _SEVETEST30_BWEDA_H_

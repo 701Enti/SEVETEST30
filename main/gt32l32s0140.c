@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，对语言文字显示的硬件字库GT32L32S0140的访问支持，包含对字体特别是中文汉字的搜索工作
+ // 对语言文字显示的硬件字库GT32L32S0140的访问支持，包含对字体特别是中文汉字的搜索工作
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 计算方法来自高通字库 https://www.hmi.gaotongfont.cn/ 非常感谢
  // github: https://github.com/701Enti
@@ -81,7 +81,7 @@ esp_err_t fonts_chip_init()
     };
     gpio_config(&spics_cfg);
 
-    if(ret == ESP_OK){
+    if (ret == ESP_OK) {
         ESP_LOGI("fonts_chip_init", "字库设备初始化成功");
     }
 
@@ -334,10 +334,10 @@ uint32_t UnicodeToGB2312(uint32_t code)
 uint32_t ASCII_number_count(uint32_t* unicode_buf, int total_unit) {
     uint32_t ASCII_num = 0;
     if (unicode_buf) {
-      for(int j=0;j<total_unit;j++)
-        if(unicode_buf[j]<128)ASCII_num++;
+        for (int j = 0;j < total_unit;j++)
+            if (unicode_buf[j] < 128)ASCII_num++;
     }
-    else{
+    else {
         ESP_LOGE("ASCII_number_count", "导入了无法处理的空指针");
     }
     return ASCII_num;

@@ -18,13 +18,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对外部RTC芯片 BL5372的支持
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
-// 目前没有考虑12小时制的读取,因为24小时制的运行更加利于SWEDA的时间同步和写入，而24小时制可以在UI显示时很方便的操作显示为12小时制而无需调度硬件
-// BL5372在SEVETEST30控制板使用的是电池供电，调试时请保证其电源的供应，连接电池或接入VCC
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含各种SE30对外部RTC芯片 BL5372的支持
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ // 目前没有考虑12小时制的读取,因为24小时制的运行更加利于SWEDA的时间同步和写入，而24小时制可以在UI显示时很方便的操作显示为12小时制而无需调度硬件
+ // BL5372在SEVETEST30控制板使用的是电池供电，调试时请保证其电源的供应，连接电池或接入VCC
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #include "BL5372.h"
 #include "esp_log.h"
@@ -35,17 +35,17 @@
 
 /// @brief 设置BL5372实时时间
 /// @param time 作为设置实时时间的数据的地址
-void BL5372_time_now_set(BL5372_time_t *time)
+void BL5372_time_now_set(BL5372_time_t* time)
 {
 
-    const char *TAG = "BL5372_time_now_set";
+    const char* TAG = "BL5372_time_now_set";
 
-    if(!time){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!time) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
-    uint8_t write_buf[8] = {0};
+    uint8_t write_buf[8] = { 0 };
 
     // 设置内部寄存器地址和传输配置0000
     write_buf[0] = BL5372_REG_TIME_SEC << 4;
@@ -68,16 +68,16 @@ void BL5372_time_now_set(BL5372_time_t *time)
 
 /// @brief 获取BL5372实时时间
 /// @param time 保存实时时间的数据的地址
-void BL5372_time_now_get(BL5372_time_t *time)
+void BL5372_time_now_get(BL5372_time_t* time)
 {
-    const char *TAG = "BL5372_time_now_get";
+    const char* TAG = "BL5372_time_now_get";
 
-    if(!time){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!time) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
-    uint8_t read_buf[7] = {0};                    // 读取缓存
+    uint8_t read_buf[7] = { 0 };                    // 读取缓存
     uint8_t write_buf = BL5372_REG_TIME_SEC << 4; // 高4位设置起始地址，低4位设置传输模式0000
     esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
     if (err != ESP_OK)
@@ -91,7 +91,7 @@ void BL5372_time_now_get(BL5372_time_t *time)
     time->month = BCD8421_transform_recode(read_buf[5]);
     time->year = BCD8421_transform_recode(read_buf[6]);
 
-    ESP_LOGI(TAG, "20%d %d %d  %d  %d %d %d",time->year,time->month,time->day,time->week,time->hour,time->minute,time->second);   
+    ESP_LOGI(TAG, "20%d %d %d  %d  %d %d %d", time->year, time->month, time->day, time->week, time->hour, time->minute, time->second);
 
 }
 
@@ -100,16 +100,16 @@ void BL5372_time_now_get(BL5372_time_t *time)
 /// @param alarm 选择闹钟，这是一个枚举类型
 /// @param time 要设置的时间数据的地址,除了 时 分 其他都是无效的
 /// @param cycle_plan 闹钟重复计划数据的地址
-void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL5372_alarm_cycle_plan_t *cycle_plan)
+void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5372_alarm_cycle_plan_t* cycle_plan)
 {
-    const char *TAG = "BL5372_time_alarm_set";
+    const char* TAG = "BL5372_time_alarm_set";
 
-    if(!time || !cycle_plan){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!time || !cycle_plan) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
-    uint8_t write_buf[4] = {0};
+    uint8_t write_buf[4] = { 0 };
 
     // 设置内部寄存器地址和传输配置0000
     if (alarm == BL5372_ALARM_A)
@@ -126,14 +126,14 @@ void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL53
     write_buf[1] = BCD8421_transform_decode(time->minute);
     write_buf[2] = BCD8421_transform_decode(time->hour);
 
-    for(int idx=0;idx<=6;idx++){
-    bool* bit_buf;
-    bit_buf = (bool*)cycle_plan + idx;
-    write_buf[3] |= *bit_buf << (6 - idx); 
+    for (int idx = 0;idx <= 6;idx++) {
+        bool* bit_buf;
+        bit_buf = (bool*)cycle_plan + idx;
+        write_buf[3] |= *bit_buf << (6 - idx);
     }
 
 
-    if(write_buf[3] == 0x00)ESP_LOGW(TAG,"设置了没有正确预定响铃周期的无效闹钟");
+    if (write_buf[3] == 0x00)ESP_LOGW(TAG, "设置了没有正确预定响铃周期的无效闹钟");
 
     esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
 
@@ -152,12 +152,12 @@ void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL53
 /// @param alarm 选择闹钟，这是一个枚举类型
 /// @param time 保存设置时间的数据的地址,除了 时 分 其他都是无效的
 /// @param cycle_plan 保存闹钟重复数据的地址
-void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL5372_alarm_cycle_plan_t *cycle_plan)
+void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5372_alarm_cycle_plan_t* cycle_plan)
 {
-    const char *TAG = "BL5372_time_alarm_get";
+    const char* TAG = "BL5372_time_alarm_get";
 
-    if(!time || !cycle_plan){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!time || !cycle_plan) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
@@ -173,7 +173,7 @@ void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL53
         return;
     }
 
-    uint8_t read_buf[3] = {0}; // 读取缓存
+    uint8_t read_buf[3] = { 0 }; // 读取缓存
 
     esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
     if (err != ESP_OK)
@@ -182,12 +182,12 @@ void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL53
     time->minute = BCD8421_transform_recode(read_buf[0]);
     time->hour = BCD8421_transform_recode(read_buf[1]);
 
-    if(read_buf[2] == 0x00)ESP_LOGW(TAG,"设置了没有正确预定响铃周期的无效闹钟");
+    if (read_buf[2] == 0x00)ESP_LOGW(TAG, "设置了没有正确预定响铃周期的无效闹钟");
 
-    for(int idx=0;idx<=6;idx++){
-      bool* bit_buf;
-      bit_buf = (bool*)cycle_plan + idx;
-      *bit_buf = (read_buf[2] << idx) & 0x40;
+    for (int idx = 0;idx <= 6;idx++) {
+        bool* bit_buf;
+        bit_buf = (bool*)cycle_plan + idx;
+        *bit_buf = (read_buf[2] << idx) & 0x40;
     }
 
     time->week = -1;
@@ -203,7 +203,7 @@ void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time,BL53
 void BL5372_alarm_status_set(BL5372_alarm_select_t alarm, bool status)
 {
 
-    const char *TAG = "BL5372_alarm_status_set";
+    const char* TAG = "BL5372_alarm_status_set";
 
     BL5372_cfg_t cfg_buf;
     BL5372_config_get(&cfg_buf);
@@ -227,7 +227,7 @@ void BL5372_alarm_status_set(BL5372_alarm_select_t alarm, bool status)
 /// @return 闹钟的状态，true为闹钟打开
 bool BL5372_alarm_status_get(BL5372_alarm_select_t alarm)
 {
-    const char *TAG = "BL5372_alarm_status_get";
+    const char* TAG = "BL5372_alarm_status_get";
 
     BL5372_cfg_t cfg_buf;
     BL5372_config_get(&cfg_buf);
@@ -246,8 +246,8 @@ bool BL5372_alarm_status_get(BL5372_alarm_select_t alarm)
 /// @brief 现在选择的闹钟是否在响铃
 /// @param alarm 选择闹钟，这是一个枚举类型
 /// @return true表示正在响铃
-bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm){
-    const char *TAG = "BL5372_alarm_is_ringing";
+bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm) {
+    const char* TAG = "BL5372_alarm_is_ringing";
 
     BL5372_cfg_t cfg_buf;
     BL5372_config_get(&cfg_buf);
@@ -260,14 +260,14 @@ bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm){
     {
         ESP_LOGE(TAG, "不存在的闹钟计时器");
         return false;
-    }  
+    }
 }
 
 /// @brief 让选择的闹钟停止响铃,但是不会关闭闹钟，需要自行调用BL5372_alarm_status_set
 /// @param alarm 选择闹钟，这是一个枚举类型
-void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm){
-   
-    const char *TAG = "BL5372_alarm_stop_ringing";
+void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm) {
+
+    const char* TAG = "BL5372_alarm_stop_ringing";
 
     BL5372_cfg_t cfg_buf;
     BL5372_config_get(&cfg_buf);
@@ -282,7 +282,7 @@ void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm){
         return;
     }
 
-    BL5372_config_set(&cfg_buf); 
+    BL5372_config_set(&cfg_buf);
 }
 
 // 以默认配置初始化BL5372的运行配置
@@ -295,16 +295,16 @@ void BL5372_config_init()
 
 /// @brief 设置BL5372的运行配置
 /// @param rtc_cfg 作为运行配置的数据的地址
-void BL5372_config_set(BL5372_cfg_t *rtc_cfg)
+void BL5372_config_set(BL5372_cfg_t* rtc_cfg)
 {
-    const char *TAG = "BL5372_config_set";
+    const char* TAG = "BL5372_config_set";
 
-    if(!rtc_cfg){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!rtc_cfg) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
-    uint8_t write_buf[3] = {0}; // 写入缓存
+    uint8_t write_buf[3] = { 0 }; // 写入缓存
 
     // 设置内部寄存器地址和传输配置0000
     write_buf[0] = BL5372_REG_CTRL_1 << 4;
@@ -333,17 +333,17 @@ void BL5372_config_set(BL5372_cfg_t *rtc_cfg)
 
 /// @brief 获取BL5372的运行配置
 /// @param rtc_cfg 保存运行配置的数据的地址
-void BL5372_config_get(BL5372_cfg_t *rtc_cfg)
+void BL5372_config_get(BL5372_cfg_t* rtc_cfg)
 {
 
-    const char *TAG = "BL5372_config_get";
+    const char* TAG = "BL5372_config_get";
 
-    if(!rtc_cfg){
-        ESP_LOGE(TAG,"导入了为空的数据地址");
+    if (!rtc_cfg) {
+        ESP_LOGE(TAG, "导入了为空的数据地址");
         return;
     }
 
-    uint8_t read_buf[2] = {0};                  // 读取缓存
+    uint8_t read_buf[2] = { 0 };                  // 读取缓存
     uint8_t write_buf = BL5372_REG_CTRL_1 << 4; // 高4位设置起始地址，低4位设置传输模式0000
     esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
     if (err != ESP_OK)

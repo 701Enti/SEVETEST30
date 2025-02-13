@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 该文件归属701Enti组织，SEVETEST30开发团队应该提供责任性维护，包含各种SE30对外部RTC芯片 BL5372的支持
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
-// github: https://github.com/701Enti
-// bilibili: 701Enti
+ // 包含各种SE30对外部RTC芯片 BL5372的支持
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ // github: https://github.com/701Enti
+ // bilibili: 701Enti
 
 #pragma once
 
@@ -133,7 +133,7 @@ typedef struct BL5372_time_t
 // BL5372的闹钟周期计划数据，请勿修改其中成员的先后顺序
 typedef struct BL5372_alarm_cycle_plan_t
 {
-//高位到低位 D6 - D0
+    //高位到低位 D6 - D0
     bool Saturday_en;  // 设置为true星期六会响铃
     bool Friday_en;    // 设置为true星期五会响铃
     bool Thursday_en;  // 设置为true星期四会响铃
@@ -160,13 +160,13 @@ typedef struct BL5372_alarm_cycle_plan_t
 
 void BL5372_config_init();
 
-void BL5372_time_now_set(BL5372_time_t *time);
+void BL5372_time_now_set(BL5372_time_t* time);
 
-void BL5372_time_now_get(BL5372_time_t *time);
+void BL5372_time_now_get(BL5372_time_t* time);
 
-void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);
+void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5372_alarm_cycle_plan_t* cycle_plan);
 
-void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t *time, BL5372_alarm_cycle_plan_t *cycle_plan);
+void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5372_alarm_cycle_plan_t* cycle_plan);
 
 void BL5372_alarm_status_set(BL5372_alarm_select_t alarm, bool status);
 
@@ -176,9 +176,9 @@ bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm);
 
 void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm);
 
-void BL5372_config_set(BL5372_cfg_t *rtc_cfg);
+void BL5372_config_set(BL5372_cfg_t* rtc_cfg);
 
-void BL5372_config_get(BL5372_cfg_t *rtc_cfg);
+void BL5372_config_get(BL5372_cfg_t* rtc_cfg);
 
 uint8_t BCD8421_transform_recode(uint8_t bin_dat);
 
