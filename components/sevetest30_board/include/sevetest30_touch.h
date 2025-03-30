@@ -28,14 +28,18 @@
 #include "hal/gpio_types.h"
 #include "driver/mcpwm.h"
 
-#define VIBRA_MOTOR_MCPWM_UNIT  MCPWM_UNIT_0
-#define VIBRA_MOTOR_MCPWM_TIMER MCPWM_TIMER_0
+//线性马达模块
+//驱动信号输入引脚在board_def配置
+// #define VIBRA_IN1_IO GPIO_NUM_X  //线性马达模块的驱动信号输入1
+// #define VIBRA_IN2_IO GPIO_NUM_X //线性马达模块的驱动信号输入2
+#define VIBRA_MOTOR_MCPWM_UNIT  MCPWM_UNIT_0 //选择MCPWM外设的UNIT
+#define VIBRA_MOTOR_MCPWM_TIMER MCPWM_TIMER_0 //选择MCPWM外设的TIMER
 #define VIBRA_MOTOR_MCPWM_DT_MODE MCPWM_ACTIVE_HIGH_COMPLIMENT_MODE //死区模式
 #define VIBRA_MOTOR_MCPWM_RED  1 //上升沿死区时间
 #define VIBRA_MOTOR_MCPWM_FED  1 //下降沿死区时间
 
 
-void vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio);
+esp_err_t vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio);
 
 void vibra_motor_start();
 

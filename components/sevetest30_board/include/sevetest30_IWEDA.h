@@ -37,7 +37,7 @@
 
 #define WIFI_CONNECT_TIMEOUT_MS 30000//WIFI连接等待超时时间
 
-#define HTTP_BUF_MAX 8192 //http输出与URL数据缓存允许大小
+#define HTTP_BUF_MAX 2048 //http输出与URL数据缓存允许大小
 #define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
 #define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 

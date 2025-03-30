@@ -30,23 +30,39 @@
 /// @brief 初始化线性振动马达
 /// @param in1_gpio 驱动信号1 GPIO
 /// @param in2_gpio 驱动信号2 GPIO
-void vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio) {
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+esp_err_t vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio) {
+    const char* TAG = "vibra_motor_init";
+
     mcpwm_config_t mcpwm_config;
     mcpwm_config.cmpr_a = 50.0;
     mcpwm_config.cmpr_b = 50.0;
     mcpwm_config.duty_mode = MCPWM_DUTY_MODE_0;
     mcpwm_config.counter_mode = MCPWM_UP_COUNTER;
     mcpwm_config.frequency = 230;
+
+    esp_err_t ret = ESP_OK;
+
     //驱动信号1引脚绑定
-    mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT, MCPWM0A, in1_gpio);
+    ret = mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT, MCPWM0A, in1_gpio);
+    ESP_RETURN_ON_ERROR(ret, TAG, "驱动信号1引脚绑定时发现问题");
+
     //驱动信号2引脚绑定
-    mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT, MCPWM0B, in2_gpio);
-    //初始化
-    mcpwm_init(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER, &mcpwm_config);
+    ret = mcpwm_gpio_init(VIBRA_MOTOR_MCPWM_UNIT, MCPWM0B, in2_gpio);
+    ESP_RETURN_ON_ERROR(ret, TAG, "驱动信号2引脚绑定时发现问题");
+
+    //初始化MCPWM参数
+    ret = mcpwm_init(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER, &mcpwm_config);
+    ESP_RETURN_ON_ERROR(ret, TAG, "初始化MCPWM参数时发现问题");
+
     //设置波形互补和死区时间
-    mcpwm_deadtime_enable(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER, VIBRA_MOTOR_MCPWM_DT_MODE, VIBRA_MOTOR_MCPWM_RED, VIBRA_MOTOR_MCPWM_FED);
+    ret = mcpwm_deadtime_enable(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER, VIBRA_MOTOR_MCPWM_DT_MODE, VIBRA_MOTOR_MCPWM_RED, VIBRA_MOTOR_MCPWM_FED);
+    ESP_RETURN_ON_ERROR(ret, TAG, "设置波形互补和死区时间时发现问题");
 
     vibra_motor_stop();
+
+    return ESP_OK;
 }
 
 /// @brief 修改线性振动马达运行频率

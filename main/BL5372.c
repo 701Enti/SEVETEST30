@@ -58,10 +58,10 @@ void BL5372_time_now_set(BL5372_time_t* time)
     write_buf[6] = BCD8421_transform_decode(time->month);
     write_buf[7] = BCD8421_transform_decode(time->year);
 
-    esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
 
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题,请检查电池电源连接 描述： %s", esp_err_to_name(err));
+    if (ret != ESP_OK)
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题,请检查电池电源连接 描述： %s", esp_err_to_name(ret));
     else
         ESP_LOGI(TAG, "外部离线RTC实时时间已更新");
 }
@@ -79,9 +79,9 @@ void BL5372_time_now_get(BL5372_time_t* time)
 
     uint8_t read_buf[7] = { 0 };                    // 读取缓存
     uint8_t write_buf = BL5372_REG_TIME_SEC << 4; // 高4位设置起始地址，低4位设置传输模式0000
-    esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK)
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(ret));
 
     time->second = BCD8421_transform_recode(read_buf[0]);
     time->minute = BCD8421_transform_recode(read_buf[1]);
@@ -135,10 +135,10 @@ void BL5372_time_alarm_set(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5
 
     if (write_buf[3] == 0x00)ESP_LOGW(TAG, "设置了没有正确预定响铃周期的无效闹钟");
 
-    esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
 
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
+    if (ret != ESP_OK)
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(ret));
     else
     {
         if (alarm == BL5372_ALARM_A)
@@ -175,9 +175,9 @@ void BL5372_time_alarm_get(BL5372_alarm_select_t alarm, BL5372_time_t* time, BL5
 
     uint8_t read_buf[3] = { 0 }; // 读取缓存
 
-    esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK)
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(ret));
 
     time->minute = BCD8421_transform_recode(read_buf[0]);
     time->hour = BCD8421_transform_recode(read_buf[1]);
@@ -285,23 +285,33 @@ void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm) {
     BL5372_config_set(&cfg_buf);
 }
 
-// 以默认配置初始化BL5372的运行配置
-void BL5372_config_init()
+/// @brief 以默认配置初始化BL5372的运行配置
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t BL5372_config_init()
 {
     BL5372_cfg_t cfg_buf = BL5372_DEFAULT_INIT_CONFIG;
-    BL5372_config_set(&cfg_buf);
+    return BL5372_config_set(&cfg_buf);
 }
 
 
 /// @brief 设置BL5372的运行配置
 /// @param rtc_cfg 作为运行配置的数据的地址
-void BL5372_config_set(BL5372_cfg_t* rtc_cfg)
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t BL5372_config_set(BL5372_cfg_t* rtc_cfg)
 {
     const char* TAG = "BL5372_config_set";
 
     if (!rtc_cfg) {
         ESP_LOGE(TAG, "导入了为空的数据地址");
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     uint8_t write_buf[3] = { 0 }; // 写入缓存
@@ -321,33 +331,42 @@ void BL5372_config_set(BL5372_cfg_t* rtc_cfg)
     write_buf[2] |= rtc_cfg->adj_en_or_xstp << 4;
     write_buf[2] |= rtc_cfg->hour_24_clock_en << 5;
 
-    esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
 
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
-    else
-        ESP_LOGI(TAG, "外部离线RTC配置已更新");
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    ESP_LOGI(TAG, "外部离线RTC配置已更新");
+    return ESP_OK;
 }
 
 
 
 /// @brief 获取BL5372的运行配置
 /// @param rtc_cfg 保存运行配置的数据的地址
-void BL5372_config_get(BL5372_cfg_t* rtc_cfg)
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t BL5372_config_get(BL5372_cfg_t* rtc_cfg)
 {
-
     const char* TAG = "BL5372_config_get";
 
     if (!rtc_cfg) {
         ESP_LOGE(TAG, "导入了为空的数据地址");
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
 
     uint8_t read_buf[2] = { 0 };                  // 读取缓存
     uint8_t write_buf = BL5372_REG_CTRL_1 << 4; // 高4位设置起始地址，低4位设置传输模式0000
-    esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, BL5372_DEVICE_ADD, &write_buf, sizeof(write_buf), read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与外部离线RTC通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(ret));
+        return ret;
+    }
 
     // 映射得到的值
     rtc_cfg->alarm_A_en = 0x01 & (read_buf[0] >> 7);
@@ -361,6 +380,8 @@ void BL5372_config_get(BL5372_cfg_t* rtc_cfg)
     rtc_cfg->INT_out_flag_or_out_keep = 0x01 & (read_buf[1] >> 2);
     rtc_cfg->alarm_A_out_flag_or_out_keep = 0x01 & (read_buf[1] >> 1);
     rtc_cfg->alarm_B_out_flag_or_out_keep = 0x01 & read_buf[1];
+
+    return ESP_OK;
 }
 
 

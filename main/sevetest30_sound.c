@@ -591,12 +591,12 @@ void i2s_filter_raw_start(TaskFunction_t running_event, UBaseType_t priority)
   xTaskCreatePinnedToCore(running_event, "i2s_filter_raw_run", ASR_EVT_TASK_STACK_SIZE, NULL, priority, NULL, ASR_EVT_TASK_CORE);
 }
 
-/// @brief uri音乐播放
-/// @param uri 导入音乐uri
+/// @brief uri/url音乐播放
+/// @param uriurl 导入音乐uri/url
 /// @param priority 任务优先级
-void music_uri_play(const char* uri, UBaseType_t priority)
+void music_uri_or_url_play(const char* uri_or_url, UBaseType_t priority)
 {
-  const char* TAG = "music_uri_play";
+  const char* TAG = "music_uri_or_url_play";
 
   // common_mp3_evt不为空说明还有音频事件运行中
   if (common_mp3_evt != NULL) {
@@ -633,7 +633,7 @@ void music_uri_play(const char* uri, UBaseType_t priority)
   i2s_stream_reader = NULL;
 
   audio_pipeline_link(pipeline, &link_tag[0], 3);
-  audio_element_set_uri(http_stream_reader, uri);
+  audio_element_set_uri(http_stream_reader, uri_or_url);
 
   http_i2s_mp3_music_start(&common_mp3_running_event, priority);
 }

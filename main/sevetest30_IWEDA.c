@@ -332,6 +332,7 @@ void http_init_get_request()
     // 配置http传输信息
     esp_http_client_config_t http_config;
     memset(&http_config, 0, sizeof(http_config)); // 对参数初始化为0
+    http_config.buffer_size = HTTP_BUF_MAX;       //设置缓冲区大小
     http_config.url = &http_get_url_buf[0];       // 导入URL
 
     // 配置传输任务，GET方式

@@ -9,9 +9,9 @@
     "idf.espIdfPathWin": "e:\\esp-idf",
     "idf.espAdfPathWin": "E:\\.espressif\\esp-adf",
     "idf.openOcdConfigs": [
-        "board/esp32s3-builtin.cfg"
+        "board/esp32s3-bridge.cfg"
     ],
-    "idf.portWin": "COM4",
+    "idf.portWin": "COM5",
     "idf.pythonBinPathWin": "e:\\.espressif\\python_env\\idf4.4_py3.11_env\\Scripts\\python.exe",
     "idf.toolsPathWin": "e:\\.espressif",
     "files.associations": {

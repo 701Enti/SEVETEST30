@@ -156,7 +156,7 @@ enum
 
 //部分嵌入式功能寄存器地址库
 //对嵌入式功能寄存器内容的所有修改都必须在断电模式下执行
-enum{
+enum {
   CONFIG_PEDO_THS_MIN = 0x0F,
 };
 
@@ -258,73 +258,73 @@ typedef enum {
 }IMU_FTYPE_t;//陀螺仪低通滤波器（LPF1）带宽选择
 
 typedef enum {
-IMU_FF_THS_156MG,
-IMU_FF_THS_219MG,
-IMU_FF_THS_250MG,
-IMU_FF_THS_312MG,
-IMU_FF_THS_344MG,
-IMU_FF_THS_406MG,
-IMU_FF_THS_469MG,
-IMU_FF_THS_500MG,
+  IMU_FF_THS_156MG,
+  IMU_FF_THS_219MG,
+  IMU_FF_THS_250MG,
+  IMU_FF_THS_312MG,
+  IMU_FF_THS_344MG,
+  IMU_FF_THS_406MG,
+  IMU_FF_THS_469MG,
+  IMU_FF_THS_500MG,
 }IMU_FF_THS_t;//自由落体检测触发阈值,单位mg 即 1 x 10^-3 g
 
 
 typedef enum {
- IMU_INACT_EN_DISABLE,//失能
- IMU_INACT_EN_MODE1,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪 不改变
- IMU_INACT_EN_MODE2,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 睡眠模式
- IMU_INACT_EN_MODE3,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 断电模式
+  IMU_INACT_EN_DISABLE,//失能
+  IMU_INACT_EN_MODE1,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪 不改变
+  IMU_INACT_EN_MODE2,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 睡眠模式
+  IMU_INACT_EN_MODE3,//如果静默事件触发,将加速度计ODR设置为12.5Hz（低功率模式）陀螺仪设置为 断电模式
 }IMU_INACT_EN_t;//静默功能设置
 
 typedef enum {
- IMU_DEC_FIFO_GYRO_NONE,//不抽取任何数据
- IMU_DEC_FIFO_GYRO_ALL,//完整数据(系数1抽取)
- IMU_DEC_FIFO_GYRO_2,//以系数2抽取
- IMU_DEC_FIFO_GYRO_3,//以系数3抽取
- IMU_DEC_FIFO_GYRO_4,//以系数4抽取
- IMU_DEC_FIFO_GYRO_8,//以系数8抽取
- IMU_DEC_FIFO_GYRO_16,//以系数16抽取
- IMU_DEC_FIFO_GYRO_32,//以系数32抽取
+  IMU_DEC_FIFO_GYRO_NONE,//不抽取任何数据
+  IMU_DEC_FIFO_GYRO_ALL,//完整数据(系数1抽取)
+  IMU_DEC_FIFO_GYRO_2,//以系数2抽取
+  IMU_DEC_FIFO_GYRO_3,//以系数3抽取
+  IMU_DEC_FIFO_GYRO_4,//以系数4抽取
+  IMU_DEC_FIFO_GYRO_8,//以系数8抽取
+  IMU_DEC_FIFO_GYRO_16,//以系数16抽取
+  IMU_DEC_FIFO_GYRO_32,//以系数32抽取
 }IMU_DEC_FIFO_GYRO_t;//陀螺仪FIFO数据集抽取设置
 
 typedef enum {
- IMU_DEC_FIFO_XL_NONE,//不抽取任何数据
- IMU_DEC_FIFO_XL_ALL,//完整数据(系数1抽取)
- IMU_DEC_FIFO_XL_2,//以系数2抽取
- IMU_DEC_FIFO_XL_3,//以系数3抽取
- IMU_DEC_FIFO_XL_4,//以系数4抽取
- IMU_DEC_FIFO_XL_8,//以系数8抽取
- IMU_DEC_FIFO_XL_16,//以系数16抽取
- IMU_DEC_FIFO_XL_32,//以系数32抽取
+  IMU_DEC_FIFO_XL_NONE,//不抽取任何数据
+  IMU_DEC_FIFO_XL_ALL,//完整数据(系数1抽取)
+  IMU_DEC_FIFO_XL_2,//以系数2抽取
+  IMU_DEC_FIFO_XL_3,//以系数3抽取
+  IMU_DEC_FIFO_XL_4,//以系数4抽取
+  IMU_DEC_FIFO_XL_8,//以系数8抽取
+  IMU_DEC_FIFO_XL_16,//以系数16抽取
+  IMU_DEC_FIFO_XL_32,//以系数32抽取
 }IMU_DEC_FIFO_XL_t;//加速度计FIFO数据集抽取设置
 
 typedef enum {
- IMU_ODR_FIFO_DISABLE,//FIFO关闭
- IMU_ODR_FIFO_MIN,//12.5 Hz
- IMU_ODR_FIFO_1,//26 Hz
- IMU_ODR_FIFO_2,//52 Hz
- IMU_ODR_FIFO_3,//104 Hz
- IMU_ODR_FIFO_4,//208 Hz
- IMU_ODR_FIFO_5,//416 Hz
- IMU_ODR_FIFO_6,//833 Hz
- IMU_ODR_FIFO_7,//1.66 kHz
- IMU_ODR_FIFO_8,//3.33 kHz
- IMU_ODR_FIFO_MAX,//6.66 kHz
+  IMU_ODR_FIFO_DISABLE,//FIFO关闭
+  IMU_ODR_FIFO_MIN,//12.5 Hz
+  IMU_ODR_FIFO_1,//26 Hz
+  IMU_ODR_FIFO_2,//52 Hz
+  IMU_ODR_FIFO_3,//104 Hz
+  IMU_ODR_FIFO_4,//208 Hz
+  IMU_ODR_FIFO_5,//416 Hz
+  IMU_ODR_FIFO_6,//833 Hz
+  IMU_ODR_FIFO_7,//1.66 kHz
+  IMU_ODR_FIFO_8,//3.33 kHz
+  IMU_ODR_FIFO_MAX,//6.66 kHz
 }IMU_ODR_FIFO_t;//FIFO ORD选择
 
-typedef enum{
-IMU_FIFO_MODE_BYPASS            = 0,//旁路模式,FIFO关闭
-IMU_FIFO_MODE_FIFO              = 1,//FIFO模式,数据全部填充状态不再抽取
-IMU_FIFO_MODE_CONTINUOUS        = 6, //连续模式,如果FIFO已满，新数据将覆盖旧的数据
-IMU_FIFO_MODE_CONTINUOUS_FIFO   = 3,//先是连续模式，触发器被取消断言后进行FIFO模式
-IMU_FIFO_MODE_BYPASS_CONTINUOUS = 4,//先是旁路模式，触发器被取消断言后进行连续模式
+typedef enum {
+  IMU_FIFO_MODE_BYPASS = 0,//旁路模式,FIFO关闭
+  IMU_FIFO_MODE_FIFO = 1,//FIFO模式,数据全部填充状态不再抽取
+  IMU_FIFO_MODE_CONTINUOUS = 6, //连续模式,如果FIFO已满，新数据将覆盖旧的数据
+  IMU_FIFO_MODE_CONTINUOUS_FIFO = 3,//先是连续模式，触发器被取消断言后进行FIFO模式
+  IMU_FIFO_MODE_BYPASS_CONTINUOUS = 4,//先是旁路模式，触发器被取消断言后进行连续模式
 }IMU_FIFO_MODE_t;//FIFO运行模式
 
-typedef enum{
-IMU_SIXD_THS_80_DEGREES,//80度
-IMU_SIXD_THS_70_DEGREES,//70度
-IMU_SIXD_THS_60_DEGREES,//60度
-IMU_SIXD_THS_50_DEGREES,//50度
+typedef enum {
+  IMU_SIXD_THS_80_DEGREES,//80度
+  IMU_SIXD_THS_70_DEGREES,//70度
+  IMU_SIXD_THS_60_DEGREES,//60度
+  IMU_SIXD_THS_50_DEGREES,//50度
 }IMU_SIXD_THS_t;// 4D/6D检测功能的阈值
 
 
@@ -358,19 +358,19 @@ typedef struct
 
 uint8_t value_compound_CTRL1_XL(IMU_ORD_XL_t ODR_XL, IMU_FS_XL_t FS_XL, bool LPF1_BW_SEL, bool BW0_XL);
 uint8_t value_compound_CTRL2_G(IMU_ORD_G_t ODR_G, IMU_FS_G_t FS_G);
-uint8_t value_compound_CTRL3_C(bool BOOT,bool BDU,bool H_LACTIVE,bool PP_OD,bool SIM,bool IF_INC,bool BLE,bool SW_RESET);
+uint8_t value_compound_CTRL3_C(bool BOOT, bool BDU, bool H_LACTIVE, bool PP_OD, bool SIM, bool IF_INC, bool BLE, bool SW_RESET);
 uint8_t value_compound_CTRL4_C(bool DEN_XL_EN, bool SLEEP, bool INT2_on_INT1, bool DEN_DRDY_INT1, bool DRDY_MASK, bool I2C_disable, bool LPF1_SEL_G);
 uint8_t value_compound_CTRL6_C(bool TRIG_EN, bool LVL_EN, bool LVL2_EN, bool XL_HM_MODE, bool USR_OFF_W, IMU_FTYPE_t FTYPE);
 uint8_t value_compound_CTRL7_G(bool G_HM_MODE, bool HP_EN_G, IMU_HPM_G_t HPM_G, bool ROUNDING_STATUS);
 uint8_t value_compound_CTRL8_XL(bool LPF2_XL_EN, IMU_HPCF_XL_t HPCF_XL, bool HP_REF_MODE, bool INPUT_COMPOSITE, bool HP_SLOPE_XL_EN, bool LOW_PASS_ON_6D);
-uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN,bool TIMER_EN,bool PEDO_EN,bool TILT_EN,bool FUNC_EN,bool PEDO_RST_STEP,bool SIGN_MOTION_EN);
-uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR,bool INT1_SIGN_MOT,bool INT1_FULL_FLAG,bool INT1_FIFO_OVR,bool INT1_FTH,bool INT1_BOOT,bool INT1_DRDY_G,bool INT1_DRDY_XL);
-uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA,bool INT2_STEP_COUNT_OV,bool INT2_FULL_FLAG,bool INT2_FIFO_OVR,bool INT2_FTH,bool INT2_DRDY_TEMP,bool INT2_DRDY_G,bool INT2_DRDY_XL);
-uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE,bool INT1_SINGLE_TAP,bool INT1_WU,bool INT1_FF,bool INT1_DOUBLE_TAP,bool INT1_6D,bool INT1_TILT,bool INT1_TIMER);
-uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE,IMU_INACT_EN_t INACT_EN,bool SLOPE_FDS,bool TAP_X_EN,bool TAP_Y_EN,bool TAP_Z_EN,bool LIR);
-uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO,IMU_DEC_FIFO_XL_t DEC_FIFO_XL);
-uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO,IMU_FIFO_MODE_t FIFO_MODE);
-uint8_t value_compound_partly_TAP_THS_6D(bool D4D_EN,IMU_SIXD_THS_t SIXD_THS);
+uint8_t value_compound_CTRL10_C(bool WRIST_TILT_EN, bool TIMER_EN, bool PEDO_EN, bool TILT_EN, bool FUNC_EN, bool PEDO_RST_STEP, bool SIGN_MOTION_EN);
+uint8_t value_compound_INT1_CTRL(bool INT1_STEP_DETECTOR, bool INT1_SIGN_MOT, bool INT1_FULL_FLAG, bool INT1_FIFO_OVR, bool INT1_FTH, bool INT1_BOOT, bool INT1_DRDY_G, bool INT1_DRDY_XL);
+uint8_t value_compound_INT2_CTRL(bool INT2_STEP_DELTA, bool INT2_STEP_COUNT_OV, bool INT2_FULL_FLAG, bool INT2_FIFO_OVR, bool INT2_FTH, bool INT2_DRDY_TEMP, bool INT2_DRDY_G, bool INT2_DRDY_XL);
+uint8_t value_compound_MD1_CFG(bool INT1_INACT_STATE, bool INT1_SINGLE_TAP, bool INT1_WU, bool INT1_FF, bool INT1_DOUBLE_TAP, bool INT1_6D, bool INT1_TILT, bool INT1_TIMER);
+uint8_t value_compound_TAP_CFG(bool INTERRUPTS_ENABLE, IMU_INACT_EN_t INACT_EN, bool SLOPE_FDS, bool TAP_X_EN, bool TAP_Y_EN, bool TAP_Z_EN, bool LIR);
+uint8_t value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_t DEC_FIFO_GYRO, IMU_DEC_FIFO_XL_t DEC_FIFO_XL);
+uint8_t value_compound_FIFO_CTRL5(IMU_ODR_FIFO_t ODR_FIFO, IMU_FIFO_MODE_t FIFO_MODE);
+uint8_t value_compound_partly_TAP_THS_6D(bool D4D_EN, IMU_SIXD_THS_t SIXD_THS);
 uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 
 
@@ -385,18 +385,18 @@ uint8_t value_compound_partly_FREE_FALL(IMU_FF_THS_t FF_THS);
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM 13 //默认寄存器值配置数据库的最大条目数量
 #define IMU_INIT_DEFAULT_MAPPING_DATABASE    { \
 MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,true)),\ 
-MAP_BASE(CTRL3_C,value_compound_CTRL3_C(false,true,false,false,false,true,false,false)), \
-MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_2,IMU_FS_XL_4G, false, false)), \
-MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_2,IMU_FS_G_125DPS)), \
-MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_16,IMU_DEC_FIFO_XL_16)), \
-MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_6,IMU_FIFO_MODE_CONTINUOUS)), \
-MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true,IMU_INACT_EN_MODE1,false,false,false,false,true)), \
-MAP_BASE(FREE_FALL,0x30|value_compound_partly_FREE_FALL(IMU_FF_THS_312MG)), \
-MAP_BASE(MD1_CFG,value_compound_MD1_CFG(false,false,false,true,false,false,false,false)), \
-MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true,IMU_SIXD_THS_80_DEGREES)), \
-MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,false,true,true,true)), \
-MAP_BASE(CTRL10_C,value_compound_CTRL10_C(false,false,true,false,true,false,true)), \
-MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \    
+MAP_BASE(CTRL3_C, value_compound_CTRL3_C(false, true, false, false, false, true, false, false)), \
+MAP_BASE(CTRL1_XL, value_compound_CTRL1_XL(IMU_ORD_XL_2, IMU_FS_XL_4G, false, false)), \
+MAP_BASE(CTRL2_G, value_compound_CTRL2_G(IMU_ORD_G_2, IMU_FS_G_125DPS)), \
+MAP_BASE(FIFO_CTRL3, value_compound_FIFO_CTRL3(IMU_DEC_FIFO_GYRO_16, IMU_DEC_FIFO_XL_16)), \
+MAP_BASE(FIFO_CTRL5, value_compound_FIFO_CTRL5(IMU_ODR_FIFO_6, IMU_FIFO_MODE_CONTINUOUS)), \
+MAP_BASE(TAP_CFG, value_compound_TAP_CFG(true, IMU_INACT_EN_MODE1, false, false, false, false, true)), \
+MAP_BASE(FREE_FALL, 0x30 | value_compound_partly_FREE_FALL(IMU_FF_THS_312MG)), \
+MAP_BASE(MD1_CFG, value_compound_MD1_CFG(false, false, false, true, false, false, false, false)), \
+MAP_BASE(TAP_THS_6D, value_compound_partly_TAP_THS_6D(true, IMU_SIXD_THS_80_DEGREES)), \
+MAP_BASE(CTRL10_C, value_compound_CTRL10_C(false, false, true, false, true, true, true)), \
+MAP_BASE(CTRL10_C, value_compound_CTRL10_C(false, false, true, false, true, false, true)), \
+MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \
 }
 
 //启用滤波
@@ -418,26 +418,26 @@ MAP_BASE(CONFIG_PEDO_THS_MIN, 0x90), \
 #define IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM 12 //默认FIFO映射数据库的最大条目数量
 #define IMU_DEFAULT_FIFO_MAPPING_DATABASE(Gx_L,Gx_H,Gy_L,Gy_H,Gz_L,Gz_H,XLx_L,XLx_H,XLy_L,XLy_H,XLz_L,XLz_H)    { \
 MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gx_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gx_H),\
-MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gy_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gy_H),\
-MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)Gz_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)Gz_H),\
-MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLx_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLx_H),\
-MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLy_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLy_H),\
-MAP_BASE(FIFO_DATA_OUT_L,(uint32_t)XLz_L),\ 
-MAP_BASE(FIFO_DATA_OUT_H,(uint32_t)XLz_H),\
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)Gx_H), \
+MAP_BASE(FIFO_DATA_OUT_L, (uint32_t)Gy_L), \
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)Gy_H), \
+MAP_BASE(FIFO_DATA_OUT_L, (uint32_t)Gz_L), \
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)Gz_H), \
+MAP_BASE(FIFO_DATA_OUT_L, (uint32_t)XLx_L), \
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)XLx_H), \
+MAP_BASE(FIFO_DATA_OUT_L, (uint32_t)XLy_L), \
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)XLy_H), \
+MAP_BASE(FIFO_DATA_OUT_L, (uint32_t)XLz_L), \
+MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)XLz_H), \
 }
 
 
 /*******************************公共API***************************************/
 esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num);
 esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
-esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database,int map_num,int read_num);
+esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);
 
-void lsm6ds3trc_init_or_reset();
+esp_err_t lsm6ds3trc_init_or_reset();
 
 bool lsm6ds3trc_get_free_fall_status();
 

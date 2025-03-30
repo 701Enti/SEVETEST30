@@ -44,16 +44,16 @@ typedef struct ext_io_ctrl_t
 
 extern ext_io_ctrl_t ext_io_ctrl;
 
-void sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode, TCA6416A_value_t* p_ext_value);
+esp_err_t sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode, TCA6416A_level_t* p_ext_value);
 
-void ext_io_value_service();
+esp_err_t ext_io_level_service();
 
-void ext_io_mode_service();
+esp_err_t ext_io_mode_service();
 
 //以下是内部使用函数，一般无需调用
 
 //外部IO的初始化工作已经会在gpio_init函数调用时一起执行
-void ext_io_init(TCA6416A_mode_t* p_mode, TCA6416A_value_t* p_value);
+esp_err_t ext_io_reset_to_default(TCA6416A_mode_t* p_mode, TCA6416A_level_t* p_value);
 
 
 

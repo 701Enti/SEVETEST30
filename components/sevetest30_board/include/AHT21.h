@@ -44,7 +44,7 @@ typedef struct AHT21_result_t
   float hum;//湿度,%RH
 }AHT21_result_t;
 
-void AHT21_begin();
+esp_err_t AHT21_begin();
 
 void AHT21_trigger();
 

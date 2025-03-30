@@ -38,18 +38,19 @@ static const char* TAG = "SEVETEST30_BOARD";
 static audio_board_handle_t board_handle = NULL;
 extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 
-audio_board_handle_t audio_board_init(void)
+esp_err_t audio_board_init(void)
 {
     if (board_handle)
     {
-        ESP_LOGW(TAG, "The board has already been initialized!");
-        return board_handle;
+        ESP_LOGW(TAG, "音频面板之前已经初始化且未释放,无法再次初始化");
+        return ESP_ERR_INVALID_STATE;
     }
+
     board_handle = (audio_board_handle_t)audio_calloc(1, sizeof(struct audio_board_handle));
-    AUDIO_MEM_CHECK(TAG, board_handle, return NULL);
+    AUDIO_MEM_CHECK(TAG, board_handle, return ESP_ERR_NO_MEM);
     board_handle->audio_hal = audio_board_codec_init();
 
-    return board_handle;
+    return ESP_OK;
 }
 
 esp_err_t init_audio_codec()

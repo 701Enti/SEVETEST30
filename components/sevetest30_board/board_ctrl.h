@@ -50,6 +50,20 @@ extern esp_periph_set_handle_t se30_periph_set_handle;
 
 typedef enum
 {
+   AUDIO_BOARD_INIT = 0,//初始化音频面板(包括了I2C的初始化和注册)
+   SEVETEST30_GPIO_INIT,//初始化GPIO服务(包括扩展GPIO)
+   FONTS_CHIP_INIT,//字库芯片
+   BL5372_CONFIG_INIT,//BL5372(离线RTC计时)
+   AHT21_BEGIN,//AHT21(温湿度传感器)
+   LSM6DS3TRC_INIT_OR_RESET,//LSM6DS3TRC(姿态传感器)
+   VIBRA_MOTOR_INIT,//震动马达
+   LEDARRAY_INIT,//LED阵列
+   INIT_STEP_NUMBER //(初始化步骤数量)
+} init_step_id_t
+
+
+typedef enum
+{
    BOARD_CTRL_ALL = 1,//对结构体存储的参数全部生效,包括没有在结构体初始化后修改值的存储参数
 
    BOARD_CTRL_DEVICE_I2C,//设备I2C通讯相关(设备I2C端口号在board_def.h指定)
@@ -73,7 +87,7 @@ typedef struct board_ctrl_t
    i2c_config_t* p_i2c_device_config;   //设备I2C配置信息的地址,如果使用BOARD_CTRL_ALL,I2C配置在所有控制事务最前发生
 
    TCA6416A_mode_t* p_ext_io_mode;   // 存储IO模式信息的结构体的地址，数据是保持的
-   TCA6416A_value_t* p_ext_io_value; // 存储IO电平信息的结构体的地址，数据是保持的
+   TCA6416A_level_t* p_ext_io_value; // 存储IO电平信息的结构体的地址，数据是保持的
 
    uint8_t amplifier_volume;         // 功放音量，取值为 0 - (board_def.h中常量AMP_VOL_MAX的值),等于 0 时将使得功放进入低功耗关断状态
    bool amplifier_mute;              // 功放静音使能，true/false
@@ -89,7 +103,7 @@ typedef struct board_ctrl_t
 } board_ctrl_t;
 
 
-esp_err_t sevetest30_all_device_init(board_ctrl_t* board_ctrl);
+esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl);
 void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t* board_ctrl);
 esp_err_t device_i2c_init();

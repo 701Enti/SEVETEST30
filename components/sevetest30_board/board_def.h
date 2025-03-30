@@ -64,35 +64,41 @@
 #define ESP_SD_PIN_CD            -1
 #define ESP_SD_PIN_WP            -1
 
-//默认为音频设备控制提供(以下定义被board_pins_config为ES8388提供的回调函数应用)
+//I2C配置-默认为音频设备控制提供(以下定义被board_pins_config为ES8388提供的回调函数应用)
 #define AUDIO_I2C_PORT      I2C_NUM_0
 #define AUDIO_I2C_SDA_IO    GPIO_NUM_48
 #define AUDIO_I2C_SCL_IO    GPIO_NUM_47
 //(通信频率在ES8838.c固定100kHz)
-//(board_ctrl更改后,频率与DEVICE_I2C_FREQ_HZ一致,这只是因为共用一个I2C_NUM_0)
 
-//默认为其他设备控制提供
-// (sevetest30 设备与音频共用一个I2C_NUM_0,通信频率在ES8838.c固定100kHz,需要调整通讯频率的器件在board_ctrl中请求)
+//I2C配置-默认为其他设备控制提供
 #define DEVICE_I2C_PORT      I2C_NUM_0
 #define DEVICE_I2C_SDA_IO    GPIO_NUM_48
 #define DEVICE_I2C_SCL_IO    GPIO_NUM_47
-#define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000)
+//SEVETEST30中设备与音频共用一个I2C_NUM_0,通信频率在ES8838.c固定100kHz
+//为了使该设置在board_ctrl生效,需要使用board_ctrl的device_i2c_init()
+#define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000) 
 
 
-
+//I2S总线通信相关
 #define I2S_MCK_IO GPIO_NUM_11;
 #define I2S_BCK_IO GPIO_NUM_12;
 #define I2S_WS_IO  GPIO_NUM_14;
 #define I2S_DAC_DATA_IO GPIO_NUM_13;
 #define I2S_ADC_DATA_IO GPIO_NUM_21;
 
+
+//SPI总线通信相关
 #define SPI_CS_IO   GPIO_NUM_0;
 #define SPI_MOSI_IO GPIO_NUM_36;
 #define SPI_MISO_IO GPIO_NUM_35;
 #define SPI_SCLK_IO GPIO_NUM_37;
-#define FONTS_CHIP_SPI_ID SPI2_HOST
-#define FONT_SPI_FREQ (1 * 1000000)//SPI通讯频率(单位HZ)
 
+//字库芯片设置(挂载在SPI总线)
+#define FONT_CHIP_SPI_ID SPI2_HOST
+#define FONT_CHIP_SPI_FREQ (1 * 1000 * 1000)//SPI通讯频率(单位HZ)
+#define FONT_CHIP_SPI_QUEUE_SIZE 7//SPI队列大小
+
+//音频编码芯片设置
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
         .adc_input  = AUDIO_HAL_ADC_INPUT_LINE1,        \
         .dac_output = AUDIO_HAL_DAC_OUTPUT_ALL,         \
@@ -107,22 +113,20 @@
 
 //以下是针对SE30硬件的特殊部分的定义
 
+//线性马达模块
+#define VIBRA_IN1_IO GPIO_NUM_9  //线性马达模块的驱动信号输入1
+#define VIBRA_IN2_IO GPIO_NUM_10 //线性马达模块的驱动信号输入2
+
 //数字电位器-音量控制
 #define  AMP_DP_ADD    0x3E  //I2C地址     数字电位器访问地址 这里用的是TPL0401B，它性价比足够高，可以尽量使用完全一样型号的数字电位器，因为这可能涉及通讯时是否需要命令的特殊问题，程序可能不兼容
 #define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送，如TPL0401B需要0x00
 #define  AMP_STEP_VOL  0x01  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
 #define  AMP_VOL_MAX   100   //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
-
-
 //数字电位器-辅助电压5V 下调控制
 #define  BV_DP_ADD    0x2E  //I2C地址     使用了TPL0401A
 #define  BV_DP_COMMAND 0x00 //操作命令
 #define  BV_STEP_VOL  0x01  //单位步长度
 #define  BV_VOL_MAX 100      //总映射步数
-
-//线性马达模块
-#define VIBRA_IN1_IO GPIO_NUM_9
-#define VIBRA_IN2_IO GPIO_NUM_10
 
 //电池接入控制
 #define BAT_IN_CTRL_IO   GPIO_NUM_2

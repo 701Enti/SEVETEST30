@@ -31,20 +31,20 @@
 
 //SPI通讯 GPIO SPI_ID 时钟频率 在board.def中设置
 
-#define FONT_SPI_MODE  0//SPI通讯模式
+#define GT32L32S0140_SPI_MODE  0//SPI通讯模式
 
-#define FONT_READ_CMD 0x03 //普通读命令码
-#define FONT_READ_COMMAND_BITS 8       //普通读 命令 位长度
-#define FONT_READ_ADDRESS_BITS 8 * 3   //普通读 地址 位长度
-#define FONT_READ_DUMMY_BITS  0     //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
-#define FONT_READ_TIMEOUT_MS 1000   //读取通讯超时时间,单位ms
+#define GT32L32S0140_READ_CMD 0x03 //普通读命令码
+#define GT32L32S0140_READ_COMMAND_BITS 8       //普通读 命令 位长度
+#define GT32L32S0140_READ_ADDRESS_BITS 8 * 3   //普通读 地址 位长度
+#define GT32L32S0140_READ_DUMMY_BITS  0     //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
+#define GT32L32S0140_READ_TIMEOUT_MS 1000   //读取通讯超时时间,单位ms
 
-#define FONT_GB2312_MAP_BASE_ADD 0x3E618B //Unicode到GB2312映射表基地址
-#define FONT_ZH_CN_12x_BASE_ADD  0x09670E //12x12点阵GB2312汉字&字符基地址
-#define FONT_ASCII_6X12_BASE_ADD 0x080900 //6x12点阵ASCII字符基地址
+#define GT32L32S0140_GB2312_MAP_BASE_ADD 0x3E618B //Unicode到GB2312映射表基地址
+#define GT32L32S0140_ZH_CN_12x_BASE_ADD  0x09670E //12x12点阵GB2312汉字&字符基地址
+#define GT32L32S0140_ASCII_6X12_BASE_ADD 0x080900 //6x12点阵ASCII字符基地址
 
-#define FONT_READ_ZH_CN_12X_BYTES 12 * 2 //一个12x12中文字模数据字节数 
-#define FONT_READ_ASCII_6X12_BYTES 12 //一个6x12ASCII字模数据字节数 
+#define FONT_CHIP_READ_ZH_CN_12X_BYTES 12 * 2 //一个12x12中文字模数据字节数 
+#define FONT_CHIP_READ_ASCII_6X12_BYTES 12 //一个6x12ASCII字模数据字节数 
 
 esp_err_t fonts_chip_init();
 

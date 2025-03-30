@@ -158,7 +158,7 @@ typedef struct BL5372_alarm_cycle_plan_t
         .alarm_B_out_flag_or_out_keep = false,   \
     }
 
-void BL5372_config_init();
+esp_err_t BL5372_config_init();
 
 void BL5372_time_now_set(BL5372_time_t* time);
 
@@ -176,9 +176,9 @@ bool BL5372_alarm_is_ringing(BL5372_alarm_select_t alarm);
 
 void BL5372_alarm_stop_ringing(BL5372_alarm_select_t alarm);
 
-void BL5372_config_set(BL5372_cfg_t* rtc_cfg);
+esp_err_t BL5372_config_set(BL5372_cfg_t* rtc_cfg);
 
-void BL5372_config_get(BL5372_cfg_t* rtc_cfg);
+esp_err_t BL5372_config_get(BL5372_cfg_t* rtc_cfg);
 
 uint8_t BCD8421_transform_recode(uint8_t bin_dat);
 

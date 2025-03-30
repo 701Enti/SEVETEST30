@@ -41,7 +41,7 @@
 #define FFT_UI_TASK_STACK_SIZE (3*1024)//FFT UI绘制任务堆栈大小
 
 #define FFT_N_SAMPLES 2048    // FFT 点数N 取2的整数次幂
-#define DSP_MAX_FFT_SIZE    8192     //最大FFT缓冲区大小
+#define DSP_MAX_FFT_SIZE    2048    //最大FFT缓冲区大小
 
 #define FFT_DAMPEN_MULTIPLES 50 // FFT 音频数据衰减倍数
 #define FFT_VIEW_DATA_MIN 0   // FFT UI视口音频数据最小值

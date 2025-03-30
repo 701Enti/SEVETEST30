@@ -76,7 +76,7 @@ typedef struct TCA6416A_mode_t // 模式配置，0=输出模式 1=输入模式�
 
 //对于设计现实的不同，您可以更改结构体成员变量名，独立应用于您的程序
 //但是必须确保定义时成员对应的IO次序不变，定义顺序必须为引脚顺序p00-p17
-typedef struct TCA6416A_value_t
+typedef struct TCA6416A_level_t
 {
 
     bool main_button; //主按键低电平表示按下
@@ -97,11 +97,11 @@ typedef struct TCA6416A_value_t
     bool ALARM_INT;//闹钟中断信号 0表示设定的中断事务进行中 该信号还会在关机状态下唤醒SE30
 
     bool addr; /// ADDR引脚电平，用于设置主机地址
-}TCA6416A_value_t;
+}TCA6416A_level_t;
 
-void TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode);
+esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode);
 
-void TCA6416A_gpio_service(TCA6416A_value_t* pTCA6416Avalue);
+esp_err_t TCA6416A_gpio_service(TCA6416A_level_t* pTCA6416Avalue);
 
 
 #define TCA6416A_DEFAULT_CONFIG_MODE  SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE

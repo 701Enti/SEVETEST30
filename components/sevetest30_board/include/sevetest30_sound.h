@@ -109,5 +109,5 @@ esp_err_t audio_element_all_init(const char* link_tag[], int link_num);
 
 // 外部功能函数
 void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority);
-void music_uri_play(const char* uri, UBaseType_t priority);
+void music_uri_or_url_play(const char* uri, UBaseType_t priority);
 void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority);

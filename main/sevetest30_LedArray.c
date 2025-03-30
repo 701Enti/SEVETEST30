@@ -526,44 +526,44 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 
 	//申请字符unicode编码缓存
 	uint32_t* buf_unicode = NULL;
-	buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	buf_unicode = (uint32_t*)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 	while (!buf_unicode)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-		buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+		buf_unicode = (uint32_t*)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 	}
-	memset(buf_unicode, 0, FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 
 	//申请UTF-8编码缓存
 	char* str_buf = NULL;
-	str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	str_buf = (char*)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 	while (!str_buf)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
-		str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+		str_buf = (char*)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 	}
-	memset(str_buf, 0, FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 
 	//格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
 	va_list ap;
 	va_start(ap, format);
-	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
+	vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
 
 	//获取所有要显示字符的Unicode,以及字符总个数
-	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
 
 	//申请字符点阵数据缓存
 	uint8_t* font_buf = NULL;
-	font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	font_buf = (uint8_t*)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 	while (!font_buf)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
-		font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+		font_buf = (uint8_t*)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 	}
-	memset(font_buf, 0, total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	memset(font_buf, 0, total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 
 	int idx = 0;//选定操作的为[idx]号字符
 	uint32_t ASCII_num = 0;//总共含有的ASCII字符个数
@@ -571,10 +571,10 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 	//从字库读取所有字符的点阵数据到font_buf
 	for (idx = 0;idx < total_unit;idx++) {
 		if (buf_unicode[idx] >= 128) {
-			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
+			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
 		}
 		else {//Unicode小于128兼容ASCII字符集
-			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
+			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
 			ASCII_num++;
 		}
 	}
@@ -587,12 +587,12 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 		x_buf = x + x_base;//获取当前选定的[idx]号字符点阵图像的起始x轴坐标
 		if (buf_unicode[idx] >= 128) {
 			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-				separation_draw(x_buf, y, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
+				separation_draw(x_buf, y, 12, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ZH_CN_12X_BYTES, color, change);
 			x_base += 12;
 		}
 		else {//Unicode小于128兼容ASCII字符集
 			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-				separation_draw(x_buf, y, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
+				separation_draw(x_buf, y, 6, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ASCII_6X12_BYTES, color, change);
 			x_base += 6;
 		}
 	}
@@ -617,44 +617,44 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 	//申请字符unicode编码缓存
 	uint32_t* buf_unicode = NULL;
-	buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	buf_unicode = (uint32_t*)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 	while (!buf_unicode)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-		buf_unicode = (uint32_t*)malloc(FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+		buf_unicode = (uint32_t*)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 	}
-	memset(buf_unicode, 0, FONT_PRINT_NUM_MAX * sizeof(uint32_t));
+	memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 
 	//申请UTF-8编码缓存
 	char* str_buf = NULL;
-	str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	str_buf = (char*)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 	while (!str_buf)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
-		str_buf = (char*)malloc(FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+		str_buf = (char*)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 	}
-	memset(str_buf, 0, FONT_PRINT_FMT_BUF_SIZE * sizeof(char));
+	memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
 
 	//格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
 	va_list ap;
 	va_start(ap, format);
-	vsnprintf(str_buf, FONT_PRINT_FMT_BUF_SIZE, format, ap);
+	vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
 
 	//获取所有要显示字符的Unicode,以及字符总个数
-	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_PRINT_NUM_MAX);
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
 
 	//申请字符点阵数据缓存
 	uint8_t* font_buf = NULL;
-	font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	font_buf = (uint8_t*)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 	while (!font_buf)
 	{
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
-		font_buf = (uint8_t*)malloc(total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+		font_buf = (uint8_t*)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 	}
-	memset(font_buf, 0, total_unit * FONT_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
+	memset(font_buf, 0, total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
 
 	int idx = 0;//选定操作的为[idx]号字符
 	uint32_t ASCII_num = 0;//总共含有的ASCII字符个数
@@ -662,10 +662,10 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 	//从字库读取所有字符的点阵数据到font_buf
 	for (idx = 0;idx < total_unit;idx++) {
 		if (buf_unicode[idx] >= 128) {
-			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
+			fonts_read_zh_CN_12x(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]);//读取汉字字符 宽度12
 		}
 		else {//Unicode小于128兼容ASCII字符集
-			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
+			fonts_read_ASCII_6x12(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]);//读取ASCII字符 宽度6
 			ASCII_num++;
 		}
 	}
@@ -691,12 +691,12 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 				if (buf_unicode[idx] >= 128) {
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, y, 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, color, change);
+						separation_draw(x_buf, y, 12, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ZH_CN_12X_BYTES, color, change);
 					x_base += 12;
 				}
 				else {//Unicode小于128兼容ASCII字符集
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, y, 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, color, change);
+						separation_draw(x_buf, y, 6, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ASCII_6X12_BYTES, color, change);
 					x_base += 6;
 				}
 
@@ -730,12 +730,12 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 				//仅对可视范围内字符进行绘制
 				if (buf_unicode[idx] >= 128) {
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, cy + (y - 1), 12, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ZH_CN_12X_BYTES, ccolor, cchange);
+						separation_draw(x_buf, cy + (y - 1), 12, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ZH_CN_12X_BYTES, ccolor, cchange);
 					x_base += 12;
 				}
 				else {//Unicode小于128兼容ASCII字符集
 					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-						separation_draw(x_buf, cy + (y - 1), 6, &font_buf[idx * FONT_READ_ZH_CN_12X_BYTES], FONT_READ_ASCII_6X12_BYTES, ccolor, cchange);
+						separation_draw(x_buf, cy + (y - 1), 6, &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES], FONT_CHIP_READ_ASCII_6X12_BYTES, ccolor, cchange);
 					x_base += 6;
 				}
 			}
@@ -759,8 +759,13 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 /*******************************************************显示驱动函数**********************************************************/
 
-/// @brief 初始化灯板阵列
-void ledarray_init()
+/// @brief  初始化灯板阵列
+/// @return [ESP_OK 初始化成功]
+/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题]
+/// @return [ESP_ERR_INVALID_STATE 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 / RMT控制器之前已经安装,请调用对应rmt_driver_uninstall]
+/// @return [ESP_ERR_INVALID_ARG 参数错误]
+/// @return [ESP_ERR_NO_MEM 内存申请失败]
+esp_err_t ledarray_init()
 {
 	const char* TAG = "ledarray_init";
 
@@ -768,12 +773,12 @@ void ledarray_init()
 		refresh_Task_Mutex = xSemaphoreCreateMutex();
 		if (!refresh_Task_Mutex) {
 			ESP_LOGE(TAG, "创建refresh_Task_Mutex互斥量时发现问题");
-			return;
+			return ESP_FAIL;
 		}
 	}
 	else {
 		ESP_LOGE(TAG, "灯板阵列不可重复初始化,运行ledarray_deinit以去初始化");
-		return;
+		return ESP_ERR_INVALID_STATE;
 	}
 
 	rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0;
@@ -782,11 +787,18 @@ void ledarray_init()
 	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
 	rmt_cfg1_buf.clk_div = 2;
 
-	rmt_config(&rmt_cfg0_buf); // 传输配置参数
-	rmt_config(&rmt_cfg1_buf);
+	return ret = ESP_OK;
+
+	ret = rmt_config(&rmt_cfg0_buf); //配置RMT参数
+	ESP_RETURN_ON_ERROR(ret, TAG, "配置RMT控制器0参数时发现问题");
+	ret = rmt_config(&rmt_cfg1_buf);
+	ESP_RETURN_ON_ERROR(ret, TAG, "配置RMT控制器1参数时发现问题");
+
 	// 控制器安装  （通道选择，接收内存块数量（发送模式使用0个），中断标识）
-	rmt_driver_install(rmt_cfg0_buf.channel, 0, 0);
-	rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
+	ret = rmt_driver_install(rmt_cfg0_buf.channel, 0, 0);
+	ESP_RETURN_ON_ERROR(ret, TAG, "安装RMT控制器0时发现问题");
+	ret = rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
+	ESP_RETURN_ON_ERROR(ret, TAG, "安装RMT控制器1时发现问题");
 
 	// 安装 ws2812控制
 	led_strip_config_t strip_cfg0 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg0_buf.channel);
@@ -800,6 +812,8 @@ void ledarray_init()
 	ledarray_set_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
 
 	ESP_LOGW(TAG, " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
+
+	return ESP_OK
 }
 
 /// @brief 去初始化灯板阵列

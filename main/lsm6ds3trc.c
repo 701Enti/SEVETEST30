@@ -48,14 +48,18 @@
 /// @param reg_database 导入数据库，这是一个以IMU_reg_mapping_t的数组，其中的条目即单个IMU_reg_mapping_t数据的个数没有规定，
 ///                     并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式
 /// @param map_num 需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量
-/// @return ESP_OK / ESP_FAIL
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
 esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
 {
   const char* TAG = "lsm6ds3trc_database_map_set";
   if (!reg_database)
   {
     ESP_LOGE(TAG, "导入了为空的数据库");
-    return ESP_FAIL;
+    return ESP_ERR_INVALID_ARG;
   }
   // 用于偏移到指定数据库内存区域获取数据
   IMU_reg_mapping_t* mapping_buf = reg_database;
@@ -64,11 +68,11 @@ esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_n
   {
     mapping_buf = &reg_database[idx];
     uint8_t write_buf[2] = { mapping_buf->reg_address, mapping_buf->reg_value };
-    esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK)
     {
-      ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(err));
-      return ESP_FAIL;
+      ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(ret));
+      return ret;
     }
   }
 
@@ -81,14 +85,18 @@ esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_n
 ///                     并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式
 //                      完成读取后,数据库中寄存器的值将更新,因此在初始化数据库设定寄存器时的值任意如0x00
 /// @param map_num 需要映射的数据条目数量即要写入的寄存器的个数，从第0个条目按数字大小顺序写入map_num个条目为止,map_num需要小于等于条目总数量
-/// @return ESP_OK / ESP_FAIL
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
 esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num)
 {
   const char* TAG = "lsm6ds3trc_database_map_read";
   if (!reg_database)
   {
     ESP_LOGE(TAG, "导入了为空的数据库");
-    return ESP_FAIL;
+    return ESP_ERR_INVALID_ARG;
   }
   // 用于偏移到指定数据库内存区域写入数据库
   IMU_reg_mapping_t* mapping_buf = reg_database;
@@ -97,11 +105,11 @@ esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_
   {
     mapping_buf = &reg_database[idx];
 
-    esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, &(mapping_buf->reg_address), sizeof(uint8_t), &(mapping_buf->reg_value), sizeof(uint8_t), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, &(mapping_buf->reg_address), sizeof(uint8_t), &(mapping_buf->reg_value), sizeof(uint8_t), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK)
     {
-      ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(err));
-      return ESP_FAIL;
+      ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(ret));
+      return ret;
     }
   }
 
@@ -120,14 +128,16 @@ esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_
 /// @param FIFO_database FIFO映射数据库,条目键值对的 value 设置为NULL表示舍弃该条目数据读取
 /// @param map_num  (必须准确)数据库的条目数量即MAP_BASE个数
 /// @param read_num (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据
-/// @return ESP_OK / ESP_FAIL
+/// @return [ESP_OK 完全成功]
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 出现失败(可以再次调用以重试读取他们)]
 esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num) {
   const char* TAG = "lsm6ds3trc_FIFO_map";
 
   //参数合法性检查
   if (!FIFO_database) {
     ESP_LOGE(TAG, "导入了为空的FIFO映射数据库");
-    return ESP_FAIL;
+    return ESP_ERR_INVALID_ARG;
   }
 
   //初始化读取缓存
@@ -173,10 +183,15 @@ esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int
 
 
 /// @brief 以默认配置初始化LSM6DS3TRC姿态传感器，或者重置其到默认配置
-void lsm6ds3trc_init_or_reset()
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t lsm6ds3trc_init_or_reset()
 {
   IMU_reg_mapping_t reg_database[IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM] = IMU_INIT_DEFAULT_MAPPING_DATABASE; // 寄存器映射数据库
-  lsm6ds3trc_database_map_set(reg_database, IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM);
+  return lsm6ds3trc_database_map_set(reg_database, IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM);
 }
 
 /// @brief 获取步数计数值

@@ -42,8 +42,8 @@
 #define RECTANGLE_SIZE_MAX 36//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48
 
 
-#define FONT_PRINT_NUM_MAX 128 //字库打印函数最大单次打印字符数
-#define FONT_PRINT_FMT_BUF_SIZE (FONT_PRINT_NUM_MAX*10)//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留
+#define FONT_CHIP_PRINT_NUM_MAX 128 //字库打印函数最大单次打印字符数
+#define FONT_CHIP_PRINT_FMT_BUF_SIZE (FONT_CHIP_PRINT_NUM_MAX*10)//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留
 
 #define LEDARRAY_REFRESH_TASK_CORE           (1)//屏幕刷新任务运行核心
 #define LEDARRAY_REFRESH_TASK_PRIO           (1)//屏幕刷新任务优先级
@@ -120,7 +120,7 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char* format, ...);
 
-void ledarray_init();
+esp_err_t ledarray_init();
 
 void ledarray_deinit();
 

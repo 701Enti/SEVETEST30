@@ -32,14 +32,19 @@
 #include "driver/i2c.h"
 #include "string.h"
 
-void AHT21_begin() {
+/// @brief  尝试启动AHT21
+/// @return [ESP_OK 传感器可以正常运行]
+/// @return [ESP_ERR_INVALID_STATE 传感器需要关键的初始化操作]
+esp_err_t AHT21_begin() {
     const char* TAG = "AHT21_begin";
     //校验状态字    
     if ((AHT21_get_status() & 0x18) == 0x18) {
         ESP_LOGI(TAG, "传感器可以正常运行");
+        return ESP_OK;
     }
     else {
         ESP_LOGE(TAG, "传感器需要关键的初始化操作");
+        return ESP_ERR_INVALID_STATE;
     }
 }
 
@@ -49,9 +54,9 @@ uint8_t AHT21_get_status() {
     const char* TAG = "AHT21_get_status";
     uint8_t read_buf = 0;// 读取缓存
     uint8_t write_buf = AHT21_STATUS_GET_COMMAND;
-    esp_err_t err = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(err));
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(ret));
     }
     return read_buf;
 }
@@ -89,10 +94,10 @@ void AHT21_trigger() {
     write_buf[0] = AHT21_TRIGGER_COMMAND;
     write_buf[1] = 0x33;
     write_buf[2] = 0x00;
-    esp_err_t err = i2c_master_write_to_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
 
-    if (err != ESP_OK)
-        ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(err));
+    if (ret != ESP_OK)
+        ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(ret));
 }
 
 /// @brief 获取测量结果
@@ -117,15 +122,15 @@ void AHT21_get_result(AHT21_result_t* dest) {
     else {
         uint8_t read_buf[8] = { 0 };// 读取缓存
         uint8_t write_buf = AHT21_STATUS_GET_COMMAND;
-        esp_err_t err = ESP_OK;
+        esp_err_t ret = ESP_OK;
 
         if (dest->flag_crc)
-            err = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
+            ret = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf), 1000 / portTICK_PERIOD_MS);
         else
-            err = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf) - 1, 1000 / portTICK_PERIOD_MS);
+            ret = i2c_master_write_read_device(DEVICE_I2C_PORT, AHT21_DEVICE_ADD, &write_buf, sizeof(write_buf), &read_buf, sizeof(read_buf) - 1, 1000 / portTICK_PERIOD_MS);
 
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(err));
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "与温湿度传感器AHT21通讯时发现问题 描述： %s", esp_err_to_name(ret));
             return;
         }
         else {

@@ -59,7 +59,7 @@ int32_t c1b1 = 10;
 void app_main(void)
 {
   TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
-  TCA6416A_value_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
+  TCA6416A_level_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
   // ext_io_value_data.en_led_board = 1;//关闭灯板
 
   i2c_config_t device_i2c_config = {
@@ -171,22 +171,7 @@ void app_main(void)
 
 
 
-  music_FFT_UI_cfg_t UI_cfg = {
-  .x = 1,
-  .y = 1,
-  .change = 1,
-  .width = LINE_LED_NUMBER,
-  .height = VERTICAL_LED_NUMBER,
-  .visual_cfg = {
-      .value_max = 128,
-      .high = FFT_VIEW_DATA_MAX,
-      .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-      .low = FFT_VIEW_DATA_MIN,
-      .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
-      .x_multiples = 2,
-      .x_move = 0.5,
-  },
-  };
+
 
 
 
@@ -232,7 +217,7 @@ void app_main(void)
 //     if (ext_io_ctrl.auto_read_INT == true)
 //     {
 //       ext_io_ctrl.auto_read_INT = false;
-//       ext_io_value_service();
+//       ext_io_level_service();
 //     }
 //     uint8_t color[3] = { 255, 255, 255 };
 //     refresh_systemtime_data();
@@ -250,44 +235,67 @@ void app_main(void)
   //   ledarray_set_and_write(i);
 
 
-// 网络音乐播放
-  const char* url1 = "https://m701.music.126.net/20250213123249/7b429384fea2ac7195d21c31f778db0d/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/58154713278/0319/4c93/1cfe/7a61740a1905f0c19cfd3437b0b5b137.mp3?vuutv=b+FFR5PH0c2bOu4aj9fI+ovEOFxzJ6IWtt9j2/GMp9Paa/6sEIK2FVm46Qr5PK5g31Jrc3hMQKQohDw6bTRfVsHZIlZjX43lQsAytT91yng=https://m701.music.126.net/20250213123249/7b429384fea2ac7195d21c31f778db0d/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/58154713278/0319/4c93/1cfe/7a61740a1905f0c19cfd3437b0b5b137.mp3?vuutv=b+FFR5PH0c2bOu4aj9fI+ovEOFxzJ6IWtt9j2/GMp9Paa/6sEIK2FVm46Qr5PK5g31Jrc3hMQKQohDw6bTRfVsHZIlZjX43lQsAytT91yng=";
+  music_FFT_UI_cfg_t UI_cfg = {
+  .x = 1,
+  .y = 1,
+  .change = 1,
+  .width = LINE_LED_NUMBER,
+  .height = VERTICAL_LED_NUMBER,
+  .visual_cfg = {
+      .value_max = 128,
+      .high = FFT_VIEW_DATA_MAX,
+      .medium = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+      .low = FFT_VIEW_DATA_MIN,
+      .public_divisor = (FFT_VIEW_DATA_MAX - FFT_VIEW_DATA_MIN) / 2,
+      .x_multiples = 2,
+      .x_move = 0.5,
+  },
+  };
+
+
+  // 网络音乐播放
+  const char* url1 = "http://m801.music.126.net/20250328155550/5d5d7a19ecc92b4dd6033ccfba9e6bbd/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/58786452675/b23d/2b04/8ebf/ed45506b8d8e1076526ee213d6e2c038.mp3?vuutv=895ICG3qoRe25kEEb3B36ifawPkvt8a1Jo/q1tp+NhvwGwSHqCnns/HNCgbt8f23Z/7rS8yaxTU8Kav99h6j+vBF7kp01RCJldgyLv00Jl9KwSVE9bcpDbqVSRPPRLkHLB3yMzZ4GVKS2f3VOpwqhISDo6nvlWkPmRIVI7nvH7LTN6BKa9rT10f5JmwRGMu6/SVCS/grHanA6o8xswD1/b+RcheZSrSvjATQ0BTv3b6CCuZDabB3kdvLfMFXvDiPLlq8//y8TNzFJFzZcOgBtNQIZpt3SfBOT3Br9wBn9U+14sqP8Sc629fwOU8Uhv33UbPSrSrVxsHVo1R4yRaBMuEnWceiYtDUbBScuyeXAdQ0ILVJwXe1D7OiU8wqIvPE";
   // 检查资源可用性
   if (http_check_common_url(url1) == ESP_OK)
   {
-    music_uri_play(url1, 1);
-    vTaskDelay(pdMS_TO_TICKS(5000));
-    board_ctrl_t* b = board_status_get();
-    b->amplifier_mute = false;
-    b->amplifier_volume = 90;
-    sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+    music_uri_or_url_play(url1, 1);
 
-    music_FFT_UI_start(&UI_cfg, 1);
+    // vTaskDelay(pdMS_TO_TICKS(5000));
 
-    uint8_t color[3] = { 0 };
+    // board_ctrl_t* b = board_status_get();
+    // b->amplifier_mute = false;
+    // b->amplifier_volume = 90;
+    // sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
-    while (sevetest30_music_running_flag)
-    {
+    // music_FFT_UI_start(&UI_cfg, 1);
 
-      // mp3_duration_calculate();
+    // uint8_t color[3] = { 0 };
 
-      if (ext_io_ctrl.auto_read_INT == true)
-      {
-        ext_io_ctrl.auto_read_INT = false;
-        ext_io_value_service();
-      }
+    // while (sevetest30_music_running_flag)
+    // {
 
-      music_FFT_UI_draw(&UI_cfg);
-      main_UI_1();
+    //   // mp3_duration_calculate();
 
-      for (int i = 0; i <= 5; i++)
-      {
-        ledarray_set_and_write(i);
-        progress_draw_buf(i * 2 + 1, 1, color);
-        progress_draw_buf(i * 2 + 2, 1, color);
-      }
-    }
-    sevetest30_music_running_flag = false;
+    //   // if (ext_io_ctrl.auto_read_INT == true)
+    //   // {
+    //   //   ext_io_ctrl.auto_read_INT = false;
+    //   //   ext_io_level_service();
+    //   // }
+
+    //   music_FFT_UI_draw(&UI_cfg);
+    //   // main_UI_1();
+
+    //   for (int i = 0; i <= 5; i++)
+    //   {
+    //     ledarray_set_and_write(i);
+    //     progress_draw_buf(i * 2 + 1, 1, color);
+    //     progress_draw_buf(i * 2 + 2, 1, color);
+    //   }
+    // }
+    // sevetest30_music_running_flag = false;
+
+
+
   }
 
 

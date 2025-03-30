@@ -43,6 +43,10 @@
 #include "sevetest30_BWEDA.h"
 #include "sevetest30_LedArray.h"
 
+
+esp_err_t board_ctrl_init_report[INIT_STEP_NUMBER] = { ESP_FAIL };
+
+
 esp_periph_set_handle_t se30_periph_set_handle;
 
 ///----注意：控制数据只有在完成sevetest30_board_ctrl工作之后，才会保存到board_ctrl_buf缓存中，如果果您只是外部定义了一个board_ctrl_t类型变量存储您的更改，
@@ -96,26 +100,28 @@ esp_err_t device_i2c_init()
 /// @brief 全局设备初始化
 /// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
 /// @param board_device_handle 设备句柄，定义board_device_handle_t非指针类型全局变量不进行任何更改，在进行一些活动时将使用其中句柄
-/// @return 成功 ESP_OK 失败 ESP_FAIL
-esp_err_t sevetest30_all_device_init(board_ctrl_t* board_ctrl)
+/// @return 初始化操作的所有esp_err_t返回记录
+esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl)
 {
     // //此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化I2C总线
     // device_i2c_init();
-    // 初始化所有设备
-    audio_board_init();
 
-    sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);
-    fonts_chip_init();
-    BL5372_config_init();
-    AHT21_begin();
-    lsm6ds3trc_init_or_reset();
-    vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());
-    ledarray_init();
+    //初始化音频面板(包括了I2C的初始化和注册)
+    board_ctrl_init_report[AUDIO_BOARD_INIT] = audio_board_init();
 
-    //初始化之后配置所有设备到指定模式
+    // 初始化其他设备
+    board_ctrl_init_report[SEVETEST30_GPIO_INIT] = sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);//初始化GPIO服务(包括扩展GPIO)
+    board_ctrl_init_report[FONTS_CHIP_INIT] = fonts_chip_init();//字库芯片
+    board_ctrl_init_report[BL5372_CONFIG_INIT] = BL5372_config_init();//BL5372(离线RTC计时)
+    board_ctrl_init_report[AHT21_BEGIN] = AHT21_begin();//AHT21(温湿度传感器)
+    board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)
+    board_ctrl_init_report[VIBRA_MOTOR_INIT] = vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());//震动马达
+    board_ctrl_init_report[LEDARRAY_INIT] = ledarray_init();//LED阵列
+
+    //全部初始化之后配置所有设备到指定模式
     sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
 
-    return ESP_OK;
+    return board_ctrl_init_report;
 }
 
 /// @brief 全局设备控制,外部函数应该调用board_status_get获取控制缓存变量,修改值后导入
@@ -139,7 +145,7 @@ void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_se
         codechip_volume_set(board_ctrl);
         codec_config_adc_input(board_ctrl);
         codec_set_mic_gain(board_ctrl);
-        ext_io_value_service();
+        ext_io_level_service();
         ext_io_mode_service();
         //添加控制操作需要同时完善board_ctrl_buf_map的缓存映射
         break;
@@ -177,12 +183,12 @@ void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_se
         break;
 
     case BOARD_CTRL_EXT_IO:
-        ext_io_value_service();
+        ext_io_level_service();
         ext_io_mode_service();
         break;
 
     default:
-        ext_io_value_service();
+        ext_io_level_service();
         ext_io_mode_service();
         break;
     }

@@ -41,17 +41,25 @@
 
 #include "board_def.h"
 
-uint8_t TCA6416A_data_buf[3] = { 0x00,0x00,0x00 };//缓存寄存器地址与数据 {reg + data}
+esp_err_t TCA6416A_data_buf[3] = { 0x00,0x00,0x00 };//缓存寄存器地址与数据 {reg + data}
 
-/// GPIO输入输出模式设置，同时保存模式数据，初始化用
-void TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
+
+/// @brief GPIO输入输出模式设置，同时保存模式数据，初始化用
+/// @param pTCA6416Amode TCA6416A_mode_t模式配置存储位置
+/// @param  pTCA6416Alevel TCA6416A_level_t电平数据存储位置
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
 {
   const char* TAG = "TCA6416A_mode_set";
-  esp_err_t err = ESP_OK;
+  esp_err_t ret = ESP_OK;
 
   if (pTCA6416Amode == NULL) {
     ESP_LOGE(TAG, "无法处理的空指针");
-    return;
+    return ESP_ERR_INVALID_ARG;
   }
 
   uint8_t data1 = NULL, data2 = NULL; // 临时数据缓存
@@ -75,22 +83,33 @@ void TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_MODE1, TCA6416A_data_buf[1] = data1, TCA6416A_data_buf[2] = data2;
-  err = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
-  if (err != ESP_OK)ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(err));
+  ret = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    return ret;
+  }
+
+  return ESP_OK;
 }
 
-// GPIO引脚数据交互服务，一次性全更新、写入，根据引脚模式配置以读写操作，以下是我一些肤浅的思路
+/// @brief GPIO引脚数据交互服务，一次性全更新、写入，根据引脚模式配置以读写操作，以下是我一些肤浅的思路
 // 写：我们先准备好两份8bit数据，对于“只读的”输入引脚数据，一同写入，因为对于TCA6416,这样的数据无效，没有任何影响
 // 读：直接读出两个寄存器的值，映射到value结构体中，我们之后显然只关心读出“只读的”输入引脚数据，读出的“只写的”输出引脚数据是无效的，对于我们的程序毫无意义，之后也不会理会
 // 读数据由传入的结构体地址对应的结构体中按成员直接回读
-void TCA6416A_gpio_service(TCA6416A_value_t* pTCA6416Avalue)
+/// @param  pTCA6416Alevel TCA6416A_level_t电平数据存储位置
+/// @return [ESP_OK 成功]  
+/// @return [ESP_ERR_INVALID_ARG 参数错误] 
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t TCA6416A_gpio_service(TCA6416A_level_t* pTCA6416Alevel)
 {
   const char* TAG = "TCA6416A_gpio_service";
-  esp_err_t err = ESP_OK;
+  esp_err_t ret = ESP_OK;
 
-  if (pTCA6416Avalue == NULL) {
+  if (pTCA6416Alevel == NULL) {
     ESP_LOGE(TAG, "无法处理的空指针");
-    return;
+    return ESP_ERR_INVALID_ARG;
   }
 
   bool* p; // 定义指针变量，指向成员变量地址
@@ -98,7 +117,7 @@ void TCA6416A_gpio_service(TCA6416A_value_t* pTCA6416Avalue)
 
   //确定设备地址 
   uint8_t i2c_add = 0x20;
-  if (pTCA6416Avalue->addr)
+  if (pTCA6416Alevel->addr)
     i2c_add = 0x21;
 
   // 准备好两份8bit数据
@@ -106,7 +125,7 @@ void TCA6416A_gpio_service(TCA6416A_value_t* pTCA6416Avalue)
   int i = 0;
   for (i = 0; i < 16; i++)
   {
-    p = (bool*)pTCA6416Avalue + i; // 强制转换地址的类型，指向成员变量地址
+    p = (bool*)pTCA6416Alevel + i; // 强制转换地址的类型，指向成员变量地址
     if (i < 8)
       data1 = *p << i | data1; // 取出值进行运算
     if (i >= 8)
@@ -115,23 +134,33 @@ void TCA6416A_gpio_service(TCA6416A_value_t* pTCA6416Avalue)
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_OUT1, TCA6416A_data_buf[1] = data1, TCA6416A_data_buf[2] = data2;
-  err = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  ret = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    return ret;
+  }
 
   // 装载,清理，准备读取
   //TCA6416A大概可以这样描述：先像正常的写数据一样，但是只写入选定的寄存器命令，之后不要STOP,马上通过i2c_master_read_from_device正常读取，即重新发送一次TCA6416A地址,主机接收数据，完成
   TCA6416A_data_buf[0] = TCA6416A_IN1, TCA6416A_data_buf[1] = 0x00, TCA6416A_data_buf[2] = 0x00;
 
   // 直接读出两个寄存器的值
-  err = i2c_master_write_read_device(DEVICE_I2C_PORT, i2c_add, &TCA6416A_data_buf[0], sizeof(TCA6416A_data_buf[0]), &TCA6416A_data_buf[1], sizeof(TCA6416A_data_buf[1]) * 2, 1000 / portTICK_PERIOD_MS);
+  ret = i2c_master_write_read_device(DEVICE_I2C_PORT, i2c_add, &TCA6416A_data_buf[0], sizeof(TCA6416A_data_buf[0]), &TCA6416A_data_buf[1], sizeof(TCA6416A_data_buf[1]) * 2, 1000 / portTICK_PERIOD_MS);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    return ret;
+  }
   data1 = TCA6416A_data_buf[1], data2 = TCA6416A_data_buf[2]; // 取出
 
   // 依据data1,data2数值移位映射
   for (i = 0; i < 16; i++)
   {
-    p = (bool*)pTCA6416Avalue + i; // 强制转换地址的类型，指向（存储）成员变量地址
+    p = (bool*)pTCA6416Alevel + i; // 强制转换地址的类型，指向（存储）成员变量地址
     if (i < 8)  *p = (data1 >> i) & 0x01; // 不断取出位移后data1最低位
     if (i >= 8) *p = data2 >> (i - 8) & 0x01; // 不断取出位移后data1最低位
   }
 
-  if (err != ESP_OK)ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(err));
+  return ESP_OK;
+
+
 }

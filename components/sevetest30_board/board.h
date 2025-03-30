@@ -52,12 +52,14 @@ extern "C" {
 
     typedef struct audio_board_handle* audio_board_handle_t;
 
-    /**
-     * @brief Initialize audio board
-     *
-     * @return The audio board handle
-     */
-    audio_board_handle_t audio_board_init(void);
+
+
+
+
+    /// @brief (已修改) 初始化音频面板
+    /// 
+    /// @return 
+    esp_err_t audio_board_init();
 
     /**
      * @brief Initialize codec chip
