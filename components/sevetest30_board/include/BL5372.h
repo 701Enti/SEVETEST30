@@ -28,6 +28,7 @@
 #pragma once
 
 #include "esp_types.h"
+#include "esp_err.h"
 
 // I2C相关配置宏定义在board_def.h下
 #define BL5372_DEVICE_ADD 0x32

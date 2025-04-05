@@ -47,6 +47,7 @@
 #include "driver/rmt.h"
 #include "hal/rmt_types.h"
 #include "gt32l32s0140.h"
+#include "esp_check.h"
 
 // 一个图像可看作不同颜色的像素组合，而每个像素颜色可用红绿蓝三元色的深度（亮度）表示
 // 因此，我们可以将一个图像分离成三个单色图层，我们就定义三个8bit数组
@@ -125,7 +126,7 @@ uint8_t draw_line_count[VERTICAL_LED_NUMBER] = { 0 };//每行的绘制计数,在
 ledarray_refresh_mode_t refresh_mode_buf = LEDARRAY_REFRESH_DISABLE;
 SemaphoreHandle_t refresh_Task_Mutex = NULL;
 
-/// @brief [单次全刷任务]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
+/// @brief [单次全刷任务 - ALL_ONCE]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
 void refresh_ALL_ONCE_Task() {
 	while (1) {
 		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
@@ -135,7 +136,7 @@ void refresh_ALL_ONCE_Task() {
 	}
 }
 
-/// @brief [多次全刷任务]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
+/// @brief [多次全刷任务 - ALL_MULTIPLE]分多步进地完成刷新整个屏幕所有行,每步之后发生延时
 void refresh_ALL_MULTIPLE_Task() {
 	while (1) {
 		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
@@ -145,7 +146,7 @@ void refresh_ALL_MULTIPLE_Task() {
 	}
 }
 
-/// @brief [单次局刷任务]一次性刷新所有发生绘制活动的行,需要部分完全刷新之后才发生延时
+/// @brief [单次局刷任务 - PART_ONCE]一次性刷新所有发生绘制活动的行,需要部分完全刷新之后才发生延时
 void refresh_PART_ONCE_Task() {
 	while (1) {
 		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
@@ -156,7 +157,7 @@ void refresh_PART_ONCE_Task() {
 	}
 }
 
-/// @brief [多次局刷任务]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
+/// @brief [多次局刷任务 - PART_MULTIPLE]分多步进地完成刷新所有发生绘制活动的行,每步之后发生延时
 void refresh_PART_MULTIPLE_Task() {
 	while (1) {
 		for (int idx = 0;idx <= VERTICAL_LED_NUMBER / 2;idx++) {
@@ -167,8 +168,8 @@ void refresh_PART_MULTIPLE_Task() {
 	}
 }
 
-/// @brief 设置LED阵列的刷新模式
-/// @param mode 刷新模式
+/// @brief 设置LED阵列的刷新模式("ALL_ONCE" "ALL_MULTIPLE" "PART_ONCE" "PART_MULTIPLE")
+/// @param mode 刷新模式,这是一个枚举类型
 void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
 	switch (refresh_mode_buf)
 	{
@@ -191,19 +192,19 @@ void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
 	{
 	case LEDARRAY_REFRESH_ALL_ONCE:
 		xTaskCreatePinnedToCore(&refresh_ALL_ONCE_Task, "ALL_ONCE",
-			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
 	case LEDARRAY_REFRESH_ALL_MULTIPLE:
 		xTaskCreatePinnedToCore(&refresh_ALL_MULTIPLE_Task, "ALL_MULTIPLE",
-			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
 	case LEDARRAY_REFRESH_PART_ONCE:
 		xTaskCreatePinnedToCore(&refresh_PART_ONCE_Task, "PART_ONCE",
-			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
 	case LEDARRAY_REFRESH_PART_MULTIPLE:
 		xTaskCreatePinnedToCore(&refresh_PART_MULTIPLE_Task, "PART_MULTIPLE",
-			1024, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
+			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
 	default:
 		break;
@@ -787,7 +788,7 @@ esp_err_t ledarray_init()
 	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
 	rmt_cfg1_buf.clk_div = 2;
 
-	return ret = ESP_OK;
+	esp_err_t ret = ESP_OK;
 
 	ret = rmt_config(&rmt_cfg0_buf); //配置RMT参数
 	ESP_RETURN_ON_ERROR(ret, TAG, "配置RMT控制器0参数时发现问题");
@@ -813,7 +814,7 @@ esp_err_t ledarray_init()
 
 	ESP_LOGW(TAG, " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
 
-	return ESP_OK
+	return ESP_OK;
 }
 
 /// @brief 去初始化灯板阵列

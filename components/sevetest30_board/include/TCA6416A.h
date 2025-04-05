@@ -40,6 +40,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include "esp_err.h"
 
 // 下面列出TCA6416A中一些对sevetest30工程具有价值的寄存器，您可以添加需要的寄存器,详细信息可参考TCA6416A规格书
 // 两个输入值寄存器，只读有效
@@ -99,9 +100,9 @@ typedef struct TCA6416A_level_t
     bool addr; /// ADDR引脚电平，用于设置主机地址
 }TCA6416A_level_t;
 
-esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode);
+esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t* pTCA6416Amode);
 
-esp_err_t TCA6416A_gpio_service(TCA6416A_level_t* pTCA6416Avalue);
+esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t* pTCA6416Avalue);
 
 
 #define TCA6416A_DEFAULT_CONFIG_MODE  SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE

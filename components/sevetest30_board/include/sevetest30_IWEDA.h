@@ -127,8 +127,8 @@ typedef struct ip_position
 
 //有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
 
-extern char http_get_out_buf[HTTP_BUF_MAX]; // 输出数据缓存
-extern char http_get_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
+extern char http_output_buf[HTTP_BUF_MAX]; // 输出数据缓存
+extern char http_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
 extern char* ip_address;//公网IP
 extern char* sevetest30_asr_result_tex;//语音识别结果
 
@@ -152,6 +152,8 @@ int http_check_response_content(esp_http_client_handle_t client_handle);
 void http_init_get_request();
 
 void http_get_request_send(bool* flag);
+
+void change_url_if_need_redirect(char** url);
 
 //库定制函数
 

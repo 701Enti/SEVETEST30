@@ -52,9 +52,9 @@ esp_err_t TCA6416A_data_buf[3] = { 0x00,0x00,0x00 };//缓存寄存器地址与�
 /// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
 /// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
-esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
+esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t* pTCA6416Amode)
 {
-  const char* TAG = "TCA6416A_mode_set";
+  const char* TAG = "TCA6416A_gpio_mode_set";
   esp_err_t ret = ESP_OK;
 
   if (pTCA6416Amode == NULL) {
@@ -92,7 +92,7 @@ esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
   return ESP_OK;
 }
 
-/// @brief GPIO引脚数据交互服务，一次性全更新、写入，根据引脚模式配置以读写操作，以下是我一些肤浅的思路
+/// @brief GPIO引脚电平数据交互服务，一次性全更新、写入，根据引脚模式配置以读写操作，以下是我一些肤浅的思路
 // 写：我们先准备好两份8bit数据，对于“只读的”输入引脚数据，一同写入，因为对于TCA6416,这样的数据无效，没有任何影响
 // 读：直接读出两个寄存器的值，映射到value结构体中，我们之后显然只关心读出“只读的”输入引脚数据，读出的“只写的”输出引脚数据是无效的，对于我们的程序毫无意义，之后也不会理会
 // 读数据由传入的结构体地址对应的结构体中按成员直接回读
@@ -102,9 +102,9 @@ esp_err_t TCA6416A_mode_set(TCA6416A_mode_t* pTCA6416Amode)
 /// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
 /// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
-esp_err_t TCA6416A_gpio_service(TCA6416A_level_t* pTCA6416Alevel)
+esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t* pTCA6416Alevel)
 {
-  const char* TAG = "TCA6416A_gpio_service";
+  const char* TAG = "TCA6416A_gpio_level_service";
   esp_err_t ret = ESP_OK;
 
   if (pTCA6416Alevel == NULL) {

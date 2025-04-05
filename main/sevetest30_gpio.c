@@ -28,12 +28,11 @@
 
 #include "sevetest30_gpio.h"
 #include "board_def.h"
-
 #include "esp_log.h"
+#include "esp_check.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-
 #include "driver/gpio.h"
 
 ext_io_ctrl_t ext_io_ctrl = {
@@ -81,7 +80,7 @@ static void tca6416a_int_task(void* arg) {
 /// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
 esp_err_t ext_io_level_service() {
-  return TCA6416A_gpio_service(P_ext_io_value_data);
+  return TCA6416A_gpio_level_service(P_ext_io_value_data);
 }
 
 
@@ -97,7 +96,7 @@ esp_err_t ext_io_level_service() {
 esp_err_t ext_io_mode_service() {
   //在将外部IO模式由输出模式转向输入模式时，可能发生意外中断问题，通过flag在模式设置时屏蔽中断自动读取，可以代价较低地避免可能性极小的重复读取问题的发生
   ext_io_ctrl.auto_read_EN = false;
-  esp_err_t ret = TCA6416A_mode_set(P_ext_io_mode_data);
+  esp_err_t ret = TCA6416A_gpio_mode_set(P_ext_io_mode_data);
   ext_io_ctrl.auto_read_EN = true;
   return ret;
 }

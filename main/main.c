@@ -86,9 +86,15 @@ void app_main(void)
   };
 
 
+  sevetest30_all_device_init(&board_ctrl);
+
+
+  esp_log_level_set("gpio", ESP_LOG_NONE);
+
 
 
   esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
+
   wifi_init(&wifi_periph_config);
 
   // 载入wifi信息
@@ -101,11 +107,6 @@ void app_main(void)
     ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
 
 
-  sevetest30_all_device_init(&board_ctrl);
-
-
-
-  esp_log_level_set("gpio", ESP_LOG_NONE);
 
 
   // for (int q = 2; q < 6; q++) {
@@ -254,7 +255,9 @@ void app_main(void)
 
 
   // 网络音乐播放
-  const char* url1 = "http://m801.music.126.net/20250328155550/5d5d7a19ecc92b4dd6033ccfba9e6bbd/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/58786452675/b23d/2b04/8ebf/ed45506b8d8e1076526ee213d6e2c038.mp3?vuutv=895ICG3qoRe25kEEb3B36ifawPkvt8a1Jo/q1tp+NhvwGwSHqCnns/HNCgbt8f23Z/7rS8yaxTU8Kav99h6j+vBF7kp01RCJldgyLv00Jl9KwSVE9bcpDbqVSRPPRLkHLB3yMzZ4GVKS2f3VOpwqhISDo6nvlWkPmRIVI7nvH7LTN6BKa9rT10f5JmwRGMu6/SVCS/grHanA6o8xswD1/b+RcheZSrSvjATQ0BTv3b6CCuZDabB3kdvLfMFXvDiPLlq8//y8TNzFJFzZcOgBtNQIZpt3SfBOT3Br9wBn9U+14sqP8Sc629fwOU8Uhv33UbPSrSrVxsHVo1R4yRaBMuEnWceiYtDUbBScuyeXAdQ0ILVJwXe1D7OiU8wqIvPE";
+  char* url1 = "";
+  change_url_if_need_redirect(&url1);
+
   // 检查资源可用性
   if (http_check_common_url(url1) == ESP_OK)
   {

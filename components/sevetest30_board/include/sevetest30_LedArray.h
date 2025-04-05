@@ -45,8 +45,11 @@
 #define FONT_CHIP_PRINT_NUM_MAX 128 //字库打印函数最大单次打印字符数
 #define FONT_CHIP_PRINT_FMT_BUF_SIZE (FONT_CHIP_PRINT_NUM_MAX*10)//字库打印函数格式化缓存大小,缓存使用char类型(占一个字节),UTF-8最多用6个字节表达一个字符+预留
 
+
+//屏幕刷新任务配置("ALL_ONCE" "ALL_MULTIPLE" "PART_ONCE" "PART_MULTIPLE")
 #define LEDARRAY_REFRESH_TASK_CORE           (1)//屏幕刷新任务运行核心
 #define LEDARRAY_REFRESH_TASK_PRIO           (1)//屏幕刷新任务优先级
+#define LEDARRAY_REFRESH_TASK_STACK_SIZE     (1024 * 2)//屏幕刷新任务堆栈大小
 
 
 

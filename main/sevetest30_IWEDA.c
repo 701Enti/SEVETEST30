@@ -60,8 +60,8 @@
 #include "tcpip_adapter.h"
 #endif
 
-char http_get_out_buf[HTTP_BUF_MAX] = { 0 }; // 输出数据缓存
-char http_get_url_buf[HTTP_BUF_MAX] = { 0 }; // url缓存,留着调用时候可以用
+char http_output_buf[HTTP_BUF_MAX] = { 0 }; // 输出数据缓存
+char http_url_buf[HTTP_BUF_MAX] = { 0 }; // url缓存,留着调用时候可以用
 char* ip_address;                          // 公网IP
 
 char* sevetest30_asr_result_tex = NULL; // 语音识别结果
@@ -71,7 +71,7 @@ char* ERNIE_Bot_4_chat_user_content = NULL;
 Real_time_weather* real_time_weather_data;
 ip_position* ip_position_data;
 
-esp_http_client_handle_t http_get_handle = NULL;
+esp_http_client_handle_t http_client_handle = NULL;
 esp_periph_handle_t se30_wifi_periph_handle = NULL;
 
 char baidu_ERNIE_Bot_access_token[ACCESSTOKEN_SIZE_MAX] = { 0 };
@@ -126,6 +126,7 @@ esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
 
     esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);// 启动连接任务
     return periph_wifi_wait_for_connected(se30_wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS));//请求连接
+    return ESP_OK;
 }
 
 /// @brief 百度API获取AccessToken,保存到char数组
@@ -150,21 +151,21 @@ esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* Acce
 
     //发送请求
     bool Task_comp_flag = false;                                                                    // 任务是否完成标识
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
+    snprintf(http_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
     http_init_get_request();
-    esp_http_client_set_timeout_ms(http_get_handle, 10000);
+    esp_http_client_set_timeout_ms(http_client_handle, 10000);
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
 
     //检查是否得到请求响应的结果
-    if (!strcasecmp(http_get_out_buf, ""))
+    if (!strcasecmp(http_output_buf, ""))
         return ESP_FAIL;
     else
     {
         //解析数据
         cJSON* root_data = NULL;
-        root_data = cJSON_Parse(http_get_out_buf);
+        root_data = cJSON_Parse(http_output_buf);
         cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
 
         memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
@@ -187,7 +188,7 @@ void refresh_position_data()
 
     // 获取公网IP
     Task_comp_flag = false;
-    sprintf(http_get_url_buf, GET_IP_ADDRESS_API_URL);
+    sprintf(http_url_buf, GET_IP_ADDRESS_API_URL);
     http_init_get_request();
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE);
     while (!Task_comp_flag)
@@ -196,9 +197,9 @@ void refresh_position_data()
 
     // 获取IP归属地邮政编码
     Task_comp_flag = false;
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, IP_POSITION_API_URL, ip_address);
+    snprintf(http_url_buf, HTTP_BUF_MAX, IP_POSITION_API_URL, ip_address);
     http_init_get_request();
-    esp_http_client_set_header(http_get_handle, "token", CONFIG_IP_138_TOKEN);
+    esp_http_client_set_header(http_client_handle, "token", CONFIG_IP_138_TOKEN);
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
@@ -213,7 +214,7 @@ void refresh_position_data()
     // 3.邮政编码大概率直接对应一个县或区，并且IP138API网页还可找到一个免费还不用鉴权的"行政区划"查询服务，会返回一个经纬度，这是GeoAPI支持的搜索关键词
     //  免费还不用鉴权的行政区划查询服务，支持多种关键词搜索： https://quhua.ipchaxun.com/
     Task_comp_flag = false;
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API_URL, ip_position_data->postcode); // 确定请求URL
+    snprintf(http_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API_URL, ip_position_data->postcode); // 确定请求URL
     http_init_get_request();
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
@@ -222,7 +223,7 @@ void refresh_position_data()
 
     // 城市搜索，获取locationID
     Task_comp_flag = false;
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data->lng, ip_position_data->lat, CONFIG_WEATHER_API_KEY);
+    snprintf(http_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data->lng, ip_position_data->lat, CONFIG_WEATHER_API_KEY);
     http_init_get_request();
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
@@ -234,7 +235,7 @@ void refresh_position_data()
 void refresh_weather_data()
 {
     bool Task_comp_flag = false;                                                                             // 任务是否完成标识
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data->id, CONFIG_WEATHER_API_KEY); // 确定请求URL
+    snprintf(http_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data->id, CONFIG_WEATHER_API_KEY); // 确定请求URL
     http_init_get_request();
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
@@ -260,9 +261,9 @@ void init_time_data_sntp()
     esp_sntp_init();
 }
 
-/// @brief 检查响应内容
+/// @brief 检查响应内容是不是可以直接获取资源
 /// @param client_handle 连接句柄
-/// @return ESP_OK 正确可用 否则返回 响应错误码
+/// @return ESP_OK 可以直接获取资源 否则(不可用/需要重定向)返回 响应码
 int http_check_response_content(esp_http_client_handle_t client_handle)
 {
     const char* TAG = "http_check_response_content";
@@ -270,6 +271,17 @@ int http_check_response_content(esp_http_client_handle_t client_handle)
     esp_http_client_fetch_headers(client_handle);                //   接收消息头
     int status = esp_http_client_get_status_code(client_handle); // 获取消息头中的响应状态信息
     int len = esp_http_client_get_content_length(client_handle); // 获取消息头中的总数据大小信息
+
+
+    //检查是否为临时重定向
+    if (status == 302 || status == 307) {
+        if (esp_http_client_is_chunked_response(client_handle) == true)
+            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ,本次传输响应数据已分块", status);
+        else
+            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ，响应数据共 %d", status, len);
+
+        return status;
+    }
 
     if (status != 200)
     {
@@ -304,22 +316,64 @@ int http_check_common_url(const char* url)
         return ESP_FAIL;
     }
 
-    sprintf(http_get_url_buf, url);
+    sprintf(http_url_buf, url);
     http_init_get_request();
 
-    if (esp_http_client_open(http_get_handle, 0) != ESP_OK)
+    if (esp_http_client_open(http_client_handle, 0) != ESP_OK)
     {
         ESP_LOGE(TAG, "无法打开连接的URL -> %s", url);
-        esp_http_client_cleanup(http_get_handle);
+        esp_http_client_cleanup(http_client_handle);
         return ESP_FAIL;
     }
 
     // 校验响应状态与数据
-    ret = http_check_response_content(http_get_handle);
-    if (ret != ESP_OK)ESP_LOGE(TAG, "响应信息发现异常的URL \n-> %s", url);
-    esp_http_client_cleanup(http_get_handle);
+    ret = http_check_response_content(http_client_handle);
+    if (ret != ESP_OK) {
+        if (ret == 302 || ret == 307) {
+            ESP_LOGW(TAG, "需要重定向处理的URL \n-> %s", url);
+        }
+        else {
+            ESP_LOGE(TAG, "响应信息发现异常的URL \n-> %s", url);
+        }
+    }
+    esp_http_client_cleanup(http_client_handle);
     return ret;
 }
+
+
+/// @brief 如果这个url需要重定向,更改url内容
+/// @brief 原来url数据不会清除, 只是参数url指代位置切换到location_url缓存
+/// @brief 请尽快使用或复制该url, 在下次change_url_if_need_redirect调用之前
+/// @param url 
+void change_url_if_need_redirect(char** url) {
+    const char* TAG = "change_url_if_need_redirect";
+
+    static char location_url_buf[HTTP_BUF_MAX] = { 0 }; // location_url缓存
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) == PERIPH_WIFI_CONNECTED) {
+        sprintf(http_url_buf, *url);
+        http_init_get_request();
+        if (esp_http_client_open(http_client_handle, 0) == ESP_OK)
+        {
+            // 校验响应状态与数据
+            int ret = http_check_response_content(http_client_handle);
+            if (ret == 302 || ret == 307) {
+                // 需要重定向
+                char* location = "NULL";
+                esp_http_client_get_header(http_client_handle, "Location", &location);
+                if (location != NULL) {
+                    strncpy(location_url_buf, location, HTTP_BUF_MAX);
+                    *url = location_url_buf;
+                    ESP_LOGW(TAG, "重定向到 %s", *url);
+                }
+                else {
+                    ESP_LOGE(TAG, "尝试获取重定向信息时发现问题,需要重定向但无法完成更改");
+                }
+            }
+        }
+        esp_http_client_cleanup(http_client_handle);
+    }
+}
+
 
 /// @brief 初始化GET请求
 void http_init_get_request()
@@ -332,17 +386,18 @@ void http_init_get_request()
     // 配置http传输信息
     esp_http_client_config_t http_config;
     memset(&http_config, 0, sizeof(http_config)); // 对参数初始化为0
-    http_config.buffer_size = HTTP_BUF_MAX;       //设置缓冲区大小
-    http_config.url = &http_get_url_buf[0];       // 导入URL
+    http_config.buffer_size_tx = HTTP_BUF_MAX;    //发送缓冲区大小
+    http_config.buffer_size = HTTP_BUF_MAX;       //接收缓冲区大小
+    http_config.url = &http_url_buf[0];       // 导入URL
 
     // 配置传输任务，GET方式
-    http_get_handle = esp_http_client_init(&http_config);         // 获取连接句柄，之后读取状态和响应都需要这个
-    esp_http_client_set_method(http_get_handle, HTTP_METHOD_GET); // GET方式
+    http_client_handle = esp_http_client_init(&http_config);         // 获取连接句柄，之后读取状态和响应都需要这个
+    esp_http_client_set_method(http_client_handle, HTTP_METHOD_GET); // GET方式
 
     // 清除http_get_out_buf之前的残留数据
-    strcpy(http_get_out_buf, "");
+    strcpy(http_output_buf, "");
     // URL也清一下
-    strcpy(http_get_url_buf, "");
+    strcpy(http_url_buf, "");
 }
 
 // 发送GET请求，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束），
@@ -356,27 +411,27 @@ void http_get_request_send(bool* flag)
     {
         const char* TAG = "http_get_request_send";
         // 对服务器发送连接请求
-        esp_err_t err_flag = esp_http_client_open(http_get_handle, 0); // get请求无需额外添加报文数据
+        esp_err_t err_flag = esp_http_client_open(http_client_handle, 0); // get请求无需额外添加报文数据
         if (err_flag != ESP_OK)
         {
-            ESP_LOGE(TAG, "请求连接服务器时出现问题 -> %s", &http_get_url_buf[0]);
-            esp_http_client_cleanup(http_get_handle); // 释放数据缓存
+            ESP_LOGE(TAG, "请求连接服务器时出现问题 -> %s", &http_url_buf[0]);
+            esp_http_client_cleanup(http_client_handle); // 释放数据缓存
             *flag = true;
             vTaskDelete(NULL); // 终止任务
         }
 
         // 校验响应状态与数据
-        if (http_check_response_content(http_get_handle) != ESP_OK)
+        if (http_check_response_content(http_client_handle) != ESP_OK)
         {
-            esp_http_client_cleanup(http_get_handle);
+            esp_http_client_cleanup(http_client_handle);
             *flag = true;
             vTaskDelete(NULL); // 终止任务
         }
 
         // 读取响应内容
-        esp_http_client_read_response(http_get_handle, http_get_out_buf, HTTP_BUF_MAX);
+        esp_http_client_read_response(http_client_handle, http_output_buf, HTTP_BUF_MAX);
 
-        esp_http_client_cleanup(http_get_handle); // 关闭连接 释放数据缓存
+        esp_http_client_cleanup(http_client_handle); // 关闭连接 释放数据缓存
 
         *flag = true;
         vTaskDelete(NULL); // 完成，终止任务
@@ -526,9 +581,9 @@ void transform_ip_address()
     memset(ip_address, 0, 30);
     char* buf = "0";
     uint8_t i = 0;
-    while (http_get_out_buf[i] != '\0')
+    while (http_output_buf[i] != '\0')
     {
-        switch (http_get_out_buf[i])
+        switch (http_output_buf[i])
         {
         case '0':
             buf = "0";
@@ -595,12 +650,12 @@ void transform_postcode()
     // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
     char json_buf[PRE_CJSON_BUF_MAX] = { 0 };
     uint8_t i = 5;
-    while (http_get_out_buf[i] != ')')
+    while (http_output_buf[i] != ')')
     {
-        json_buf[i - 5] = http_get_out_buf[i];
+        json_buf[i - 5] = http_output_buf[i];
         i++;
     }
-    http_get_out_buf[i] = '\0';
+    http_output_buf[i] = '\0';
 
     // 提取完成开始json解析
     cJSON* root_data = NULL;
@@ -620,7 +675,7 @@ void transform_lng_lat()
     const char* TAG = "transform_lng_lat";
 
     cJSON* root_data = NULL;
-    root_data = cJSON_Parse(http_get_out_buf);
+    root_data = cJSON_Parse(http_output_buf);
 
     cJSON* cjson_data = cJSON_GetObjectItem(root_data, "data");
     cJSON* cjson_results = cJSON_GetObjectItem(cjson_data, "results");
@@ -642,7 +697,7 @@ void transform_locationID()
     const char* TAG = "transform_locationID";
 
     char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
-    gzip_decompress(http_get_out_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
+    gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
     cJSON* root_data = NULL;
     root_data = cJSON_Parse(json_buf);
@@ -672,7 +727,7 @@ void transform_real_time_weather_data()
     const char* TAG = "transform_real_time_weather_data";
 
     char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
-    gzip_decompress(http_get_out_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
+    gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
     // JSON数据解析,当前仅需要 now 的数据 15个 全部解析
     cJSON* root_data = NULL;
@@ -1068,7 +1123,7 @@ void asr_data_save_result(char* asr_response)
 esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max) {
     const char* TAG = "get_music_lyric_by_url";
     bool Task_comp_flag = false;// 任务是否完成标识
-    snprintf(http_get_url_buf, HTTP_BUF_MAX, url); // 确定请求URL
+    snprintf(http_url_buf, HTTP_BUF_MAX, url); // 确定请求URL
     http_init_get_request();
     xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
@@ -1076,7 +1131,7 @@ esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max) {
 
     //开始json解析
     cJSON* root_data = NULL;
-    root_data = cJSON_Parse(http_get_out_buf);
+    root_data = cJSON_Parse(http_output_buf);
     cJSON* cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
     if (cjson_lyric) {
         if (strlen(cjson_lyric->valuestring) < len_max) {

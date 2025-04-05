@@ -59,7 +59,7 @@ typedef enum
    VIBRA_MOTOR_INIT,//震动马达
    LEDARRAY_INIT,//LED阵列
    INIT_STEP_NUMBER //(初始化步骤数量)
-} init_step_id_t
+} init_step_id_t;
 
 
 typedef enum

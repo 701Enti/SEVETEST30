@@ -6,10 +6,10 @@
         "OPENOCD_SCRIPTS": "e:\\.espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230419/openocd-esp32/share/openocd/scripts",
         "IDF_CCACHE_ENABLE": "1"
     },
-    "idf.espIdfPathWin": "e:\\esp-idf",
+    "idf.espIdfPathWin": "e:\\v4.4.8\\esp-idf",
     "idf.espAdfPathWin": "E:\\.espressif\\esp-adf",
     "idf.openOcdConfigs": [
-        "board/esp32s3-bridge.cfg"
+        "board/esp32s3-builtin.cfg"
     ],
     "idf.portWin": "COM5",
     "idf.pythonBinPathWin": "e:\\.espressif\\python_env\\idf4.4_py3.11_env\\Scripts\\python.exe",
@@ -155,5 +155,6 @@
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",
-    "idf.flashType": "UART"
+    "idf.flashType": "UART",
+    "idf.pythonInstallPath": "e:\\.espressif\\tools\\idf-python\\3.8.7\\python.exe"
 }

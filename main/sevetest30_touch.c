@@ -26,6 +26,7 @@
 
 #include "sevetest30_touch.h"
 #include "board_pins_config.h"
+#include "esp_check.h"
 
 /// @brief 初始化线性振动马达
 /// @param in1_gpio 驱动信号1 GPIO
