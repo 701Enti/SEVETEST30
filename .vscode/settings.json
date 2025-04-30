@@ -4,9 +4,10 @@
     "idf.customExtraPaths": "e:\\.espressif\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin;e:\\.espressif\\tools\\riscv32-esp-elf-gdb\\11.2_20220823\\riscv32-esp-elf-gdb\\bin;e:\\.espressif\\tools\\xtensa-esp32-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\bin;e:\\.espressif\\tools\\xtensa-esp32s2-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32s2-elf\\bin;e:\\.espressif\\tools\\xtensa-esp32s3-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32s3-elf\\bin;e:\\.espressif\\tools\\riscv32-esp-elf\\esp-2021r2-patch5-8.4.0\\riscv32-esp-elf\\bin;e:\\.espressif\\tools\\esp32ulp-elf\\2.35_20220830\\esp32ulp-elf\\bin;e:\\.espressif\\tools\\cmake\\3.23.1\\bin;e:\\.espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230419\\openocd-esp32\\bin;e:\\.espressif\\tools\\ninja\\1.10.2;e:\\.espressif\\tools\\idf-exe\\1.0.3;e:\\.espressif\\tools\\ccache\\4.3\\ccache-4.3-windows-64;e:\\.espressif\\tools\\dfu-util\\0.9\\dfu-util-0.9-win64",
     "idf.customExtraVars": {
         "OPENOCD_SCRIPTS": "e:\\.espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230419/openocd-esp32/share/openocd/scripts",
-        "IDF_CCACHE_ENABLE": "1"
+        "IDF_CCACHE_ENABLE": "1",
+        "IDF_TARGET": "esp32s3"
     },
-    "idf.espIdfPathWin": "e:\\v4.4.8\\esp-idf",
+    "idf.espIdfPathWin": "e:\\v5.0.8\\esp-idf",
     "idf.espAdfPathWin": "E:\\.espressif\\esp-adf",
     "idf.openOcdConfigs": [
         "board/esp32s3-builtin.cfg"
@@ -151,10 +152,17 @@
         "gt32l32s0140.h": "c",
         "tcpip_adapter.h": "c",
         "freertosconfig.h": "c",
-        "esp_gap_ble_api.h": "c"
+        "esp_gap_ble_api.h": "c",
+        "i2s_std.h": "c",
+        "rmt_tx.h": "c",
+        "led_strip_rmt.h": "c",
+        "esp_check.h": "c",
+        "led_strip_spi.h": "c",
+        "rmt_private.h": "c",
+        "soc_caps.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",
     "idf.flashType": "UART",
-    "idf.pythonInstallPath": "e:\\.espressif\\tools\\idf-python\\3.8.7\\python.exe"
+    "idf.pythonInstallPath": "e:\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
 }

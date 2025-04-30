@@ -21,7 +21,6 @@
 
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 在此，对 乐鑫科技-ESPRESSIF ESP-IDF ESP-ADF ESP-DSP各种框架及相关创作者们 表示感谢
- // 在此，对 网易云音乐 网易云音乐API及相关创作者们 表示感谢
  // 在此，对 zlib及相关创作者们 表示感谢
  // 在此, 对 百度智能云千帆大模型平台 API服务及相关创作者们表示感谢
  // 在此，对 和风天气及相关创作者们 表示感谢
@@ -82,7 +81,7 @@ void app_main(void)
       .codec_adc_gain = MIC_GAIN_MAX,
       .codec_dac_pin = DAC_OUTPUT_ALL,
       .codec_dac_volume = 100,
-      .codec_adc_pin = ADC_INPUT_LINPUT1_RINPUT1,
+      .codec_adc_pin = CODEC_ADC_INPUT_MIC_ON_BOARD,
   };
 
 
@@ -255,8 +254,8 @@ void app_main(void)
 
 
   // 网络音乐播放
-  char* url1 = "";
-  change_url_if_need_redirect(&url1);
+  char* url1 = "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
+  // change_url_if_need_redirect(&url1);
 
   // 检查资源可用性
   if (http_check_common_url(url1) == ESP_OK)
@@ -323,7 +322,7 @@ void app_main(void)
     //   asr_cfg.record_save_times_max = 20;
 
     //   // 启动ASR服务
-    //   asr_service_start(&asr_cfg, 1);
+    //   asr_service_begin(&asr_cfg, 1);
 
     //   vTaskDelay(pdMS_TO_TICKS(500));
 
@@ -381,7 +380,7 @@ void app_main(void)
     //     if (text1)memset(text1, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
 
     //     memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
-    //     asr_service_start(&asr_cfg, 1);
+    //     asr_service_begin(&asr_cfg, 1);
     //   }
 
 

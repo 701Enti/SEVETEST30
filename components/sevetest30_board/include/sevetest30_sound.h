@@ -31,24 +31,30 @@
 #include "freertos/task.h"
 #include "audio_event_iface.h"
 
-#define MUSIC_PLAY_EVT_TASK_CORE (0)
-#define MUSIC_PLAY_EVT_TASK_STACK_SIZE (4 * 1024)
+//元素配置
+#define ELEMENT_MP3_DECODER_TASK_CORE (1) //运行在的CPU核心-mp3编码器任务(音频元素)
+#define ELEMENT_MP3_DECODER_TASK_STACK_SIZE (4 * 1024) //运行堆栈大小(Byte)-mp3编码器任务(音频元素)
+#define ELEMENT_MP3_DECODER_RINGBUFFER_SIZE (4 * 1024) //循环缓冲区大小(Byte)-mp3编码器(音频元素)
 
-#define MUSIC_MP3_DECODER_TASK_CORE (1)
+#define ELEMENT_RAW_STREAM_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-RAW原始音频流(音频元素)
 
-#define VAD_FRAME_LENGTH 30// VAD 帧时长(ms)
+//MUSIC_PLAY-音频播放功能
+#define MUSIC_PLAY_EVT_TASK_CORE (1) //运行在的CPU核心-音频播放功能的事件监听和处理任务
+#define MUSIC_PLAY_EVT_TASK_STACK_SIZE (4 * 1024) //运行堆栈大小(Byte)-音频播放功能的事件监听和处理任务
 
-// i2s_filter_raw_run 任务
-#define ASR_EVT_TASK_CORE (0)
-#define ASR_EVT_TASK_STACK_SIZE (3*1024)
-
-#define ASR_HTTP_RESPONSE_BUF_MAX 1024
-#define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)
-#define ASR_TIMEOUT_MS  10000//识别超时时长(ms)
-
-#define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS uri
+//ASR-自动语音识别功能
+#define ASR_TIMEOUT_MS  10000//说话停顿超时时长(ms)-说话停顿超过该时长后认为话说完了,停止识别语音-语音识别功能的说话检测
+#define ASR_HTTP_RESPONSE_BUF_MAX 1024 //缓存大小(Byte)-语音识别功能的http响应结果的缓存大小
+#define ASR_EVT_TASK_CORE (0) //运行在的CPU核心-语音识别功能的事件监听和处理任务
+#define ASR_EVT_TASK_STACK_SIZE (3*1024) //运行堆栈大小(Byte)-音频播放功能的事件监听和处理任务
+#define VAD_FRAME_LENGTH 30// VAD 帧时长(ms)-语音识别功能的说话检测
+#define ASR_FRAME_LENGTH 300//识别数据帧时长(ms)-语音识别功能的语音数据打包
 #define BAIDU_ASR_URL      "http://vop.baidu.com/server_api" //百度ASR uri
 #define BAIDU_ASR_PRO_URL  "http://vop.baidu.com/pro_api"//百度ASR极速版 uri
+
+//TTS-文本转语音(语音合成)功能
+#define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS uri
+
 
 
 
@@ -101,13 +107,11 @@ extern int volatile running_i2s_port;//运行的I2S配置
 extern bool volatile sevetest30_music_running_flag;//音乐播放/TTS语音合成运行标志
 extern bool volatile sevetest30_asr_running_flag;//语音识别运行标志
 
-uint64_t mp3_decoder_play_time_get();
 
-void element_cfg_data_reset();
-
-esp_err_t audio_element_all_init(const char* link_tag[], int link_num);
-
-// 外部功能函数
+// 外部通用功能运行
 void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority);
 void music_uri_or_url_play(const char* uri, UBaseType_t priority);
-void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority);
+void asr_service_begin(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority);
+
+//外部扩展功能API
+uint64_t mp3_decoder_play_time_get();

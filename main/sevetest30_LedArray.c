@@ -19,15 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含WS2812构成的LED阵列的图形与显示处理，不包含WS2812底层驱动程序
+ // 包含WS2812构成的LED阵列的图形与显示处理，使用的WS2812底层驱动程序为官方组件
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
- // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考Espressif官方提供的led_strip例程文件,同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
+ // 敬告：文件本体不包含WS2812硬件驱动代码，而是参考ESP-IDF的例程文件,使用官方led_strip组件依赖,同时还使用了源文件中的hsv到rgb的转换函数,非常感谢
  // 绘制函数本身不会刷新屏幕,需要运行屏幕刷新,才会在屏幕上点亮
  // 绘制函数规定使用字模点阵的左上角的点作为其坐标表示点,LED的延伸方向为X轴正方向,沿线方向的灯排对应的gpio号在ledarray_gpio_info数组的先后顺序指代其在Y轴正向出现顺序,对应角标+1为其对应的Y轴坐标
  // 在标准SEVETEST30-LedArray板下,正视"701Enti"标志,此时坐标原点应为最左上角像素点,X轴正方向向右,Y轴正方向向下,原点坐标为(1,1)即填入函数 x = 1,y = 1
- // ESP-IDF项目地址 https://github.com/espressif/esp-idf
- // 官方例程连接：https://github.com/espressif/esp-idf/tree/release/v4.4/examples/common_components/led_strip
- // 官方文档链接：https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/peripherals/rmt.html
+ // 本库WS2812使用硬件RMT驱动,占用两个RMT模块,由ESP-IDF内部驱动程序动态分配RMT模块,无需手动指定
+ // 如果是12排分为6组(0-5),RMT输出引脚将在这些连接的GPIO之间来回切换,实现阵列的刷新,同时提供局部刷新服务模式提高刷新效率
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
@@ -37,6 +37,8 @@
 #include "freertos/task.h"
 #include "stdarg.h"
 #include "led_strip.h"
+#include "led_strip_interface.h"
+#include "driver/rmt_tx.h"
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
@@ -44,7 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <esp_log.h>
-#include "driver/rmt.h"
 #include "hal/rmt_types.h"
 #include "gt32l32s0140.h"
 #include "esp_check.h"
@@ -96,16 +97,15 @@ uint8_t blue_y10[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y11[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y12[LINE_LED_NUMBER] = { 0x00 };
 
-const int ledarray_gpio_info[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO信息 第一行 到 最后一行
+const int ledarray_gpio_num_list[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO号列表 顺序为 第一行 到 最后一行
 uint8_t compound_result[LINE_LED_NUMBER * 3] = { 0 }; // 发送给WS2812的格式化数据缓存，GRB格式
 
-//本库WS2812使用硬件RMT驱动,占用两个RMT模块RMT0 RMT1
-//12排分为6组(0-5)两个RMT模块实际绑定了全部的6组IO
-//通过直接的IO模式切换选择RMT的控制对象
-rmt_config_t* rmt_cfg0;
-rmt_config_t* rmt_cfg1;
-led_strip_t* strip0 = NULL;
-led_strip_t* strip1 = NULL;
+//本库WS2812使用硬件RMT驱动,占用两个RMT模块
+//如果是12排分为6组(0-5),RMT输出引脚将在这些连接的GPIO之间来回切换,实现阵列的刷新,同时提供局部刷新服务模式提高刷新效率
+led_strip_handle_t strip0 = NULL;
+led_strip_handle_t strip1 = NULL;
+rmt_channel_handle_t strip0_rmt_channel = NULL;
+rmt_channel_handle_t strip1_rmt_channel = NULL;
 
 // 数字 0-9
 const uint8_t matrix_0[7] = { 0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0 };
@@ -121,9 +121,9 @@ const uint8_t matrix_9[7] = { 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0 };
 
 
 
-/******************************屏幕刷新任务 [绘制函数本身不会刷新屏幕,需要运行屏幕刷新,才会在屏幕上点亮] *****************************/
+/******************************自动屏幕刷新服务 [绘制函数本身不会刷新屏幕,需要手动或自动运行屏幕刷新,才会在屏幕上点亮] *****************************/
 uint8_t draw_line_count[VERTICAL_LED_NUMBER] = { 0 };//每行的绘制计数,在局部刷新模式下,为0次绘制活动的行不刷新屏幕
-ledarray_refresh_mode_t refresh_mode_buf = LEDARRAY_REFRESH_DISABLE;
+ledarray_auto_refresh_mode_t refresh_mode_buf = LEDARRAY_AUTO_REFRESH_DISABLE;
 SemaphoreHandle_t refresh_Task_Mutex = NULL;
 
 /// @brief [单次全刷任务 - ALL_ONCE]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
@@ -168,21 +168,21 @@ void refresh_PART_MULTIPLE_Task() {
 	}
 }
 
-/// @brief 设置LED阵列的刷新模式("ALL_ONCE" "ALL_MULTIPLE" "PART_ONCE" "PART_MULTIPLE")
+/// @brief 设置LED阵列的自动刷新模式,立即启动生效
 /// @param mode 刷新模式,这是一个枚举类型
-void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
+void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode) {
 	switch (refresh_mode_buf)
 	{
-	case LEDARRAY_REFRESH_ALL_ONCE:
+	case LEDARRAY_AUTO_REFRESH_ALL_ONCE:
 		vTaskDelete(xTaskGetHandle("ALL_ONCE"));
 		break;
-	case LEDARRAY_REFRESH_ALL_MULTIPLE:
+	case LEDARRAY_AUTO_REFRESH_ALL_MULTIPLE:
 		vTaskDelete(xTaskGetHandle("ALL_MULTIPLE"));
 		break;
-	case LEDARRAY_REFRESH_PART_ONCE:
+	case LEDARRAY_AUTO_REFRESH_PART_ONCE:
 		vTaskDelete(xTaskGetHandle("PART_ONCE"));
 		break;
-	case LEDARRAY_REFRESH_PART_MULTIPLE:
+	case LEDARRAY_AUTO_REFRESH_PART_MULTIPLE:
 		vTaskDelete(xTaskGetHandle("PART_MULTIPLE"));
 		break;
 	default:
@@ -190,19 +190,19 @@ void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
 	}
 	switch (mode)
 	{
-	case LEDARRAY_REFRESH_ALL_ONCE:
+	case LEDARRAY_AUTO_REFRESH_ALL_ONCE:
 		xTaskCreatePinnedToCore(&refresh_ALL_ONCE_Task, "ALL_ONCE",
 			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
-	case LEDARRAY_REFRESH_ALL_MULTIPLE:
+	case LEDARRAY_AUTO_REFRESH_ALL_MULTIPLE:
 		xTaskCreatePinnedToCore(&refresh_ALL_MULTIPLE_Task, "ALL_MULTIPLE",
 			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
-	case LEDARRAY_REFRESH_PART_ONCE:
+	case LEDARRAY_AUTO_REFRESH_PART_ONCE:
 		xTaskCreatePinnedToCore(&refresh_PART_ONCE_Task, "PART_ONCE",
 			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
-	case LEDARRAY_REFRESH_PART_MULTIPLE:
+	case LEDARRAY_AUTO_REFRESH_PART_MULTIPLE:
 		xTaskCreatePinnedToCore(&refresh_PART_MULTIPLE_Task, "PART_MULTIPLE",
 			LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
@@ -217,16 +217,16 @@ void ledarray_set_refresh_mode(ledarray_refresh_mode_t mode) {
 /// @brief 生成一个矩形字模(需要释放)
 /// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
 /// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
-/// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小（Byte） RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
+/// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小(uint64_t)(单位:Byte) RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
 /// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p);
-uint8_t* rectangle(int8_t breadth, int8_t length)
+uint8_t* rectangle(int32_t breadth, int32_t length)
 {
 	if (breadth < 0 || length < 0)
 		return NULL;
 
-	uint8_t x_byte_num = 1, entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
-	uint8_t Dx = 0;								 // 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
-	bool flag = 0;								 // 即将写入的位数据值
+	uint64_t x_byte_num = 1, entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
+	uint64_t Dx = 0;// 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
+	bool flag = 0;// 即将写入的位数据值
 
 	static uint8_t* pT1 = NULL;
 	static uint8_t* p = NULL;
@@ -236,12 +236,12 @@ uint8_t* rectangle(int8_t breadth, int8_t length)
 	x_byte_num = ceil(breadth * 1.0 / 8.0);
 	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
 
-	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 1);//一个字节用于存储字模数据大小
-	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 1);
+	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 8);//8个字节(uint64_t)用于存储字模数据大小
+	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 8);
 
 	*rectangle_data = entire_byte_num; // 装载entire_byte_num
 	p = rectangle_data;
-	pT1 = rectangle_data + 0x01; // 获取到数据的起始地址
+	pT1 = rectangle_data + 0x08; // 获取到数据的起始地址
 
 	// 先进行全图填充
 	flag = 1;
@@ -282,7 +282,7 @@ uint8_t* rectangle(int8_t breadth, int8_t length)
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB）
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
+void separation_draw(int x, int y, uint64_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
 {
 	if (p == NULL)
 	{
@@ -291,10 +291,10 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, ui
 	}
 
 	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
-		uint32_t Dx = 0, Dy = 0; // xy的增加量
-		uint8_t dat = 0x00;		// 临时数据存储
+		uint64_t Dx = 0, Dy = 0; // xy的增加量
+		uint8_t data = 0x00;		// 临时数据存储
 		uint8_t i = 0;			// 临时变量i
-		int32_t sx = 0;			// 临时存储选定的横坐标
+		int sx = 0;			// 临时存储选定的横坐标
 		bool flag = 0;			// 该像素是否需要点亮
 		uint8_t black[3] = { 0 };
 		uint8_t color[3] = { in_color[0], in_color[1], in_color[2] };			// 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
@@ -307,8 +307,8 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, ui
 			for (i = 0; i <= 7; i++)
 			{
 				// 数据解析
-				dat = *p;				  // 读取数据
-				flag = (dat << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
+				data = *p;				  // 读取数据
+				flag = (data << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
 
 				// 存储到缓冲区
 				sx = x + Dx - 1;
@@ -340,7 +340,7 @@ void separation_draw(int32_t x, int32_t y, uint8_t breadth, const uint8_t* p, ui
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p        导入图像指针
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change)
+void direct_draw(int x, int y, const uint8_t* p, uint8_t change)
 {
 	if (p == NULL)
 	{
@@ -348,21 +348,21 @@ void direct_draw(int32_t x, int32_t y, const uint8_t* p, uint8_t change)
 		return;
 	}
 	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
-		uint32_t Dx = 0, Dy = 0;				  // xy的增加量
-		int32_t sx = 0;						  // 临时存储选定的横坐标	
+		uint64_t Dx = 0, Dy = 0;				  // xy的增加量
+		int sx = 0;						  // 临时存储选定的横坐标	
 		uint8_t* pT1 = p, * pT2 = p, * pT3 = p; // 临时指针
 
 		// 获取图案长宽数据
-		uint32_t length = 0, breadth = 0; // 长宽信息
-		uint8_t dat[4] = { 0x00 };		 // 临时数据存储
+		uint64_t length = 0, breadth = 0; // 长宽信息
+		uint8_t data[4] = { 0x00 };		 // 临时数据存储
 		p += 0x02;						 // 偏移到长宽数据区
 		for (uint8_t i = 0; i < 4; i++)
 		{
-			dat[i] = *p;
+			data[i] = *p;
 			p++;
 		}
-		breadth = (dat[1] << 8) | dat[0];
-		length = (dat[3] << 8) | dat[2];
+		breadth = (data[1] << 8) | data[0];
+		length = (data[3] << 8) | data[2];
 		// 图像解析
 		p += 0x02;				   // 偏移到图像数据区
 		uint8_t color[3] = { 0x00 }; // 临时数据存储
@@ -408,48 +408,48 @@ void clean_draw() {
 
 /// @brief 清空指定行的图像
 /// @param y 指定行纵坐标(从1开始)
-void clean_draw_buf(int8_t y)
+void clean_draw_buf(int y)
 {
-	uint8_t dat[3] = { 0 };
+	uint8_t data[3] = { 0 };
 	for (int i = 0; i < LINE_LED_NUMBER; i++)
-		color_input(i, y, dat);
+		color_input(i, y, data);
 }
 
 /// @brief 渐进指定行的图像，使得颜色向目标颜色以步进值偏移一步，这只会对绘制状态非活动的区域起作用
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色
-void progress_draw_buf(int8_t y, uint8_t step, uint8_t* color)
+void progress_draw_buf(int y, uint8_t step, uint8_t* color)
 {
-	uint8_t dat[3] = { 0 };
+	uint8_t data[3] = { 0 };
 	for (int i = 0; i < LINE_LED_NUMBER; i++)
 	{
-		color_output(i, y, dat);
+		color_output(i, y, data);
 		for (int j = 0; j < 3; j++)
 		{
 			if (color[j] >= 0 && color[j] <= 255)
 			{
-				if (dat[j] < color[j])
+				if (data[j] < color[j])
 				{
-					if (255 - dat[j] >= step)
-						dat[j] += step;
+					if (255 - data[j] >= step)
+						data[j] += step;
 					else
-						dat[j] = color[j];
+						data[j] = color[j];
 				}
-				if (dat[j] > color[j])
+				if (data[j] > color[j])
 				{
-					if (dat[j] >= step)
-						dat[j] -= step;
+					if (data[j] >= step)
+						data[j] -= step;
 					else
-						dat[j] = color[j];
+						data[j] = color[j];
 				}
 			}
 			else
 			{
-				dat[j] = color[j];
+				data[j] = color[j];
 			}
 		}
-		color_input(i, y, dat);
+		color_input(i, y, data);
 	}
 }
 
@@ -461,7 +461,7 @@ void progress_draw_buf(int8_t y, uint8_t step, uint8_t* color)
 /// @param figure 输入整型0-9数字,不支持负数
 /// @param color 颜色RGB
 /// @param change 亮度0-100
-void print_number(int32_t x, int32_t y, int8_t figure, uint8_t color[3], uint8_t change)
+void print_number(int x, int y, int8_t figure, uint8_t color[3], uint8_t change)
 {
 	uint8_t* p = NULL;
 	// 将p指向对应数字字模
@@ -512,7 +512,7 @@ void print_number(int32_t x, int32_t y, int8_t figure, uint8_t color[3], uint8_t
 		ESP_LOGE("print_number", "输入了0-9之外的数字");
 		return;
 	}
-	separation_draw(x, y, FIGURE, p, sizeof(matrix_7), color, change); // 因为，数字字模数据大小一样，随便输入一个字模就可以
+	separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_7), color, change); // 因为，数字字模数据大小一样，随便输入一个字模就可以
 }
 
 
@@ -522,7 +522,7 @@ void print_number(int32_t x, int32_t y, int8_t figure, uint8_t color[3], uint8_t
 /// @param color 字符颜色
 /// @param change 亮度调制 1-100
 /// @param format 形式同printf的可变参量表
-void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, char* format, ...) {
+void font_raw_print_12x(int x, int y, uint8_t color[3], uint8_t change, char* format, ...) {
 	const char* TAG = "font_raw_print_12x";
 
 	//申请字符unicode编码缓存
@@ -580,7 +580,7 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 		}
 	}
 
-	int32_t x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
 	int x_base = 0;//当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
 
 	//绘制所有字符
@@ -613,7 +613,7 @@ void font_raw_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, 
 /// @param change 亮度调制 1-100
 /// @param cartoon_handle sevetest30_UI动画支持句柄,填写句柄启用预设的动画,填写NULL以使用默认效果
 /// @param format 形式同printf的可变参量表
-void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...) {
+void font_roll_print_12x(int x, int y, uint8_t color[3], uint8_t change, cartoon_handle_t cartoon_handle, char* format, ...) {
 	const char* TAG = "font_roll_print_12x";
 
 	//申请字符unicode编码缓存
@@ -673,7 +673,7 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 
 	//绘制图像形成滚动效果
 	uint32_t step = 0;//当前步进值
-	int32_t x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_buf = 0;//当前选定的[idx]号字符点阵图像的起始x轴坐标
 	int x_base = 0;//当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平步数距离,这在计算[idx-1]号字符时完成累加
 
 	//如果把要滚动的字符看做一列火车车厢,屏幕看作一条小于车长的直隧洞
@@ -761,11 +761,11 @@ void font_roll_print_12x(int32_t x, int32_t y, uint8_t color[3], uint8_t change,
 /*******************************************************显示驱动函数**********************************************************/
 
 /// @brief  初始化灯板阵列
-/// @return [ESP_OK 初始化成功]
-/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题]
-/// @return [ESP_ERR_INVALID_STATE 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 / RMT控制器之前已经安装,请调用对应rmt_driver_uninstall]
+/// @return [ESP_OK 成功]
+/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题 / refresh_Task_Mutex互斥量已经被意外创建]
+/// @return [ESP_ERR_INVALID_STATE 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 / RMT控制器之前已经安装,请调用对应rmt_driver_uninstall释放需要的资源]
 /// @return [ESP_ERR_INVALID_ARG 参数错误]
-/// @return [ESP_ERR_NO_MEM 内存申请失败]
+/// @return [ESP_ERR_NO_MEM 内存不足]
 esp_err_t ledarray_init()
 {
 	const char* TAG = "ledarray_init";
@@ -778,108 +778,206 @@ esp_err_t ledarray_init()
 		}
 	}
 	else {
-		ESP_LOGE(TAG, "灯板阵列不可重复初始化,运行ledarray_deinit以去初始化");
-		return ESP_ERR_INVALID_STATE;
+		if (strip0 != NULL || strip1 != NULL) {
+			ESP_LOGE(TAG, "灯板阵列不可重复初始化,运行ledarray_deinit以去初始化");
+			return ESP_ERR_INVALID_STATE;
+		}
+		else {
+			ESP_LOGE(TAG, "refresh_Task_Mutex互斥量已经被意外创建");
+			return ESP_FAIL;
+		}
 	}
 
-	rmt_config_t rmt_cfg0_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[0], 0); // 使用默认通道配置模板，通道0;
-	rmt_config_t rmt_cfg1_buf = RMT_DEFAULT_CONFIG_TX(ledarray_gpio_info[1], 1); // 使用默认通道配置模板，通道1;
+	led_strip_config_t strip_config_0 = {
+		.strip_gpio_num = ledarray_gpio_num_list[0],
+		.max_leds = LINE_LED_NUMBER,
+		.color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB,
+		.led_model = LEDARRAY_LED_MODEL,
+		.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
+	};
 
-	rmt_cfg0_buf.clk_div = 2;															// 修改成员，设定计数器分频，如果频率不适配，是无法运行的
-	rmt_cfg1_buf.clk_div = 2;
+	led_strip_config_t strip_config_1 = {
+		.strip_gpio_num = ledarray_gpio_num_list[1],
+		.max_leds = LINE_LED_NUMBER,
+		.color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB,
+		.led_model = LEDARRAY_LED_MODEL,
+		.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
+	};
+
+	led_strip_rmt_config_t rmt_config = {
+		.clk_src = LEDARRAY_LED_RMT_CLK_SRC,
+		.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
+		.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
+		.flags.with_dma = LEDARRAY_LED_WITH_DMA,
+	};
 
 	esp_err_t ret = ESP_OK;
 
-	ret = rmt_config(&rmt_cfg0_buf); //配置RMT参数
-	ESP_RETURN_ON_ERROR(ret, TAG, "配置RMT控制器0参数时发现问题");
-	ret = rmt_config(&rmt_cfg1_buf);
-	ESP_RETURN_ON_ERROR(ret, TAG, "配置RMT控制器1参数时发现问题");
+	//创建通过RMT通讯的实例
+	ret = led_strip_new_rmt_device(&strip_config_0, &rmt_config, &strip0);
+	ESP_RETURN_ON_ERROR(ret, TAG, "创建 strip0 时发现问题 描述 %s", esp_err_to_name(ret));
+	ret = led_strip_new_rmt_device(&strip_config_1, &rmt_config, &strip1);
+	ESP_RETURN_ON_ERROR(ret, TAG, "创建 strip1 时发现问题 描述 %s", esp_err_to_name(ret));
 
-	// 控制器安装  （通道选择，接收内存块数量（发送模式使用0个），中断标识）
-	ret = rmt_driver_install(rmt_cfg0_buf.channel, 0, 0);
-	ESP_RETURN_ON_ERROR(ret, TAG, "安装RMT控制器0时发现问题");
-	ret = rmt_driver_install(rmt_cfg1_buf.channel, 0, 0);
-	ESP_RETURN_ON_ERROR(ret, TAG, "安装RMT控制器1时发现问题");
+	//通过偏移强制访问内部封装资源(不推荐)
+	strip0_rmt_channel = (rmt_channel_handle_t)((void*)strip0 + sizeof(led_strip_t) / sizeof(void*));
+	strip1_rmt_channel = (rmt_channel_handle_t)((void*)strip0 + sizeof(led_strip_t) / sizeof(void*));
 
-	// 安装 ws2812控制
-	led_strip_config_t strip_cfg0 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg0_buf.channel);
-	led_strip_config_t strip_cfg1 = LED_STRIP_DEFAULT_CONFIG(LINE_LED_NUMBER, (led_strip_dev_t)rmt_cfg1_buf.channel);
-	strip0 = led_strip_new_rmt_ws2812(&strip_cfg0);
-	strip1 = led_strip_new_rmt_ws2812(&strip_cfg1);
+	//设置自动刷新模式为默认模式
+	ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
 
-	rmt_cfg0 = &rmt_cfg0_buf;
-	rmt_cfg1 = &rmt_cfg0_buf;
-
-	ledarray_set_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
-
-	ESP_LOGW(TAG, " %d X %d LED阵列初始化完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
+	ESP_LOGW(TAG, " %d X %d LED阵列初始化完成 当前自动刷新服务模式 %d", LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_REFRESH_INIT_MODE);
 
 	return ESP_OK;
 }
 
-/// @brief 去初始化灯板阵列
-void ledarray_deinit()
+/// @brief  灯板阵列反初始化操作
+/// @return [ESP_OK 成功]
+/// @return [ESP_FAIL 释放资源失败 / refresh_Task_Mutex互斥量异常]
+/// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
+/// @return [ESP_ERR_INVALID_ARG ledarray_gpio_num_list中存在错误的GPIO号码]
+esp_err_t ledarray_deinit()
 {
 	const char* TAG = "ledarray_deinit";
 
 	if (!refresh_Task_Mutex) {
-		ESP_LOGE(TAG, "灯板阵列未初始化,无需去初始化");
-		return;
+		if (strip0 != NULL || strip1 != NULL) {
+			ESP_LOGE(TAG, "灯板阵列未初始化,无需反初始化");
+			return ESP_ERR_INVALID_STATE;
+		}
+		else {
+			ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常");
+			return ESP_FAIL;
+		}
 	}
 
-	ledarray_set_refresh_mode(LEDARRAY_REFRESH_DISABLE);
+	esp_err_t ret = ESP_OK;
+
+	//禁用刷新服务
+	ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
+
+	//禁用访问
+	strip0_rmt_channel = NULL;
+	strip1_rmt_channel = NULL;
+
+	//释放strip0资源
+	ret = led_strip_del(strip0);
+	ESP_RETURN_ON_ERROR(ret, TAG, "释放 strip0资源 时发现问题 描述 %s", esp_err_to_name(ret));
+	strip0 = NULL;
+
+	//释放strip1资源
+	ret = led_strip_del(strip1);
+	ESP_RETURN_ON_ERROR(ret, TAG, "释放 strip1资源 时发现问题 描述 %s", esp_err_to_name(ret));
+	strip1 = NULL;
+
+	//重置互斥量
 	vSemaphoreDelete(refresh_Task_Mutex);
 	refresh_Task_Mutex = NULL;
 
-	strip0->del(strip0);
-	strip0 = NULL;
-	strip1->del(strip1);
-	strip1 = NULL;
-	rmt_driver_uninstall(0);
-	rmt_driver_uninstall(1);
+	//确保不再有信号输出
+	for (int i = 0;i < VERTICAL_LED_NUMBER;i++) {
+		esp_rom_gpio_pad_select_gpio(ledarray_gpio_num_list[i]);
+		ret = gpio_set_direction(ledarray_gpio_num_list[i], GPIO_MODE_INPUT);
+		ESP_RETURN_ON_ERROR(ret, TAG, "错误的GPIO号码");
+		gpio_set_level(ledarray_gpio_num_list[i], 0);
+	}
 
-	ESP_LOGW(TAG, " %d X %d LED阵列去初始化重置完成", LINE_LED_NUMBER, VERTICAL_LED_NUMBER);
+	ESP_LOGW(TAG, " %d X %d LED阵列反初始化操作完成,所有资源已释放 当前自动刷新服务模式 %d", LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_AUTO_REFRESH_DISABLE);
+	return ESP_OK;
 }
 
 /// @brief 灯板阵列选定并写入，未通过ledarray_init()初始化ledarray，函数内会自动初始化
-/// @param group_sw 选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算
-void ledarray_set_and_write(uint8_t group_sw)
+/// @param group_num 选定要刷新的组,每组有两串WS2812,如12行WS2812,共6组,取值为0-5,不足一组单独按一组计算
+void ledarray_set_and_write(int group_num)
 {
-	if (group_sw > VERTICAL_LED_NUMBER / 2 - 1)
+	const char* TAG = "ledarray_set_and_write";
+
+	if (group_num > VERTICAL_LED_NUMBER / 2 - 1)
 	{
 		return; // 不在显示范围退出即可，允许在范围外但不报告
 	}
 	if (strip0 == NULL || strip1 == NULL)
 	{
-		ESP_LOGE("ledarray_set_and_write", "LED阵列未初始化");
+		ESP_LOGE(TAG, "LED阵列未初始化");
 		return;
 	}
 
-	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {
+	if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY)) {		//竞争互斥锁
 		// 记录了上次调用函数刷新的组的输出IO
-		static gpio_num_t former_select0 = ledarray_gpio_info[0];
-		static gpio_num_t former_select1 = ledarray_gpio_info[1];
+		static gpio_num_t former_select0 = ledarray_gpio_num_list[0];
+		static gpio_num_t former_select1 = ledarray_gpio_num_list[1];
 
-		// strip0
-		gpio_set_direction(former_select0, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-		color_compound(group_sw * 2 + 1);										   // 合成数据
-		rmt_set_gpio(0, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 0], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-		for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-			strip0->set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-		strip0->refresh(strip0, 100); // 对现在绑定的IO写入数据
+		rmt_tx_channel_config_t strip0_channel_config = {
+			.gpio_num = ledarray_gpio_num_list[group_num * 2 + 0],
+			.clk_src = LEDARRAY_LED_RMT_CLK_SRC,
+			.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
+			.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
+			.trans_queue_depth = 4,
+			.flags.with_dma = LEDARRAY_LED_WITH_DMA,
+			.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
+		};
 
+		rmt_tx_channel_config_t strip1_channel_config = {
+			.gpio_num = ledarray_gpio_num_list[group_num * 2 + 1],
+			.clk_src = LEDARRAY_LED_RMT_CLK_SRC,
+			.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
+			.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
+			.trans_queue_depth = 4,
+			.flags.with_dma = LEDARRAY_LED_WITH_DMA,
+			.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
+		};
 
-		// strip1
-		gpio_set_direction(former_select1, GPIO_MODE_INPUT);	//禁止向之前绑定的IO发送数据
-		color_compound(group_sw * 2 + 2);	   // 合成数据
-		rmt_set_gpio(1, RMT_MODE_TX, ledarray_gpio_info[group_sw * 2 + 1], false); // 绑定新IO,数据会向所有已经绑定的IO发送
-		for (uint8_t j = 0; j < LINE_LED_NUMBER * 3; j += 3)
-			strip1->set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
-		strip1->refresh(strip1, 100); // 对现在绑定的IO写入数据
+		esp_err_t err = ESP_OK;
 
-		former_select0 = ledarray_gpio_info[group_sw * 2 + 0];
-		former_select1 = ledarray_gpio_info[group_sw * 2 + 1];
+		// strip0切换输出引脚
+		err = ESP_OK;
+		err |= rmt_tx_wait_all_done(strip0_rmt_channel, -1);//等待之前的传输完成
+		err |= rmt_del_channel(strip0_rmt_channel);//卸载当前RMT通道
+		err |= rmt_new_tx_channel(&strip0_channel_config, &strip0_rmt_channel);//安装新的RMT通道(切换到下一个GPIO)
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "strip0切换输出引脚时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
+		}
 
+		// strip1切换输出引脚
+		err = ESP_OK;
+		err |= rmt_tx_wait_all_done(strip1_rmt_channel, -1);//等待之前的传输完成
+		err |= rmt_del_channel(strip1_rmt_channel);//卸载当前RMT通道
+		err |= rmt_new_tx_channel(&strip1_channel_config, &strip1_rmt_channel);//安装新的RMT通道(切换到下一个GPIO)
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "strip1切换输出引脚时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
+		}
+
+		//写入strip0数据并刷新
+		err = ESP_OK;
+		color_compound(group_num * 2 + 1);// 合成strip0数据到缓存
+		for (int j = 0; j < LINE_LED_NUMBER * 3; j += 3) {
+			err |= led_strip_set_pixel(strip0, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+		}
+		err |= led_strip_refresh(strip0); // 对现在绑定的IO写入数据
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "写入并刷新strip0时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
+		}
+
+		//写入strip1数据并刷新
+		err = ESP_OK;
+		color_compound(group_num * 2 + 2);// 合成strip1数据到缓存
+		for (int j = 0; j < LINE_LED_NUMBER * 3; j += 3) {
+			err |= led_strip_set_pixel(strip1, j / 3, compound_result[j + 1], compound_result[j + 0], compound_result[j + 2]); // 设置即将刷新的数据
+		}
+		err |= led_strip_refresh(strip1); // 对现在绑定的IO写入数据
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "写入并刷新strip1时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
+		}
+
+		//存储本次操作的输出GPIO
+		former_select0 = ledarray_gpio_num_list[group_num * 2 + 0];
+		former_select1 = ledarray_gpio_num_list[group_num * 2 + 1];
+
+		//释放互斥锁
 		xSemaphoreGive(refresh_Task_Mutex);
 	}
 }
@@ -887,8 +985,8 @@ void ledarray_set_and_write(uint8_t group_sw)
 /// @brief 颜色导入,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
 /// @param x 绝对横坐标(0 到 LINE_LED_NUMBER-1)
 /// @param y 一般纵坐标(1 到 VERTICAL_LED_NUMBER)
-/// @param dat 导入的颜色RGB数据位置
-void color_input(int8_t x, int8_t y, uint8_t* dat)
+/// @param data 导入的颜色RGB数据位置
+void color_input(int x, int y, uint8_t* data)
 {
 
 	if (x < 0 || x > LINE_LED_NUMBER - 1 || y < 1 || y > VERTICAL_LED_NUMBER) {
@@ -901,75 +999,75 @@ void color_input(int8_t x, int8_t y, uint8_t* dat)
 	switch (y)
 	{
 	case 1:
-		red_y1[x] = dat[0];
-		green_y1[x] = dat[1];
-		blue_y1[x] = dat[2];
+		red_y1[x] = data[0];
+		green_y1[x] = data[1];
+		blue_y1[x] = data[2];
 		break;
 
 	case 2:
-		red_y2[x] = dat[0];
-		green_y2[x] = dat[1];
-		blue_y2[x] = dat[2];
+		red_y2[x] = data[0];
+		green_y2[x] = data[1];
+		blue_y2[x] = data[2];
 		break;
 
 	case 3:
-		red_y3[x] = dat[0];
-		green_y3[x] = dat[1];
-		blue_y3[x] = dat[2];
+		red_y3[x] = data[0];
+		green_y3[x] = data[1];
+		blue_y3[x] = data[2];
 		break;
 
 	case 4:
-		red_y4[x] = dat[0];
-		green_y4[x] = dat[1];
-		blue_y4[x] = dat[2];
+		red_y4[x] = data[0];
+		green_y4[x] = data[1];
+		blue_y4[x] = data[2];
 		break;
 
 	case 5:
-		red_y5[x] = dat[0];
-		green_y5[x] = dat[1];
-		blue_y5[x] = dat[2];
+		red_y5[x] = data[0];
+		green_y5[x] = data[1];
+		blue_y5[x] = data[2];
 		break;
 
 	case 6:
-		red_y6[x] = dat[0];
-		green_y6[x] = dat[1];
-		blue_y6[x] = dat[2];
+		red_y6[x] = data[0];
+		green_y6[x] = data[1];
+		blue_y6[x] = data[2];
 		break;
 
 	case 7:
-		red_y7[x] = dat[0];
-		green_y7[x] = dat[1];
-		blue_y7[x] = dat[2];
+		red_y7[x] = data[0];
+		green_y7[x] = data[1];
+		blue_y7[x] = data[2];
 		break;
 
 	case 8:
-		red_y8[x] = dat[0];
-		green_y8[x] = dat[1];
-		blue_y8[x] = dat[2];
+		red_y8[x] = data[0];
+		green_y8[x] = data[1];
+		blue_y8[x] = data[2];
 		break;
 
 	case 9:
-		red_y9[x] = dat[0];
-		green_y9[x] = dat[1];
-		blue_y9[x] = dat[2];
+		red_y9[x] = data[0];
+		green_y9[x] = data[1];
+		blue_y9[x] = data[2];
 		break;
 
 	case 10:
-		red_y10[x] = dat[0];
-		green_y10[x] = dat[1];
-		blue_y10[x] = dat[2];
+		red_y10[x] = data[0];
+		green_y10[x] = data[1];
+		blue_y10[x] = data[2];
 		break;
 
 	case 11:
-		red_y11[x] = dat[0];
-		green_y11[x] = dat[1];
-		blue_y11[x] = dat[2];
+		red_y11[x] = data[0];
+		green_y11[x] = data[1];
+		blue_y11[x] = data[2];
 		break;
 
 	case 12:
-		red_y12[x] = dat[0];
-		green_y12[x] = dat[1];
-		blue_y12[x] = dat[2];
+		red_y12[x] = data[0];
+		green_y12[x] = data[1];
+		blue_y12[x] = data[2];
 		break;
 
 	default:
@@ -980,10 +1078,10 @@ void color_input(int8_t x, int8_t y, uint8_t* dat)
 /// @brief 颜色导出,SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
 /// @param x 绝对横坐标(0 到 LINE_LED_NUMBER-1)
 /// @param y 一般纵坐标(1 到 LINE_LED_NUMBER)
-/// @param dat 导出存储的颜色RGB数据的位置
-void color_output(int8_t x, int8_t y, uint8_t* dat)
+/// @param data 导出存储的颜色RGB数据的位置
+void color_output(int x, int y, uint8_t* data)
 {
-	if (!dat) {
+	if (!data) {
 		ESP_LOGE("color_output", "输入了无法处理的空指针");
 		return;
 	}
@@ -992,75 +1090,75 @@ void color_output(int8_t x, int8_t y, uint8_t* dat)
 	switch (y)
 	{
 	case 1:
-		dat[0] = red_y1[x];
-		dat[1] = green_y1[x];
-		dat[2] = blue_y1[x];
+		data[0] = red_y1[x];
+		data[1] = green_y1[x];
+		data[2] = blue_y1[x];
 		break;
 
 	case 2:
-		dat[0] = red_y2[x];
-		dat[1] = green_y2[x];
-		dat[2] = blue_y2[x];
+		data[0] = red_y2[x];
+		data[1] = green_y2[x];
+		data[2] = blue_y2[x];
 		break;
 
 	case 3:
-		dat[0] = red_y3[x];
-		dat[1] = green_y3[x];
-		dat[2] = blue_y3[x];
+		data[0] = red_y3[x];
+		data[1] = green_y3[x];
+		data[2] = blue_y3[x];
 		break;
 
 	case 4:
-		dat[0] = red_y4[x];
-		dat[1] = green_y4[x];
-		dat[2] = blue_y4[x];
+		data[0] = red_y4[x];
+		data[1] = green_y4[x];
+		data[2] = blue_y4[x];
 		break;
 
 	case 5:
-		dat[0] = red_y5[x];
-		dat[1] = green_y5[x];
-		dat[2] = blue_y5[x];
+		data[0] = red_y5[x];
+		data[1] = green_y5[x];
+		data[2] = blue_y5[x];
 		break;
 
 	case 6:
-		dat[0] = red_y6[x];
-		dat[1] = green_y6[x];
-		dat[2] = blue_y6[x];
+		data[0] = red_y6[x];
+		data[1] = green_y6[x];
+		data[2] = blue_y6[x];
 		break;
 
 	case 7:
-		dat[0] = red_y7[x];
-		dat[1] = green_y7[x];
-		dat[2] = blue_y7[x];
+		data[0] = red_y7[x];
+		data[1] = green_y7[x];
+		data[2] = blue_y7[x];
 		break;
 
 	case 8:
-		dat[0] = red_y8[x];
-		dat[1] = green_y8[x];
-		dat[2] = blue_y8[x];
+		data[0] = red_y8[x];
+		data[1] = green_y8[x];
+		data[2] = blue_y8[x];
 		break;
 
 	case 9:
-		dat[0] = red_y9[x];
-		dat[1] = green_y9[x];
-		dat[2] = blue_y9[x];
+		data[0] = red_y9[x];
+		data[1] = green_y9[x];
+		data[2] = blue_y9[x];
 		break;
 
 	case 10:
-		dat[0] = red_y10[x];
-		dat[1] = green_y10[x];
-		dat[2] = blue_y10[x];
+		data[0] = red_y10[x];
+		data[1] = green_y10[x];
+		data[2] = blue_y10[x];
 		break;
 
 	case 11:
-		dat[0] = red_y11[x];
-		dat[1] = green_y11[x];
-		dat[2] = blue_y11[x];
+		data[0] = red_y11[x];
+		data[1] = green_y11[x];
+		data[2] = blue_y11[x];
 		break;
 
 	case 12:
-		dat[0] = red_y12[x];
-		dat[1] = green_y12[x];
-		dat[2] = blue_y12[x];
+		data[0] = red_y12[x];
+		data[1] = green_y12[x];
+		data[2] = blue_y12[x];
 		break;
 
 	default:
@@ -1071,15 +1169,15 @@ void color_output(int8_t x, int8_t y, uint8_t* dat)
 
 /// @brief 颜色数据合成,将R red_y(x) G green_y(x) B blue_y(x) 合成为 为WS2812发送的数据
 /// @brief SE30中VERTICAL_LED_NUMBER=12 如果您希望扩展屏幕纵向长度，务必修改这个函数
-/// @param line_sw 合成选定的行(1-VERTICAL_LED_NUMBER)
-void color_compound(uint8_t line_sw)
+/// @param line_num 合成选定的行(1-VERTICAL_LED_NUMBER)
+void color_compound(int line_num)
 {
 	uint8_t i = 0;
 	// 初始化
 	uint8_t* red = NULL;
 	uint8_t* green = NULL;
 	uint8_t* blue = NULL;
-	switch (line_sw)
+	switch (line_num)
 	{
 	case 1:
 		red = red_y1;
@@ -1146,7 +1244,7 @@ void color_compound(uint8_t line_sw)
 		break;
 	}
 
-	draw_line_count[line_sw - 1] = 0;//该行发生刷新活动,绘制计数值重置
+	draw_line_count[line_num - 1] = 0;//该行发生刷新活动,绘制计数值重置
 	// 填充数据
 	for (i = 0; i < LINE_LED_NUMBER; i++)
 	{
@@ -1224,7 +1322,7 @@ double value_min(double value1, double value2, double value3)
 
 // 注意，RGB和HSV的取值范围并不一致，标准定义是 R G B 为 0-255  H 为 0-360 S V 为0-1
 // 然而，为了方便计算，这里 S V 映射到 0-100
-// 将RGB转换到HSV颜色空间,计算方法是网上随便找的
+// 将RGB转换到HSV颜色空间,计算方法来自网络
 void rgb_to_hvs(uint8_t red_buf, uint8_t green_buf, uint8_t blue_buf, uint32_t* p_h, uint32_t* p_s, uint32_t* p_v)
 {
 	// HSV需要浮点存储

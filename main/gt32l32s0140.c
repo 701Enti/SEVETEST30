@@ -40,8 +40,10 @@ spi_device_handle_t fonts_chip_handle = NULL;
 /// @return ESP_OK 成功 ESP_FAIL 失败(未包含原因的) ESP_ERR_INVALID_STATE 失败(字库芯片异常或未上件)
 esp_err_t fonts_chip_init()
 {
+    const char* TAG = "fonts_chip_init";
+
     if (fonts_chip_handle) {
-        ESP_LOGE("fonts_chip_init", "字库芯片GT32L32S0140之前已经初始化且未释放,无法再次初始化");
+        ESP_LOGE(TAG, "字库芯片GT32L32S0140之前已经初始化且未释放,无法再次初始化");
         return ESP_FAIL;
     }
 
@@ -78,23 +80,23 @@ esp_err_t fonts_chip_init()
     //如果字库芯片存在问题或者根本没有上件,那么下拉CS,MISO将不会处于被下拉状态
     //检测下拉状态,可以启用内部上拉电阻实现,如果有下拉(字库芯片正常),为低电平,如果没有(字库芯片异常或未上件),就是上拉电阻产生的的高电平
     //下拉CS
-    gpio_pad_select_gpio(interface_config.spics_io_num);
+    esp_rom_gpio_pad_select_gpio(interface_config.spics_io_num);
     gpio_set_direction(interface_config.spics_io_num, GPIO_MODE_OUTPUT);
     gpio_set_level(interface_config.spics_io_num, 0);
     //获取MISO状态
-    gpio_pad_select_gpio(bus_config.miso_io_num);
+    esp_rom_gpio_pad_select_gpio(bus_config.miso_io_num);
     gpio_set_direction(bus_config.miso_io_num, GPIO_MODE_INPUT);
     gpio_set_pull_mode(bus_config.miso_io_num, GPIO_PULLUP_ONLY);
     int level = gpio_get_level(bus_config.miso_io_num);
     //释放pad
-    gpio_pad_unhold(interface_config.spics_io_num);
-    gpio_pad_unhold(bus_config.miso_io_num);
+    esp_rom_gpio_pad_unhold(interface_config.spics_io_num);
+    esp_rom_gpio_pad_unhold(bus_config.miso_io_num);
     //如果字库芯片异常或未上件
     if (level != 0) {
-        ESP_LOGE("fonts_chip_init", "电气检查时发现问题,无法完成初始化,请检查是否字库芯片异常或未上件");
+        ESP_LOGE(TAG, "电气检查时发现问题,无法完成初始化,请检查是否字库芯片异常或未上件");
         return ESP_ERR_INVALID_STATE;
     }
-    ESP_LOGI("fonts_chip_init", "电气检查通过");
+    ESP_LOGI(TAG, "字库设备电气检查通过");
 
 
     ret = spi_bus_initialize(FONT_CHIP_SPI_ID, &bus_config, SPI_DMA_CH_AUTO);
@@ -111,7 +113,10 @@ esp_err_t fonts_chip_init()
     gpio_config(&spics_cfg);
 
     if (ret == ESP_OK) {
-        ESP_LOGI("fonts_chip_init", "字库设备初始化成功");
+        ESP_LOGI(TAG, "字库设备初始化成功");
+    }
+    else {
+        ESP_LOGE(TAG, "字库设备初始化时发现问题");
     }
 
     return ret;

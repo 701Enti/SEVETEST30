@@ -173,14 +173,14 @@ esp_err_t sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode, TCA6416A_level_t* p_
   ret = gpio_config(&TCA6416A_int_config);//配置GPIO
   ESP_RETURN_ON_ERROR(ret, TAG, "配置TCA6416A的INT信号GPIO时发现问题");
 
-  //INT中断配置
-  tca6416a_int_queue = xQueueCreate(10, sizeof(uint32_t));//队列创建
-  xTaskCreatePinnedToCore(tca6416a_int_task, "tca6416a_int_task", 2048, NULL, EXT_IO_READ_EVT_PRIO, NULL, EXT_IO_READ_EVT_CORE);//中断识别任务创建
-  ret = gpio_install_isr_service(EXT_IO_READ_INTR_FLAG);//安装GPIO ISR服务
-  ESP_RETURN_ON_ERROR(ret, TAG, "安装TCA6416A的INT信号GPIO的ISR服务时发现问题");
-  P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;//将自动读取标志值的地址作为ISR参数进行传输
-  ret = gpio_isr_handler_add(TCA6416A_IO_INT, tca6416a_int_isr_handler, (void*)P_ext_io_auto_read_flag);//为选定的GPIO添加ISR句柄
-  ESP_RETURN_ON_ERROR(ret, TAG, "添加TCA6416A的INT信号GPIO的ISR句柄时发现问题");
+  // //INT中断配置
+  // tca6416a_int_queue = xQueueCreate(10, sizeof(uint32_t));//队列创建
+  // xTaskCreatePinnedToCore(tca6416a_int_task, "tca6416a_int_task", 2048, NULL, EXT_IO_READ_EVT_PRIO, NULL, EXT_IO_READ_EVT_CORE);//中断识别任务创建
+  // ret = gpio_install_isr_service(EXT_IO_READ_INTR_FLAG);//安装GPIO ISR服务
+  // ESP_RETURN_ON_ERROR(ret, TAG, "安装TCA6416A的INT信号GPIO的ISR服务时发现问题");
+  // P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;//将自动读取标志值的地址作为ISR参数进行传输
+  // ret = gpio_isr_handler_add(TCA6416A_IO_INT, tca6416a_int_isr_handler, (void*)P_ext_io_auto_read_flag);//为选定的GPIO添加ISR句柄
+  // ESP_RETURN_ON_ERROR(ret, TAG, "添加TCA6416A的INT信号GPIO的ISR句柄时发现问题");
 
   // 此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空，请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
 

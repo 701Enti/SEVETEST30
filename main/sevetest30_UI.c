@@ -40,6 +40,7 @@
 #include <esp_dsp.h>
 #include <audio_mem.h>
 #include <board_def.h>
+#include <soc/soc_caps.h>
 
 #define LOW_TEMP_MULTIPLE 20 // 低于BLUE_TEMP多少倍将达到设定的最高白色亮度
 
@@ -16711,9 +16712,9 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         {
             uint8_t* p = rectangle(2, 1);
             if (temp_buf >= 10)
-                separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
+                separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
             else
-                separation_draw(x - 1 + LINE_LED_NUMBER - 2 * FIGURE, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
+                separation_draw(x - 1 + LINE_LED_NUMBER - 2 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
         }
 
         // 取出每位上的数
@@ -16721,9 +16722,9 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         int8_t uints = temp_buf - tens * 10; // 个位
 
         // 显示温度数字
-        print_number(x - 1 + LINE_LED_NUMBER - FIGURE, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, uints, color, change); // 数字字模的尺寸为4x7
+        print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, uints, color, change); // 数字字模的尺寸为4x7
         if (tens > 0)
-            print_number(x - 1 + LINE_LED_NUMBER - FIGURE * 2 - 1, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, tens, color, change); // 显示一个为0的十位显然没有意义的
+            print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH * 2 - 1, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, tens, color, change); // 显示一个为0的十位显然没有意义的
     }
 }
 
@@ -16901,7 +16902,7 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_cfg_t* UI_cfg)
     while (sevetest30_fft_ui_running_flag)
     {
         //如果音频活动进行,正常读取,否则,不运算新的监视数据
-        if (running_i2s_port >= 0 && running_i2s_port < I2S_NUM_MAX) {
+        if (running_i2s_port >= 0 && running_i2s_port < SOC_I2S_NUM) {
             memset(unit_data_max, 0, UI_cfg->width * sizeof(float));// 清理之前缓存的数据
             i2s_read(running_i2s_port, i2s_read_buf, N, &read_len, portMAX_DELAY);// 载入FFT源数据
             vTaskDelay(pdMS_TO_TICKS(10));

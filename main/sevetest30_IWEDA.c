@@ -96,7 +96,11 @@ esp_err_t wifi_init(esp_periph_config_t* periph_config)
     ESP_ERROR_CHECK(ret);
 
     // 初始化TCP/IP协议栈
-    ret = esp_netif_init();
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
+    ESP_ERROR_CHECK(esp_netif_init());
+#else
+    tcpip_adapter_init();
+#endif
 
     // 初始化网络外设
     se30_periph_set_handle = esp_periph_set_init(periph_config); // 获取运行配置句柄
@@ -126,7 +130,6 @@ esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
 
     esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);// 启动连接任务
     return periph_wifi_wait_for_connected(se30_wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS));//请求连接
-    return ESP_OK;
 }
 
 /// @brief 百度API获取AccessToken,保存到char数组

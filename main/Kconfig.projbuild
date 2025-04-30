@@ -79,7 +79,7 @@ config DEEPSEEK_ACCESS_KEY
 
 
 config IP_138_TOKEN
-    string " ip138 position access token"
+    string "ip138 position access token"
     default ""
     help
         you could get a free token if you haven't had it , just click "https://user.ip138.com/ip/"

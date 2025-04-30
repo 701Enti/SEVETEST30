@@ -143,7 +143,7 @@ void AGS10_TVOC_result_get(AGS10_result_t* dest) {
             }
         }
 
-        ESP_LOGI(TAG, "%d ppb", dest->TVOC_data);
+        ESP_LOGI(TAG, "%d ppb", (int)dest->TVOC_data);
 
         //数据有效标记
         dest->data_true = true;

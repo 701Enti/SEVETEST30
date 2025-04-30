@@ -31,6 +31,8 @@
 
 #include "esp_system.h"
 
+#include "esp_mac.h"
+
 #include "esp_log.h"
 #include "esp_err.h"
 #include "board_ctrl.h"
@@ -107,7 +109,185 @@ baidu_ASR_cfg_t* ASR_cfg_buf = NULL;
 
 char* baidu_access_token = NULL;
 
+void element_cfg_data_reset();
+esp_err_t audio_element_all_init(const char* link_tag[], int link_num);
+void common_mp3_running_event();
+void common_asr_running_event();
+void http_i2s_mp3_music_start(TaskFunction_t running_event, UBaseType_t priority);
+void i2s_filter_raw_start(TaskFunction_t running_event, UBaseType_t priority);
+
 int _TTS_get_token_handle(http_stream_event_msg_t* msg);
+
+/// @brief uri/url音乐播放
+/// @param uriurl 导入音乐uri/url
+/// @param priority 任务优先级
+void music_uri_or_url_play(const char* uri_or_url, UBaseType_t priority)
+{
+  const char* TAG = "music_uri_or_url_play";
+
+  // common_mp3_evt不为空说明还有音频事件运行中
+  if (common_mp3_evt != NULL) {
+    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
+    return;
+  }
+  else
+  {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
+    sevetest30_music_running_flag = true;
+    common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
+  }
+
+  element_cfg_data_reset();
+
+  i2s_cfg.chan_cfg.id = CODEC_DAC_I2S_PORT;
+  running_i2s_port = i2s_cfg.chan_cfg.id;
+
+  i2s_stream_reader = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_reader，禁止初始化
+
+  const char* link_tag[3] = { "http", "mp3", "i2s" };
+
+
+  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
+  {
+    ESP_LOGE(TAG, "初始化音频元素时发现问题,任务无法启动");
+    sevetest30_music_running_flag = false;
+    return;
+  }
+
+  i2s_stream_reader = NULL;
+
+  audio_pipeline_link(pipeline, &link_tag[0], 3);
+  audio_element_set_uri(http_stream_reader, uri_or_url);
+
+  http_i2s_mp3_music_start(&common_mp3_running_event, priority);
+}
+
+/// @brief 请求TTS服务并播放
+/// @param tts_cfg  tts配置
+/// @param priority 任务优先级
+void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority)
+{
+  const char* TAG = "tts_service_play";
+
+  // common_mp3_evt不为空说明还有音频事件运行中，进行等待再继续
+  if (common_mp3_evt != NULL)
+  {
+    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
+    return;
+  }
+  else
+  {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
+    sevetest30_music_running_flag = true;
+    common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
+  }
+
+  element_cfg_data_reset();
+
+  i2s_cfg.chan_cfg.id = CODEC_DAC_I2S_PORT;
+  running_i2s_port = i2s_cfg.chan_cfg.id;
+
+  http_cfg.event_handle = _TTS_get_token_handle;
+  if (TTS_cfg_buf == NULL)
+    TTS_cfg_buf = audio_calloc(1, sizeof(baidu_TTS_cfg_t));
+  TTS_cfg_buf->tex = tts_cfg->tex;
+  TTS_cfg_buf->spd = tts_cfg->spd;
+  TTS_cfg_buf->pit = tts_cfg->pit;
+  TTS_cfg_buf->vol = tts_cfg->vol;
+  TTS_cfg_buf->per = tts_cfg->per;
+  i2s_stream_reader = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_reader，禁止初始化
+
+  const char* link_tag[3] = { "http", "mp3", "i2s" };
+  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
+  {
+    ESP_LOGE(TAG, "准备音频元素时发现问题");
+    sevetest30_music_running_flag = false;
+    return;
+  }
+
+  i2s_stream_reader = NULL;
+
+  audio_pipeline_link(pipeline, &link_tag[0], 3);
+  audio_element_set_uri(http_stream_reader, BAIDU_TTS_ENDPOINT);
+
+  http_i2s_mp3_music_start(&common_mp3_running_event, priority);
+}
+
+
+
+/// @brief 启动语音识别服务，启动后不断地自动监听并完成识别,是一个不断循环识别的任务
+/// @param asr_cfg asr配置
+/// @param priority 任务优先级
+void asr_service_begin(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority)
+{
+  const char* TAG = "asr_service_begin";
+
+  if (sevetest30_asr_running_flag)
+  {
+    ESP_LOGE(TAG, "识别繁忙中，无法准备新识别任务");
+    return;
+  }
+  else
+  {
+    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
+    sevetest30_asr_running_flag = true;
+  }
+
+  // 获取token
+  while (!baidu_access_token)
+  {
+    baidu_access_token = baidu_get_access_token(CONFIG_BAIDU_SPEECH_ACCESS_KEY, CONFIG_BAIDU_SPEECH_SECRET_KEY);
+    if (!baidu_access_token)
+    {
+      ESP_LOGE(TAG, "获取token时发现问题");
+      vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+  }
+
+  element_cfg_data_reset();
+
+  i2s_cfg.chan_cfg.id = CODEC_ADC_I2S_PORT;
+  running_i2s_port = i2s_cfg.chan_cfg.id;
+
+  i2s_cfg.type = AUDIO_STREAM_READER;
+  rsp_cfg.dest_ch = 1;
+  rsp_cfg.dest_rate = asr_cfg->rate;
+  i2s_stream_writer = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_writer，禁止初始化
+
+  if (ASR_cfg_buf == NULL)
+    ASR_cfg_buf = audio_calloc(1, sizeof(baidu_ASR_cfg_t));
+  ASR_cfg_buf->rate = asr_cfg->rate;
+  ASR_cfg_buf->dev_pid = asr_cfg->dev_pid;
+  ASR_cfg_buf->stop_threshold = asr_cfg->stop_threshold;
+  ASR_cfg_buf->send_threshold = asr_cfg->send_threshold;
+  ASR_cfg_buf->record_save_times_max = asr_cfg->record_save_times_max;
+
+  const char* link_tag[3] = { "i2s", "filter", "raw" };
+
+  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
+  {
+    ESP_LOGE(TAG, "准备音频元素时发现问题");
+    sevetest30_asr_running_flag = false;
+    return;
+  }
+
+  i2s_stream_writer = NULL;
+
+  audio_pipeline_link(pipeline, &link_tag[0], 3);
+
+  i2s_filter_raw_start(common_asr_running_event, priority);
+
+
+}
 
 
 /// @brief 获取MP3解码器播放实时时间进度
@@ -139,13 +319,13 @@ void common_mp3_running_event()
       continue;
     }
 
-    // 消息性质为[音频元素类->来自mp3_decoder->音频信息报告] 进行音频硬件自适应
+    // 消息性质为[音频元素类->来自mp3_decoder->音频信息报告] 进行音频硬件配置
     if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void*)mp3_decoder && msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO)
     {
       audio_element_info_t music_info = { 0 };
       audio_element_getinfo(mp3_decoder, &music_info);
 
-      ESP_LOGI(TAG, "收到来自mp3_decoder音频, 采样率=%d, 位深=%d, 通道数=%d",
+      ESP_LOGI(TAG, "收到来自mp3_decoder音频, 采样率=%d, 位深=%d, 声道数=%d",
         music_info.sample_rates, music_info.bits, music_info.channels);
 
       i2s_stream_set_clk(i2s_stream_writer, music_info.sample_rates, music_info.bits, music_info.channels);
@@ -153,7 +333,9 @@ void common_mp3_running_event()
     }
 
     // 消息性质为[音频元素类->来自i2s_stream_writer->运行状态报告] 内容 为 停止状态 或 完成状态 就结束播放事件
-    if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void*)i2s_stream_writer && msg.cmd == AEL_MSG_CMD_REPORT_STATUS && (((int)msg.data == AEL_STATUS_STATE_STOPPED) || ((int)msg.data == AEL_STATUS_STATE_FINISHED)))
+    if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void*)i2s_stream_writer
+      && msg.cmd == AEL_MSG_CMD_REPORT_STATUS && (((int)msg.data == AEL_STATUS_STATE_STOPPED)
+        || ((int)msg.data == AEL_STATUS_STATE_FINISHED)))
     {
       ESP_LOGI(TAG, "播放完毕");
       break;
@@ -207,8 +389,8 @@ void common_asr_running_event()
   // 准备POST请求
 
   // 获取设备MAC地址
-  int mac = 0;
-  esp_base_mac_addr_get((uint8_t*)&mac);
+  uint8_t mac[6] = { 0 };
+  esp_efuse_mac_get_default(mac);
 
   // 初始化http_client
   esp_http_client_config_t http_config;
@@ -236,7 +418,8 @@ void common_asr_running_event()
 
   // {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":" - - - - -    ","len":%d}
   snprintf(request_body_buf, ASR_FRAME_LENGTH * ASR_cfg_buf->rate / 1000 * ASR_cfg_buf->record_save_times_max / 3 * 4 + 2048,
-    "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%d\",\"dev_pid\":%d,\"speech\":\"", ASR_cfg_buf->rate, baidu_access_token, mac, ASR_cfg_buf->dev_pid);
+    "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"dev_pid\":%d,\"speech\":\"",
+    ASR_cfg_buf->rate, baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], ASR_cfg_buf->dev_pid);
 
   int record_save_times = 0; // 录制并保存音频数据的次数（防溢出）
   int asr_len = 0;           // 实际原始音频数据长度，作为ASR时的len参数
@@ -358,7 +541,8 @@ void common_asr_running_event()
             record_save_times = 0;
             asr_len = 0;
             memset(request_body_buf, 0, ASR_FRAME_LENGTH * ASR_cfg_buf->rate / 1000 * sizeof(char) * ASR_cfg_buf->record_save_times_max / 3 * 4 + 2048 * sizeof(char));
-            sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%d\",\"speech\":\"", ASR_cfg_buf->rate, baidu_access_token, mac);
+            sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
+              ASR_cfg_buf->rate, baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
             esp_http_client_close(client_handle); // 关闭连接
             goto RESTART;
           }
@@ -373,7 +557,8 @@ void common_asr_running_event()
             record_save_times = 0;
             asr_len = 0;
             memset(request_body_buf, 0, ASR_FRAME_LENGTH * ASR_cfg_buf->rate / 1000 * sizeof(char) * ASR_cfg_buf->record_save_times_max / 3 * 4 + 2048 * sizeof(char));
-            sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%d\",\"speech\":\"", ASR_cfg_buf->rate, baidu_access_token, mac);
+            sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
+              ASR_cfg_buf->rate, baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
             esp_http_client_close(client_handle); // 关闭连接
             goto RESTART;
           }
@@ -389,7 +574,8 @@ void common_asr_running_event()
           asr_len = 0;
           memset(request_body_buf, 0, ASR_FRAME_LENGTH * ASR_cfg_buf->rate / 1000 * sizeof(char) * ASR_cfg_buf->record_save_times_max / 3 * 4 + 2048 * sizeof(char));
           // {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":" - - - - -    ","len":%d}
-          sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%d\",\"speech\":\"", ASR_cfg_buf->rate, baidu_access_token, mac);
+          sprintf(request_body_buf, "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
+            ASR_cfg_buf->rate, baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         }
       }
     }
@@ -448,6 +634,9 @@ void common_asr_running_event()
 /// @brief 重置元素配置数据到默认值，之后您可以针对性修改某些参数，接着运行元素配置函数
 void element_cfg_data_reset()
 {
+
+  //之后可以针对性继续修改某些参数来进一步自定义配置
+
   // pipeline
   audio_pipeline_cfg_t pipeline_cfg_buf = DEFAULT_AUDIO_PIPELINE_CONFIG();
   pipeline_cfg = pipeline_cfg_buf;
@@ -462,15 +651,13 @@ void element_cfg_data_reset()
   i2s_stream_cfg_t i2s_cfg_buf = I2S_STREAM_CFG_DEFAULT();
   i2s_cfg = i2s_cfg_buf;
 
-  i2s_cfg.i2s_config.sample_rate = CODEC_ADC_SAMPLE_RATE;
-  i2s_cfg.i2s_config.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT;
-  i2s_cfg.i2s_config.dma_buf_len = I2S_DMA_BUF_SIZE;
-
   // MP3解码器
   mp3_decoder_cfg_t mp3_cfg_buf = DEFAULT_MP3_DECODER_CONFIG();
   mp3_cfg = mp3_cfg_buf;
 
-  mp3_cfg.task_core = MUSIC_MP3_DECODER_TASK_CORE;
+  mp3_cfg.task_core = ELEMENT_MP3_DECODER_TASK_CORE;
+  mp3_cfg.task_stack = ELEMENT_MP3_DECODER_TASK_STACK_SIZE;
+  mp3_cfg.out_rb_size = ELEMENT_MP3_DECODER_RINGBUFFER_SIZE;
 
   // 语音滤波
   rsp_filter_cfg_t rsp_cfg_buf = DEFAULT_RESAMPLE_FILTER_CONFIG();
@@ -480,8 +667,8 @@ void element_cfg_data_reset()
   rsp_cfg.dest_rate = CODEC_ADC_SAMPLE_RATE;
   rsp_cfg.dest_ch = 2;
 
-  // 原始流读取
-  raw_cfg.out_rb_size = 8 * 1024;
+  // RAW原始音频流读取
+  raw_cfg.out_rb_size = ELEMENT_RAW_STREAM_RINGBUFFER_SIZE;
   raw_cfg.type = AUDIO_STREAM_READER;
 }
 
@@ -537,7 +724,7 @@ esp_err_t audio_element_all_init(const char* link_tag[], int link_num)
 
     if (!strcasecmp(link_tag[i], "i2s") && i2s_stream_writer == NULL && i2s_stream_reader != NULL)
     {
-      i2s_cfg.i2s_port = CODEC_DAC_I2S_PORT;
+      i2s_cfg.chan_cfg.id = CODEC_DAC_I2S_PORT;
       i2s_cfg.type = AUDIO_STREAM_WRITER;
       i2s_stream_writer = i2s_stream_init(&i2s_cfg);
       if (!i2s_stream_writer)
@@ -547,7 +734,7 @@ esp_err_t audio_element_all_init(const char* link_tag[], int link_num)
     }
     else if (!strcasecmp(link_tag[i], "i2s") && i2s_stream_reader == NULL && i2s_stream_writer != NULL)
     {
-      i2s_cfg.i2s_port = CODEC_ADC_I2S_PORT;
+      i2s_cfg.chan_cfg.id = CODEC_ADC_I2S_PORT;
       i2s_cfg.type = AUDIO_STREAM_READER;
       i2s_stream_reader = i2s_stream_init(&i2s_cfg);
       if (!i2s_stream_reader)
@@ -574,8 +761,6 @@ void http_i2s_mp3_music_start(TaskFunction_t running_event, UBaseType_t priority
   audio_event_iface_set_listener(esp_periph_set_get_event_iface(se30_periph_set_handle), common_mp3_evt);
   // 运行音频通道
   audio_pipeline_run(pipeline);
-  // 初始化clk,之后真实的音频播放配置由mp3文件自动变更
-  i2s_stream_set_clk(i2s_stream_writer, 44100, 16, 2);
   // 事件监听任务启动
   xTaskCreatePinnedToCore(running_event, "http_i2s_mp3_music_run", MUSIC_PLAY_EVT_TASK_STACK_SIZE, NULL, priority, NULL, MUSIC_PLAY_EVT_TASK_CORE);
 }
@@ -589,177 +774,6 @@ void i2s_filter_raw_start(TaskFunction_t running_event, UBaseType_t priority)
 
   audio_pipeline_run(pipeline);
   xTaskCreatePinnedToCore(running_event, "i2s_filter_raw_run", ASR_EVT_TASK_STACK_SIZE, NULL, priority, NULL, ASR_EVT_TASK_CORE);
-}
-
-/// @brief uri/url音乐播放
-/// @param uriurl 导入音乐uri/url
-/// @param priority 任务优先级
-void music_uri_or_url_play(const char* uri_or_url, UBaseType_t priority)
-{
-  const char* TAG = "music_uri_or_url_play";
-
-  // common_mp3_evt不为空说明还有音频事件运行中
-  if (common_mp3_evt != NULL) {
-    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
-    return;
-  }
-  else
-  {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-      ESP_LOGE(TAG, "网络未连接");
-      return;
-    }
-    sevetest30_music_running_flag = true;
-    common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
-  }
-
-  element_cfg_data_reset();
-
-  i2s_cfg.i2s_port = CODEC_DAC_I2S_PORT;
-  running_i2s_port = i2s_cfg.i2s_port;
-
-  i2s_stream_reader = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_reader，禁止初始化
-
-  const char* link_tag[3] = { "http", "mp3", "i2s" };
-
-
-  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
-  {
-    ESP_LOGE(TAG, "初始化音频元素时发现问题,任务无法启动");
-    sevetest30_music_running_flag = false;
-    return;
-  }
-
-  i2s_stream_reader = NULL;
-
-  audio_pipeline_link(pipeline, &link_tag[0], 3);
-  audio_element_set_uri(http_stream_reader, uri_or_url);
-
-  http_i2s_mp3_music_start(&common_mp3_running_event, priority);
-}
-
-/// @brief 请求TTS服务并播放
-/// @param tts_cfg  tts配置
-/// @param priority 任务优先级
-void tts_service_play(baidu_TTS_cfg_t* tts_cfg, UBaseType_t priority)
-{
-  const char* TAG = "tts_service_play";
-
-  // common_mp3_evt不为空说明还有音频事件运行中，进行等待再继续
-  if (common_mp3_evt != NULL)
-  {
-    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
-    return;
-  }
-  else
-  {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-      ESP_LOGE(TAG, "网络未连接");
-      return;
-    }
-    sevetest30_music_running_flag = true;
-    common_mp3_evt = audio_calloc(1, sizeof(audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
-  }
-
-  element_cfg_data_reset();
-
-  i2s_cfg.i2s_port = CODEC_DAC_I2S_PORT;
-  running_i2s_port = i2s_cfg.i2s_port;
-
-  http_cfg.event_handle = _TTS_get_token_handle;
-  if (TTS_cfg_buf == NULL)
-    TTS_cfg_buf = audio_calloc(1, sizeof(baidu_TTS_cfg_t));
-  TTS_cfg_buf->tex = tts_cfg->tex;
-  TTS_cfg_buf->spd = tts_cfg->spd;
-  TTS_cfg_buf->pit = tts_cfg->pit;
-  TTS_cfg_buf->vol = tts_cfg->vol;
-  TTS_cfg_buf->per = tts_cfg->per;
-  i2s_stream_reader = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_reader，禁止初始化
-
-  const char* link_tag[3] = { "http", "mp3", "i2s" };
-  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
-  {
-    ESP_LOGE(TAG, "准备音频元素时发现问题");
-    sevetest30_music_running_flag = false;
-    return;
-  }
-
-  i2s_stream_reader = NULL;
-
-  audio_pipeline_link(pipeline, &link_tag[0], 3);
-  audio_element_set_uri(http_stream_reader, BAIDU_TTS_ENDPOINT);
-
-  http_i2s_mp3_music_start(&common_mp3_running_event, priority);
-}
-
-
-
-/// @brief 启动语音识别服务，启动后不断地自动监听并完成识别,是一个不断循环识别的任务
-/// @param asr_cfg asr配置
-/// @param priority 任务优先级
-void asr_service_start(baidu_ASR_cfg_t* asr_cfg, UBaseType_t priority)
-{
-  const char* TAG = "asr_service_start";
-
-  if (sevetest30_asr_running_flag)
-  {
-    ESP_LOGE(TAG, "识别繁忙中，无法准备新识别任务");
-    return;
-  }
-  else
-  {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-      ESP_LOGE(TAG, "网络未连接");
-      return;
-    }
-    sevetest30_asr_running_flag = true;
-  }
-
-  // 获取token
-  while (!baidu_access_token)
-  {
-    baidu_access_token = baidu_get_access_token(CONFIG_BAIDU_SPEECH_ACCESS_KEY, CONFIG_BAIDU_SPEECH_SECRET_KEY);
-    if (!baidu_access_token)
-    {
-      ESP_LOGE(TAG, "获取token时发现问题");
-      vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-  }
-
-  element_cfg_data_reset();
-
-  i2s_cfg.i2s_port = CODEC_ADC_I2S_PORT;
-  running_i2s_port = i2s_cfg.i2s_port;
-
-  i2s_cfg.type = AUDIO_STREAM_READER;
-  rsp_cfg.dest_ch = 1;
-  rsp_cfg.dest_rate = asr_cfg->rate;
-  i2s_stream_writer = audio_calloc(1, sizeof(audio_element_handle_t)); // 锁定i2s_stream_writer，禁止初始化
-
-  if (ASR_cfg_buf == NULL)
-    ASR_cfg_buf = audio_calloc(1, sizeof(baidu_ASR_cfg_t));
-  ASR_cfg_buf->rate = asr_cfg->rate;
-  ASR_cfg_buf->dev_pid = asr_cfg->dev_pid;
-  ASR_cfg_buf->stop_threshold = asr_cfg->stop_threshold;
-  ASR_cfg_buf->send_threshold = asr_cfg->send_threshold;
-  ASR_cfg_buf->record_save_times_max = asr_cfg->record_save_times_max;
-
-  const char* link_tag[3] = { "i2s", "filter", "raw" };
-
-  if (audio_element_all_init(&link_tag[0], 3) != ESP_OK)
-  {
-    ESP_LOGE(TAG, "准备音频元素时发现问题");
-    sevetest30_asr_running_flag = false;
-    return;
-  }
-
-  i2s_stream_writer = NULL;
-
-  audio_pipeline_link(pipeline, &link_tag[0], 3);
-
-  i2s_filter_raw_start(common_asr_running_event, priority);
-
-
 }
 
 // 以下使用了官方提供的 https://github.com/espressif/esp-adf/tree/master/examples/cloud_services/pipeline_baidu_speech_mp3 例程,通过post进行的设定部分进行了修改,非常感谢
@@ -790,8 +804,8 @@ int _TTS_get_token_handle(http_stream_event_msg_t* msg)
   }
 
   // 设定语音合成配置
-  int mac = 0;
-  esp_base_mac_addr_get((uint8_t*)&mac);
+  uint8_t mac[6] = { 0 };
+  esp_efuse_mac_get_default(mac);
 
   if (!TTS_cfg_buf)
   {
@@ -799,7 +813,8 @@ int _TTS_get_token_handle(http_stream_event_msg_t* msg)
     return ESP_FAIL;
   }
 
-  int data_len = snprintf(request_data, 4096, "lan=zh&ctp=1&tok=%s&cuid=%d&vol=%d&spd=%d&pit=%d&per=%d&tex=%s", baidu_access_token, mac,
+  int data_len = snprintf(request_data, 4096, "lan=zh&ctp=1&tok=%s&cuid=%02x:%02x:%02x:%02x:%02x:%02x&vol=%d&spd=%d&pit=%d&per=%d&tex=%s",
+    baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
     TTS_cfg_buf->vol, TTS_cfg_buf->spd, TTS_cfg_buf->pit, TTS_cfg_buf->per, TTS_cfg_buf->tex);
 
   esp_http_client_set_post_field(http_client, request_data, data_len);

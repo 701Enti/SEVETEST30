@@ -30,7 +30,6 @@
 
 #include "audio_hal.h"
 #include "driver/i2c.h"
-#include "esp_gatts_api.h"
 
 //蓝牙配置
 #define SEVETEST30_BLE_DEVICE_NAME               "SEVETEST30" //蓝牙设备名称
@@ -39,14 +38,17 @@
 
 //音频相关
 #define FUNC_AUDIO_CODEC_EN       (true)
-#define CODEC_ADC_I2S_PORT        (0)
 #define CODEC_DAC_I2S_PORT        (1)
-#define I2S_DMA_BUF_SIZE          (1024)
-#define CODEC_ADC_BITS_PER_SAMPLE I2S_BITS_PER_SAMPLE_16BIT
+
+#define CODEC_ADC_INPUT_MIC_ON_BOARD   ADC_INPUT_LINPUT1_RINPUT1 //使用电路板上的板载麦克风
+#define CODEC_ADC_INPUT_MIC_HEADPHONE   ADC_INPUT_LINPUT2_RINPUT2 //使用连接的3.5mm耳机上带有的麦克风
+#define CODEC_ADC_I2S_PORT        (0)
+#define CODEC_ADC_BITS_PER_SAMPLE I2S_DATA_BIT_WIDTH_16BIT
 #define CODEC_ADC_SAMPLE_RATE     (48000)
+
 #define RECORD_HARDWARE_AEC       (false)
-#define BOARD_PA_GAIN             (10) /* Power amplifier gain defined by board (dB) */
-#define PA_ENABLE_GPIO            -1
+#define BOARD_PA_GAIN             (-30) /* Power amplifier gain defined by board (dB) */
+#define PA_ENABLE_GPIO            -1 //SEVETEST30的功放使能只由board_ctrl控制
 
 #define FUNC_SDCARD_EN            (false)
 #define SDCARD_OPEN_FILE_NUM_MAX  5
@@ -117,16 +119,20 @@
 #define VIBRA_IN1_IO GPIO_NUM_9  //线性马达模块的驱动信号输入1
 #define VIBRA_IN2_IO GPIO_NUM_10 //线性马达模块的驱动信号输入2
 
-//数字电位器-音量控制
-#define  AMP_DP_ADD    0x3E  //I2C地址     数字电位器访问地址 这里用的是TPL0401B，它性价比足够高，可以尽量使用完全一样型号的数字电位器，因为这可能涉及通讯时是否需要命令的特殊问题，程序可能不兼容
-#define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送，如TPL0401B需要0x00
-#define  AMP_STEP_VOL  0x01  //单位步长度    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位，其中一个单位所对应的寄存器设置值为STEP_VOL
-#define  AMP_VOL_MAX   100   //总映射步数  由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围缩小到0-VOL_MAX单位,需要修改则STEP_VOL也要改
-//数字电位器-辅助电压5V 下调控制
-#define  BV_DP_ADD    0x2E  //I2C地址     使用了TPL0401A
-#define  BV_DP_COMMAND 0x00 //操作命令
-#define  BV_STEP_VOL  0x01  //单位步长度
-#define  BV_VOL_MAX 100      //总映射步数
+//数字电位器(TPL0401B)-音量控制 
+//寄存器设置值(step - 步数) = (AMP_VOL_MAX - [当前设置的音量]) * AMP_STEP_VOL
+//[当前设置的音量]允许范围为0 - AMP_VOL_MAX
+#define  AMP_DP_ADD    0x3E  //I2C地址
+#define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送
+#define  AMP_STEP_VOL  0x01  //单位步长度(每一个单位,改变那么多寄存器设置值)    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围映射到到0-VOL_MAX个单位，其中一个单位所对应的寄存器设置值(step-步数)为STEP_VOL
+#define  AMP_VOL_MAX   100   //最大单位个数(最大音量值)  可以调整的最大单位个数,意味着音量有从0到AMP_VOL_MAX的那么多种选择
+//数字电位器(TPL0401A)-辅助电压5V 下调控制
+//寄存器设置值(step - 步数) = (BV_VOL_MAX - [当前设置的下调量]) * BV_STEP_VOL
+//[当前设置的下调量]允许范围为0 - BV_VOL_MAX
+#define  BV_DP_ADD    0x2E  //I2C地址    
+#define  BV_DP_COMMAND 0x00 //操作命令     部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送
+#define  BV_STEP_VOL  0x01  //单位步长度(每一个单位,改变那么多寄存器设置值)   由于调压精度可以不用太高，为了方便调节，把寄存器设置值(step-步数)每下调STEP_VOL视为调压了一个单位
+#define  BV_VOL_MAX 100     //最大单位个数(最大下调量) 可以调整的最大单位个数,意味着电压有从0到AMP_VOL_MAX的那么多种选择
 
 //电池接入控制
 #define BAT_IN_CTRL_IO   GPIO_NUM_2
