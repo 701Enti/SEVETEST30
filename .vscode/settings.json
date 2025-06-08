@@ -159,7 +159,9 @@
         "esp_check.h": "c",
         "led_strip_spi.h": "c",
         "rmt_private.h": "c",
-        "soc_caps.h": "c"
+        "soc_caps.h": "c",
+        "variant": "c",
+        "hscdtd008a.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

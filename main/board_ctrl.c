@@ -104,10 +104,10 @@ esp_err_t device_i2c_init()
 esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl)
 {
     // //此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化I2C总线
-    // device_i2c_init();
+    device_i2c_init();
 
     //初始化音频面板(包括了I2C的初始化和注册)
-    board_ctrl_init_report[AUDIO_BOARD_INIT] = audio_board_init();
+    // board_ctrl_init_report[AUDIO_BOARD_INIT] = audio_board_init();
 
     // // 初始化其他设备
     board_ctrl_init_report[SEVETEST30_GPIO_INIT] = sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);//初始化GPIO服务(包括扩展GPIO)

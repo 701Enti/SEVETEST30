@@ -48,8 +48,10 @@
 #define LEDARRAY_LED_INVERT_OUT (false)//将输出信号反向
 #define LEDARRAY_LED_RMT_RESOLUTION_HZ (10*1000*1000)//RMT信号分辨率
 #define LEDARRAY_LED_RMT_CLK_SRC RMT_CLK_SRC_DEFAULT//时钟源
-#define LEDARRAY_LED_WITH_DMA (true) //传输时使用DMA提高效率
-#define LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS 64 //如果未启用DMA,表示专用内存块大小(至少64),如果启用DMA,表示最大化控制内部DMA缓冲区的大小
+#define LEDARRAY_LED_STRIP0_WITH_DMA (true) //strip0传输时使用DMA提高效率
+#define LEDARRAY_LED_STRIP1_WITH_DMA (false) //strip1传输时使用DMA提高效率
+
+#define LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS 64 //如果未启用DMA,表示专用内存块大小,如果启用DMA,表示最大化控制内部DMA缓冲区的大小
 
 
 
@@ -67,7 +69,7 @@
 //屏幕刷新任务配置("ALL_ONCE" "ALL_MULTIPLE" "PART_ONCE" "PART_MULTIPLE")
 #define LEDARRAY_REFRESH_TASK_CORE           (1)//屏幕刷新任务运行核心
 #define LEDARRAY_REFRESH_TASK_PRIO           (1)//屏幕刷新任务优先级
-#define LEDARRAY_REFRESH_TASK_STACK_SIZE     (1024 * 2)//屏幕刷新任务堆栈大小
+#define LEDARRAY_REFRESH_TASK_STACK_SIZE     (1024 * 4)//屏幕刷新任务堆栈大小
 
 
 
@@ -112,7 +114,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode);
     //取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
 
-void separation_draw(int x, int y, uint64_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change);
+void separation_draw(int x, int y, uint64_t breadth, const uint8_t* p, uint64_t byte_number, uint8_t in_color[3], uint8_t change);
 
 
 //彩色图像直显方式 
@@ -134,6 +136,8 @@ void clean_draw_buf(int y);
 void progress_draw_buf(int y, uint8_t step, uint8_t* color);
 
 uint8_t* rectangle(int32_t breadth, int32_t length);
+
+uint64_t matrix_size(uint8_t* matrix_data);
 
 void print_number(int x, int y, int8_t figure, uint8_t color[3], uint8_t change);
 

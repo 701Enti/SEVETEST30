@@ -98,6 +98,7 @@ uint8_t blue_y11[LINE_LED_NUMBER] = { 0x00 };
 uint8_t blue_y12[LINE_LED_NUMBER] = { 0x00 };
 
 const int ledarray_gpio_num_list[VERTICAL_LED_NUMBER] = { 4, 5, 6, 7, 17, 18, 8, 42, 41, 40, 39, 38 }; // ws2812数据线连接的GPIO号列表 顺序为 第一行 到 最后一行
+
 uint8_t compound_result[LINE_LED_NUMBER * 3] = { 0 }; // 发送给WS2812的格式化数据缓存，GRB格式
 
 //本库WS2812使用硬件RMT驱动,占用两个RMT模块
@@ -217,14 +218,14 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode) {
 /// @brief 生成一个矩形字模(需要释放)
 /// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
 /// @param length  矩形纵向长度(1-VERTICAL_LED_NUMBER)
-/// @return 返回值 rectangle_data 为矩形数据地址 *rectangle_data 为 总数据大小(uint64_t)(单位:Byte) RECTANGLE_MATRIX(rectangle_data) 为 矩形字模
+/// @return 返回值 rectangle_data 为矩形数据地址 [matrix_size(rectangle_data) 为 总数据大小(uint64_t)(单位:Byte)] [RECTANGLE_MATRIX(rectangle_data) 为 矩形字模]
 /// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),*p,color,change); free(p);
 uint8_t* rectangle(int32_t breadth, int32_t length)
 {
 	if (breadth < 0 || length < 0)
 		return NULL;
 
-	uint64_t x_byte_num = 1, entire_byte_num = 1; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
+	uint64_t x_byte_num = 0, entire_byte_num = 0; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
 	uint64_t Dx = 0;// 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
 	bool flag = 0;// 即将写入的位数据值
 
@@ -236,23 +237,27 @@ uint8_t* rectangle(int32_t breadth, int32_t length)
 	x_byte_num = ceil(breadth * 1.0 / 8.0);
 	entire_byte_num = sizeof(uint8_t) * x_byte_num * length;
 
-	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 8);//8个字节(uint64_t)用于存储字模数据大小
-	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t) + 8);
+	uint8_t* rectangle_data = (uint8_t*)malloc(RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));//8个字节(uint64_t)用于存储字模数据大小
+	memset(rectangle_data, 0, RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));
 
-	*rectangle_data = entire_byte_num; // 装载entire_byte_num
+	// 装载entire_byte_num
+	for (int i = 0;i < 8;i++) {
+		*(rectangle_data + i) = (uint8_t)(entire_byte_num >> i * sizeof(uint64_t) | 0xFF);
+	}
+
 	p = rectangle_data;
-	pT1 = rectangle_data + 0x08; // 获取到数据的起始地址
+	pT1 = rectangle_data + sizeof(uint64_t); // 获取到数据的起始地址
 
 	// 先进行全图填充
 	flag = 1;
-	for (uint8_t i = 0; i < entire_byte_num; i++)
+	for (uint64_t i = 0; i < entire_byte_num; i++)
 	{
 		if (pT1 - p > entire_byte_num)
 		{
 			ESP_LOGE("rectangle", "计算总数据大小出错");
 			return NULL; // 越界退出
 		}
-		for (uint8_t j = 0; j < 8; j++)
+		for (uint64_t j = 0; j < 8; j++)
 		{
 			*pT1 |= flag << (7 - j); // 写入
 			if (Dx == breadth - 1)
@@ -268,6 +273,17 @@ uint8_t* rectangle(int32_t breadth, int32_t length)
 	return rectangle_data;
 }
 
+/// @brief 计算字模有效图形数据大小(单位:Byte)
+/// @param matrix_data 字模数据,如rectangle()的返回值
+/// @return 有效图形数据大小(单位:Byte)
+uint64_t matrix_size(uint8_t* matrix_data) {
+	uint64_t size = 0;
+	for (int i = 0;i < sizeof(uint64_t);i++) {
+		size |= (uint64_t) * (matrix_data + i) << i * sizeof(uint64_t);
+	}
+	return size;
+}
+
 
 /*******************************************************基本绘制函数**********************************************************/
 /// @brief 三色分离方式 取模适配PCtoLCD2002
@@ -277,12 +293,12 @@ uint8_t* rectangle(int32_t breadth, int32_t length)
 /// @brief 取模方式请参考头文件
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
-/// @param breadth 图案宽度（已定义的：FIGURE-数字 LETTER-字母 CHINESE-汉字）
+/// @param breadth 图案宽度（已定义的：FIGURE-数字 RECTANGLE_MATRIX(x)-生成的矩形 ）
 /// @param p       导入字模指针
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB）
 /// @param change   亮度调整（1-100）警告:过高的调整幅度可能导致色彩失真
-void separation_draw(int x, int y, uint64_t breadth, const uint8_t* p, uint8_t byte_number, uint8_t in_color[3], uint8_t change)
+void separation_draw(int x, int y, uint64_t breadth, const uint8_t* p, uint64_t byte_number, uint8_t in_color[3], uint8_t change)
 {
 	if (p == NULL)
 	{
@@ -808,14 +824,15 @@ esp_err_t ledarray_init()
 		.clk_src = LEDARRAY_LED_RMT_CLK_SRC,
 		.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
 		.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
-		.flags.with_dma = LEDARRAY_LED_WITH_DMA,
 	};
 
 	esp_err_t ret = ESP_OK;
 
 	//创建通过RMT通讯的实例
+	rmt_config.flags.with_dma = LEDARRAY_LED_STRIP0_WITH_DMA;
 	ret = led_strip_new_rmt_device(&strip_config_0, &rmt_config, &strip0);
 	ESP_RETURN_ON_ERROR(ret, TAG, "创建 strip0 时发现问题 描述 %s", esp_err_to_name(ret));
+	rmt_config.flags.with_dma = LEDARRAY_LED_STRIP1_WITH_DMA;
 	ret = led_strip_new_rmt_device(&strip_config_1, &rmt_config, &strip1);
 	ESP_RETURN_ON_ERROR(ret, TAG, "创建 strip1 时发现问题 描述 %s", esp_err_to_name(ret));
 
@@ -913,7 +930,7 @@ void ledarray_set_and_write(int group_num)
 			.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
 			.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
 			.trans_queue_depth = 4,
-			.flags.with_dma = LEDARRAY_LED_WITH_DMA,
+			.flags.with_dma = LEDARRAY_LED_STRIP0_WITH_DMA,
 			.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
 		};
 
@@ -923,7 +940,7 @@ void ledarray_set_and_write(int group_num)
 			.resolution_hz = LEDARRAY_LED_RMT_RESOLUTION_HZ,
 			.mem_block_symbols = LEDARRAY_LED_RMT_MEM_BLOCK_SYMBOLS,
 			.trans_queue_depth = 4,
-			.flags.with_dma = LEDARRAY_LED_WITH_DMA,
+			.flags.with_dma = LEDARRAY_LED_STRIP1_WITH_DMA,
 			.flags.invert_out = LEDARRAY_LED_INVERT_OUT,
 		};
 
@@ -935,7 +952,7 @@ void ledarray_set_and_write(int group_num)
 		err |= rmt_del_channel(strip0_rmt_channel);//卸载当前RMT通道
 		err |= rmt_new_tx_channel(&strip0_channel_config, &strip0_rmt_channel);//安装新的RMT通道(切换到下一个GPIO)
 		if (err != ESP_OK) {
-			ESP_LOGE(TAG, "strip0切换输出引脚时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ESP_LOGE(TAG, "strip0切换输出引脚时发现问题,由于错误,将暂时禁用自动刷新服务");
 			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 		}
 
@@ -945,7 +962,7 @@ void ledarray_set_and_write(int group_num)
 		err |= rmt_del_channel(strip1_rmt_channel);//卸载当前RMT通道
 		err |= rmt_new_tx_channel(&strip1_channel_config, &strip1_rmt_channel);//安装新的RMT通道(切换到下一个GPIO)
 		if (err != ESP_OK) {
-			ESP_LOGE(TAG, "strip1切换输出引脚时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ESP_LOGE(TAG, "strip1切换输出引脚时发现问题,由于错误,将暂时禁用自动刷新服务");
 			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 		}
 
@@ -957,7 +974,7 @@ void ledarray_set_and_write(int group_num)
 		}
 		err |= led_strip_refresh(strip0); // 对现在绑定的IO写入数据
 		if (err != ESP_OK) {
-			ESP_LOGE(TAG, "写入并刷新strip0时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ESP_LOGE(TAG, "写入并刷新strip0时发现问题,由于错误,将暂时禁用自动刷新服务");
 			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 		}
 
@@ -969,7 +986,7 @@ void ledarray_set_and_write(int group_num)
 		}
 		err |= led_strip_refresh(strip1); // 对现在绑定的IO写入数据
 		if (err != ESP_OK) {
-			ESP_LOGE(TAG, "写入并刷新strip1时发现问题,用于错误,将暂时禁用自动刷新服务");
+			ESP_LOGE(TAG, "写入并刷新strip1时发现问题,由于错误,将暂时禁用自动刷新服务");
 			ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 		}
 

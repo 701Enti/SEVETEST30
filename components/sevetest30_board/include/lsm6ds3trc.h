@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含各种SE30对姿态传感器LSM6DS3TR-C的操作
+ // 包含各种SE30对姿态传感器LSM6DS3TR-C的访问与控制
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  //       对于功能设计需求，并不是所有寄存器都被考虑，都要求配置，实际上可以遵从默认设置
@@ -26,9 +26,15 @@
  // 您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路 https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html
  // github: https://github.com/701Enti
  // bilibili: 701Enti
- // [基本初始化] 设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
- //             开启BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
- //             设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
+ // [默认配置涵盖]  设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)
+ //                设置XL_HM_MODE位
+ //                开启BDU和DRDY_MASK 
+ //                配置INT1
+ //                配置自动记录相关模块
+ //                设置FIFO抽取系数 
+ //                设置FIFO_ORD
+ //                设置 加速度 角速率 数据源到FIFO
+ //                配置为FIFO Continuous mode模式 不使用FIFO中断
  // [读取步骤] 读出FIFO存储的数据 / 读出自动记录的数据
  // [快捷监测] 6D/4D检测 自由落体检测 计步器
  // [默认中断] INT1上路由 - 自由落体事件
@@ -38,6 +44,9 @@
 
 #include "esp_types.h"
 #include "esp_err.h"
+
+// I2C相关配置宏定义在board_def.h下
+#define LSM6DS3TRC_DEVICE_ADDRESS 0x6A
 
 //LSB对应实际的值
 //加速度计 mg/LSB (1 x 10^-3 g/LSB)
@@ -174,12 +183,12 @@ typedef struct {
 }IMU_angular_rate_value_t;//角速度值 单位为mdps 即 1 x 10^-3 dps
 
 typedef struct {
-  bool XL;//X轴偏低
-  bool XH;//X轴偏高
-  bool YL;//Y轴偏低
-  bool YH;//Y轴偏高
-  bool ZL;//Z轴偏低
-  bool ZH;//Z轴偏高
+  bool XL;//X轴偏低(设备在X轴负半轴)
+  bool XH;//X轴偏高(设备在X轴正半轴)
+  bool YL;//Y轴偏低(设备在Y轴负半轴)
+  bool YH;//Y轴偏高(设备在Y轴正半轴)
+  bool ZL;//Z轴偏低(设备在Z轴负半轴)
+  bool ZH;//Z轴偏高(设备在Z轴正半轴)
 }IMU_D6D_data_value_t;//D6D方向监测 方向偏移标识
 //***********************************用户配置相关***********************************/
 typedef enum
@@ -433,7 +442,7 @@ MAP_BASE(FIFO_DATA_OUT_H, (uint32_t)XLz_H), \
 
 
 /*******************************公共API***************************************/
-esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num);
+esp_err_t lsm6ds3trc_database_map_write(IMU_reg_mapping_t* reg_database, int map_num);
 esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_num);
 esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);
 
@@ -445,7 +454,9 @@ uint16_t lsm6ds3trc_get_step_counter();
 
 int lsm6ds3trc_get_now_temperature();
 
-IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value();
+IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value(bool clearNow);
+
+void lsm6ds3trc_clear_D6D_data_value();
 
 IMU_acceleration_value_t lsm6ds3trc_gat_now_acceleration();
 

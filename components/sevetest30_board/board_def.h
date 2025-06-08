@@ -48,7 +48,7 @@
 
 #define RECORD_HARDWARE_AEC       (false)
 #define BOARD_PA_GAIN             (-30) /* Power amplifier gain defined by board (dB) */
-#define PA_ENABLE_GPIO            -1 //SEVETEST30的功放使能只由board_ctrl控制
+#define PA_ENABLE_GPIO            0 //SEVETEST30的功放使能只由board_ctrl控制
 
 #define FUNC_SDCARD_EN            (false)
 #define SDCARD_OPEN_FILE_NUM_MAX  5

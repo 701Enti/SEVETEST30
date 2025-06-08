@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含各种SE30对姿态传感器LSM6DS3TR-C的操作
+ // 包含各种SE30对姿态传感器LSM6DS3TR-C的访问与控制
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
  //       对于功能设计需求，并不是所有寄存器都被考虑，都要求配置，实际上可以遵从默认设置
@@ -26,9 +26,15 @@
  // 您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路 https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html
  // github: https://github.com/701Enti
  // bilibili: 701Enti
- // [基本初始化] 设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)，以及XL_HM_MODE位的设置
- //             开启BDU和DRDY_MASK 配置INT1 配置自动记录相关模块
- //             设置FIFO抽取系数 设置FIFO_ORD   设置 加速度 角速率 数据源到FIFO   配置为FIFO Continuous mode模式 不使用中断
+ // [默认配置涵盖]  设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)
+ //                设置XL_HM_MODE位
+ //                开启BDU和DRDY_MASK 
+ //                配置INT1
+ //                配置自动记录相关模块
+ //                设置FIFO抽取系数 
+ //                设置FIFO_ORD
+ //                设置 加速度 角速率 数据源到FIFO
+ //                配置为FIFO Continuous mode模式 不使用FIFO中断
  // [读取步骤] 读出FIFO存储的数据 / 读出自动记录的数据
  // [快捷监测] 6D/4D检测 自由落体检测 计步器
  // [默认中断] INT1上路由 - 自由落体事件
@@ -41,9 +47,6 @@
 #include <string.h>
 #include <math.h>
 
-// I2C相关配置宏定义在board_def.h下
-#define LSM6DS3TRC_DEVICE_ADD 0x6A
-
 /// @brief 映射数据库中的配置到LSM6DS3TRC硬件寄存器,即通过数据库写入设定的寄存器
 /// @param reg_database 导入数据库，这是一个以IMU_reg_mapping_t的数组，其中的条目即单个IMU_reg_mapping_t数据的个数没有规定，
 ///                     并且条目的角标与寄存器地址和数据不需要按任何顺序规律进行对应，每个条目只要包含需要写入的寄存器地址和数据，可以参考lsm6ds3trc.h默认配置宏的数据库构建方式
@@ -53,9 +56,9 @@
 /// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
 /// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
-esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_num)
+esp_err_t lsm6ds3trc_database_map_write(IMU_reg_mapping_t* reg_database, int map_num)
 {
-  const char* TAG = "lsm6ds3trc_database_map_set";
+  const char* TAG = "lsm6ds3trc_database_map_write";
   if (!reg_database)
   {
     ESP_LOGE(TAG, "导入了为空的数据库");
@@ -68,7 +71,7 @@ esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_n
   {
     mapping_buf = &reg_database[idx];
     uint8_t write_buf[2] = { mapping_buf->reg_address, mapping_buf->reg_value };
-    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_to_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADDRESS, write_buf, sizeof(write_buf), 1000 / portTICK_PERIOD_MS);
     if (ret != ESP_OK)
     {
       ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(ret));
@@ -76,7 +79,6 @@ esp_err_t lsm6ds3trc_database_map_set(IMU_reg_mapping_t* reg_database, int map_n
     }
   }
 
-  ESP_LOGI(TAG, "成功映射配置到姿态传感器LSM6DS3TRC");
   return ESP_OK;
 }
 
@@ -105,7 +107,7 @@ esp_err_t lsm6ds3trc_database_map_read(IMU_reg_mapping_t* reg_database, int map_
   {
     mapping_buf = &reg_database[idx];
 
-    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADD, &(mapping_buf->reg_address), sizeof(uint8_t), &(mapping_buf->reg_value), sizeof(uint8_t), 1000 / portTICK_PERIOD_MS);
+    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, LSM6DS3TRC_DEVICE_ADDRESS, &(mapping_buf->reg_address), sizeof(uint8_t), &(mapping_buf->reg_value), sizeof(uint8_t), 1000 / portTICK_PERIOD_MS);
     if (ret != ESP_OK)
     {
       ESP_LOGE(TAG, "与姿态传感器LSM6DS3TRC通讯时发现问题 描述： %s", esp_err_to_name(ret));
@@ -190,8 +192,17 @@ esp_err_t lsm6ds3trc_FIFO_map(IMU_reg_mapping_t* FIFO_database, int map_num, int
 /// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
 esp_err_t lsm6ds3trc_init_or_reset()
 {
+  const char* TAG = "lsm6ds3trc_init_or_reset";
   IMU_reg_mapping_t reg_database[IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM] = IMU_INIT_DEFAULT_MAPPING_DATABASE; // 寄存器映射数据库
-  return lsm6ds3trc_database_map_set(reg_database, IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM);
+  esp_err_t ret = lsm6ds3trc_database_map_write(reg_database, IMU_INIT_DEFAULT_MAPPING_DATABASE_MAP_NUM);
+  if (ret == ESP_OK) {
+    ESP_LOGI(TAG, "成功以默认配置初始化LSM6DS3TRC姿态传感器");
+    return ret;
+  }
+  else {
+    ESP_LOGE(TAG, "以默认配置初始化LSM6DS3TRC姿态传感器时发现问题");
+    return ret;
+  }
 }
 
 /// @brief 获取步数计数值
@@ -208,8 +219,10 @@ uint16_t lsm6ds3trc_get_step_counter()
   return ret;
 }
 
-
-IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value()
+/// @brief 获取实时D6D偏移方向监测数据
+/// @param clearNow 读取完成后立即清理监测数据(lsm6ds3trc的D6D偏移方向监测数据是自锁的,任意为被置为1后,不会自动重置为0,必须用户显式清理)
+/// @return 方向偏移标识
+IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value(bool clearNow)
 {
   IMU_reg_mapping_t reg_database[1] = {
       MAP_BASE(D6D_SRC, 0x00),
@@ -225,7 +238,20 @@ IMU_D6D_data_value_t lsm6ds3trc_get_D6D_data_value()
     .ZH = reg_database[0].reg_value >> 5,
   };
 
+  if (clearNow) {
+    lsm6ds3trc_clear_D6D_data_value();
+  }
+
   return data_value;
+}
+
+/// @brief 立即清理监测数据(lsm6ds3trc的D6D偏移方向监测数据是自锁的,任意为被置为1后,不会自动重置为0,必须用户显式清理)
+void lsm6ds3trc_clear_D6D_data_value()
+{
+  IMU_reg_mapping_t reg_database[1] = {
+      MAP_BASE(D6D_SRC, 0x00),
+  };
+  lsm6ds3trc_database_map_write(reg_database, 1);
 }
 
 
