@@ -30,11 +30,16 @@
 #include <cinttypes>
 #include <string_view>
 
-#include <openssl/ssl.h>
-
 #include "ssl_compat.h"
 
 using namespace std::literals;
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/ssl.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/ssl.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 namespace nghttp2 {
 
@@ -45,23 +50,24 @@ namespace tls {
 //
 // https://wiki.mozilla.org/Security/Server_Side_TLS
 constexpr auto DEFAULT_CIPHER_LIST =
-    "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-"
-    "AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-"
-    "POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-"
-    "AES256-GCM-SHA384"sv;
+  "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-"
+  "AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-"
+  "POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-"
+  "AES256-GCM-SHA384"sv;
 
 // Recommended general purpose "Modern compatibility" cipher suites
 // for TLSv1.3 by mozilla.
 //
 // https://wiki.mozilla.org/Security/Server_Side_TLS
 constexpr auto DEFAULT_TLS13_CIPHER_LIST =
-#if defined(NGHTTP2_GENUINE_OPENSSL) || defined(NGHTTP2_OPENSSL_IS_LIBRESSL)
-    "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:"
-    "TLS_CHACHA20_POLY1305_SHA256"sv
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_LIBRESSL) || defined(NGHTTP2_OPENSSL_IS_WOLFSSL)
+  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:"
+  "TLS_CHACHA20_POLY1305_SHA256"sv
 #else  // !NGHTTP2_GENUINE_OPENSSL && !NGHTTP2_OPENSSL_IS_LIBRESSL
-    ""
+  ""
 #endif // !NGHTTP2_GENUINE_OPENSSL && !NGHTTP2_OPENSSL_IS_LIBRESSL
-    ;
+  ;
 
 constexpr auto NGHTTP2_TLS_MIN_VERSION = TLS1_VERSION;
 #ifdef TLS1_3_VERSION

@@ -35,7 +35,7 @@
 
 #include <nghttp2/nghttp2.h>
 
-#include "url-parser/url_parser.h"
+#include "urlparse.h"
 
 #include "util.h"
 #include "memchunk.h"
@@ -48,10 +48,10 @@ namespace nghttp2 {
 struct Header {
   Header(std::string name, std::string value, bool no_index = false,
          int32_t token = -1)
-      : name(std::move(name)),
-        value(std::move(value)),
-        token(token),
-        no_index(no_index) {}
+    : name(std::move(name)),
+      value(std::move(value)),
+      token(token),
+      no_index(no_index) {}
 
   Header() : token(-1), no_index(false) {}
 
@@ -72,7 +72,7 @@ struct Header {
 struct HeaderRef {
   HeaderRef(const StringRef &name, const StringRef &value,
             bool no_index = false, int32_t token = -1)
-      : name(name), value(value), token(token), no_index(no_index) {}
+    : name(name), value(value), token(token), no_index(no_index) {}
 
   HeaderRef() : token(-1), no_index(false) {}
 
@@ -110,7 +110,7 @@ bool lws(const char *value);
 // Copies the |field| component value from |u| and |url| to the
 // |dest|. If |u| does not have |field|, then this function does
 // nothing.
-void copy_url_component(std::string &dest, const http_parser_url *u, int field,
+void copy_url_component(std::string &dest, const urlparse_url *u, int field,
                         const char *url);
 
 Headers::value_type to_header(const StringRef &name, const StringRef &value,
@@ -157,7 +157,7 @@ inline nghttp2_nv make_field(const StringRef &name, const StringRef &value,
 inline nghttp2_nv make_field_v(const StringRef &name, const StringRef &value,
                                uint8_t flags = NGHTTP2_NV_FLAG_NONE) {
   return make_field_flags(
-      name, value, static_cast<uint8_t>(NGHTTP2_NV_FLAG_NO_COPY_NAME | flags));
+    name, value, static_cast<uint8_t>(NGHTTP2_NV_FLAG_NO_COPY_NAME | flags));
 }
 
 // Creates nghttp2_nv from |name|, |value| and |flags|.  nghttp2
@@ -270,7 +270,7 @@ void erase_header(HeaderRef *hd);
 // location URI is not subject to the rewrite, this function returns
 // empty string.
 StringRef rewrite_location_uri(BlockAllocator &balloc, const StringRef &uri,
-                               const http_parser_url &u,
+                               const urlparse_url &u,
                                const StringRef &match_host,
                                const StringRef &request_authority,
                                const StringRef &upstream_scheme);
@@ -433,6 +433,9 @@ bool legacy_http1(int major, int minor);
 // strictly.  This function does not allow empty value, BWS, and empty
 // list elements.
 bool check_transfer_encoding(const StringRef &s);
+
+// Encodes |extpri| in the wire format.
+std::string encode_extpri(const nghttp2_extpri &extpri);
 
 } // namespace http2
 

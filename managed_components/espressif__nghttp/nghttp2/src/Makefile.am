@@ -39,15 +39,17 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/lib/includes \
 	-I$(top_builddir)/lib/includes \
 	-I$(top_srcdir)/lib \
-	-I$(top_srcdir)/third-party \
+	-I$(top_srcdir)/third-party/urlparse \
 	-I$(top_srcdir)/third-party/llhttp/include \
 	@JEMALLOC_CFLAGS@ \
 	@LIBXML2_CFLAGS@ \
 	@LIBEV_CFLAGS@ \
 	@LIBNGHTTP3_CFLAGS@ \
+	@LIBNGTCP2_CRYPTO_WOLFSSL_CFLAGS@ \
 	@LIBNGTCP2_CRYPTO_QUICTLS_CFLAGS@ \
 	@LIBNGTCP2_CRYPTO_BORINGSSL_CFLAGS@ \
 	@LIBNGTCP2_CFLAGS@ \
+	@WOLFSSL_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
 	@LIBCARES_CFLAGS@ \
 	@JANSSON_CFLAGS@ \
@@ -60,15 +62,17 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = @LIBTOOL_LDFLAGS@
 
 LDADD = $(top_builddir)/lib/libnghttp2.la \
-	$(top_builddir)/third-party/liburl-parser.la \
+	$(top_builddir)/third-party/liburlparse.la \
 	$(top_builddir)/third-party/libllhttp.la \
 	@JEMALLOC_LIBS@ \
 	@LIBXML2_LIBS@ \
 	@LIBEV_LIBS@ \
 	@LIBNGHTTP3_LIBS@ \
+	@LIBNGTCP2_CRYPTO_WOLFSSL_LIBS@ \
 	@LIBNGTCP2_CRYPTO_QUICTLS_LIBS@ \
 	@LIBNGTCP2_CRYPTO_BORINGSSL_LIBS@ \
 	@LIBNGTCP2_LIBS@ \
+	@WOLFSSL_LIBS@ \
 	@OPENSSL_LIBS@ \
 	@LIBCARES_LIBS@ \
 	@SYSTEMD_LIBS@ \
@@ -185,7 +189,8 @@ NGHTTPX_SRCS += \
 	shrpx_quic_connection_handler.cc shrpx_quic_connection_handler.h \
 	shrpx_http3_upstream.cc shrpx_http3_upstream.h \
 	http3.cc http3.h \
-	quic.cc quic.h
+	quic.cc quic.h \
+	siphash.cc siphash.h
 endif # ENABLE_HTTP3
 
 noinst_LIBRARIES = libnghttpx.a
@@ -225,6 +230,9 @@ nghttpx_unittest_SOURCES = shrpx-unittest.cc \
 	base64_test.cc base64_test.h \
 	$(top_srcdir)/tests/munit/munit.c $(top_srcdir)/tests/munit/munit.h \
 	$(top_srcdir)/tests/munit/munitxx.h
+if ENABLE_HTTP3
+nghttpx_unittest_SOURCES += siphash_test.cc siphash_test.h
+endif # ENABLE_HTTP3
 nghttpx_unittest_CPPFLAGS = ${AM_CPPFLAGS} \
 	-I$(top_srcdir)/tests/munit \
 	-DNGHTTP2_SRC_DIR=\"$(top_srcdir)/src\"

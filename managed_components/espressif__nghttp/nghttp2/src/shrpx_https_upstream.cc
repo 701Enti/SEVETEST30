@@ -45,7 +45,7 @@
 #include "util.h"
 #include "template.h"
 #include "base64.h"
-#include "url-parser/url_parser.h"
+#include "urlparse.h"
 
 using namespace nghttp2;
 
@@ -63,37 +63,37 @@ int htp_msg_completecb(llhttp_t *htp);
 
 namespace {
 constexpr llhttp_settings_t htp_hooks = {
-    htp_msg_begin,       // llhttp_cb      on_message_begin;
-    htp_uricb,           // llhttp_data_cb on_url;
-    nullptr,             // llhttp_data_cb on_status;
-    nullptr,             // llhttp_data_cb on_method;
-    nullptr,             // llhttp_data_cb on_version;
-    htp_hdr_keycb,       // llhttp_data_cb on_header_field;
-    htp_hdr_valcb,       // llhttp_data_cb on_header_value;
-    nullptr,             // llhttp_data_cb on_chunk_extension_name;
-    nullptr,             // llhttp_data_cb on_chunk_extension_value;
-    htp_hdrs_completecb, // llhttp_cb      on_headers_complete;
-    htp_bodycb,          // llhttp_data_cb on_body;
-    htp_msg_completecb,  // llhttp_cb      on_message_complete;
-    nullptr,             // llhttp_cb      on_url_complete;
-    nullptr,             // llhttp_cb      on_status_complete;
-    nullptr,             // llhttp_cb      on_method_complete;
-    nullptr,             // llhttp_cb      on_version_complete;
-    nullptr,             // llhttp_cb      on_header_field_complete;
-    nullptr,             // llhttp_cb      on_header_value_complete;
-    nullptr,             // llhttp_cb      on_chunk_extension_name_complete;
-    nullptr,             // llhttp_cb      on_chunk_extension_value_complete;
-    nullptr,             // llhttp_cb      on_chunk_header;
-    nullptr,             // llhttp_cb      on_chunk_complete;
-    nullptr,             // llhttp_cb      on_reset;
+  htp_msg_begin,       // llhttp_cb      on_message_begin;
+  htp_uricb,           // llhttp_data_cb on_url;
+  nullptr,             // llhttp_data_cb on_status;
+  nullptr,             // llhttp_data_cb on_method;
+  nullptr,             // llhttp_data_cb on_version;
+  htp_hdr_keycb,       // llhttp_data_cb on_header_field;
+  htp_hdr_valcb,       // llhttp_data_cb on_header_value;
+  nullptr,             // llhttp_data_cb on_chunk_extension_name;
+  nullptr,             // llhttp_data_cb on_chunk_extension_value;
+  htp_hdrs_completecb, // llhttp_cb      on_headers_complete;
+  htp_bodycb,          // llhttp_data_cb on_body;
+  htp_msg_completecb,  // llhttp_cb      on_message_complete;
+  nullptr,             // llhttp_cb      on_url_complete;
+  nullptr,             // llhttp_cb      on_status_complete;
+  nullptr,             // llhttp_cb      on_method_complete;
+  nullptr,             // llhttp_cb      on_version_complete;
+  nullptr,             // llhttp_cb      on_header_field_complete;
+  nullptr,             // llhttp_cb      on_header_value_complete;
+  nullptr,             // llhttp_cb      on_chunk_extension_name_complete;
+  nullptr,             // llhttp_cb      on_chunk_extension_value_complete;
+  nullptr,             // llhttp_cb      on_chunk_header;
+  nullptr,             // llhttp_cb      on_chunk_complete;
+  nullptr,             // llhttp_cb      on_reset;
 };
 } // namespace
 
 HttpsUpstream::HttpsUpstream(ClientHandler *handler)
-    : handler_(handler),
-      current_header_length_(0),
-      ioctrl_(handler->get_rlimit()),
-      num_requests_(0) {
+  : handler_(handler),
+    current_header_length_(0),
+    ioctrl_(handler->get_rlimit()),
+    num_requests_(0) {
   llhttp_init(&htp_, HTTP_REQUEST, &htp_hooks);
   htp_.data = this;
 }
@@ -111,7 +111,7 @@ void HttpsUpstream::on_start_request() {
   reset_current_header_length();
 
   auto downstream =
-      std::make_unique<Downstream>(this, handler_->get_mcpool(), 0);
+    std::make_unique<Downstream>(this, handler_->get_mcpool(), 0);
 
   attach_downstream(std::move(downstream));
 
@@ -149,7 +149,7 @@ int htp_uricb(llhttp_t *htp, const char *data, size_t len) {
     }
     assert(downstream->get_request_state() == DownstreamState::INITIAL);
     downstream->set_request_state(
-        DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
+      DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
     llhttp_set_error_reason(htp, "too long request URI");
     return HPE_USER;
   }
@@ -158,7 +158,7 @@ int htp_uricb(llhttp_t *htp, const char *data, size_t len) {
 
   if (req.method == HTTP_CONNECT) {
     req.authority =
-        concat_string_ref(balloc, req.authority, StringRef{data, len});
+      concat_string_ref(balloc, req.authority, StringRef{data, len});
   } else {
     req.path = concat_string_ref(balloc, req.path, StringRef{data, len});
   }
@@ -181,7 +181,7 @@ int htp_hdr_keycb(llhttp_t *htp, const char *data, size_t len) {
     }
     if (downstream->get_request_state() == DownstreamState::INITIAL) {
       downstream->set_request_state(
-          DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
+        DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
     }
     llhttp_set_error_reason(htp, "too large header");
     return HPE_USER;
@@ -193,10 +193,10 @@ int htp_hdr_keycb(llhttp_t *htp, const char *data, size_t len) {
       if (req.fs.num_fields() >= httpconf.max_request_header_fields) {
         if (LOG_ENABLED(INFO)) {
           ULOG(INFO, upstream)
-              << "Too many header field num=" << req.fs.num_fields() + 1;
+            << "Too many header field num=" << req.fs.num_fields() + 1;
         }
         downstream->set_request_state(
-            DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
+          DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
         llhttp_set_error_reason(htp, "too many headers");
         return HPE_USER;
       }
@@ -210,7 +210,7 @@ int htp_hdr_keycb(llhttp_t *htp, const char *data, size_t len) {
       if (req.fs.num_fields() >= httpconf.max_request_header_fields) {
         if (LOG_ENABLED(INFO)) {
           ULOG(INFO, upstream)
-              << "Too many header field num=" << req.fs.num_fields() + 1;
+            << "Too many header field num=" << req.fs.num_fields() + 1;
         }
         llhttp_set_error_reason(htp, "too many headers");
         return HPE_USER;
@@ -236,7 +236,7 @@ int htp_hdr_valcb(llhttp_t *htp, const char *data, size_t len) {
     }
     if (downstream->get_request_state() == DownstreamState::INITIAL) {
       downstream->set_request_state(
-          DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
+        DownstreamState::HTTP1_REQUEST_HEADER_TOO_LARGE);
     }
     llhttp_set_error_reason(htp, "too large header");
     return HPE_USER;
@@ -252,13 +252,12 @@ int htp_hdr_valcb(llhttp_t *htp, const char *data, size_t len) {
 
 namespace {
 void rewrite_request_host_path_from_uri(BlockAllocator &balloc, Request &req,
-                                        const StringRef &uri,
-                                        http_parser_url &u) {
-  assert(u.field_set & (1 << UF_HOST));
+                                        const StringRef &uri, urlparse_url &u) {
+  assert(u.field_set & (1 << URLPARSE_HOST));
 
   // As per https://tools.ietf.org/html/rfc7230#section-5.4, we
   // rewrite host header field with authority component.
-  auto authority = util::get_uri_field(uri.data(), u, UF_HOST);
+  auto authority = util::get_uri_field(uri.data(), u, URLPARSE_HOST);
   // TODO properly check IPv6 numeric address
   auto ipv6 = std::find(std::begin(authority), std::end(authority), ':') !=
               std::end(authority);
@@ -266,7 +265,7 @@ void rewrite_request_host_path_from_uri(BlockAllocator &balloc, Request &req,
   if (ipv6) {
     authoritylen += 2;
   }
-  if (u.field_set & (1 << UF_PORT)) {
+  if (u.field_set & (1 << URLPARSE_PORT)) {
     authoritylen += 1 + str_size("65535");
   }
   if (authoritylen > authority.size()) {
@@ -280,7 +279,7 @@ void rewrite_request_host_path_from_uri(BlockAllocator &balloc, Request &req,
       *p++ = ']';
     }
 
-    if (u.field_set & (1 << UF_PORT)) {
+    if (u.field_set & (1 << URLPARSE_PORT)) {
       *p++ = ':';
       p = util::utos(p, u.port);
     }
@@ -291,11 +290,11 @@ void rewrite_request_host_path_from_uri(BlockAllocator &balloc, Request &req,
     req.authority = authority;
   }
 
-  req.scheme = util::get_uri_field(uri.data(), u, UF_SCHEMA);
+  req.scheme = util::get_uri_field(uri.data(), u, URLPARSE_SCHEMA);
 
   StringRef path;
-  if (u.field_set & (1 << UF_PATH)) {
-    path = util::get_uri_field(uri.data(), u, UF_PATH);
+  if (u.field_set & (1 << URLPARSE_PATH)) {
+    path = util::get_uri_field(uri.data(), u, URLPARSE_PATH);
   } else if (req.method == HTTP_OPTIONS) {
     // Server-wide OPTIONS takes following form in proxy request:
     //
@@ -310,11 +309,11 @@ void rewrite_request_host_path_from_uri(BlockAllocator &balloc, Request &req,
     path = "/"_sr;
   }
 
-  if (u.field_set & (1 << UF_QUERY)) {
-    auto &fdata = u.field_data[UF_QUERY];
+  if (u.field_set & (1 << URLPARSE_QUERY)) {
+    auto &fdata = u.field_data[URLPARSE_QUERY];
 
-    if (u.field_set & (1 << UF_PATH)) {
-      auto q = util::get_uri_field(uri.data(), u, UF_QUERY);
+    if (u.field_set & (1 << URLPARSE_PATH)) {
+      auto q = util::get_uri_field(uri.data(), u, URLPARSE_QUERY);
       path = StringRef{std::begin(path), std::end(q)};
     } else {
       path = concat_string_ref(balloc, path, "?"_sr,
@@ -430,14 +429,15 @@ int htp_hdrs_completecb(llhttp_t *htp) {
   auto config = get_config();
 
   if (method != HTTP_CONNECT) {
-    http_parser_url u{};
-    rv = http_parser_parse_url(req.path.data(), req.path.size(), 0, &u);
+    urlparse_url u;
+    rv = urlparse_parse_url(req.path.data(), req.path.size(), 0, &u);
     if (rv != 0) {
       // Expect to respond with 400 bad request
       return -1;
     }
-    // checking UF_HOST could be redundant, but just in case ...
-    if (!(u.field_set & (1 << UF_SCHEMA)) || !(u.field_set & (1 << UF_HOST))) {
+    // checking URLPARSE_HOST could be redundant, but just in case ...
+    if (!(u.field_set & (1 << URLPARSE_SCHEMA)) ||
+        !(u.field_set & (1 << URLPARSE_HOST))) {
       req.no_authority = true;
 
       if (method == HTTP_OPTIONS && req.path == "*"_sr) {
@@ -560,7 +560,7 @@ int htp_bodycb(llhttp_t *htp, const char *data, size_t len) {
   auto upstream = static_cast<HttpsUpstream *>(htp->data);
   auto downstream = upstream->get_downstream();
   rv = downstream->push_upload_data_chunk(
-      reinterpret_cast<const uint8_t *>(data), len);
+    reinterpret_cast<const uint8_t *>(data), len);
   if (rv != 0) {
     // Ignore error if response has been completed.  We will end up in
     // htp_msg_completecb, and request will end gracefully.
@@ -633,7 +633,6 @@ int HttpsUpstream::on_read() {
   // downstream can be nullptr here, because it is initialized in the
   // callback chain called by llhttp_execute()
   if (downstream && downstream->get_upgraded()) {
-
     auto rv = downstream->push_upload_data_chunk(rb->pos(), rb->rleft());
 
     if (rv != 0) {
@@ -672,7 +671,7 @@ int HttpsUpstream::on_read() {
 
   if (htperr == HPE_PAUSED_UPGRADE &&
       rb->pos() ==
-          reinterpret_cast<const uint8_t *>(llhttp_get_error_pos(&htp_))) {
+        reinterpret_cast<const uint8_t *>(llhttp_get_error_pos(&htp_))) {
     llhttp_resume_after_upgrade(&htp_);
 
     htperr = llhttp_execute(&htp_, reinterpret_cast<const char *>(rb->pos()),
@@ -680,10 +679,10 @@ int HttpsUpstream::on_read() {
   }
 
   auto nread =
-      htperr == HPE_OK
-          ? rb->rleft()
-          : reinterpret_cast<const uint8_t *>(llhttp_get_error_pos(&htp_)) -
-                rb->pos();
+    htperr == HPE_OK
+      ? rb->rleft()
+      : reinterpret_cast<const uint8_t *>(llhttp_get_error_pos(&htp_)) -
+          rb->pos();
   rb->drain(nread);
   rlimit->startw();
 
@@ -1049,7 +1048,7 @@ void HttpsUpstream::error_reply(unsigned int status_code) {
 
   if (!downstream) {
     attach_downstream(
-        std::make_unique<Downstream>(this, handler_->get_mcpool(), 1));
+      std::make_unique<Downstream>(this, handler_->get_mcpool(), 1));
     downstream = get_downstream();
   }
 
@@ -1074,8 +1073,8 @@ void HttpsUpstream::error_reply(unsigned int status_code) {
   output->append(get_config()->http.server_name);
   output->append("\r\nContent-Length: ");
   std::array<char, NGHTTP2_MAX_UINT64_DIGITS> intbuf;
-  output->append(StringRef{std::begin(intbuf),
-                           util::utos(std::begin(intbuf), html.size())});
+  output->append(
+    StringRef{std::begin(intbuf), util::utos(std::begin(intbuf), html.size())});
   output->append("\r\nDate: ");
   auto lgconf = log_config();
   lgconf->update_tstamp(std::chrono::system_clock::now());
@@ -1189,7 +1188,7 @@ int HttpsUpstream::on_downstream_header_complete(Downstream *downstream) {
 
   if (!config->http2_proxy && !httpconf.no_location_rewrite) {
     downstream->rewrite_location_response_header(
-        get_client_handler()->get_upstream_scheme());
+      get_client_handler()->get_upstream_scheme());
   }
 
   if (downstream->get_non_final_response()) {
@@ -1209,8 +1208,8 @@ int HttpsUpstream::on_downstream_header_complete(Downstream *downstream) {
 
   auto build_flags = (http2::HDOP_STRIP_ALL & ~http2::HDOP_STRIP_VIA) |
                      (!http2::legacy_http1(req.http_major, req.http_minor)
-                          ? 0
-                          : http2::HDOP_STRIP_TRANSFER_ENCODING);
+                        ? 0
+                        : http2::HDOP_STRIP_TRANSFER_ENCODING);
 
   http2::build_http1_headers_from_headers(buf, resp.fs.headers(), build_flags);
 
@@ -1296,9 +1295,9 @@ int HttpsUpstream::on_downstream_header_complete(Downstream *downstream) {
       auto &shared_addr = group->shared_addr;
       auto &cookieconf = shared_addr->affinity.cookie;
       auto secure =
-          http::require_cookie_secure_attribute(cookieconf.secure, req.scheme);
+        http::require_cookie_secure_attribute(cookieconf.secure, req.scheme);
       auto cookie_str = http::create_affinity_cookie(
-          balloc, cookieconf.name, affinity_cookie, cookieconf.path, secure);
+        balloc, cookieconf.name, affinity_cookie, cookieconf.path, secure);
       buf->append("Set-Cookie: ");
       buf->append(cookie_str);
       buf->append("\r\n");
@@ -1403,7 +1402,7 @@ int HttpsUpstream::on_downstream_abort_request(Downstream *downstream,
 }
 
 int HttpsUpstream::on_downstream_abort_request_with_https_redirect(
-    Downstream *downstream) {
+  Downstream *downstream) {
   redirect_to_https(downstream);
   handler_->signal_write();
   return 0;
@@ -1568,13 +1567,13 @@ HttpsUpstream::on_downstream_push_promise(Downstream *downstream,
 }
 
 int HttpsUpstream::on_downstream_push_promise_complete(
-    Downstream *downstream, Downstream *promised_downstream) {
+  Downstream *downstream, Downstream *promised_downstream) {
   return -1;
 }
 
 bool HttpsUpstream::push_enabled() const { return false; }
 
 void HttpsUpstream::cancel_premature_downstream(
-    Downstream *promised_downstream) {}
+  Downstream *promised_downstream) {}
 
 } // namespace shrpx

@@ -31,7 +31,14 @@
 
 #include <ev.h>
 
-#include <openssl/ssl.h>
+#include "ssl_compat.h"
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/ssl.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/ssl.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 #include "shrpx_rate_limit.h"
 #include "shrpx_connection.h"
@@ -174,8 +181,8 @@ public:
                                const StringRef &cookie_name);
 
   DownstreamAddr *get_downstream_addr_strict_affinity(
-      int &err, const std::shared_ptr<SharedDownstreamAddr> &shared_addr,
-      Downstream *downstream);
+    int &err, const std::shared_ptr<SharedDownstreamAddr> &shared_addr,
+    Downstream *downstream);
 
   const UpstreamAddr *get_upstream_addr() const;
 

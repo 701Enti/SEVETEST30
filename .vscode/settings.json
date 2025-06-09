@@ -161,7 +161,12 @@
         "rmt_private.h": "c",
         "soc_caps.h": "c",
         "variant": "c",
-        "hscdtd008a.h": "c"
+        "hscdtd008a.h": "c",
+        "dsps_math.h": "c",
+        "dspm_matrix.h": "c",
+        "esp_cpu.h": "c",
+        "math_tools.h": "c",
+        "dspm_mulc.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

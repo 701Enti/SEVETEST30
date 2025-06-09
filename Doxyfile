@@ -1111,7 +1111,6 @@ EXCLUDE_PATTERNS       = */doxygen/* \
                          */build/* \
                          */pattern/* \
                          */font/* \
-                         */zlib_lib/* \
                          */managed_components/* \
                          */base64_re.c \
                          */board_def.c \

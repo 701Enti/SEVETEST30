@@ -61,11 +61,17 @@
 #include <fstream>
 #include <iomanip>
 
-#include <openssl/evp.h>
+#include "ssl_compat.h"
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/evp.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/evp.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 #include <nghttp2/nghttp2.h>
 
-#include "ssl_compat.h"
 #include "timegm.h"
 
 namespace nghttp2 {
@@ -562,15 +568,15 @@ namespace {
 // with given costs.  swapcost, subcost, addcost and delcost are cost
 // to swap 2 adjacent characters, substitute characters, add character
 // and delete character respectively.
-int levenshtein(const char *a, int alen, const char *b, int blen, int swapcost,
-                int subcost, int addcost, int delcost) {
+int levenshtein(const char *a, size_t alen, const char *b, size_t blen,
+                int swapcost, int subcost, int addcost, int delcost) {
   auto dp = std::vector<std::vector<int>>(3, std::vector<int>(blen + 1));
-  for (int i = 0; i <= blen; ++i) {
-    dp[1][i] = i;
+  for (size_t i = 0; i <= blen; ++i) {
+    dp[1][i] = i * addcost;
   }
-  for (int i = 1; i <= alen; ++i) {
-    dp[0][0] = i;
-    for (int j = 1; j <= blen; ++j) {
+  for (size_t i = 1; i <= alen; ++i) {
+    dp[0][0] = i * delcost;
+    for (size_t j = 1; j <= blen; ++j) {
       dp[0][j] = dp[1][j - 1] + (a[i - 1] == b[j - 1] ? 0 : subcost);
       if (i >= 2 && j >= 2 && a[i - 1] != b[j - 1] && a[i - 2] == b[j - 1] &&
           a[i - 1] == b[j - 2]) {
@@ -622,7 +628,7 @@ void show_candidates(const char *unkopt, const option *options) {
     }
     // cost values are borrowed from git, help.c.
     int sim =
-        levenshtein(unkopt, unkoptlen, options[i].name, optnamelen, 0, 2, 1, 3);
+      levenshtein(unkopt, unkoptlen, options[i].name, optnamelen, 0, 2, 1, 3);
     cands.emplace_back(sim, options[i].name);
   }
   if (prefix_match == 1 || cands.empty()) {
@@ -643,12 +649,12 @@ void show_candidates(const char *unkopt, const option *options) {
   }
 }
 
-bool has_uri_field(const http_parser_url &u, http_parser_url_fields field) {
+bool has_uri_field(const urlparse_url &u, urlparse_url_fields field) {
   return u.field_set & (1 << field);
 }
 
-bool fieldeq(const char *uri1, const http_parser_url &u1, const char *uri2,
-             const http_parser_url &u2, http_parser_url_fields field) {
+bool fieldeq(const char *uri1, const urlparse_url &u1, const char *uri2,
+             const urlparse_url &u2, urlparse_url_fields field) {
   if (!has_uri_field(u1, field)) {
     if (!has_uri_field(u2, field)) {
       return true;
@@ -665,13 +671,13 @@ bool fieldeq(const char *uri1, const http_parser_url &u1, const char *uri2,
                 uri2 + u2.field_data[field].off, u1.field_data[field].len) == 0;
 }
 
-bool fieldeq(const char *uri, const http_parser_url &u,
-             http_parser_url_fields field, const char *t) {
+bool fieldeq(const char *uri, const urlparse_url &u, urlparse_url_fields field,
+             const char *t) {
   return fieldeq(uri, u, field, StringRef{t});
 }
 
-bool fieldeq(const char *uri, const http_parser_url &u,
-             http_parser_url_fields field, const StringRef &t) {
+bool fieldeq(const char *uri, const urlparse_url &u, urlparse_url_fields field,
+             const StringRef &t) {
   if (!has_uri_field(u, field)) {
     return t.empty();
   }
@@ -679,8 +685,8 @@ bool fieldeq(const char *uri, const http_parser_url &u,
   return StringRef{uri + f.off, f.len} == t;
 }
 
-StringRef get_uri_field(const char *uri, const http_parser_url &u,
-                        http_parser_url_fields field) {
+StringRef get_uri_field(const char *uri, const urlparse_url &u,
+                        urlparse_url_fields field) {
   if (!util::has_uri_field(u, field)) {
     return StringRef{};
   }
@@ -688,28 +694,28 @@ StringRef get_uri_field(const char *uri, const http_parser_url &u,
   return StringRef{uri + u.field_data[field].off, u.field_data[field].len};
 }
 
-uint16_t get_default_port(const char *uri, const http_parser_url &u) {
-  if (util::fieldeq(uri, u, UF_SCHEMA, "https")) {
+uint16_t get_default_port(const char *uri, const urlparse_url &u) {
+  if (util::fieldeq(uri, u, URLPARSE_SCHEMA, "https")) {
     return 443;
-  } else if (util::fieldeq(uri, u, UF_SCHEMA, "http")) {
+  } else if (util::fieldeq(uri, u, URLPARSE_SCHEMA, "http")) {
     return 80;
   } else {
     return 443;
   }
 }
 
-bool porteq(const char *uri1, const http_parser_url &u1, const char *uri2,
-            const http_parser_url &u2) {
+bool porteq(const char *uri1, const urlparse_url &u1, const char *uri2,
+            const urlparse_url &u2) {
   uint16_t port1, port2;
-  port1 =
-      util::has_uri_field(u1, UF_PORT) ? u1.port : get_default_port(uri1, u1);
-  port2 =
-      util::has_uri_field(u2, UF_PORT) ? u2.port : get_default_port(uri2, u2);
+  port1 = util::has_uri_field(u1, URLPARSE_PORT) ? u1.port
+                                                 : get_default_port(uri1, u1);
+  port2 = util::has_uri_field(u2, URLPARSE_PORT) ? u2.port
+                                                 : get_default_port(uri2, u2);
   return port1 == port2;
 }
 
-void write_uri_field(std::ostream &o, const char *uri, const http_parser_url &u,
-                     http_parser_url_fields field) {
+void write_uri_field(std::ostream &o, const char *uri, const urlparse_url &u,
+                     urlparse_url_fields field) {
   if (util::has_uri_field(u, field)) {
     o.write(uri + u.field_data[field].off, u.field_data[field].len);
   }
@@ -1881,7 +1887,7 @@ uint8_t msghdr_get_ecn(msghdr *msg, int family) {
 }
 
 size_t msghdr_get_udp_gro(msghdr *msg) {
-  uint16_t gso_size = 0;
+  int gso_size = 0;
 
 #  ifdef UDP_GRO
   for (auto cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
@@ -1893,7 +1899,7 @@ size_t msghdr_get_udp_gro(msghdr *msg) {
   }
 #  endif // UDP_GRO
 
-  return gso_size;
+  return static_cast<size_t>(gso_size);
 }
 #endif // ENABLE_HTTP3
 

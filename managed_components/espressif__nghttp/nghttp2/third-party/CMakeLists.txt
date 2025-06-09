@@ -12,11 +12,11 @@ if(ENABLE_THIRD_PARTY)
     POSITION_INDEPENDENT_CODE ON
   )
 
-  set(LIBURL_PARSER_SOURCES
-    url-parser/url_parser.c
+  set(LIBURLPARSE_SOURCES
+    urlparse/urlparse.c
   )
-  add_library(url-parser OBJECT ${LIBURL_PARSER_SOURCES})
-  set_target_properties(url-parser PROPERTIES
+  add_library(urlparse OBJECT ${LIBURLPARSE_SOURCES})
+  set_target_properties(urlparse PROPERTIES
     POSITION_INDEPENDENT_CODE ON)
 
   if(HAVE_NEVERBLEED)
@@ -29,6 +29,7 @@ if(ENABLE_THIRD_PARTY)
       "${CMAKE_SOURCE_DIR}/third-party/neverbleed"
     )
     target_link_libraries(neverbleed ${OPENSSL_LIBRARIES})
+    target_compile_definitions(neverbleed PUBLIC _GNU_SOURCE)
   endif()
 
   if(HAVE_MRUBY)

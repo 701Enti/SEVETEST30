@@ -41,8 +41,6 @@
 #include <iostream>
 #include <string>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <nghttp2/nghttp2.h>
 
 #include "app_helper.h"
@@ -179,8 +177,6 @@ Options:
   --no-content-length
               Don't send content-length header field.
   --ktls      Enable ktls.
-  --no-rfc7540-pri
-              Disable RFC7540 priorities.
   --version   Display version information and exit.
   -h, --help  Display this help and exit.
 
@@ -200,34 +196,34 @@ int main(int argc, char **argv) {
   while (1) {
     static int flag = 0;
     constexpr static option long_options[] = {
-        {"address", required_argument, nullptr, 'a'},
-        {"daemon", no_argument, nullptr, 'D'},
-        {"htdocs", required_argument, nullptr, 'd'},
-        {"help", no_argument, nullptr, 'h'},
-        {"verbose", no_argument, nullptr, 'v'},
-        {"verify-client", no_argument, nullptr, 'V'},
-        {"header-table-size", required_argument, nullptr, 'c'},
-        {"push", required_argument, nullptr, 'p'},
-        {"padding", required_argument, nullptr, 'b'},
-        {"max-concurrent-streams", required_argument, nullptr, 'm'},
-        {"workers", required_argument, nullptr, 'n'},
-        {"error-gzip", no_argument, nullptr, 'e'},
-        {"window-bits", required_argument, nullptr, 'w'},
-        {"connection-window-bits", required_argument, nullptr, 'W'},
-        {"no-tls", no_argument, &flag, 1},
-        {"color", no_argument, &flag, 2},
-        {"version", no_argument, &flag, 3},
-        {"dh-param-file", required_argument, &flag, 4},
-        {"early-response", no_argument, &flag, 5},
-        {"trailer", required_argument, &flag, 6},
-        {"hexdump", no_argument, &flag, 7},
-        {"echo-upload", no_argument, &flag, 8},
-        {"mime-types-file", required_argument, &flag, 9},
-        {"no-content-length", no_argument, &flag, 10},
-        {"encoder-header-table-size", required_argument, &flag, 11},
-        {"ktls", no_argument, &flag, 12},
-        {"no-rfc7540-pri", no_argument, &flag, 13},
-        {nullptr, 0, nullptr, 0}};
+      {"address", required_argument, nullptr, 'a'},
+      {"daemon", no_argument, nullptr, 'D'},
+      {"htdocs", required_argument, nullptr, 'd'},
+      {"help", no_argument, nullptr, 'h'},
+      {"verbose", no_argument, nullptr, 'v'},
+      {"verify-client", no_argument, nullptr, 'V'},
+      {"header-table-size", required_argument, nullptr, 'c'},
+      {"push", required_argument, nullptr, 'p'},
+      {"padding", required_argument, nullptr, 'b'},
+      {"max-concurrent-streams", required_argument, nullptr, 'm'},
+      {"workers", required_argument, nullptr, 'n'},
+      {"error-gzip", no_argument, nullptr, 'e'},
+      {"window-bits", required_argument, nullptr, 'w'},
+      {"connection-window-bits", required_argument, nullptr, 'W'},
+      {"no-tls", no_argument, &flag, 1},
+      {"color", no_argument, &flag, 2},
+      {"version", no_argument, &flag, 3},
+      {"dh-param-file", required_argument, &flag, 4},
+      {"early-response", no_argument, &flag, 5},
+      {"trailer", required_argument, &flag, 6},
+      {"hexdump", no_argument, &flag, 7},
+      {"echo-upload", no_argument, &flag, 8},
+      {"mime-types-file", required_argument, &flag, 9},
+      {"no-content-length", no_argument, &flag, 10},
+      {"encoder-header-table-size", required_argument, &flag, 11},
+      {"ktls", no_argument, &flag, 12},
+      {"no-rfc7540-pri", no_argument, &flag, 13},
+      {nullptr, 0, nullptr, 0}};
     int option_index = 0;
     int c = getopt_long(argc, argv, "DVb:c:d:ehm:n:p:va:w:W:", long_options,
                         &option_index);
@@ -415,7 +411,8 @@ int main(int argc, char **argv) {
         break;
       case 13:
         // no-rfc7540-pri option
-        config.no_rfc7540_pri = true;
+        std::cerr << "[WARNING]: --no-rfc7540-pri option has been deprecated."
+                  << std::endl;
         break;
       }
       break;

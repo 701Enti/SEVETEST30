@@ -31,15 +31,21 @@
 #include <iostream>
 #include <fstream>
 
-#include <openssl/crypto.h>
-#include <openssl/conf.h>
-
 #ifdef HAVE_LIBBROTLI
 #  include <brotli/encode.h>
 #  include <brotli/decode.h>
 #endif // HAVE_LIBBROTLI
 
 #include "ssl_compat.h"
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/crypto.h>
+#  include <wolfssl/openssl/conf.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/crypto.h>
+#  include <openssl/conf.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 namespace nghttp2 {
 
@@ -95,13 +101,13 @@ TLSSessionInfo *get_tls_session_info(TLSSessionInfo *tls_info, SSL *ssl) {
   ((0x0000 <= id && id <= 0x00FF &&                                            \
     "\xFF\xFF\xFF\xCF\xFF\xFF\xFF\xFF\x7F\x00\x00\x00\x80\x3F\x00\x00"         \
     "\xF0\xFF\xFF\x3F\xF3\xF3\xFF\xFF\x3F\x00\x00\x00\x00\x00\x00\x80"         \
-            [(id & 0xFF) / 8] &                                                \
-        (1 << (id % 8))) ||                                                    \
+        [(id & 0xFF) / 8] &                                                    \
+      (1 << (id % 8))) ||                                                      \
    (0xC000 <= id && id <= 0xC0FF &&                                            \
     "\xFE\xFF\xFF\xFF\xFF\x67\xFE\xFF\xFF\xFF\x33\xCF\xFC\xCF\xFF\xCF"         \
     "\x3C\xF3\xFC\x3F\x33\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"         \
-            [(id & 0xFF) / 8] &                                                \
-        (1 << (id % 8))))
+        [(id & 0xFF) / 8] &                                                    \
+      (1 << (id % 8))))
 
 bool check_http2_cipher_block_list(SSL *ssl) {
   int id = SSL_CIPHER_get_id(SSL_get_current_cipher(ssl)) & 0xFFFFFF;
@@ -178,6 +184,10 @@ int cert_decompress(SSL *ssl, CRYPTO_BUFFER **out, size_t uncompressed_len,
 }
 #endif // NGHTTP2_OPENSSL_IS_BORINGSSL && HAVE_LIBBROTLI
 
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_BORINGSSL) ||                                     \
+  defined(NGHTTP2_OPENSSL_IS_LIBRESSL) ||                                      \
+  (defined(NGHTTP2_OPENSSL_IS_WOLFSSL) && defined(HAVE_SECRET_CALLBACK))
 namespace {
 std::ofstream keylog_file;
 
@@ -203,6 +213,13 @@ int setup_keylog_callback(SSL_CTX *ssl_ctx) {
 
   return 0;
 }
+#else  // !NGHTTP2_GENUINE_OPENSSL && !NGHTTP2_OPENSSL_IS_BORINGSSL &&
+       // !NGHTTP2_OPENSSL_IS_LIBRESSL && !(NGHTTP2_OPENSSL_IS_WOLFSSL &&
+       // HAVE_SECRET_CALLBACK)
+int setup_keylog_callback(SSL_CTX *ssl_ctx) { return 0; }
+#endif // !NGHTTP2_GENUINE_OPENSSL && !NGHTTP2_OPENSSL_IS_BORINGSSL &&
+       // !NGHTTP2_OPENSSL_IS_LIBRESSL && !(NGHTTP2_OPENSSL_IS_WOLFSSL &&
+       // HAVE_SECRET_CALLBACK)
 
 } // namespace tls
 

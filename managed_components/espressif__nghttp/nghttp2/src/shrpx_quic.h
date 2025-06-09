@@ -33,29 +33,37 @@
 #include <optional>
 #include <span>
 
-#include <openssl/evp.h>
+#include "ssl_compat.h"
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/evp.h>
+#  include <wolfssl/openssl/rand.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/evp.h>
+#  include <openssl/rand.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 #include <ngtcp2/ngtcp2.h>
 
+#include "siphash.h"
+#include "template.h"
 #include "network.h"
 
 using namespace nghttp2;
 
 namespace std {
 template <> struct hash<ngtcp2_cid> {
-  std::size_t operator()(const ngtcp2_cid &cid) const noexcept {
-    // FNV-1a 64bits variant
-    constexpr uint64_t basis = 0xCBF29CE484222325ULL;
-    const uint8_t *p = cid.data, *end = cid.data + cid.datalen;
-    uint64_t h = basis;
-
-    for (; p != end;) {
-      h ^= *p++;
-      h *= basis;
-    }
-
-    return static_cast<size_t>(h);
+  hash() {
+    auto s = as_writable_uint8_span(std::span{key});
+    assert(RAND_bytes(s.data(), s.size()) == 1);
   }
+
+  std::size_t operator()(const ngtcp2_cid &cid) const noexcept {
+    return static_cast<size_t>(siphash24(key, {cid.data, cid.datalen}));
+  }
+
+  std::array<uint64_t, 2> key;
 };
 } // namespace std
 
@@ -71,12 +79,12 @@ constexpr size_t SHRPX_QUIC_CID_WORKER_ID_OFFSET = 1;
 constexpr size_t SHRPX_QUIC_SERVER_IDLEN = 4;
 constexpr size_t SHRPX_QUIC_SOCK_IDLEN = 4;
 constexpr size_t SHRPX_QUIC_WORKER_IDLEN =
-    SHRPX_QUIC_SERVER_IDLEN + SHRPX_QUIC_SOCK_IDLEN;
+  SHRPX_QUIC_SERVER_IDLEN + SHRPX_QUIC_SOCK_IDLEN;
 constexpr size_t SHRPX_QUIC_CLIENT_IDLEN = 8;
 constexpr size_t SHRPX_QUIC_DECRYPTED_DCIDLEN =
-    SHRPX_QUIC_WORKER_IDLEN + SHRPX_QUIC_CLIENT_IDLEN;
+  SHRPX_QUIC_WORKER_IDLEN + SHRPX_QUIC_CLIENT_IDLEN;
 constexpr size_t SHRPX_QUIC_SCIDLEN =
-    SHRPX_QUIC_CID_WORKER_ID_OFFSET + SHRPX_QUIC_DECRYPTED_DCIDLEN;
+  SHRPX_QUIC_CID_WORKER_ID_OFFSET + SHRPX_QUIC_DECRYPTED_DCIDLEN;
 constexpr size_t SHRPX_QUIC_CID_ENCRYPTION_KEYLEN = 16;
 constexpr size_t SHRPX_QUIC_CONN_CLOSE_PKTLEN = 256;
 constexpr size_t SHRPX_QUIC_STATELESS_RESET_BURST = 100;

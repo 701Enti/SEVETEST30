@@ -15,4 +15,5 @@ configure_file(
   "AHT21.h" 
   "AGS10.h" 
   "hscdtd008a.h"
+  "math_tools.h"
   )

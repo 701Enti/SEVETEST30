@@ -271,7 +271,7 @@ bool lws(const char *value) {
   return true;
 }
 
-void copy_url_component(std::string &dest, const http_parser_url *u, int field,
+void copy_url_component(std::string &dest, const urlparse_url *u, int field,
                         const char *url) {
   if (u->field_set & (1 << field)) {
     dest.assign(url + u->field_data[field].off, u->field_data[field].len);
@@ -398,8 +398,8 @@ void copy_headers_to_nva_internal(std::vector<nghttp2_nv> &nva,
       it_via = it;
       break;
     }
-    nva.push_back(make_field_flags(kv->name, kv->value,
-                                   nv_flags | no_index(kv->no_index)));
+    nva.push_back(
+      make_field_flags(kv->name, kv->value, nv_flags | no_index(kv->no_index)));
   }
 }
 } // namespace
@@ -412,8 +412,8 @@ void copy_headers_to_nva(std::vector<nghttp2_nv> &nva,
 void copy_headers_to_nva_nocopy(std::vector<nghttp2_nv> &nva,
                                 const HeaderRefs &headers, uint32_t flags) {
   copy_headers_to_nva_internal(
-      nva, headers,
-      NGHTTP2_NV_FLAG_NO_COPY_NAME | NGHTTP2_NV_FLAG_NO_COPY_VALUE, flags);
+    nva, headers, NGHTTP2_NV_FLAG_NO_COPY_NAME | NGHTTP2_NV_FLAG_NO_COPY_VALUE,
+    flags);
 }
 
 void build_http1_headers_from_headers(DefaultMemchunks *buf,
@@ -516,10 +516,10 @@ int32_t determine_window_update_transmission(nghttp2_session *session,
     recv_length = nghttp2_session_get_effective_recv_data_length(session);
     window_size = nghttp2_session_get_effective_local_window_size(session);
   } else {
-    recv_length = nghttp2_session_get_stream_effective_recv_data_length(
-        session, stream_id);
+    recv_length =
+      nghttp2_session_get_stream_effective_recv_data_length(session, stream_id);
     window_size = nghttp2_session_get_stream_effective_local_window_size(
-        session, stream_id);
+      session, stream_id);
   }
   if (recv_length != -1 && window_size != -1) {
     if (recv_length >= window_size / 2) {
@@ -568,15 +568,15 @@ void erase_header(HeaderRef *hd) {
 }
 
 StringRef rewrite_location_uri(BlockAllocator &balloc, const StringRef &uri,
-                               const http_parser_url &u,
+                               const urlparse_url &u,
                                const StringRef &match_host,
                                const StringRef &request_authority,
                                const StringRef &upstream_scheme) {
   // We just rewrite scheme and authority.
-  if ((u.field_set & (1 << UF_HOST)) == 0) {
+  if ((u.field_set & (1 << URLPARSE_HOST)) == 0) {
     return StringRef{};
   }
-  auto field = &u.field_data[UF_HOST];
+  auto field = &u.field_data[URLPARSE_HOST];
   if (!util::starts_with(std::begin(match_host), std::end(match_host),
                          &uri[field->off], &uri[field->off] + field->len) ||
       (match_host.size() != field->len && match_host[field->len] != ':')) {
@@ -588,18 +588,18 @@ StringRef rewrite_location_uri(BlockAllocator &balloc, const StringRef &uri,
     len += upstream_scheme.size() + str_size("://") + request_authority.size();
   }
 
-  if (u.field_set & (1 << UF_PATH)) {
-    field = &u.field_data[UF_PATH];
+  if (u.field_set & (1 << URLPARSE_PATH)) {
+    field = &u.field_data[URLPARSE_PATH];
     len += field->len;
   }
 
-  if (u.field_set & (1 << UF_QUERY)) {
-    field = &u.field_data[UF_QUERY];
+  if (u.field_set & (1 << URLPARSE_QUERY)) {
+    field = &u.field_data[URLPARSE_QUERY];
     len += 1 + field->len;
   }
 
-  if (u.field_set & (1 << UF_FRAGMENT)) {
-    field = &u.field_data[UF_FRAGMENT];
+  if (u.field_set & (1 << URLPARSE_FRAGMENT)) {
+    field = &u.field_data[URLPARSE_FRAGMENT];
     len += 1 + field->len;
   }
 
@@ -609,20 +609,20 @@ StringRef rewrite_location_uri(BlockAllocator &balloc, const StringRef &uri,
   if (!request_authority.empty()) {
     p = std::copy(std::begin(upstream_scheme), std::end(upstream_scheme), p);
     p = util::copy_lit(p, "://");
-    p = std::copy(std::begin(request_authority), std::end(request_authority),
-                  p);
+    p =
+      std::copy(std::begin(request_authority), std::end(request_authority), p);
   }
-  if (u.field_set & (1 << UF_PATH)) {
-    field = &u.field_data[UF_PATH];
+  if (u.field_set & (1 << URLPARSE_PATH)) {
+    field = &u.field_data[URLPARSE_PATH];
     p = std::copy_n(&uri[field->off], field->len, p);
   }
-  if (u.field_set & (1 << UF_QUERY)) {
-    field = &u.field_data[UF_QUERY];
+  if (u.field_set & (1 << URLPARSE_QUERY)) {
+    field = &u.field_data[URLPARSE_QUERY];
     *p++ = '?';
     p = std::copy_n(&uri[field->off], field->len, p);
   }
-  if (u.field_set & (1 << UF_FRAGMENT)) {
-    field = &u.field_data[UF_FRAGMENT];
+  if (u.field_set & (1 << URLPARSE_FRAGMENT)) {
+    field = &u.field_data[URLPARSE_FRAGMENT];
     *p++ = '#';
     p = std::copy_n(&uri[field->off], field->len, p);
   }
@@ -997,7 +997,7 @@ InputIt skip_to_right_dquote(InputIt first, InputIt last) {
         break;
       default:
         if ((0x21 <= *first && *first <= 0x7e) /* VCHAR */ ||
-            (0x80 <= *first && *first <= 0xff) /* obs-text */) {
+            0x80 <= *first /* obs-text */) {
           break;
         }
 
@@ -1320,7 +1320,7 @@ std::string path_join(const StringRef &base_path, const StringRef &base_query,
   BlockAllocator balloc(1024, 1024);
 
   return std::string{
-      path_join(balloc, base_path, base_query, rel_path, rel_query)};
+    path_join(balloc, base_path, base_query, rel_path, rel_query)};
 }
 
 bool expect_response_body(int status_code) {
@@ -1536,20 +1536,20 @@ int lookup_method_token(const StringRef &name) {
 StringRef to_method_string(int method_token) {
   // we happened to use same value for method with llhttp.
   return StringRef{
-      llhttp_method_name(static_cast<llhttp_method>(method_token))};
+    llhttp_method_name(static_cast<llhttp_method>(method_token))};
 }
 
 StringRef get_pure_path_component(const StringRef &uri) {
   int rv;
 
-  http_parser_url u{};
-  rv = http_parser_parse_url(uri.data(), uri.size(), 0, &u);
+  urlparse_url u;
+  rv = urlparse_parse_url(uri.data(), uri.size(), 0, &u);
   if (rv != 0) {
     return StringRef{};
   }
 
-  if (u.field_set & (1 << UF_PATH)) {
-    auto &f = u.field_data[UF_PATH];
+  if (u.field_set & (1 << URLPARSE_PATH)) {
+    auto &f = u.field_data[URLPARSE_PATH];
     return StringRef{uri.data() + f.off, f.len};
   }
 
@@ -1566,9 +1566,9 @@ int construct_push_component(BlockAllocator &balloc, StringRef &scheme,
     return -1;
   }
 
-  http_parser_url u{};
+  urlparse_url u;
 
-  rv = http_parser_parse_url(uri.data(), uri.size(), 0, &u);
+  rv = urlparse_parse_url(uri.data(), uri.size(), 0, &u);
 
   if (rv != 0) {
     if (uri[0] == '/') {
@@ -1584,14 +1584,14 @@ int construct_push_component(BlockAllocator &balloc, StringRef &scheme,
       relq = StringRef{q + 1, std::end(uri)};
     }
   } else {
-    if (u.field_set & (1 << UF_SCHEMA)) {
-      scheme = util::get_uri_field(uri.data(), u, UF_SCHEMA);
+    if (u.field_set & (1 << URLPARSE_SCHEMA)) {
+      scheme = util::get_uri_field(uri.data(), u, URLPARSE_SCHEMA);
     }
 
-    if (u.field_set & (1 << UF_HOST)) {
-      auto auth = util::get_uri_field(uri.data(), u, UF_HOST);
+    if (u.field_set & (1 << URLPARSE_HOST)) {
+      auto auth = util::get_uri_field(uri.data(), u, URLPARSE_HOST);
       auto len = auth.size();
-      auto port_exists = u.field_set & (1 << UF_PORT);
+      auto port_exists = u.field_set & (1 << URLPARSE_PORT);
       if (port_exists) {
         len += 1 + str_size("65535");
       }
@@ -1607,15 +1607,15 @@ int construct_push_component(BlockAllocator &balloc, StringRef &scheme,
       authority = StringRef{std::span{std::begin(iov), p}};
     }
 
-    if (u.field_set & (1 << UF_PATH)) {
-      auto &f = u.field_data[UF_PATH];
+    if (u.field_set & (1 << URLPARSE_PATH)) {
+      auto &f = u.field_data[URLPARSE_PATH];
       rel = StringRef{uri.data() + f.off, f.len};
     } else {
       rel = "/"_sr;
     }
 
-    if (u.field_set & (1 << UF_QUERY)) {
-      auto &f = u.field_data[UF_QUERY];
+    if (u.field_set & (1 << URLPARSE_QUERY)) {
+      auto &f = u.field_data[URLPARSE_QUERY];
       relq = StringRef{uri.data() + f.off, f.len};
     }
   }
@@ -1665,10 +1665,10 @@ template <typename InputIt> InputIt eat_dir(InputIt first, InputIt last) {
 StringRef path_join(BlockAllocator &balloc, const StringRef &base_path,
                     const StringRef &base_query, const StringRef &rel_path,
                     const StringRef &rel_query) {
-  auto res = make_byte_ref(
-      balloc, std::max(static_cast<size_t>(1), base_path.size()) +
-                  rel_path.size() + 1 +
-                  std::max(base_query.size(), rel_query.size()) + 1);
+  auto res =
+    make_byte_ref(balloc, std::max(static_cast<size_t>(1), base_path.size()) +
+                            rel_path.size() + 1 +
+                            std::max(base_query.size(), rel_query.size()) + 1);
   auto p = std::begin(res);
 
   if (rel_path.empty()) {
@@ -1773,7 +1773,7 @@ StringRef normalize_path(BlockAllocator &balloc, const StringRef &path,
     if (*it == '%') {
       if (util::is_hex_digit(*(it + 1)) && util::is_hex_digit(*(it + 2))) {
         auto c =
-            (util::hex_to_uint(*(it + 1)) << 4) + util::hex_to_uint(*(it + 2));
+          (util::hex_to_uint(*(it + 1)) << 4) + util::hex_to_uint(*(it + 2));
         if (util::in_rfc3986_unreserved_chars(c)) {
           *p++ = c;
 
@@ -1820,7 +1820,7 @@ StringRef normalize_path_colon(BlockAllocator &balloc, const StringRef &path,
     if (*it == '%') {
       if (util::is_hex_digit(*(it + 1)) && util::is_hex_digit(*(it + 2))) {
         auto c =
-            (util::hex_to_uint(*(it + 1)) << 4) + util::hex_to_uint(*(it + 2));
+          (util::hex_to_uint(*(it + 1)) << 4) + util::hex_to_uint(*(it + 2));
         if (util::in_rfc3986_unreserved_chars(c) || c == ':') {
           *p++ = c;
 
@@ -2021,6 +2021,17 @@ bool check_transfer_encoding(const StringRef &s) {
       }
     }
   }
+}
+
+std::string encode_extpri(const nghttp2_extpri &extpri) {
+  std::string res = "u=";
+
+  res += extpri.urgency + '0';
+  if (extpri.inc) {
+    res += ",i";
+  }
+
+  return res;
 }
 
 } // namespace http2

@@ -31,14 +31,20 @@
 
 #include <limits>
 
-#include <openssl/err.h>
+#include "ssl_compat.h"
+
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/err.h>
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
+#  include <openssl/err.h>
+#endif // !NGHTTP2_OPENSSL_IS_WOLFSSL
 
 #include "shrpx_tls.h"
 #include "shrpx_memcached_request.h"
 #include "shrpx_log.h"
 #include "memchunk.h"
 #include "util.h"
-#include "ssl_compat.h"
 
 using namespace nghttp2;
 using namespace std::chrono_literals;
@@ -53,21 +59,21 @@ Connection::Connection(struct ev_loop *loop, int fd, SSL *ssl,
                        IOCb readcb, TimerCb timeoutcb, void *data,
                        size_t tls_dyn_rec_warmup_threshold,
                        ev_tstamp tls_dyn_rec_idle_timeout, Proto proto)
-    :
+  :
 #ifdef ENABLE_HTTP3
-      conn_ref{nullptr, this},
+    conn_ref{nullptr, this},
 #endif // ENABLE_HTTP3
-      tls{DefaultMemchunks(mcpool), DefaultPeekMemchunks(mcpool),
-          DefaultMemchunks(mcpool)},
-      wlimit(loop, &wev, write_limit.rate, write_limit.burst),
-      rlimit(loop, &rev, read_limit.rate, read_limit.burst, this),
-      loop(loop),
-      data(data),
-      fd(fd),
-      tls_dyn_rec_warmup_threshold(tls_dyn_rec_warmup_threshold),
-      tls_dyn_rec_idle_timeout(util::duration_from(tls_dyn_rec_idle_timeout)),
-      proto(proto),
-      read_timeout(read_timeout) {
+    tls{DefaultMemchunks(mcpool), DefaultPeekMemchunks(mcpool),
+        DefaultMemchunks(mcpool)},
+    wlimit(loop, &wev, write_limit.rate, write_limit.burst),
+    rlimit(loop, &rev, read_limit.rate, read_limit.burst, this),
+    loop(loop),
+    data(data),
+    fd(fd),
+    tls_dyn_rec_warmup_threshold(tls_dyn_rec_warmup_threshold),
+    tls_dyn_rec_idle_timeout(util::duration_from(tls_dyn_rec_idle_timeout)),
+    proto(proto),
+    read_timeout(read_timeout) {
 
   ev_io_init(&wev, writecb, fd, EV_WRITE);
   ev_io_init(&rev, readcb, proto == Proto::HTTP3 ? 0 : fd, EV_READ);
@@ -146,17 +152,25 @@ void Connection::prepare_client_handshake() {
 }
 
 void Connection::prepare_server_handshake() {
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_BORINGSSL) ||                                     \
+  defined(NGHTTP2_OPENSSL_IS_LIBRESSL)
   auto &tlsconf = get_config()->tls;
   if (proto != Proto::HTTP3 && !tlsconf.session_cache.memcached.host.empty()) {
     auto bio = BIO_new(tlsconf.bio_method);
     BIO_set_data(bio, this);
     SSL_set_bio(tls.ssl, bio, bio);
   }
+#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL ||
+       // NGHTTP2_OPENSSL_IS_LIBRESSL
 
   SSL_set_accept_state(tls.ssl);
   tls.server_handshake = true;
 }
 
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_BORINGSSL) ||                                     \
+  defined(NGHTTP2_OPENSSL_IS_LIBRESSL)
 // BIO implementation is inspired by openldap implementation:
 // http://www.openldap.org/devel/cvsweb.cgi/~checkout~/libraries/libldap/tls_o.c
 namespace {
@@ -283,6 +297,8 @@ BIO_METHOD *create_bio_method() {
 
   return meth;
 }
+#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL ||
+       // NGHTTP2_OPENSSL_IS_LIBRESSL
 
 void Connection::set_ssl(SSL *ssl) {
   tls.ssl = ssl;
@@ -304,6 +320,9 @@ int Connection::tls_handshake() {
   wlimit.stopw();
   ev_timer_stop(loop, &wt);
 
+#ifdef NGHTTP2_OPENSSL_IS_WOLFSSL
+  return tls_handshake_simple();
+#else // !NGHTTP2_OPENSSL_IS_WOLFSSL
   auto &tlsconf = get_config()->tls;
 
   if (!tls.server_handshake || tlsconf.session_cache.memcached.host.empty()) {
@@ -371,7 +390,7 @@ int Connection::tls_handshake() {
 
   ERR_clear_error();
 
-#ifdef NGHTTP2_GENUINE_OPENSSL
+#  ifdef NGHTTP2_GENUINE_OPENSSL
   if (!tls.server_handshake || tls.early_data_finish) {
     rv = SSL_do_handshake(tls.ssl);
   } else {
@@ -422,9 +441,9 @@ int Connection::tls_handshake() {
       }
     }
   }
-#else  // !NGHTTP2_GENUINE_OPENSSL
+#  else  // !NGHTTP2_GENUINE_OPENSSL
   rv = SSL_do_handshake(tls.ssl);
-#endif // !NGHTTP2_GENUINE_OPENSSL
+#  endif // !NGHTTP2_GENUINE_OPENSSL
 
   if (rv <= 0) {
     auto err = SSL_get_error(tls.ssl, rv);
@@ -473,10 +492,10 @@ int Connection::tls_handshake() {
   // routine.  We have to check HTTP/2 requirement if HTTP/2 was
   // negotiated before sending finished message to the peer.
   if ((rv != 1
-#ifdef NGHTTP2_OPENSSL_IS_BORINGSSL
+#  ifdef NGHTTP2_OPENSSL_IS_BORINGSSL
        || SSL_in_init(tls.ssl)
-#endif // NGHTTP2_OPENSSL_IS_BORINGSSL
-           ) &&
+#  endif // NGHTTP2_OPENSSL_IS_BORINGSSL
+         ) &&
       tls.wbuf.rleft()) {
     // First write indicates that resumption stuff has done.
     if (tls.handshake_state != TLSHandshakeState::WRITE_STARTED) {
@@ -513,7 +532,7 @@ int Connection::tls_handshake() {
     return SHRPX_ERR_INPROGRESS;
   }
 
-#ifdef NGHTTP2_OPENSSL_IS_BORINGSSL
+#  ifdef NGHTTP2_OPENSSL_IS_BORINGSSL
   if (!tlsconf.no_postpone_early_data && SSL_in_early_data(tls.ssl) &&
       SSL_in_init(tls.ssl)) {
     auto nread = SSL_read(tls.ssl, buf.data(), buf.size());
@@ -545,7 +564,7 @@ int Connection::tls_handshake() {
       return SHRPX_ERR_INPROGRESS;
     }
   }
-#endif // NGHTTP2_OPENSSL_IS_BORINGSSL
+#  endif // NGHTTP2_OPENSSL_IS_BORINGSSL
 
   // Handshake was done
 
@@ -560,6 +579,7 @@ int Connection::tls_handshake() {
   tls.initial_handshake_done = true;
 
   return write_tls_pending_handshake();
+#endif   // !NGHTTP2_OPENSSL_IS_WOLFSSL
 }
 
 int Connection::tls_handshake_simple() {
@@ -575,10 +595,13 @@ int Connection::tls_handshake_simple() {
   }
 
   int rv;
-#if defined(NGHTTP2_GENUINE_OPENSSL) || defined(NGHTTP2_OPENSSL_IS_BORINGSSL)
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_BORINGSSL) ||                                     \
+  (defined(NGHTTP2_OPENSSL_IS_WOLFSSL) && defined(WOLFSSL_EARLY_DATA))
   auto &tlsconf = get_config()->tls;
   std::array<uint8_t, 16_k> buf;
-#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL
+#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL ||
+       // (NGHTTP2_OPENSSL_IS_WOLFSSL && WOLFSSL_EARLY_DATA)
 
   ERR_clear_error();
 
@@ -627,9 +650,60 @@ int Connection::tls_handshake_simple() {
       }
     }
   }
-#else  // !NGHTTP2_GENUINE_OPENSSL
+#elif defined(NGHTTP2_OPENSSL_IS_WOLFSSL) && defined(WOLFSSL_EARLY_DATA)
+  if (!tls.server_handshake || tls.early_data_finish) {
+    rv = SSL_do_handshake(tls.ssl);
+  } else {
+    for (;;) {
+      size_t nread = 0;
+
+      rv = SSL_read_early_data(tls.ssl, buf.data(), buf.size(), &nread);
+      if (rv < 0) {
+        if (SSL_get_error(tls.ssl, rv) == SSL_ERROR_WANT_READ) {
+          if (tlsconf.no_postpone_early_data && tls.earlybuf.rleft()) {
+            rv = 1;
+          }
+
+          break;
+        }
+
+        /* It looks like we are here if there is no early data. */
+        tls.early_data_finish = true;
+
+        ERR_clear_error();
+        rv = SSL_do_handshake(tls.ssl);
+
+        break;
+      }
+
+      if (LOG_ENABLED(INFO)) {
+        LOG(INFO) << "tls: read early data " << nread << " bytes";
+      }
+
+      tls.earlybuf.append(buf.data(), nread);
+
+      if (rv == 0) {
+        if (LOG_ENABLED(INFO)) {
+          LOG(INFO) << "tls: read all early data; total "
+                    << tls.earlybuf.rleft() << " bytes";
+        }
+        tls.early_data_finish = true;
+        // The same reason stated above.
+        if (tlsconf.no_postpone_early_data && tls.earlybuf.rleft()) {
+          rv = 1;
+        } else {
+          ERR_clear_error();
+          rv = SSL_do_handshake(tls.ssl);
+        }
+        break;
+      }
+    }
+  }
+#else  // !NGHTTP2_GENUINE_OPENSSL && !(NGHTTP2_OPENSSL_IS_WOLFSSL &&
+       // WOLFSSL_EARLY_DATA)
   rv = SSL_do_handshake(tls.ssl);
-#endif // !NGHTTP2_GENUINE_OPENSSL
+#endif // !NGHTTP2_GENUINE_OPENSSL && !(NGHTTP2_OPENSSL_IS_WOLFSSL &&
+       // WOLFSSL_EARLY_DATA)
 
   if (rv <= 0) {
     auto err = SSL_get_error(tls.ssl, rv);
@@ -830,7 +904,6 @@ constexpr size_t SHRPX_SMALL_WRITE_LIMIT = 1300;
 } // namespace
 
 size_t Connection::get_tls_write_limit() {
-
   if (tls_dyn_rec_warmup_threshold == 0) {
     return std::numeric_limits<ssize_t>::max();
   }
@@ -885,7 +958,7 @@ nghttp2_ssize Connection::write_tls(const void *data, size_t len) {
 
   auto &tlsconf = get_config()->tls;
   auto via_bio =
-      tls.server_handshake && !tlsconf.session_cache.memcached.host.empty();
+    tls.server_handshake && !tlsconf.session_cache.memcached.host.empty();
 
   ERR_clear_error();
 
@@ -953,11 +1026,13 @@ nghttp2_ssize Connection::write_tls(const void *data, size_t len) {
 nghttp2_ssize Connection::read_tls(void *data, size_t len) {
   ERR_clear_error();
 
-#if defined(NGHTTP2_GENUINE_OPENSSL) || defined(NGHTTP2_OPENSSL_IS_BORINGSSL)
+#if defined(NGHTTP2_GENUINE_OPENSSL) ||                                        \
+  defined(NGHTTP2_OPENSSL_IS_BORINGSSL) || defined(NGHTTP2_OPENSSL_IS_WOLFSSL)
   if (tls.earlybuf.rleft()) {
     return tls.earlybuf.remove(data, len);
   }
-#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL
+#endif // NGHTTP2_GENUINE_OPENSSL || NGHTTP2_OPENSSL_IS_BORINGSSL ||
+       // defined(NGHTTP2_OPENSSL_IS_WOLFSSL)
 
   // SSL_read requires the same arguments (buf pointer and its
   // length) on SSL_ERROR_WANT_READ or SSL_ERROR_WANT_WRITE.
@@ -978,7 +1053,7 @@ nghttp2_ssize Connection::read_tls(void *data, size_t len) {
 
   auto &tlsconf = get_config()->tls;
   auto via_bio =
-      tls.server_handshake && !tlsconf.session_cache.memcached.host.empty();
+    tls.server_handshake && !tlsconf.session_cache.memcached.host.empty();
 
 #ifdef NGHTTP2_GENUINE_OPENSSL
   if (!tls.early_data_finish) {
@@ -1025,6 +1100,52 @@ nghttp2_ssize Connection::read_tls(void *data, size_t len) {
     return nread;
   }
 #endif // NGHTTP2_GENUINE_OPENSSL
+
+#if defined(NGHTTP2_OPENSSL_IS_WOLFSSL) && defined(WOLFSSL_EARLY_DATA)
+  if (!tls.early_data_finish) {
+    // TLSv1.3 handshake is still going on.
+    size_t nread = 0;
+    auto rv = SSL_read_early_data(tls.ssl, data, len, &nread);
+    if (rv < 0) {
+      auto err = SSL_get_error(tls.ssl, rv);
+      switch (err) {
+      case SSL_ERROR_WANT_READ:
+        tls.last_readlen = len;
+        return 0;
+      case SSL_ERROR_SSL:
+        if (LOG_ENABLED(INFO)) {
+          LOG(INFO) << "SSL_read: "
+                    << ERR_error_string(ERR_get_error(), nullptr);
+        }
+        return SHRPX_ERR_NETWORK;
+      default:
+        if (LOG_ENABLED(INFO)) {
+          LOG(INFO) << "SSL_read: SSL_get_error returned " << err;
+        }
+        return SHRPX_ERR_NETWORK;
+      }
+    }
+
+    if (LOG_ENABLED(INFO)) {
+      LOG(INFO) << "tls: read early data " << nread << " bytes";
+    }
+
+    if (rv == 0) {
+      if (LOG_ENABLED(INFO)) {
+        LOG(INFO) << "tls: read all early data";
+      }
+      tls.early_data_finish = true;
+      // We may have stopped write watcher in write_tls.
+      wlimit.startw();
+    }
+
+    if (!via_bio) {
+      rlimit.drain(nread);
+    }
+
+    return nread;
+  }
+#endif // NGHTTP2_OPENSSL_IS_WOLFSSL && WOLFSSL_EARLY_DATA
 
   auto rv = SSL_read(tls.ssl, data, len);
 
@@ -1196,8 +1317,8 @@ int Connection::get_tcp_hint(TCPHint *hint) const {
   }
 
   auto avail_packets = tcp_info.tcpi_snd_cwnd > tcp_info.tcpi_unacked
-                           ? tcp_info.tcpi_snd_cwnd - tcp_info.tcpi_unacked
-                           : 0;
+                         ? tcp_info.tcpi_snd_cwnd - tcp_info.tcpi_unacked
+                         : 0;
 
   // http://www.slideshare.net/kazuho/programming-tcp-for-responsiveness
 
@@ -1218,7 +1339,7 @@ int Connection::get_tcp_hint(TCPHint *hint) const {
   }
 
   auto writable_size =
-      (avail_packets + 2) * (tcp_info.tcpi_snd_mss - tls_overhead);
+    (avail_packets + 2) * (tcp_info.tcpi_snd_mss - tls_overhead);
   if (writable_size > 16_k) {
     writable_size = writable_size & ~(16_k - 1);
   } else {
@@ -1263,7 +1384,7 @@ void Connection::again_rt() {
 
 bool Connection::expired_rt() {
   auto delta = read_timeout - util::ev_tstamp_from(
-                                  std::chrono::steady_clock::now() - last_read);
+                                std::chrono::steady_clock::now() - last_read);
   if (delta < 1e-9) {
     return true;
   }

@@ -37,7 +37,7 @@ void readcb(struct ev_loop *loop, ev_io *w, int revent) {
 } // namespace
 
 QUICListener::QUICListener(const UpstreamAddr *faddr, Worker *worker)
-    : faddr_{faddr}, worker_{worker} {
+  : faddr_{faddr}, worker_{worker} {
   ev_io_init(&rev_, readcb, faddr_->fd, EV_READ);
   rev_.data = this;
   ev_io_start(worker_->get_loop(), &rev_);
@@ -60,7 +60,7 @@ void QUICListener::on_read() {
   msg.msg_iovlen = 1;
 
   uint8_t msg_ctrl[CMSG_SPACE(sizeof(int)) + CMSG_SPACE(sizeof(in6_pktinfo)) +
-                   CMSG_SPACE(sizeof(uint16_t))];
+                   CMSG_SPACE(sizeof(int))];
   msg.msg_control = msg_ctrl;
 
   auto quic_conn_handler = worker_->get_quic_connection_handler();
@@ -74,8 +74,8 @@ void QUICListener::on_read() {
       return;
     }
 
-    // Packets less than 22 bytes never be a valid QUIC packet.
-    if (nread < 22) {
+    // Packets less than 21 bytes never be a valid QUIC packet.
+    if (nread < 21) {
       ++pktcnt;
 
       continue;
@@ -98,7 +98,7 @@ void QUICListener::on_read() {
     util::set_port(local_addr, faddr_->port);
 
     ngtcp2_pkt_info pi{
-        .ecn = util::msghdr_get_ecn(&msg, su.storage.ss_family),
+      .ecn = util::msghdr_get_ecn(&msg, su.storage.ss_family),
     };
 
     auto gso_size = util::msghdr_get_udp_gro(&msg);
@@ -121,8 +121,8 @@ void QUICListener::on_read() {
                   << " bytes";
       }
 
-      // Packets less than 22 bytes never be a valid QUIC packet.
-      if (datalen < 22) {
+      // Packets less than 21 bytes never be a valid QUIC packet.
+      if (datalen < 21) {
         break;
       }
 
