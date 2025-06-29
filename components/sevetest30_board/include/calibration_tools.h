@@ -24,8 +24,39 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
+#pragma once
 
-#include "sensor_calibration.h"
-#include "math_tools.h"
+#include "esp_err.h"
 
 
+#define SENSOR_CALIBRATION_MALLOC_CAP_DEFAULT MALLOC_CAP_SPIRAM //默认内存申请位置
+
+
+/// @brief 地磁传感器静态校准模型(解决固有误差问题,会被存储到Flash,反复使用)
+typedef struct GS_static_calibration_model_t {
+    struct timeval generate_time;//模型的生成时间 
+    float SSR;//椭球拟合残差平方和 
+    float A, B, C, D, E, F, G, H, I;//椭球参数
+    float sx, sy, sz;//缩放量
+    float x0, y0, z0;//偏移量
+}GS_calibration_static_model_t;
+
+/// @brief 地磁传感器动态校准模型(解决动态误差问题,仅临时变量,不会被存储到Flash)
+typedef struct GS_dynamic_calibration_model_t {
+    float temperature_coeff;//温度系数
+    float hard_iron_x;//x轴硬磁补偿
+    float hard_iron_y;//y轴硬磁补偿
+    float pitch;//俯仰角
+    float roll;//横滚角
+    float k_omega;//陀螺仪补偿
+}GS_dynamic_calibration_model_t;
+
+
+
+typedef struct GS_calibration_t {
+    GS_calibration_static_model_t static_model;//静态校准模型
+    GS_dynamic_calibration_model_t dynamic_model;//动态校准模型
+
+}GS_calibration_t;
+
+esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* static_model, int sample_size, int sample_delay);

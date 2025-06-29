@@ -51,6 +51,8 @@
 
 //临时测试包含
 #include "hscdtd008a.h"
+#include "calibration_tools.h"
+#include "math_tools.h"
 
 
 int32_t c1b1 = 10;
@@ -210,25 +212,24 @@ void app_main(void)
   hscdtd008a_mode_set(GS_MODE_ACTIVE);
   hscdtd008a_state_set(GS_STATE_NORMAL);
 
-  GS_output_data_t output;
-  GS_magnetic_flux_density_data_t mfd;
-  GS_angle_data_t angle;
-  for (;;) {
-    hscdtd008a_output_data_get(&output);
-    to_magnetic_flux_density_data(&output, &mfd);
-    to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
-    ESP_LOGI("Angle", "方位---[%f]--- 俯仰|%f|", angle.azimuth, angle.pitch);
-    // ESP_LOGI("MFD", "x-[%f] y-[%f] z-[%f] B0-[%f]", mfd.Bx, mfd.By, mfd.Bz, mfd.B0);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  }
+  // GS_output_data_t output;
+  // GS_magnetic_flux_density_data_t mfd;
+  // GS_angle_data_t angle;
+  // for (;;) {
+  //   hscdtd008a_output_data_get(&output);
+  //   to_magnetic_flux_density_data(&output, &mfd);
+  //   to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
+  //   ESP_LOGI("Angle", "方位---[%f]--- 俯仰|%f|", angle.azimuth, angle.pitch);
+  //   // ESP_LOGI("MFD", "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By, mfd.Bz);
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
+  // }
+
+  ESP_LOGI("ME", "5s后开始校准");
+  vTaskDelay(pdMS_TO_TICKS(5000));
 
 
-
-
-
-
-
-
+  GS_calibration_static_model_t static_model;
+  GS_calibration_static_model_generate(&static_model, 100, 500);
 
 
   // ///时间模块初始化

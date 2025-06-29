@@ -102,7 +102,7 @@ typedef struct GS_magnetic_flux_density_data_t
     double Bx; //x轴磁感应强度,单位: uT
     double By; //y轴磁感应强度,单位: uT
     double Bz; //z轴磁感应强度,单位: uT
-    double B0; //磁感应强度的模,与方向无关,表示磁场总强度,单位: uT
+    // double B0; //磁感应强度的模,与方向无关,表示磁场总强度,单位: uT, B0 = sqrt(dest->Bx * dest->Bx + dest->By * dest->By + dest->Bz * dest->Bz);
 } GS_magnetic_flux_density_data_t;
 
 //角数据单位

@@ -373,8 +373,8 @@ esp_err_t to_magnetic_flux_density_data(GS_output_data_t* src, GS_magnetic_flux_
             dest->Bz = (double)((((int)(src->raw_output_z_MSB & 0x3F) << 8) | src->raw_output_z_LSB) * HSCDTD008A_1LSB_MAGNETIC_FLUX_DENSITY);//正数取有效位即可
         }
 
-        //计算磁感应强度的模并填充
-        dest->B0 = sqrt(dest->Bx * dest->Bx + dest->By * dest->By + dest->Bz * dest->Bz);
+        // //计算磁感应强度的模并填充
+        // dest->B0 = sqrt(dest->Bx * dest->Bx + dest->By * dest->By + dest->Bz * dest->Bz);
 
         //填充量程
         dest->range = src->range;
@@ -409,8 +409,8 @@ esp_err_t to_magnetic_flux_density_data(GS_output_data_t* src, GS_magnetic_flux_
             dest->Bz = (double)((((int)(src->raw_output_z_MSB & 0x7F) << 8) | src->raw_output_z_LSB) * HSCDTD008A_1LSB_MAGNETIC_FLUX_DENSITY);//正数取有效位即可
         }
 
-        //计算磁感应强度的模并填充
-        dest->B0 = sqrt(dest->Bx * dest->Bx + dest->By * dest->By + dest->Bz * dest->Bz);
+        // //计算磁感应强度的模并填充
+        // dest->B0 = sqrt(dest->Bx * dest->Bx + dest->By * dest->By + dest->Bz * dest->Bz);
 
         //填充量程
         dest->range = src->range;

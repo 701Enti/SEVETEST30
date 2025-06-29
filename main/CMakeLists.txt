@@ -17,6 +17,7 @@ set(COMPONENT_SRCS
 ./AGS10.c
 ./hscdtd008a.c
 ./math_tools.c
+./calibration_tools.c
 )
 set(LDFRAGMENTS "./sevetest30.lf")
 register_component()
