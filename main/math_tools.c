@@ -35,7 +35,7 @@
 #include <math.h>
 
 
-static const char* TOP_TAG = "math_tools";
+static const char* math_tools_TAG = __FILE__;
 
 /// @brief 通用矩阵转置
 /// @param input 矩阵输入 
@@ -77,7 +77,7 @@ void square_aligned_16_matrix_transpose(float* local, int n) {
 /// @return [ESP_ERR_INVALID_ARG input为NULL / output为NULL / m <= 0 / n <= 0] 
 esp_err_t matrix_transpose(float* input, float* output, int m, int n) {
     //参数检查
-    ESP_RETURN_ON_FALSE(input && output && m > 0 && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(input && output && m > 0 && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     // //选出最佳策略
     // if ((uintptr_t)input % 16 == 0 && (uintptr_t)output % 16 == 0) {
@@ -248,7 +248,7 @@ float matrix_only_row_elimination_step(float* A, int aim_row, int pivot_row, int
 /// @return [ESP_ERR_INVALID_ARG A为NULL / L为NULL / U为NULL / m <= 0 / n <= 0] 
 esp_err_t matrix_decomposition_LU(float* A, float* L, float* U, int* P, int m, int n) {
     //入参检查
-    ESP_RETURN_ON_FALSE(A && L && U && m > 0 && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(A && L && U && m > 0 && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     //初始化
     if (P) {
@@ -298,11 +298,11 @@ esp_err_t matrix_decomposition_LU(float* A, float* L, float* U, int* P, int m, i
 /// @return [ESP_ERR_NO_MEM  内存不足] 
 esp_err_t matrix_square_solve_LU(const float* L, const float* U, const int* P, float* b, float* x, int n) {
     //入参检查
-    ESP_RETURN_ON_FALSE(L && U && b && x && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(L && U && b && x && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     //内存申请
     float* y = (float*)heap_caps_aligned_alloc(16, n * sizeof(float), MATH_TOOLS_MALLOC_CAP_DEFAULT);
-    ESP_RETURN_ON_FALSE(y, ESP_ERR_NO_MEM, TOP_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+    ESP_RETURN_ON_FALSE(y, ESP_ERR_NO_MEM, math_tools_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
 
     //前代求解 Ly = Pb
     for (int r = 0;r < n;++r) {
@@ -317,7 +317,7 @@ esp_err_t matrix_square_solve_LU(const float* L, const float* U, const int* P, f
         if (fabsf(U[i * n + i]) < 1e-10f) {
             heap_caps_free(y);
             y = NULL;
-            ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, TOP_TAG, "原矩阵奇异,求解操作无法完成(回代求解 Ux = y,i=%d时发现U[i * %d + i]=%f) 描述%s", i, n, U[i * n + i], esp_err_to_name(ESP_ERR_INVALID_STATE));
+            ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, math_tools_TAG, "原矩阵奇异,求解操作无法完成(回代求解 Ux = y,i=%d时发现U[i * %d + i]=%f) 描述%s", i, n, U[i * n + i], esp_err_to_name(ESP_ERR_INVALID_STATE));
         }
         x[i] = y[i];
         for (int j = i + 1;j < n;++j) {
@@ -344,7 +344,7 @@ esp_err_t matrix_square_solve_LU(const float* L, const float* U, const int* P, f
 /// @return [ESP_ERR_NO_MEM  内存不足] 
 esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
     //入参检查
-    ESP_RETURN_ON_FALSE(A && inv_A && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(A && inv_A && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     //申请临时内存
     float* L = (float*)heap_caps_aligned_alloc(16, n * n * sizeof(float), MATH_TOOLS_MALLOC_CAP_DEFAULT);
@@ -360,7 +360,7 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
         U = NULL;
         P = NULL;
         b = NULL;
-        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, TOP_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, math_tools_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
     }
     memset(b, 0.0f, n * sizeof(float));//仅填充b,不需填充L,U,P,因为运行LU分解会完全填充L,U,P
 
@@ -383,7 +383,7 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
             U = NULL;
             P = NULL;
             b = NULL;
-            ESP_RETURN_ON_FALSE(false, solve_ret, TOP_TAG, "求解时发现问题 描述%s", esp_err_to_name(solve_ret));
+            ESP_RETURN_ON_FALSE(false, solve_ret, math_tools_TAG, "求解时发现问题 描述%s", esp_err_to_name(solve_ret));
         }
     }
 
@@ -447,8 +447,8 @@ void matrix_log_print(const float* A, int m, int n, bool major_default, bool sho
 /// @return [ESP_ERR_NO_MEM  内存不足] 
 esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* beta, int m, int n) {
     //入参检查
-    ESP_RETURN_ON_FALSE(X && y && beta && m > 0 && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
-    ESP_RETURN_ON_FALSE(m > n, ESP_ERR_NOT_SUPPORTED, TOP_TAG, "不支持 m<=n 的方程组 描述%s", esp_err_to_name(ESP_ERR_NOT_SUPPORTED));
+    ESP_RETURN_ON_FALSE(X && y && beta && m > 0 && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(m > n, ESP_ERR_NOT_SUPPORTED, math_tools_TAG, "不支持 m<=n 的方程组 描述%s", esp_err_to_name(ESP_ERR_NOT_SUPPORTED));
 
     // [运算原理] 对于超定方程组, 给定 X* beta = y, 最小二乘解即为 beta = (XT * X)^{-1} * XT * y, 其中T代表转置 , ^{-1}代表矩阵求逆(inverse)运算
 
@@ -466,7 +466,7 @@ esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* be
         XTy = NULL;
         XTX = NULL;
         inverse_XTX = NULL;
-        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, TOP_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, math_tools_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
     }
     memset(XT, 0, n * m * sizeof(float));
     memset(XTy, 0, n * sizeof(float));
@@ -497,7 +497,7 @@ esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* be
         XTy = NULL;
         XTX = NULL;
         inverse_XTX = NULL;
-        ESP_RETURN_ON_FALSE(false, inv_ret, TOP_TAG, "运算时失败,矩阵 XT * X 无法求逆 描述%s", esp_err_to_name(inv_ret));
+        ESP_RETURN_ON_FALSE(false, inv_ret, math_tools_TAG, "运算时失败,矩阵 XT * X 无法求逆 描述%s", esp_err_to_name(inv_ret));
     }
 
     //计算(XT * X) ^ {-1} * XT * y , 其结果为beta
@@ -535,7 +535,7 @@ esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* be
 /// @return [ESP_ERR_INVALID_ARG X为NULL / y为NULL / beta为NULL / m <= 0 / n <= 0] 
 esp_err_t appraisal_residual_linear_model(float* r, float* SSR, const float* X, const float* y, float* beta, int m, int n) {
     //入参检查
-    ESP_RETURN_ON_FALSE(r && X && y && beta && m > 0 && n > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(r && X && y && beta && m > 0 && n > 0, ESP_ERR_INVALID_ARG, math_tools_TAG, "传入参数异常 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     //[运算原理] 残差r = X * beta - y
 

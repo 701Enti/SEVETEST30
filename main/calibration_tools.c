@@ -7,7 +7,7 @@
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or put copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
@@ -37,8 +37,48 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/projdefs.h"
+#include "PsP2P_DM_for_idf.h"
+#include "cJSON.h"
 
-static const char* TOP_TAG = "calibration_tools";
+static const char* calibration_tools_TAG = __FILE__;
+
+// esp_err_t PsP2P_DM_Producer_put_GS_calibration_static_model(GS_calibration_static_model_t* static_model) {
+//     ESP_RETURN_ON_FALSE(static_model != NULL, ESP_ERR_INVALID_ARG, calibration_tools_TAG, "输入了无法处理的空指针, 描述 %s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+//     ///封装数据产品
+//     cJSON* root = cJSON_CreateObject();
+//     if (root == NULL) {
+//         PsP2P_DM_Producer_message_send("esp_err_t", ESP_ERR_NO_MEM);
+//         PsP2P_DM_Producer_destory();
+//     }
+// #ifdef VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T 1
+//     //struct timeval generate_time;//模型的生成时间
+//     cJSON* generate_time = cJSON_CreateObject();
+//     cJSON_AddNumberToObject(generate_time, "tv_sec", (double)static_model->generate_time.tv_sec);
+//     cJSON_AddNumberToObject(generate_time, "tv_usec", (double)static_model->generate_time.tv_usec);
+//     cJSON_AddItemToObject(root, "generate_time", generate_time);
+//     //float SSR;//椭球拟合残差平方和 
+//     cJSON_AddNumberToObject(root, "SSR", (double)static_model->SSR);
+//     //float A, B, C, D, E, F, G, H, I;//椭球参数
+//     cJSON_AddNumberToObject(root, "A", (double)static_model->A);
+//     cJSON_AddNumberToObject(root, "B", (double)static_model->B);
+//     cJSON_AddNumberToObject(root, "C", (double)static_model->C);
+//     cJSON_AddNumberToObject(root, "D", (double)static_model->D);
+//     cJSON_AddNumberToObject(root, "E", (double)static_model->E);
+//     cJSON_AddNumberToObject(root, "F", (double)static_model->F);
+//     cJSON_AddNumberToObject(root, "G", (double)static_model->G);
+//     cJSON_AddNumberToObject(root, "H", (double)static_model->H);
+//     cJSON_AddNumberToObject(root, "I", (double)static_model->I);
+//     //float sx, sy, sz;//缩放量
+//     cJSON_AddNumberToObject(root, "sx", (double)static_model->sx);
+//     cJSON_AddNumberToObject(root, "sy", (double)static_model->sy);
+//     cJSON_AddNumberToObject(root, "sz", (double)static_model->sz);
+//     //float x0, y0, z0;//偏移量
+//     cJSON_AddNumberToObject(root, "x0", (double)static_model->x0);
+//     cJSON_AddNumberToObject(root, "y0", (double)static_model->y0);
+//     cJSON_AddNumberToObject(root, "z0", (double)static_model->z0);
+// #endif
+//     PsP2P_DM_Producer_put((void*)root, "GS_calibration_static_model");
+// }
 
 /// @brief 生成磁传感器校准模型
 /// @param static_model 导入静态模型结果存储位置
@@ -54,18 +94,18 @@ esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* st
     const char* TAG = "GS_calibration_static_model_generate";
 
     //参数检查
-    ESP_RETURN_ON_FALSE(static_model != NULL, ESP_ERR_INVALID_ARG, TOP_TAG, "输入了无法处理的空指针, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
-    ESP_RETURN_ON_FALSE(sample_size > 0, ESP_ERR_INVALID_ARG, TOP_TAG, "错误,因为参数sample_size小于或等于0,它必须大于9,建议大于或等于50, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
-    ESP_RETURN_ON_FALSE(sample_size > 9, ESP_ERR_INVALID_ARG, TOP_TAG, "错误,因为参数sample_size小于或等于9,它必须大于9,建议大于或等于50, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(static_model != NULL, ESP_ERR_INVALID_ARG, calibration_tools_TAG, "输入了无法处理的空指针, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(sample_size > 0, ESP_ERR_INVALID_ARG, calibration_tools_TAG, "错误,因为参数sample_size小于或等于0,它必须大于9,建议大于或等于50, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(sample_size > 9, ESP_ERR_INVALID_ARG, calibration_tools_TAG, "错误,因为参数sample_size小于或等于9,它必须大于9,建议大于或等于50, 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
 
     //通知用户完成有效校准动作
     ESP_LOGI(TAG, "数据采集开始,现在请开始完成有效校准动作");
 
     //初始化缓存
     float p[9];//参数向量p,对应椭球方程中的参数,他们在数组p的对应顺序为{A,B,C,D,E,F,G,H,I},数学表达中对应顺序表示为p=[A,B,C,D,E,F,G,H,I]T (T代表转置)    
-    float* U = (float*)heap_caps_aligned_alloc(16, sample_size * 9 * sizeof(float), MATH_TOOLS_MALLOC_CAP_DEFAULT); //设计矩阵U,行优先,每行输入数据对应[x^2,y^2,z^2,2xy,2xz,2yz,2x,2y,2z]
-    float* y = (float*)heap_caps_aligned_alloc(16, sample_size * sizeof(float), MATH_TOOLS_MALLOC_CAP_DEFAULT);//观测向量y
-    float* r = (float*)heap_caps_aligned_alloc(16, sample_size * sizeof(float), MATH_TOOLS_MALLOC_CAP_DEFAULT);//结果残差r
+    float* U = (float*)heap_caps_aligned_alloc(16, sample_size * 9 * sizeof(float), MALLOC_CAP_DEFAULT_CALIBRATION_TOOLS); //设计矩阵U,行优先,每行输入数据对应[x^2,y^2,z^2,2xy,2xz,2yz,2x,2y,2z]
+    float* y = (float*)heap_caps_aligned_alloc(16, sample_size * sizeof(float), MALLOC_CAP_DEFAULT_CALIBRATION_TOOLS);//观测向量y
+    float* r = (float*)heap_caps_aligned_alloc(16, sample_size * sizeof(float), MALLOC_CAP_DEFAULT_CALIBRATION_TOOLS);//结果残差r
     if (!U || !y || !r) {
         heap_caps_free(U);
         heap_caps_free(y);
@@ -73,7 +113,7 @@ esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* st
         U = NULL;
         y = NULL;
         r = NULL;
-        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, TOP_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_NO_MEM, calibration_tools_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
     }
     //设置观测向量y为全1向量  
     for (int i = 0;i < sample_size;i++) {
@@ -88,9 +128,9 @@ esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* st
         //获取磁感应强度数据
         esp_err_t ret = ESP_OK;
         ret = hscdtd008a_output_data_get(&output);//读取原始数据
-        ESP_RETURN_ON_ERROR(ret, TOP_TAG, "读取传感器数据时发现问题 描述%s", esp_err_to_name(ret));
+        ESP_RETURN_ON_ERROR(ret, calibration_tools_TAG, "读取传感器数据时发现问题 描述%s", esp_err_to_name(ret));
         ret = to_magnetic_flux_density_data(&output, &mfd);//转换为磁感应强度数据
-        ESP_RETURN_ON_ERROR(ret, TOP_TAG, "将原始数据转换为磁感应强度数据时发现问题 描述%s", esp_err_to_name(ret));
+        ESP_RETURN_ON_ERROR(ret, calibration_tools_TAG, "将原始数据转换为磁感应强度数据时发现问题 描述%s", esp_err_to_name(ret));
         ESP_LOGI("MFD", "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By, mfd.Bz);
         //输入到构造矩阵
         U[index * 9 + 0] = mfd.Bx * mfd.Bx;//x ^ 2
@@ -120,7 +160,7 @@ esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* st
         U = NULL;
         y = NULL;
         r = NULL;
-        ESP_RETURN_ON_FALSE(false, solve_ret, TOP_TAG, "运算过程中发现异常,椭球方程拟合失败 描述%s", esp_err_to_name(solve_ret));
+        ESP_RETURN_ON_FALSE(false, solve_ret, calibration_tools_TAG, "运算过程中发现异常,椭球方程拟合失败 描述%s", esp_err_to_name(solve_ret));
     }
 
     //拟合成功,进行结果品质评估(残差评估)
@@ -160,6 +200,8 @@ esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* st
     y = NULL;
     return ESP_OK;
 }
+
+
 
 
 

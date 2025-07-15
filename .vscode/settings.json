@@ -181,7 +181,16 @@
         "dsps_mulc.h": "c",
         "dsps_addc.h": "c",
         "dsps_view.h": "c",
-        "dsps_dotprod.h": "c"
+        "dsps_dotprod.h": "c",
+        "typeindex": "c",
+        "typeinfo": "c",
+        "*.def": "c",
+        "esp_system.h": "c",
+        "memory": "c",
+        "frequencyecd_for_idf.h": "c",
+        "projdefs.h": "c",
+        "memory_resource": "c",
+        "psp2p_dm_for_idf.h": "c"
     },
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",

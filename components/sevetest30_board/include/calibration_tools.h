@@ -29,7 +29,7 @@
 #include "esp_err.h"
 
 
-#define SENSOR_CALIBRATION_MALLOC_CAP_DEFAULT MALLOC_CAP_SPIRAM //默认内存申请位置
+#define MALLOC_CAP_DEFAULT_CALIBRATION_TOOLS MALLOC_CAP_SPIRAM //默认内存申请位置
 
 
 /// @brief 地磁传感器静态校准模型(解决固有误差问题,会被存储到Flash,反复使用)
@@ -40,6 +40,9 @@ typedef struct GS_static_calibration_model_t {
     float sx, sy, sz;//缩放量
     float x0, y0, z0;//偏移量
 }GS_calibration_static_model_t;
+#define VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T 1 //数据结构版本-地磁传感器静态校准模型
+
+
 
 /// @brief 地磁传感器动态校准模型(解决动态误差问题,仅临时变量,不会被存储到Flash)
 typedef struct GS_dynamic_calibration_model_t {
@@ -60,3 +63,13 @@ typedef struct GS_calibration_t {
 }GS_calibration_t;
 
 esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* static_model, int sample_size, int sample_delay);
+
+
+
+
+
+
+
+
+
+
