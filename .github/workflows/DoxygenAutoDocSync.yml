@@ -1,0 +1,51 @@
+name: DoxygenAutoDocSync
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
+      DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
+
+    steps:
+    - name: Wait for push to complete (estimate for a nearly 500MB repo)
+      run: sleep 60
+    
+    - name: Checkout code with submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Set env
+      run: |
+        BRANCH_NAME_BUF=$(echo $GITHUB_REF | sed -e 's/.*\///')
+        OWNER=$(echo ${{ github.repository }} | cut -d'/' -f1)
+        REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+        echo "BRANCH_NAME=$BRANCH_NAME_BUF" >> $GITHUB_ENV 
+        echo "OWNER=$OWNER" >> $GITHUB_ENV 
+        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV 
+        
+    - name: Set output
+      id: set_output
+      run: |
+        echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+        echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifact
+        path: ./
+
+
+  call-reusable-workflow:
+    needs: build
+    uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
+    with:
+      BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}   
+      docRepo: ${{ needs.build.outputs.DOC_REPO }}
+    secrets:
+      docRepoSecret: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+
+      
+        
