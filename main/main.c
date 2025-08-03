@@ -163,6 +163,7 @@ void app_main(void)
 
 
 
+
     //初始化结束后
 
     // char lrc[5000] = {'\0'};
