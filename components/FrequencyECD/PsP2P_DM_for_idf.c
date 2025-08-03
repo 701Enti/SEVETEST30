@@ -34,14 +34,14 @@
  // 同时,这种强容错弹性设计方便了冗余部署,在某个组分异常时,其他健康冗余部分可以发现到并快速介入处理,比如Flash空间不足,其他存储介质(可能多种)介入存储等场景,而传统冗余可能需要更复杂的逻辑
 
 
- // [相关概念与逻辑]-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ // [部分相关概念与逻辑]-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  // 节点(node):一个数据产生或使用的个体,一个函数库的一个身份占用一个节点,节点可以根据身份分为生产者或消费者
  // 产品(product):持有数据资源resource和消费者引用等各种与产品有关数据的数据句柄
  // 节点名(node_name):1.节点名一般是一个数据产生或使用的个体的名字,在实践中,建议使用c宏定义__FILE__作为节点名
  //                  2.可以创建同名但身份不同的节点,不允许创建同名同身份节点
  // 产品名(product_name):1.产品名一般是产品数据资源resource存储对象名,比如把结构体变量的指针作为产品数据资源resource上架,那么产品名一般是结构体变量的变量名
  //                     2.同一生产者不可以有完全同名产品, 上架时会检查产品名, 若产品名被使用过(根据内容比较)不允许上架
- //                     3.消费者可以购买产品名相同,但是生产者名不同的商品,同一生产者不可以有完全同名产品,所以消费者不可能买到它们
+ //                     3.消费者可以购买产品名相同,但是生产者名不同的产品,同一生产者不可以有完全同名产品,所以消费者不可能买到它们
  // 节点链表:所有节点创建时就被加入节点链表,使得任何节点实现自主访问
  // 产品链表:每个节点都有一个产品链表,对生产者,产品链表包含它上架且未下架的产品,对消费者,产品链表包含它购买且未退货的产品,每个节点的产品链表各自唯一且独立,伴随节点整个生命周期
  //         消费者购买产品获得的产品句柄是克隆而非引用,同一产品会占用不同节点的内存资源, 互不干涉
@@ -54,9 +54,9 @@
  // 消费者节点列表(consumer_node_list):消费者持有消费者节点列表的引用,从而可以被任何人访问,但是由生产者管理列表占用的内存资源,由消费者自行加入自己到列表中(buy中实现),其中元素角标与该元素即消费者的consumer_id相等
  // 垃圾清理:垃圾清理是指清理产品的resource(如调用free),PsP2P_DM不会进行任何垃圾清理操作,也不会管理数据访问以确保安全,不同场景下,需要由使用者完成清理的最佳实践
  //           --注意:可以有以下实践,PsP2P_DM不会规定必须选择某个实践方式,也不会规定必须要实现的细节,只是一些建议
- //         实践1.消费者及时清理(无需联络) - 如果数据只会被一个消费者持有利用, 可以由消费者在使用完后直接清理资源, 实现及时清理, 并设置resource = NULL
- //         实践2.生产者及时清理(无需联络) - 等待,观测到产品的consumer_sum由正值跳变为0一段时间(无消费者持有),生产者就立即清理资源,并设置resource=NULL
- //         实践3.生产者通知清理(需要联络) - 生产者发送附加目标产品的PsP2P_DM_REQUEST_REFUND消息给已经购买产品的消费者,在所有消费者[退货]后,将观测到产品的consumer_sum=0,生产者立即清理资源,并设置resource=NULL
+ //         实践1.消费者及时清理(无需联络) - 如果数据只会被一个消费者持有利用, 可以由消费者在使用完后直接清理资源, 实现及时清理(建议清理前设置生产者方产品resource = NULL,防止途中突发购买操作产生野指针)
+ //         实践2.生产者及时清理(无需联络) - 等待,观测到产品的consumer_sum由正值跳变为0一段时间(无消费者持有),生产者清理资源(建议清理前设置生产者方产品resource = NULL,防止途中突发购买操作产生野指针)
+ //         实践3.生产者通知清理(需要联络) - 生产者发送附加目标产品的PsP2P_DM_REQUEST_REFUND消息给已经购买产品的消费者,在所有消费者[退货]后,将观测到产品的consumer_sum=0,生产者清理资源(建议清理前设置生产者方产品resource = NULL,防止途中突发购买操作产生野指针)
  //         实践n......
  //           --注意:垃圾清理有时通过让消费者[退货]保证引用丢失,提升安全性,但是PsP2P_DM不会规定产品垃圾清理必须让消费者退货,这只是一种实践方式,而不是固有机制
  //           --注意:垃圾清理完毕也不一定所有消费者都退货即consumer_sum=0,consumer_sum=0只是一定实践中的数据观测指标,在consumer_sum不为0的情况下清理资源可能也是合理的
@@ -72,119 +72,21 @@
  //                       > 需要释放的资源只会有 1.每个节点的:产品标识资源 2.共享但是只由一方管理的:产品消费者节点列表资源(生产者管理),产品数据资源(生产者管理/消费者管理)
  //                       > 节点的产品链表为空链表则允许销毁节点(PsP2P_DM确定能否销毁的唯一判断指标),意味着如果即将销毁的节点是生产者需要下架所有产品,如果即将销毁的节点是消费者需要退货所有产品
  //                       > 如果即将销毁的节点是生产者 -> 需要下架产品[产品标识资源释放+产品消费者节点列表资源释放] -> 需要自己垃圾清理或者消费者清理(最终都是resource=NULL)[产品数据资源释放]
-//                            --注意:在使用默认开发模板时,如果发现销毁的节点是生产者且名下有上架产品且未下架时,默认开发模板使用上文垃圾清理实践3清理垃圾并自动完成释放(但是这只是范式模板,并非PsP2P_DM要求)
+ //                            --注意:在使用快速开发扩展库(PsP2P_DM_FDE)时,如果发现销毁的节点是生产者且名下有上架产品且未下架时,
+ //                                   快速开发扩展库使用上文垃圾清理实践3实现产品所有下架(垃圾需用户在之后自行清理)(但是这只是范式模板, 并非PsP2P_DM要求)
  //                       > 如果即将销毁的节点是消费者 -> 需要退货产品[产品标识资源释放+数据资源引用停止]
 
+#include "PsP2P_DM_for_idf.h"
+#include "FrequencyECD_for_idf.h"
 #include "stdlib.h"
 #include "string.h"
-#include "stdbool.h"
-#include "esp_err.h"
 #include "esp_check.h"
-#include "FreeRTOS.h"
-#include "FrequencyECD_for_idf.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-PsP2P_DM_node_handle_t Producer_handle;//生产者句柄
-/// @brief 创建PsP2P_DM生产者
-void PsP2P_DM_Producer_create() {
-    Producer_handle = PsP2P_DM_node_create(node_name, PsP2P_DM_IDENTITY_PRODUCER);
-}
-/// @brief 销毁PsP2P_DM生产者
-esp_err_t PsP2P_DM_Producer_destory() {
-    if (Producer_handle) {
-        if (Producer_handle->head_product == NULL && Producer_handle->tail_product == NULL) {
-            //名下目前没有上架产品,直接销毁即可
-            PsP2P_DM_node_destory(Producer_handle);
-            Producer_handle = NULL;
-        }
-        else if (Producer_handle->head_product != NULL && Producer_handle->tail_product != NULL) {
-            //名下有上架产品且未下架
-            //实践3.生产者通知清理(需要联络) - 生产者发送附加目标产品的PsP2P_DM_REQUEST_REFUND消息给已经购买产品的消费者,
-            //      在所有消费者[退货]后, 将观测到产品的consumer_sum = 0, 生产者立即清理资源, 并设置resource = NULL
-            //--注意:在使用默认开发模板时, 如果发现销毁的节点是生产者且名下有上架产品且未下架时, 
-            //       默认开发模板使用上文垃圾清理实践3清理垃圾并自动完成释放(但是这只是范式模板, 并非PsP2P_DM要求)
-
-            PsP2P_DM_product_t* product = Producer_handle->head_product;//产品遍历指针
-
-            //获取生产者当前最大总消费者数量,实际消费者数量 <= 最大总消费者数量
-            int max_total_consumer_sum = 0;//生产者当前总消费者数量
-            while (product) {
-                max_total_consumer_sum += product->consumer_sum;
-                product = product->next;
-            }
-
-            //申请消息基本内存资源
-            //申请的内存资源一般最终不会全部使用,因为 实际消费者数量 <= 最大总消费者数量, 申请内存时假设 实际消费者数量 == 最大总消费者数量
-            //而一个消费者(接收者) 对应 一个PsP2P_DM_message_t, 故申请最大总消费者数量个PsP2P_DM_message_t
-            PsP2P_DM_message_t* message_list = malloc(max_total_consumer_sum * sizeof(PsP2P_DM_message_t));
-            ESP_RETURN_ON_FALSE(message_list, ESP_ERR_NO_MEM, PsP2P_DM_TAG, "内存不足  描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
-            memset(message_list, 0, max_total_consumer_sum * sizeof(PsP2P_DM_message_t));
-
-            //向消息填充接收者,如果遍历到同名消费者,不填充,因为可以在之前已填充的message写入消息
-
-
-            //遍历message_list,顺便填充消息内容,并根据接收者填充需要它退货的所有商品的信息(作为附件发送)
-            //同时,填充完成后发送消息
-
-
-
-
-
-
-
-        }
-        else {
-            ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, node_name, "产品链表存在头或尾缺失,维护状态异常  描述%s", esp_err_to_name(ESP_ERR_INVALID_STATE));
-        }
-    }
-}
-
-/// @brief 生产者上架产品
-/// @param resource 产品数据资源
-/// @param product_name 产品名
-void PsP2P_DM_Producer_put(void* resource, char* product_name) {
-    if (Producer_handle) {
-        PsP2P_DM_put(Producer_handle, resource, product_name);
-    }
-}
-/// @brief 生产者发送枚举消息
-/// @param enum_type_name 枚举类型名
-/// @param value 枚举值
-void PsP2P_DM_Producer_message_send(PsP2P_DM_node_handle_t receiver, PsP2P_DM_message_t message, TickType_t xTicksToWait) {
-    if (Producer_handle) {
-        PsP2P_DM_message_send(receiver, message, xTicksToWait);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 static const char* PsP2P_DM_TAG = __FILE__;//PsP2P_DM标签
 PsP2P_DM_node_handle_t head_node = NULL;//PsP2P_DM节点链表-头节点
 PsP2P_DM_node_handle_t tail_node = NULL;//PsP2P_DM节点链表-尾节点
+
 
 /// @brief 创建PsP2P_DM节点
 /// @param node_name 节点名,一般使用文件名__FILE__
@@ -194,7 +96,7 @@ PsP2P_DM_node_handle_t tail_node = NULL;//PsP2P_DM节点链表-尾节点
 /// @note  节点名一般是一个数据产生或使用的个体的名字,在实践中,建议使用c宏定义__FILE__作为节点名
 /// @note  可以创建同名但身份不同的节点,不允许创建同名同身份节点
 /// @return PsP2P_DM节点句柄 / [NULL 为空指针的节点名/内存不足/不允许创建同名同身份节点/节点链表存在头或尾缺失,维护状态异常]
-PsP2P_DM_node_handle_t PsP2P_DM_node_create(const char* node_name, PsP2P_DM_identity_t identity, UBaseType_t uxMessageQueueLength, UBaseType_t uxMessageItemSize) {
+PsP2P_DM_node_handle_t PsP2P_DM_node_create(const char* node_name, PsP2P_DM_identity_t identity, UBaseType_t uxMessageQueueLength) {
     if (!node_name) {
         ESP_LOGE(PsP2P_DM_TAG, "为空指针的节点名");
         return NULL;
@@ -211,7 +113,7 @@ PsP2P_DM_node_handle_t PsP2P_DM_node_create(const char* node_name, PsP2P_DM_iden
         new_node->next = NULL;
 
         //消息系统-创建消息队列
-        new_node->messageQueue = xQueueCreate(uxMessageQueueLength, uxMessageItemSize);
+        new_node->messageQueue = xQueueCreate(uxMessageQueueLength, sizeof(PsP2P_DM_message_t*));
         if (!new_node->messageQueue) {
             ESP_LOGE(PsP2P_DM_TAG, "创建节点消息队列时发现问题");
             free(new_node);
@@ -265,7 +167,7 @@ PsP2P_DM_node_handle_t PsP2P_DM_node_create(const char* node_name, PsP2P_DM_iden
 /// @brief 销毁PsP2P_DM节点
 /// @param node_handle PsP2P_DM节点句柄
 /// @note   节点的产品链表为空链表则允许销毁节点,意味着对于生产者销毁需要下架所有产品,对于消费者销毁需要退货所有产品
-/// @return [ESP_OK 销毁成功]
+/// @return [ESP_OK 成功]
 /// @return [ESP_ERR_INVALID_ARG 输入了无法处理的空指针]
 /// @return [ESP_ERR_INVALID_STATE 节点链表为空链表,维护状态异常]
 /// @return [ESP_ERR_NOT_FINISHED 节点的产品链表不为空链表,请完成相应的产品移除操作再进行销毁]
@@ -318,7 +220,7 @@ esp_err_t PsP2P_DM_node_destory(PsP2P_DM_node_handle_t node_to_destory) {
 /// @param product_name 产品名
 /// @note  产品名一般是产品数据资源source存储对象名,比如把结构体变量的指针作为产品数据资源source上架,那么产品名一般是结构体变量的变量名
 /// @note  同一生产者不可以有完全同名产品,上架时会检查产品名,若产品名被使用过(根据内容比较)不允许上架
-/// @return [ESP_OK 上架成功]
+/// @return [ESP_OK 成功]
 /// @return [ESP_ERR_NO_MEM 内存不足]
 /// @return [ESP_ERR_INVALID_ARG 输入了无法处理的空指针 / 同一生产者不可以有完全同名产品,对本生产者,产品名在自己的产品链表中已经被使用过]
 /// @return [ESP_ERR_INVALID_STATE 产品链表存在头或尾缺失,维护状态异常]
@@ -383,13 +285,114 @@ esp_err_t PsP2P_DM_put(PsP2P_DM_node_handle_t producer, void* resource, const ch
     return ESP_OK;
 }
 
+/// @brief PsP2P_DM产品下架
+/// @param producer 生产者句柄
+/// @param product_name 产品名
+/// @note  产品名一般是产品数据资源source存储对象名,比如把结构体变量的指针作为产品数据资源source上架,那么产品名一般是结构体变量的变量名
+/// @note  同一生产者不可以有完全同名产品,上架时会检查产品名,若产品名被使用过(根据内容比较)不允许上架
+/// @return [ESP_OK 成功]
+/// @return [ESP_ERR_NOT_FOUND 产品链表是非空链表,但是未找到指定的产品 / 产品链表是空链表,不可能找到指定的产品]
+/// @return [ESP_ERR_INVALID_ARG 输入了无法处理的空指针]
+/// @return [ESP_ERR_INVALID_STATE 产品链表存在头或尾缺失,维护状态异常]
+/// @return [ESP_ERR_NOT_SUPPORTED 非生产者不可使用下架(off)操作]
+esp_err_t PsP2P_DM_off(PsP2P_DM_node_handle_t producer, const char* product_name) {
+    ESP_RETURN_ON_FALSE(producer && product_name, ESP_ERR_INVALID_ARG, PsP2P_DM_TAG, "输入了无法处理的空指针 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(producer->identity == PsP2P_DM_IDENTITY_PRODUCER, ESP_ERR_NOT_SUPPORTED, PsP2P_DM_TAG, "非生产者不可使用下架(off)操作 描述%s", esp_err_to_name(ESP_ERR_NOT_SUPPORTED));
+
+    //检索产品并编辑产品链表,同时释放产品资源,并自减当前上架有效产品数量
+    if (producer->head_product != NULL && producer->tail_product != NULL) {
+        //链表非空
+        //检索产品
+        PsP2P_DM_product_t* product = producer->head_product;
+        while (product)
+        {
+            if (!strcmp(product->product_name, product_name)) {
+                break;
+            }
+            product = product->next;
+        }
+        if (!product) {
+            ESP_RETURN_ON_FALSE(false, ESP_ERR_NOT_FOUND, PsP2P_DM_TAG, "产品链表是非空链表,但是未找到指定的产品 描述%s", esp_err_to_name(ESP_ERR_NOT_FOUND));
+        }
+
+        //编辑产品链表
+        product->prev->next = product->next;
+        product->next->prev = product->prev;
+
+        //自减当前上架有效产品数量
+        producer->put_sum--;
+
+        //释放产品资源
+        free(product);
+        product = NULL;
+    }
+    else if (producer->head_product == NULL && producer->tail_product == NULL) {
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_NOT_FOUND, PsP2P_DM_TAG, "产品链表是空链表,不可能找到指定的产品 描述%s", esp_err_to_name(ESP_ERR_NOT_FOUND));
+    }
+    else {
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, PsP2P_DM_TAG, "产品链表存在头或尾缺失,维护状态异常  描述%s", esp_err_to_name(ESP_ERR_INVALID_STATE));
+    }
+
+    return ESP_OK;
+}
+
+
+/// @brief PsP2P_DM下架所有产品
+/// @param producer 生产者句柄
+/// @return [ESP_OK 成功]
+/// @return [ESP_ERR_NOT_FOUND 产品链表是空链表,不可能找到指定的产品]
+/// @return [ESP_ERR_INVALID_ARG 输入了无法处理的空指针]
+/// @return [ESP_ERR_INVALID_STATE 产品链表存在头或尾缺失,维护状态异常]
+/// @return [ESP_ERR_NOT_SUPPORTED 非生产者不可使用下架所有产品(off_all)操作]
+esp_err_t PsP2P_DM_off_all(PsP2P_DM_node_handle_t producer) {
+    ESP_RETURN_ON_FALSE(producer, ESP_ERR_INVALID_ARG, PsP2P_DM_TAG, "输入了无法处理的空指针 描述%s", esp_err_to_name(ESP_ERR_INVALID_ARG));
+    ESP_RETURN_ON_FALSE(producer->identity == PsP2P_DM_IDENTITY_PRODUCER, ESP_ERR_NOT_SUPPORTED, PsP2P_DM_TAG, "非生产者不可使用下架所有产品(off_all)操作 描述%s", esp_err_to_name(ESP_ERR_NOT_SUPPORTED));
+
+    //检索产品并编辑产品链表,同时释放产品资源,并自减当前上架有效产品数量
+    if (producer->head_product != NULL && producer->tail_product != NULL) {
+        //链表非空
+
+        PsP2P_DM_product_t* product = producer->head_product;
+
+        //强制设置为空列表,避免其他任务此时遍历而发生意外
+        producer->head_product = NULL;
+        producer->tail_product = NULL;
+
+        //下架所有产品
+        PsP2P_DM_product_t* product_buf = NULL;
+        while (product)
+        {
+            //缓存下一个产品
+            product_buf = product->next;
+
+            //释放产品资源
+            free(product);
+            product = NULL;
+            product = product_buf;
+
+            //自减当前上架有效产品数量
+            producer->put_sum--;
+        }
+    }
+    else if (producer->head_product == NULL && producer->tail_product == NULL) {
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_NOT_FOUND, PsP2P_DM_TAG, "产品链表是空链表,不可能找到指定的产品 描述%s", esp_err_to_name(ESP_ERR_NOT_FOUND));
+    }
+    else {
+        ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, PsP2P_DM_TAG, "产品链表存在头或尾缺失,维护状态异常  描述%s", esp_err_to_name(ESP_ERR_INVALID_STATE));
+    }
+
+    return ESP_OK;
+}
+
+
 
 /// @brief PsP2P_DM购买产品
 /// @param consumer 消费者句柄
 /// @param producer_name 生产者名
 /// @param product_name 产品名
 /// @note  产品名一般是产品数据资源source存储对象名,比如把结构体变量的指针作为产品数据资源source上架,那么产品名一般是结构体变量的变量名
-/// @note  消费者可以购买产品名相同,但是生产者名不同的商品,同一生产者不可以有完全同名产品,所以消费者不可能买到它们
+/// @note  消费者可以购买产品名相同,但是生产者名不同的产品,同一生产者不可以有完全同名产品,所以消费者不可能买到它们
+/// @return [ESP_OK 成功]
 /// @return [ESP_ERR_INVALID_ARG 输入了无法处理的空指针]
 /// @return [ESP_ERR_NOT_SUPPORTED 非消费者不可使用购买(buy)操作]
 /// @return [ESP_ERR_INVALID_STATE 产品被过多消费者购买 / 节点链表为空链表,维护状态异常 / 该产品消费者节点列表存在未成功删除的消费者节点引用,维护状态异常 / 该生产者的产品链表存在头或尾缺失,维护状态异常]
@@ -488,12 +491,17 @@ esp_err_t PsP2P_DM_buy(PsP2P_DM_node_handle_t consumer, const char* producer_nam
 }
 
 
-
-esp_err_t PsP2P_DM_message_send(PsP2P_DM_node_handle_t receiver, PsP2P_DM_message_t message, TickType_t xTicksToWait) {
+/// @brief PsP2P_DM消息发送
+/// @param receiver 接收节点
+/// @param message 消息
+/// @param xTicksToWait 发送超时时间,将传递给xQueueSend
+/// @return [ESP_OK 成功]
+/// @return [ESP_ERR_INVALID_STATE 消息队列已满,等待后队列仍非空闲,无法完成消息发送]
+esp_err_t PsP2P_DM_message_send(PsP2P_DM_node_handle_t receiver, PsP2P_DM_message_t* message, TickType_t xTicksToWait) {
     ESP_RETURN_ON_FALSE(
-        xQueueSend(receiver->messageQueue, (void*)message, xTicksToWait) == pdTRUE,
+        xQueueSend(receiver->messageQueue, (void*)&message, xTicksToWait) == pdTRUE,
         ESP_ERR_INVALID_STATE,
-        PsP2P_DM_TAG, "接收者节点[%s]消息队列已满,无法完成消息发送 描述%s",
+        PsP2P_DM_TAG, "接收者节点[%s]消息队列已满,等待后队列仍非空闲,无法完成消息发送 描述%s",
         receiver->node_name, esp_err_to_name(ESP_ERR_INVALID_STATE));
     return ESP_OK;
 }
@@ -501,3 +509,104 @@ esp_err_t PsP2P_DM_message_send(PsP2P_DM_node_handle_t receiver, PsP2P_DM_messag
 
 
 
+/// @brief PsP2P_DM创建信箱,信箱中消息接收者是生产者(发送者)自己的消费者
+/// @param producer 生产者(发送者)
+/// @param result 创建结果存储到句柄(句柄变量在外部定义一个即可)
+/// @note  信箱使用完后记得调用free()释放信箱资源和消息资源(没有明确附件,它们不由这里申请内存)
+/// @note  如果是调用create(包括本函数)或外部malloc等堆内存申请,信箱,消息和附件内存资源都要单独调用相关free释放,否则不需要
+/// @return [ESP_OK 成功]
+/// @return [ESP_ERR_NOT_FOUND 不需要发送消息,因为符合条件的接收者数量为0]
+/// @return [ESP_ERR_NO_MEM 内存不足]
+esp_err_t PsP2P_DM_message_box_create_as_receiver_own_consumer(PsP2P_DM_node_handle_t producer, PsP2P_DM_message_box_handle_t* result) {
+    PsP2P_DM_product_t* product = NULL;//产品遍历指针
+
+    //获取生产者当前最大总消费者数量,实际消费者数量 <= 最大总消费者数量
+    int max_total_consumer_sum = 0;//生产者当前最大总消费者数量
+    product = producer->head_product;
+    while (product) {
+        max_total_consumer_sum += product->consumer_sum;
+        product = product->next;
+    }
+
+    ESP_RETURN_ON_FALSE(max_total_consumer_sum != 0, ESP_ERR_NOT_FOUND, PsP2P_DM_TAG, "不需要发送消息,因为符合条件的接收者数量为0  描述%s", esp_err_to_name(ESP_ERR_NOT_FOUND));
+
+    //申请存储所有消费者节点句柄的临时列表,列表大小足够存储最大总消费者数量情况下句柄数据
+    PsP2P_DM_node_handle_t* all_consumer = malloc(max_total_consumer_sum * sizeof(PsP2P_DM_node_handle_t));
+    ESP_RETURN_ON_FALSE(all_consumer, ESP_ERR_NO_MEM, PsP2P_DM_TAG, "内存不足  描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+    memset(all_consumer, 0, max_total_consumer_sum * sizeof(PsP2P_DM_node_handle_t));
+
+    //遍历生产者所有产品的消费者节点列表,提取消费者节点加入临时列表,如果它已经在临时列表,就不要重复加入
+    //同时我们便可以得到实际消费者数量,就等于加入次数
+    int real_total_consumer_sum = 0;//生产者当前实际总消费者数量
+    product = producer->head_product;
+    while (product) {
+        if (product->consumer_sum != 0) {
+            //产品消费者节点列表不是空的
+            for (int i = 0;i < product->consumer_sum;i++) {
+                //遍历其中每个消费者节点
+                PsP2P_DM_node_handle_t consumer = product->consumer_node_list[i];
+                if (real_total_consumer_sum != 0) {
+                    //当前临时列表已加入一些消费者节点,判断是否已经存在这个消费者节点,如果它已经在临时列表,就不要重复加入
+                    bool is_in_list = false;//是否已经存在
+                    for (int j = 0;j < real_total_consumer_sum;j++) {
+                        if (all_consumer[j] == consumer) {//基于句柄判断
+                            is_in_list = true;//存在
+                            break;//已经明确存在,没有必要继续判断
+                        }
+                    }
+                    if (is_in_list) {
+                        continue;//已经明确存在,不需要任何操作,下一个
+                    }
+                    else {
+                        //可以加入
+                        if (consumer) {//防止加入NULL
+                            all_consumer[real_total_consumer_sum] = consumer;
+                            real_total_consumer_sum++;
+                        }
+                    }
+                }
+                else {
+                    //当前临时列表没有消费者节点,直接加入,不用担心重复加入
+                    if (consumer) {//防止加入NULL
+                        all_consumer[0] = consumer;
+                        real_total_consumer_sum = 1;
+                    }
+                }
+            }
+        }
+        product = product->next;
+    }
+
+    //申请消息内存资源和消息信箱内存资源,都要提供给外部,这里不释放
+    PsP2P_DM_message_t* message_list = malloc(real_total_consumer_sum * sizeof(PsP2P_DM_message_t));
+    PsP2P_DM_message_box_t* message_box = malloc(sizeof(PsP2P_DM_message_box_t));
+    if (!message_list || !message_box) {
+        free(message_list);
+        free(message_box);
+        free(all_consumer);
+        message_list = NULL;
+        message_box = NULL;
+        all_consumer = NULL;
+        ESP_LOGE(PsP2P_DM_TAG, "内存不足  描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
+        return ESP_ERR_NO_MEM;
+    }
+    memset(message_list, 0, max_total_consumer_sum * sizeof(PsP2P_DM_message_t));
+    memset(message_box, 0, sizeof(PsP2P_DM_message_box_t));
+
+    //根据临时列表,向消息填充接收者
+    for (int c = 0;c < real_total_consumer_sum;c++) {
+        message_list[c].receiver = all_consumer[c];
+    }
+
+    //构建消息信箱
+    message_box->message_list = (PsP2P_DM_message_list_t)message_list;
+    message_box->total_message_amount = real_total_consumer_sum;
+
+    //释放临时缓存
+    free(all_consumer);
+    all_consumer = NULL;
+
+    //填充结果
+    *result = (PsP2P_DM_message_box_handle_t)message_box;
+    return ESP_OK;
+}

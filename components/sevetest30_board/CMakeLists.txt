@@ -11,8 +11,8 @@ set(COMPONENT_SRCS
 ./board_pins_config.c
 ./board_ctrl.h
 ./board_pins_config.h
-./base64_re.h
 ./base64_re.c
+./base64_re.h
 )
 endif()
 

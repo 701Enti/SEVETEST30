@@ -16,5 +16,6 @@ configure_file(
   "AGS10.h" 
   "hscdtd008a.h"
   "math_tools.h"
+  "math_tools_fp64.h"
   "calibration_tools.h"
   )

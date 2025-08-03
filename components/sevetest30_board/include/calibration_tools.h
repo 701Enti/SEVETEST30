@@ -26,19 +26,31 @@
 
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "hscdtd008a.h"
+#include "stdbool.h"
 #include "esp_err.h"
 
+#define VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T 1
 
 #define MALLOC_CAP_DEFAULT_CALIBRATION_TOOLS MALLOC_CAP_SPIRAM //默认内存申请位置
-
+#define MESSAGE_QUEUE_LENGTH_PRODUCER_PSP2P_DM_CALIBRATION_TOOLS 20 //PsP2P生产者节点消息队列长度
 
 /// @brief 地磁传感器静态校准模型(解决固有误差问题,会被存储到Flash,反复使用)
 typedef struct GS_static_calibration_model_t {
-    struct timeval generate_time;//模型的生成时间 
+
     float SSR;//椭球拟合残差平方和 
     float A, B, C, D, E, F, G, H, I;//椭球参数
     float sx, sy, sz;//缩放量
     float x0, y0, z0;//偏移量
+
+    union {
+        //以下两个模型生成时间根据具体情况二择一使用,并通过generate_time_is_MT标注选择(仅仅只是标识注释,不是选择参数),其为true是表示单调时间,为false是表示实时时间
+        struct timeval generate_time_RTC;//模型的生成时间(系统微秒级实时时间) - (默认使用-在保证NTP时间同步完成,系统时间与现实时间一致情况下)
+        int64_t generate_time_MT;//模型的生成时间(系统微秒级单调时间) - (备用-在如网络未连接,无法进行NTP时间同步,系统时间与现实时间可能不一致情况下)        
+    };
+    bool generate_time_is_MT;//以上两个模型生成时间根据具体情况二择一使用,并通过generate_time_is_MT标注选择(仅仅只是标识注释,不是选择参数),其为true是表示单调时间,为false是表示实时时间
+
 }GS_calibration_static_model_t;
 #define VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T 1 //数据结构版本-地磁传感器静态校准模型
 
@@ -62,7 +74,15 @@ typedef struct GS_calibration_t {
 
 }GS_calibration_t;
 
-esp_err_t GS_calibration_static_model_generate(GS_calibration_static_model_t* static_model, int sample_size, int sample_delay);
+esp_err_t generate_GS_calibration_static_model(GS_calibration_static_model_t* static_model, int sample_size, int sample_delay);
+
+esp_err_t calculate_calibrated_GS_only_by_static_model(const GS_calibration_static_model_t* static_model, GS_magnetic_flux_density_data_t* mfd);
+
+
+void calibration_tools_init_PsP2P_DM_Producer();
+
+esp_err_t put_GS_calibration_static_model(GS_calibration_static_model_t* static_model);
+
 
 
 

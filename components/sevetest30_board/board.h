@@ -22,6 +22,10 @@
  *
  */
 
+ //这是一个已修改的文件,非常感谢原作者!
+ //在原程序基础上,更改为项目需要的数值设置
+ //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
 #ifndef _AUDIO_BOARD_H_
 #define _AUDIO_BOARD_H_
 
@@ -38,10 +42,7 @@ extern "C" {
 
     extern audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE;
 
-    //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
-    //更改为项目需要的形式或设置
-    //这个修改为适应硬件环境的一个项目需求, 不是否认原作者设计的可靠性
-    //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
 
     /**
      * @brief Audio board handle

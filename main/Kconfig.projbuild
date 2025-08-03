@@ -1,17 +1,17 @@
 menu "sevetest30 Configuration"
 
-# config WIFI_SSID
-#     string "WiFi SSID"
-# 	default ""
-# 	help
-# 		SSID (network name) for the example to connect to.
+config WIFI_SSID
+    string "WiFi SSID"
+	default ""
+	help
+		It's the name of WiFi which SEVETEST30 connects to.
 
-# config WIFI_PASSWORD
-#     string "WiFi Password"
-# 	default ""
-# 	help
-# 		WiFi password (WPA or WPA2) for the example to use.
-# 		Can be left blank if the network has no security set.
+config WIFI_PASSWORD
+    string "WiFi Password"
+	default ""
+	help
+        It's the password of WiFi which SEVETEST30 connects to.
+        If the WIFI is Open WiFi, please left blank. 
 
 # 时区设置
 config LOCAL_TZ 

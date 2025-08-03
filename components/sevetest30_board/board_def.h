@@ -21,12 +21,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-#pragma once
 
- //这是一个已修改的文件,原作者信息见上方声明,在原程序基础上,
- //更改为项目需要的形式或设置
- //这个修改为适应硬件环境的一个项目需求, 不是否认原作者设计的可靠性
+ //这是一个已修改的文件,非常感谢原作者!
+ //在原程序基础上,更改为项目需要的数值设置,并添加一些项目个性化需要的定义
  //为了明确原作者信息,此文件API帮助及相关内容不在文档中显示
+
+#pragma once
 
 #include "audio_hal.h"
 #include "driver/i2c.h"
