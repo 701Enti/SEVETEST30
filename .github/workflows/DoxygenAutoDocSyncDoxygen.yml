@@ -1,5 +1,12 @@
 name: DoxygenAutoDocSyncDoxygen
-on: [push]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
 jobs:
   build:
     timeout-minutes: 30
@@ -9,8 +16,8 @@ jobs:
       DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
 
     steps:
-      - name: Wait for push to complete (estimate for a nearly 500MB repo)
-        run: sleep 60
+      - name: Wait for push to complete
+        run: sleep 30
 
       - name: Checkout code with submodules
         uses: actions/checkout@v4
