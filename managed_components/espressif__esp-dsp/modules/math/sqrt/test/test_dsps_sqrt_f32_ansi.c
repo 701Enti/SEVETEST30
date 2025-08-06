@@ -1,4 +1,4 @@
-// Copyright 2018-2019 Espressif Systems (Shanghai) PTE LTD
+// Copyright 2018-2023 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include "dsp_platform.h"
 #include "esp_log.h"
 
+#include "dsp_tests.h"
 #include "dsps_sqrt.h"
 #include "esp_attr.h"
 
@@ -27,7 +28,7 @@ TEST_CASE("dsps_sqrtf_f32_ansi functionality", "[dsps]")
     float max_err = -1000;
     float max_value = 0;
     float min_err = 0;
-    float min_value = INT32_MAX;
+    float min_value = (float)INT32_MAX;
     int test_points = 100000;
     for (size_t i = 0; i < test_points; i++) {
         float test_value = rand();
@@ -62,9 +63,9 @@ TEST_CASE("dsps_sqrt_f32_ansi functionality", "[dsps]")
         y[i] = i * 10;
         x[i] = y[i] * y[i];
     }
-    unsigned int start_b = xthal_get_ccount();
+    unsigned int start_b = dsp_get_cpu_cycle_count();
     dsps_sqrt_f32_ansi(x, result, n);
-    float cycles = xthal_get_ccount() - start_b;
+    float cycles = dsp_get_cpu_cycle_count() - start_b;
 
     for (int i = 0 ; i < n ; i++) {
         //printf("Result[%i] = %f, expected = %f,  diff = %f\n", i, result[i], y[i], 20*logf(fabs((result[i] - y[i])/y[i]) + 0.000001));

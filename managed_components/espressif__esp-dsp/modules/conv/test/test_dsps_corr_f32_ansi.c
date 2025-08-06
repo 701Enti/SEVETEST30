@@ -17,6 +17,7 @@
 #include "dsp_platform.h"
 #include "esp_log.h"
 
+#include "dsp_tests.h"
 #include "dsps_corr.h"
 #include "esp_attr.h"
 
@@ -42,7 +43,7 @@ TEST_CASE("dsps_corr_f32_ansi functionality", "[dsps]")
     }
     inputB[0] = 1;
     dsps_corr_f32_ansi(inputA, lenA, inputB, lenB, &output[1]);
-    for (size_t i = 0; i < lenA + lenB; i++) {
+    for (int i = 0; i < lenA + lenB; i++) {
         ESP_LOGD(TAG, "output[%i] = %2.2f", i, output[i]);
     }
 
@@ -69,9 +70,9 @@ TEST_CASE("dsps_corr_f32_ansi benchmark", "[dsps]")
         y[i] = 1000;
     }
 
-    unsigned int start_b = xthal_get_ccount();
+    unsigned int start_b = dsp_get_cpu_cycle_count();
     dsps_corr_f32_ansi(x, max_N, y, corr_size, &z[0]);
-    unsigned int end_b = xthal_get_ccount();
+    unsigned int end_b = dsp_get_cpu_cycle_count();
 
     float cycles = end_b - start_b;
     ESP_LOGI(TAG, "dsps_corr_f32_ansi - %f cycles for signal %i and pattern %i", cycles, max_N, corr_size);

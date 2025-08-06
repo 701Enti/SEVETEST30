@@ -20,8 +20,6 @@
 
  // 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
- // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
- //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
  // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
  // github: https://github.com/701Enti
  // bilibili: 701Enti
@@ -46,7 +44,7 @@
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
-#include <esp_sntp.h>
+#include "esp_sntp.h"
 
 
 #include "periph_wifi.h"
@@ -255,8 +253,6 @@ void init_time_data_sntp()
         ESP_LOGE("http_init_get_request", "网络未连接");
         return;
     }
-
-    // 调整方式参考了官方文档 https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.4/esp32/api-reference/system/system_time.html?highlight=time
     esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, CONFIG_NTP_SERVER_0); // 索引表示第0个，其NTP服务器名为
     esp_sntp_setservername(1, CONFIG_NTP_SERVER_1); // 索引表示第1个，其NTP服务器名为

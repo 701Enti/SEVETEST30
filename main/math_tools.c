@@ -43,8 +43,8 @@ static const char* math_tools_TAG = __FILE__;
 /// @param m 原矩阵的行数
 /// @param n 原矩阵的列数
 void general_matrix_transpose(float* input, float* output, int m, int n) {
-    for (int i = 0;i < m;++i) {
-        for (int j = 0;j < n;++j) {
+    for (int i = 0;i < m;i++) {
+        for (int j = 0;j < n;j++) {
             //input(共m行,n列) 第i行,第j列 为 output(共n行,m列) 第j行,第i列的值
             output[j * m + i] = input[i * n + j];
         }
@@ -129,7 +129,7 @@ int matrix_get_the_row_of_aim_col_pivot(const float* A, int m, int n, int aim_co
     int ret = start_row;//返回值缓存
     float max = 0;//当前发现的最大绝对值
     float a = 0;//当前位置元素绝对值缓存
-    for (int r = start_row;r < m;++r) {//r为当前遍历的行号
+    for (int r = start_row;r < m;r++) {//r为当前遍历的行号
         //主元即绝对值最大
         a = fabsf(A[r * n + aim_col]);//当前位置元素绝对值
         if (a > max) {
@@ -151,7 +151,7 @@ void matrix_swap_rows(float* A, int n, int r1, int r2) {
     }
     else {
         float buf = 0;//元素值缓存
-        for (int c = 0;c < n;++c) {
+        for (int c = 0;c < n;c++) {
             buf = A[r1 * n + c];
             A[r1 * n + c] = A[r2 * n + c];
             A[r2 * n + c] = buf;
@@ -171,8 +171,8 @@ void matrix_swap_rows(float* A, int n, int r1, int r2) {
 /// @param set2[情况1.当set1=true]  选择强制输出矩阵的对角线元素为1还是0 (true = 强制对角线元素为1 / false = 强制对角线元素为0)
 /// @param set2[情况2.当set1=false] 执行其他方案, (true = 复制矩阵A对角线元素到输出矩阵对角线元素 / false = 跳过输出矩阵对角线元素存储区域,不进行任何更改)
 void matrix_extract_triangle_region(const float* A, float* output, int n, bool lower, bool other, bool set1, bool set2) {
-    for (int r = 0;r < n;++r) {
-        for (int c = 0;c < n;++c) {
+    for (int r = 0;r < n;r++) {
+        for (int c = 0;c < n;c++) {
             if (r == c) {
                 //处于矩阵A对角线位置
                 if (set1) {
@@ -223,13 +223,13 @@ float matrix_only_row_elimination_step(float* A, int aim_row, int pivot_row, int
     //单步消元
     if (major_default) {
         //行主序,修改目标行的右侧元素
-        for (int c = pivot_col + 1;c < LDA;++c) {
+        for (int c = pivot_col + 1;c < LDA;c++) {
             A[aim_row * LDA + c] -= multiplier * A[pivot_row * LDA + c];
         }
     }
     else {
         //列主序,修改目标列的下方元素
-        for (int r = pivot_row + 1;r < LDA;++r) {
+        for (int r = pivot_row + 1;r < LDA;r++) {
             A[pivot_col * LDA + r] -= multiplier * A[pivot_col * LDA + pivot_row];
         }
     }
@@ -253,19 +253,19 @@ esp_err_t matrix_decomposition_LU(float* A, float* L, float* U, int* P, int m, i
     //初始化
     if (P) {
         //若需要输出 矩阵P (当矩阵P不等于NULL),初始化P为单位置换矩阵,初始存储为原行号
-        for (int r = 0;r < m;++r) {
+        for (int r = 0;r < m;r++) {
             P[r] = r;
         }
     }
     //复制矩阵A到U以初始化U,初始化L矩阵为单位矩阵
-    for (int r = 0;r < n;++r) {
-        for (int c = 0;c < n;++c) {
+    for (int r = 0;r < n;r++) {
+        for (int c = 0;c < n;c++) {
             U[r * n + c] = A[r * n + c];
             L[r * n + c] = (r == c) ? 1.0f : 0.0f;
         }
     }
     //分解
-    for (int k = 0;k < m && k < n;++k) {
+    for (int k = 0;k < m && k < n;k++) {
         int pivot_row = matrix_get_the_row_of_aim_col_pivot(U, m, n, k, k);//获取主元行
         matrix_swap_rows(U, n, k, pivot_row);//矩阵U当前行与主元行交换
         if (k > 0)matrix_swap_rows(L, n, k, pivot_row);//矩阵L当前行与主元行交换(k=0的初始交换无意义)
@@ -276,7 +276,7 @@ esp_err_t matrix_decomposition_LU(float* A, float* L, float* U, int* P, int m, i
             P[pivot_row] = buf;
         }
         //高斯消元,顺便填充L矩阵
-        for (int r = k + 1;r < m;++r) {
+        for (int r = k + 1;r < m;r++) {
             L[r * n + k] = matrix_only_row_elimination_step(U, r, k, k, true, n);//注意,这里主元行的行号为k,因为之前进行了行交换,现在实际主元在行号为k的行,不是pivot_row
         }
     }
@@ -305,22 +305,22 @@ esp_err_t matrix_square_solve_LU(const float* L, const float* U, const int* P, f
     ESP_RETURN_ON_FALSE(y, ESP_ERR_NO_MEM, math_tools_TAG, "内存不足 描述%s", esp_err_to_name(ESP_ERR_NO_MEM));
 
     //前代求解 Ly = Pb
-    for (int r = 0;r < n;++r) {
+    for (int r = 0;r < n;r++) {
         y[r] = P ? b[P[r]] : b[r];
-        for (int c = 0;c < r;++c) {
+        for (int c = 0;c < r;c++) {
             y[r] -= L[r * n + c] * y[c];
         }
     }
 
     //回代求解 Ux = y
-    for (int i = n - 1;i >= 0;--i) {
+    for (int i = n - 1;i >= 0;i--) {
         if (fabsf(U[i * n + i]) < 1e-10f) {
             heap_caps_free(y);
             y = NULL;
             ESP_RETURN_ON_FALSE(false, ESP_ERR_INVALID_STATE, math_tools_TAG, "原矩阵奇异,求解操作无法完成(回代求解 Ux = y,i=%d时发现U[i * %d + i]=%f) 描述%s", i, n, U[i * n + i], esp_err_to_name(ESP_ERR_INVALID_STATE));
         }
         x[i] = y[i];
-        for (int j = i + 1;j < n;++j) {
+        for (int j = i + 1;j < n;j++) {
             x[i] -= U[i * n + j] * x[j];
         }
         x[i] /= U[i * n + i];
@@ -368,7 +368,7 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
     matrix_decomposition_LU(A, L, U, P, n, n);
 
     //求逆
-    for (int c = 0;c < n;++c) {
+    for (int c = 0;c < n;c++) {
         //对单位矩阵拆分为n列,作为右端项向量b求解即可求逆
         //因为单位矩阵的每一列都是固定的, 直接确定当前右端项向量b
         b[c] = 1.0f;
@@ -408,8 +408,8 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
 /// @param show_rc 显示元素的行和列(坐标表示),假设A中一个元素1.123456,它在第2行第3列,当show_rc设为true,显示为(2,3)[1.123456]
 void matrix_log_print(const float* A, int m, int n, bool major_default, bool show_rc) {
     if (A != NULL) {
-        for (int r = 0;r < m;++r) {
-            for (int c = 0;c < n;++c) {
+        for (int r = 0;r < m;r++) {
+            for (int c = 0;c < n;c++) {
                 if (major_default) {
                     if (show_rc)printf("(%d,%d)", r + 1, c + 1);
                     printf("[%f] ", A[r * n + c]);
@@ -477,8 +477,8 @@ esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* be
     matrix_transpose(X, XT, m, n);
 
     //计算 XT * y (T代表转置)
-    for (int i = 0;i < n;++i) {
-        for (int j = 0;j < m;++j) {
+    for (int i = 0;i < n;i++) {
+        for (int j = 0;j < m;j++) {
             XTy[i] += XT[i * m + j] * y[j];
         }
     }

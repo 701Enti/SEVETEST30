@@ -1,4 +1,4 @@
-// Copyright 2018-2019 Espressif Systems (Shanghai) PTE LTD
+// Copyright 2018-2023 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
 
 #include <string.h>
 #include <math.h>
+#include <malloc.h>
 #include "unity.h"
 #include "dsp_platform.h"
 #include "esp_log.h"
 
+#include "dsp_tests.h"
 #include "dsps_conv.h"
 #include "esp_attr.h"
 #include "esp_dsp.h"
@@ -26,13 +28,6 @@ static const char *TAG = "dsps_conv";
 
 #define lenA  20
 #define lenB  20
-
-static float inputA[lenA];
-static float inputB[lenB];
-static float output_ref[lenA + lenB - 1 + 2];
-static float output_fwd[lenA + lenB - 1 + 2];
-static float output_back[lenA + lenB - 1 + 2];
-
 
 esp_err_t dsps_conv_f32_ref(const float *Signal, const int siglen, const float *Kernel, const int kernlen, float *convout)
 {
@@ -45,7 +40,6 @@ esp_err_t dsps_conv_f32_ref(const float *Signal, const int siglen, const float *
     if (NULL == convout) {
         return ESP_ERR_DSP_PARAM_OUTOFRANGE;
     }
-
 
     for (int n = 0; n < siglen + kernlen - 1; n++) {
         size_t kmin, kmax, k;
@@ -64,13 +58,20 @@ esp_err_t dsps_conv_f32_ref(const float *Signal, const int siglen, const float *
 
 TEST_CASE("dsps_conv_f32_ansi functionality", "[dsps]")
 {
-    for (size_t la = 1; la < lenA; la++) {
-        for (size_t lb = 1; lb < lenB; lb++) {
+    float *inputA = (float *)memalign(16, lenA * sizeof(float));
+    float *inputB = (float *)memalign(16, lenB * sizeof(float));
+
+    float *output_ref = (float *)memalign(16, (lenA + lenB - 1 + 2) * sizeof(float));
+    float *output_fwd = (float *)memalign(16, (lenA + lenB - 1 + 2) * sizeof(float));
+    float *output_back = (float *)memalign(16, (lenA + lenB - 1 + 2) * sizeof(float));
+
+    for (int la = 1; la < lenA; la++) {
+        for (int lb = 1; lb < lenB; lb++) {
             for (int i = 0 ; i < lenA ; i++) {
-                inputA[i] = (float)rand() / INT32_MAX;
+                inputA[i] = (float)rand() / (float)INT32_MAX;
             }
             for (int i = 0 ; i < lenB ; i++) {
-                inputB[i] = (float)rand() / INT32_MAX;
+                inputB[i] = (float)rand() / (float)INT32_MAX;
             }
             for (int i = 0 ; i < (lenA + lenB  - 1 + 2); i++) {
                 output_ref[i] = -1;
@@ -81,9 +82,9 @@ TEST_CASE("dsps_conv_f32_ansi functionality", "[dsps]")
             dsps_conv_f32_ansi(inputA, la, inputB, lb, &output_fwd[1]);
             dsps_conv_f32_ansi(inputB, lb, inputA, la, &output_back[1]);
             float max_eps = 0.000001;
-            for (size_t i = 0; i < (la + lb + 1); i++) {
+            for (int i = 0; i < (la + lb + 1); i++) {
                 if ((fabs(output_ref[i] - output_fwd[i]) > max_eps) || (fabs(output_ref[i] - output_back[i]) > max_eps) || (fabs(output_back[i] - output_fwd[i]) > max_eps)) {
-                    ESP_LOGE(TAG, "la=%i, lb=%i, i=%i, ref=%2.3f, fwd=%2.3f, back=%2.3f", la, lb, i, output_ref[i], output_fwd[i], output_back[i]);
+                    ESP_LOGI(TAG, "la=%i, lb=%i, i=%i, ref=%2.3f, fwd=%2.3f, back=%2.3f", la, lb, i, output_ref[i], output_fwd[i], output_back[i]);
                 }
                 TEST_ASSERT_EQUAL(output_ref[i], output_fwd[i]);
                 TEST_ASSERT_EQUAL(output_ref[i], output_back[i]);
@@ -91,6 +92,11 @@ TEST_CASE("dsps_conv_f32_ansi functionality", "[dsps]")
             }
         }
     }
+    free(inputA);
+    free(inputB);
+    free(output_ref);
+    free(output_fwd);
+    free(output_back);
 }
 
 TEST_CASE("dsps_conv_f32_ansi draw", "[dsps]")
@@ -134,9 +140,9 @@ TEST_CASE("dsps_conv_f32_ansi benchmark", "[dsps]")
         y[i] = 1000;
     }
 
-    unsigned int start_b = xthal_get_ccount();
+    unsigned int start_b = dsp_get_cpu_cycle_count();
     dsps_conv_f32_ansi(x, max_N, y, conv_size, &z[0]);
-    unsigned int end_b = xthal_get_ccount();
+    unsigned int end_b = dsp_get_cpu_cycle_count();
 
     float cycles = end_b - start_b;
     ESP_LOGI(TAG, "dsps_conv_f32_ansi - %f cycles for signal %i and pattern %i", cycles, max_N, conv_size);
