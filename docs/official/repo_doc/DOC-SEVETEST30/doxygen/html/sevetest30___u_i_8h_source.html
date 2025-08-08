@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: components/sevetest30_board/include/sevetest30_UI.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('sevetest30___u_i_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">sevetest30_UI.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="sevetest30___u_i_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * 701Enti MIT License</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Copyright © 2024 &lt;701Enti organization&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * a copy of this software and associated documentation files (the “Software”),</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * to deal in the Software without restriction, including without limitation</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> <span class="comment">// 包含对传感器数据，网络API等数据的 整理显示与动画交互工作</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> <span class="comment">// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> <span class="comment">// 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="comment">// 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="comment">// github: https://github.com/701Enti</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> <span class="comment">// bilibili: 701Enti</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;stdbool.h&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;esp_err.h&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;freertos/FreeRTOS.h&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;freertos/task.h&quot;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;driver/i2s.h&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="board__ctrl_8h.html">board_ctrl.h</a>&quot;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">//FFT相关</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5a2c706b479fa2810b46e7d019abb950">   40</a></span><span class="preprocessor">#define FFT_UI_TASK_CORE (1)     </span><span class="comment">// FFT UI绘制任务核心</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#aae35791eea612c825a5b7908f076ddca">   41</a></span><span class="preprocessor">#define FFT_UI_TASK_STACK_SIZE (3*1024)</span><span class="comment">//FFT UI绘制任务堆栈大小</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ac42c56997143f5116da0b5ef75464d78">   43</a></span><span class="preprocessor">#define FFT_N_SAMPLES 2048    </span><span class="comment">// FFT 点数N 取2的整数次幂</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#af1ab76206bc3a1addbbd7a154c18911a">   44</a></span><span class="preprocessor">#define DSP_MAX_FFT_SIZE    2048    </span><span class="comment">//最大FFT缓冲区大小</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ab3603710f20699621c3fe322110f9481">   46</a></span><span class="preprocessor">#define FFT_DAMPEN_MULTIPLES 50 </span><span class="comment">// FFT 音频数据衰减倍数</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a15418b88b8cdb9b60b141866bf515c80">   47</a></span><span class="preprocessor">#define FFT_VIEW_DATA_MIN 0   </span><span class="comment">// FFT UI视口音频数据最小值</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad2e779965bebf4652152dc97bd825c9d">   48</a></span><span class="preprocessor">#define FFT_VIEW_DATA_MAX 500</span><span class="comment">// FFT UI视口音频数据最大值</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a6cc612327a8c53b80112c2a8392539b1">   50</a></span><span class="preprocessor">#define FFT_VIEW_WIDTH_MAX 100 </span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">//动画相关</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a88ecc832dd7df88acda8f3d005b6a578">   54</a></span><span class="preprocessor">#define CARTOON_PARAM_RENDER_PRECISION 10000 </span><span class="comment">//动画渲染参数计算精度</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad791f106f61ad6d7f1437e6c64a1984c">   55</a></span><span class="preprocessor">#define CARTOON_KEY_FRAME_PCT_MAX 10000 </span><span class="comment">//动画关键帧百分位置标识的最大值 1标识动画开始一帧 [CARTOON_KEY_FRAME_PCT_MAX]标识最后一帧</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="};">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html">   57</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a45a8fc657753ebdace63c7b2a459bf56">   59</a></span>   uint8_t <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a45a8fc657753ebdace63c7b2a459bf56">value_max</a>;  <span class="comment">// 映射结果的最大值</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a8f32ce4adda20edea0b82f664c2c4a4d">   60</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a8f32ce4adda20edea0b82f664c2c4a4d">high</a>;           <span class="comment">// 较高的值</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a6e88c7fee046e40591ee1a9817089bbc">   61</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a6e88c7fee046e40591ee1a9817089bbc">medium</a>;         <span class="comment">// 中等的值</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a53d5401d2e760024bcf14b3a9dbdcf62">   62</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a53d5401d2e760024bcf14b3a9dbdcf62">low</a>;            <span class="comment">// 较低的值</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a0e80c7452da8d2116b2430b206f97612">   63</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a0e80c7452da8d2116b2430b206f97612">public_divisor</a>; <span class="comment">// 公共除数，抑制数据变化动态，过大过小都会出现全部填充value_max的情况，导致色彩单一,可从 (high - low)/2 开始 调整到可视化动态效果最加即可</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a88a3fffdca8dddde56701c5bb88d1cdd">   64</a></span>   <span class="keywordtype">float</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a88a3fffdca8dddde56701c5bb88d1cdd">x_multiples</a>;  <span class="comment">// 视口横向缩放倍数,控制视口的横向放大缩小 缩小&lt;1 放大&gt;1 不进行 (如横向视口放大到200% x_multiples = 2)</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="struct_u_i__color__visual__cfg__t.html#a2778ca00354edfef410e54aea98be321">   65</a></span>   <span class="keywordtype">float</span> <a class="code hl_variable" href="struct_u_i__color__visual__cfg__t.html#a2778ca00354edfef410e54aea98be321">x_move</a>;       <span class="comment">// 视口偏移系数  左偏移&lt;0 右偏移&gt;0 不进行 0 (如把视口向右横向偏移屏幕的一半 x_move = 0.5)</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#acf0e0eeb8fecca7cf60f19f1cdfe1bc2">   66</a></span>} <a class="code hl_struct" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a>;</div>
+</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="foldopen" id="foldopen00068" data-start="{" data-end="};">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html">   68</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>{</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#aa5cf8d790305e205a63fb90295abe514">   70</a></span>   int16_t <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#aa5cf8d790305e205a63fb90295abe514">x</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#aa09dc98b4f5168e86115d76d0079aaf0">   71</a></span>   int16_t <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#aa09dc98b4f5168e86115d76d0079aaf0">y</a>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#ad7b953c48b209d31aca006d9adc7f896">   72</a></span>   uint8_t <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#ad7b953c48b209d31aca006d9adc7f896">change</a>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#acb0ea3a869f4bd6afd7df87396d27d1e">   73</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#acb0ea3a869f4bd6afd7df87396d27d1e">width</a>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#ad93cd2afe2db5b6b9585490be6e4fe2c">   74</a></span>   <span class="keywordtype">int</span> <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#ad93cd2afe2db5b6b9585490be6e4fe2c">height</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="structmusic___f_f_t___u_i__cfg__t.html#ab879d5a5b74b2aed966bba14d0c26952">   75</a></span>   <a class="code hl_struct" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a> <a class="code hl_variable" href="structmusic___f_f_t___u_i__cfg__t.html#ab879d5a5b74b2aed966bba14d0c26952">visual_cfg</a>;<span class="comment">//频谱颜色可视化配置</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#abaf4a16362d1ce25a330a305d65f9a4a">   76</a></span>}<a class="code hl_struct" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a>;</div>
+</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="};">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__param__t.html">   79</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structcartoon__ctrl__param__t.html">cartoon_ctrl_param_t</a> {</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__param__t.html#a3245d33b5f4135ff7d94dfffb4c426ef">   80</a></span>   int32_t <a class="code hl_variable" href="structcartoon__ctrl__param__t.html#a3245d33b5f4135ff7d94dfffb4c426ef">x</a>;<span class="comment">//x轴坐标</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__param__t.html#a1fe3a0e9c809b9b32edc3c9a537e6716">   81</a></span>   int32_t <a class="code hl_variable" href="structcartoon__ctrl__param__t.html#a1fe3a0e9c809b9b32edc3c9a537e6716">y</a>;<span class="comment">//y轴坐标</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__param__t.html#a20c54fc8030acc24e9532f1589241139">   82</a></span>   uint8_t <a class="code hl_variable" href="structcartoon__ctrl__param__t.html#a20c54fc8030acc24e9532f1589241139">color</a>[3];<span class="comment">//颜色</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__param__t.html#a627527527d31078b8df461cf73fc7694">   83</a></span>   uint8_t <a class="code hl_variable" href="structcartoon__ctrl__param__t.html#a627527527d31078b8df461cf73fc7694">change</a>;<span class="comment">//亮度</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#aa94dc5b8bef026048864c603d44d2d72">   84</a></span>}<a class="code hl_struct" href="structcartoon__ctrl__param__t.html">cartoon_ctrl_param_t</a>;</div>
+</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment">//控制对象</span></div>
+<div class="foldopen" id="foldopen00088" data-start="{" data-end="};">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html">   88</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a> {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html#a4d376bf1ce8c36e692325dec3b4c5f34">   89</a></span>   uint32_t* <a class="code hl_variable" href="structcartoon__ctrl__object__t.html#a4d376bf1ce8c36e692325dec3b4c5f34">pstep</a>;<span class="comment">//显示函数自增的step步进值数据位置(可0),hook函数只读     </span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html#ab1f68d07dd6d1de105a4b779eba1c85e">   90</a></span>   int32_t* <a class="code hl_variable" href="structcartoon__ctrl__object__t.html#ab1f68d07dd6d1de105a4b779eba1c85e">px</a>;<span class="comment">//需要控制的x轴坐标数据位置,hook函数只写     </span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html#a092f870455d5bcaddbfeda083ed21cb0">   91</a></span>   int32_t* <a class="code hl_variable" href="structcartoon__ctrl__object__t.html#a092f870455d5bcaddbfeda083ed21cb0">py</a>;<span class="comment">//需要控制的y轴坐标数据位置,hook函数只写 </span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html#a2812ad8960e8885ac5b20bf18ad02c3b">   92</a></span>   uint8_t* <a class="code hl_variable" href="structcartoon__ctrl__object__t.html#a2812ad8960e8885ac5b20bf18ad02c3b">pcolor</a>;<span class="comment">//需要控制的颜色数据位置,hook函数只写 </span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structcartoon__ctrl__object__t.html#a4ecc08b32613cc5943c5ca5aa685bb31">   93</a></span>   uint8_t* <a class="code hl_variable" href="structcartoon__ctrl__object__t.html#a4ecc08b32613cc5943c5ca5aa685bb31">pchange</a>;<span class="comment">//需要控制的亮度数据位置,hook函数只写 </span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a4ae9fbaa643e64c457472aecb9fe1cd2">   94</a></span>}<a class="code hl_struct" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a>;</div>
+</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">//动画关键帧属性选择</span></div>
+<div class="foldopen" id="foldopen00098" data-start="{" data-end="};">
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">   98</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>   <span class="comment">//渲染关键帧</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa45ca6fdc046c7887806c0ed1de9531a8">  100</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa45ca6fdc046c7887806c0ed1de9531a8">KEY_FRAME_ATTR_LINEAR</a> = 0,<span class="comment">//线性关键帧,线性地调整参量直到设置水平</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa59fd9bb03d46e65c80f6f4a3e3fcec4b">  101</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa59fd9bb03d46e65c80f6f4a3e3fcec4b">KEY_FRAME_ATTR_EASE_IN</a>,<span class="comment">//缓动关键帧-缓入 至少对应一个标记其前的拟合关键帧,否则被识别为线性关键帧</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa6e0fd8992646f3db253a02d69821dc3e">  102</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa6e0fd8992646f3db253a02d69821dc3e">KEY_FRAME_ATTR_EASE_OUT</a>,<span class="comment">//缓动关键帧-缓出 至少对应一个标记其后的拟合关键帧,否则被识别为线性关键帧</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aabcb1928884d493b015569b47a20144bf">  103</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aabcb1928884d493b015569b47a20144bf">KEY_FRAME_ATTR_CONTINUOUS</a>,<span class="comment">//连续关键帧,使用在两关键帧之间,保持这两关键帧最终效果但期间向连续关键帧偏移   </span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aaecd32d1cc5fde4d7b1d8ebde72e84127">  104</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aaecd32d1cc5fde4d7b1d8ebde72e84127">KEY_FRAME_ATTR_HOLD</a>,<span class="comment">//保持关键帧,开始保持设置的状态直到下一关键帧  </span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa4b1856e7c185d54181594219e0906918">  105</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa4b1856e7c185d54181594219e0906918">KEY_FRAME_ATTR_FITTING</a>,<span class="comment">//拟合关键帧-创建在缓动关键帧周围(缓入之前,缓出之后)用于进一步拟合缓动参量变化函数,至少一个缓动关键帧对应一个,否则被识别为线性关键帧    </span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>   <span class="comment">//非渲染关键帧</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa70613754b15171e6018dd6562c3f7d18">  107</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa70613754b15171e6018dd6562c3f7d18">KEY_FRAME_ATTR_STEGANOGRAPHY</a>,<span class="comment">//隐写关键帧-参数不以key_frame_t规定格式填写,完全不参与渲染,占用关键帧数据库内存但数据不进参量表,以某种方式在动画生成callback时传递数据的伪造关键帧</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>}<a class="code hl_enumeration" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a>;</div>
+</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment">//隐写关键帧:参数不以key_frame_t规定格式填写,完全不参与渲染,占用关键帧数据库内存但数据不进参量表,以某种方式在动画生成callback时传递数据的伪造关键帧</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="comment">//隐写关键帧是动画支持工作下无函数快速操作数据,运行命令的一种方式,隐写关键帧的单位数据类型为key_frame_t,但是对应关系改变,如下</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="comment">// typedef struct key_frame_t {</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">//    key_frame_attr_t frame_attribute;//关键帧属性,必须填写为KEY_FRAME_ATTR_STEGANOGRAPHY</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">//    int32_t percentage;//模式选择,取值[CARTOON_KEY_FRAME_PCT_MAX + 1] - [CARTOON_KEY_FRAME_PCT_MAX + n],表示隐写操作的模式</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="comment">//    int32_t x;//[隐写数据位x - 4字节]</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="comment">//    int32_t y;//[隐写数据位y - 4字节]</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment">//    int32_t color[3];//[隐写数据位color[0]color[1]color[2] - 每个4字节]</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="comment">//    int32_t change;//[隐写数据位change - 4字节]</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="comment">//    int32_t step_buf;//[隐写数据位step_buf - 4字节]</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="comment">// }key_frame_t;</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="comment">//percentage参数的标定使得可以运行多种隐写模式,实现多种操作,隐写模式类型如下,枚举选择需要的隐写模式</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="foldopen" id="foldopen00124" data-start="{" data-end="};">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956da">  124</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>   <span class="comment">//隐写模式:映射 - [警告:只有隐写关键帧设置在目标关键帧之后数据才能运行]映射内存中的数据以填充任意关键帧</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>   <span class="comment">//x y color[3] change 存储要读取的内存地址(为NULL的不读取),根据x(隐写数据位x)地址读到的数据根据映射关系映射到目标关键帧数据单元的x成员上,以此类推</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>   <span class="comment">//step_buf不同,存储的是要映射到的对象关键帧在key_frame_database的角标</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa8744e3d869b8cf9ef3e032003f38536f">  128</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa8744e3d869b8cf9ef3e032003f38536f">STEGANOGRAPHY_MODE_MAPPING_EQUATION</a> = <a class="code hl_define" href="sevetest30___u_i_8h.html#ad791f106f61ad6d7f1437e6c64a1984c">CARTOON_KEY_FRAME_PCT_MAX</a> + 1, <span class="comment">//相等映射,映射关系为相等,源数据直接覆盖目标位置</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa7e6e92ee5e4520439cc56ebdc81870cb">  129</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa7e6e92ee5e4520439cc56ebdc81870cb">STEGANOGRAPHY_MODE_MAPPING_ADDITION</a>,<span class="comment">//加法映射,覆盖目标位置的值为 [映射前目标位置的值 加上 源数据]</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa3ac0fe939f1b0a34fb966ed2043a2cc4">  130</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa3ac0fe939f1b0a34fb966ed2043a2cc4">STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION</a>,<span class="comment">//减法映射,覆盖目标位置的值为 [映射前目标位置的值 减去 源数据]</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa894add0a4c457f4d0de9ae978e880074">  131</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa894add0a4c457f4d0de9ae978e880074">STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION</a>,<span class="comment">//乘法映射,覆盖目标位置的值为[映射前目标位置的值 乘上 源数据]</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa28431eccbb9adaa9435067f5488438b6">  132</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa28431eccbb9adaa9435067f5488438b6">STEGANOGRAPHY_MODE_MAPPING_DIVISION</a>,<span class="comment">//除法映射,覆盖目标位置的值为[映射前目标位置的值 除以 源数据]</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}<a class="code hl_enumeration" href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956da">steganography_mode_t</a>;<span class="comment">//隐写操作模式类型</span></div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="comment">//动画关键帧类型</span></div>
+<div class="foldopen" id="foldopen00138" data-start="{" data-end="};">
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="structkey__frame__t.html">  138</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structkey__frame__t.html">key_frame_t</a> {</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#a04721801ddd46317bda1cacbcd576e91">  139</a></span>   <a class="code hl_enumeration" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a> <a class="code hl_variable" href="structkey__frame__t.html#a04721801ddd46317bda1cacbcd576e91">frame_attribute</a>;<span class="comment">//关键帧属性</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#a5ba0f9cb314396aee484d7a5b8baceb0">  140</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#a5ba0f9cb314396aee484d7a5b8baceb0">percentage</a>;<span class="comment">//关键帧百分位置,取值0-[CARTOON_KEY_FRAME_PCT_MAX],表示播放步数百分比(末两位数表示小数部分)</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#ade0b9ac93ff22cabafc6bf50c18ad254">  141</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#ade0b9ac93ff22cabafc6bf50c18ad254">step_buf</a>;<span class="comment">//关键帧步位置缓存,该关键帧在第step步映射(可为0)       </span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#a12c0378189b8b3f42dea21bdb1dc7919">  142</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#a12c0378189b8b3f42dea21bdb1dc7919">x</a>;<span class="comment">//x轴坐标</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#a92edb167faa486c265537090441a7d6f">  143</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#a92edb167faa486c265537090441a7d6f">y</a>;<span class="comment">//y轴坐标</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#ac1b15873dbdc184bcde1b6e0ae810f5d">  144</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#ac1b15873dbdc184bcde1b6e0ae810f5d">color</a>[3];<span class="comment">//颜色</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="structkey__frame__t.html#ad5856d17691d44016c341358d16dd26a">  145</a></span>   int32_t <a class="code hl_variable" href="structkey__frame__t.html#ad5856d17691d44016c341358d16dd26a">change</a>;<span class="comment">//亮度</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ae836217a54a5b4c49bb6372f40a550ac">  146</a></span>}<a class="code hl_struct" href="structkey__frame__t.html">key_frame_t</a>;</div>
+</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="comment">//动画计划类型</span></div>
+<div class="foldopen" id="foldopen00151" data-start="{" data-end="};">
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html">  151</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structcartoon__plan__t.html">cartoon_plan_t</a> {</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#a70fa9b63ca21ab1cb23b6235bdce5984">  152</a></span>   <a class="code hl_struct" href="structkey__frame__t.html">key_frame_t</a>* <a class="code hl_variable" href="structcartoon__plan__t.html#a70fa9b63ca21ab1cb23b6235bdce5984">key_frame_database</a>;<span class="comment">//动画计划关键帧数据库   </span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#a23904beb6bf0def3af78ddaad50f5e57">  153</a></span>   <span class="keywordtype">bool</span> <a class="code hl_variable" href="structcartoon__plan__t.html#a23904beb6bf0def3af78ddaad50f5e57">x_en</a>;<span class="comment">//启用x轴坐标控制</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#a65962bcc60030c656ffc531d069cfddb">  154</a></span>   <span class="keywordtype">bool</span> <a class="code hl_variable" href="structcartoon__plan__t.html#a65962bcc60030c656ffc531d069cfddb">y_en</a>;<span class="comment">//启用y轴坐标控制</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#aed705fa7beffc009b9a2e5c75ec999e0">  155</a></span>   <span class="keywordtype">bool</span> <a class="code hl_variable" href="structcartoon__plan__t.html#aed705fa7beffc009b9a2e5c75ec999e0">color_en</a>;<span class="comment">//启用颜色控制</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#a999a76e96763a1bfcebb96d891289edf">  156</a></span>   <span class="keywordtype">bool</span> <a class="code hl_variable" href="structcartoon__plan__t.html#a999a76e96763a1bfcebb96d891289edf">change_en</a>;<span class="comment">//启用亮度控制</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#abd59ea8722bcae2e2a74faca7c2c6ba9">  157</a></span>   uint32_t <a class="code hl_variable" href="structcartoon__plan__t.html#abd59ea8722bcae2e2a74faca7c2c6ba9">total_key_frame</a>;<span class="comment">//实际总关键帧数缓存(私有缓存,用户函数请勿赋值)</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="structcartoon__plan__t.html#add97917ca1cdf01b36f6cf15bedb67b5">  158</a></span>   uint32_t <a class="code hl_variable" href="structcartoon__plan__t.html#add97917ca1cdf01b36f6cf15bedb67b5">total_step_buf</a>;<span class="comment">//实际总步数缓存(私有缓存,用户函数请勿赋值) </span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a8e9a4468d268c720e6776cdbd91bf14a">  159</a></span>}<a class="code hl_struct" href="structcartoon__plan__t.html">cartoon_plan_t</a>;</div>
+</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="comment">//动画生成回调函数类型,根据动画计划转换为控制参量表格式</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#ad991613a2204caa270ce8d3ce16a17f6">  164</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="sevetest30___u_i_8h.html#ad991613a2204caa270ce8d3ce16a17f6">cartoon_create_callback_func_t</a>)(int, int32_t);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="comment">//动画控制钩子类型,用于控制和运用动画参量</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a0bc600f38331b4acbf6716c0e4ff772f">  167</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="sevetest30___u_i_8h.html#a0bc600f38331b4acbf6716c0e4ff772f">cartoon_ctrl_hook_func_t</a>)(int, <a class="code hl_struct" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a>*);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="foldopen" id="foldopen00170" data-start="{" data-end="};">
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="structcartoon__support__t.html">  170</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structcartoon__support__t.html">cartoon_support_t</a> {</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="structcartoon__support__t.html#a17689d6b40789a632e4b467800f68138">  171</a></span>   <a class="code hl_struct" href="structcartoon__plan__t.html">cartoon_plan_t</a> <a class="code hl_variable" href="structcartoon__support__t.html#a17689d6b40789a632e4b467800f68138">cartoon_plan</a>;<span class="comment">//动画计划,需要提前设置</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="structcartoon__support__t.html#a2dad4f18126dfadee4177b604573f538">  172</a></span>   <a class="code hl_struct" href="structcartoon__ctrl__param__t.html">cartoon_ctrl_param_t</a>* <a class="code hl_variable" href="structcartoon__support__t.html#a2dad4f18126dfadee4177b604573f538">ctrl_param_list</a>;<span class="comment">//控制参量表,不同处理策略的控制参量表,钩子和回调都不一</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="structcartoon__support__t.html#a38f3bb6b5c5280ef788e28cc66cf6888">  173</a></span>   <a class="code hl_typedef" href="sevetest30___u_i_8h.html#ad991613a2204caa270ce8d3ce16a17f6">cartoon_create_callback_func_t</a> <a class="code hl_variable" href="structcartoon__support__t.html#a38f3bb6b5c5280ef788e28cc66cf6888">create_callback</a>;<span class="comment">//动画生成回调,不同处理策略的控制参量表,钩子和回调都不一</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="structcartoon__support__t.html#a128d932d98718b9f813b2e7727805dce">  174</a></span>   <a class="code hl_typedef" href="sevetest30___u_i_8h.html#a0bc600f38331b4acbf6716c0e4ff772f">cartoon_ctrl_hook_func_t</a> <a class="code hl_variable" href="structcartoon__support__t.html#a128d932d98718b9f813b2e7727805dce">ctrl_hook</a>;<span class="comment">//动画控制的钩子函数,不同处理策略的控制参量表,钩子和回调都不一 </span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a6353d6a9f996b5a5495a92c8edb0d1bf">  175</a></span>}<a class="code hl_struct" href="structcartoon__support__t.html">cartoon_support_t</a>;</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">  177</a></span><span class="keyword">typedef</span> <a class="code hl_struct" href="structcartoon__support__t.html">cartoon_support_t</a>* <a class="code hl_typedef" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="foldopen" id="foldopen00180" data-start="{" data-end="};">
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">  180</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4a4ca2b3be91d8aa9416a3affc9ac64a29">  181</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4a4ca2b3be91d8aa9416a3affc9ac64a29">CARTOON_RUN_MODE_PRE_RENDER</a> = 0,<span class="comment">//预渲染,在动画运行前保存每步图像到参量表,适合时长短且关键帧数量非常多的动画计划(比较消耗内存)</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4aca61a0dfebb5be0cb5c64e91269eac2e">  182</a></span>   <a class="code hl_enumvalue" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4aca61a0dfebb5be0cb5c64e91269eac2e">CARTOON_RUN_MODE_REAL_TIME_RENDER</a>,<span class="comment">//实时渲染,在动画运行时,钩子函数直接通过关键帧的数据实时渲染,适合简单常规的动画计划(动画运行时比较占用CPU)</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>}<a class="code hl_enumeration" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">cartoon_run_mode_t</a>;</div>
+</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <span class="keyword">volatile</span> <a class="code hl_variable" href="sevetest30___u_i_8h.html#a989913e89b959169beea7e3c60b301c2">sevetest30_fft_ui_running_flag</a>;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span><span class="comment">// 数据可视化函数</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#ac187e07e4c3977c4e5b8a476e323584f">data_to_color</a>(<span class="keywordtype">int</span> data, <a class="code hl_struct" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a>* visual_cfg, uint8_t* high, uint8_t* comfort, uint8_t* low);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#a8b639bb35cee3220c3fc491ea43b4b1a">temp_to_color</a>(<span class="keywordtype">int</span> temp, uint8_t <a class="code hl_function" href="sevetest30___led_array_8h.html#a56a0725fa7f743bec9d665033a24faec">value_max</a>, uint8_t* high, uint8_t* comfort, uint8_t* low);</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="comment">//动画支持适配函数-模式:预渲染</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#ac08a046e47d13126ab0310ebc48448ae">_PRE_RENDER_create_callback</a>(<a class="code hl_struct" href="structcartoon__support__t.html">cartoon_handle_t</a> handle, int32_t total_step);</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#a53dfc9cdddc366dcc67104bb902f06c0">_PRE_RENDER_ctrl_hook</a>(<a class="code hl_struct" href="structcartoon__support__t.html">cartoon_handle_t</a> handle, <a class="code hl_struct" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a>* <span class="keywordtype">object</span>);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="comment">//动画支持通用函数</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><a class="code hl_struct" href="structcartoon__support__t.html">cartoon_handle_t</a> <a class="code hl_function" href="sevetest30___u_i_8h.html#aa7a885036d18b783c0a8c197b315f48d">cartoon_new</a>(<a class="code hl_enumeration" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">cartoon_run_mode_t</a> run_mode, <span class="keywordtype">bool</span> en_x, <span class="keywordtype">bool</span> en_y, <span class="keywordtype">bool</span> en_color, <span class="keywordtype">bool</span> en_change, <span class="keywordtype">int</span> key_frame_max);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#ac41453cde0c1bea6c30f76de15070247">cartoon_delete</a>(<a class="code hl_struct" href="structcartoon__support__t.html">cartoon_handle_t</a> handle);</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>uint32_t <a class="code hl_function" href="sevetest30___u_i_8h.html#a1536783b2411dcb1685f8571928fd542">add_new_key_frame</a>(<a class="code hl_struct" href="structcartoon__support__t.html">cartoon_handle_t</a> handle, <a class="code hl_enumeration" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a> attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#ac4c62dec526b28bf5f5b989dbbbc6178">weather_UI_1</a>(int16_t x, int16_t y, uint8_t change);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#a838cbb7bad8b790ff2b70ba268c3d8bd">time_UI_1</a>(int16_t x, int16_t y, uint8_t change);</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#afc972054f7b59c25e7643fe7727284bd">time_UI_2</a>(int16_t x, int16_t y, uint8_t change);</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#ad24016a691cd754d328ec3fd0a5410ea">music_FFT_UI_draw</a>(<a class="code hl_struct" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a>* UI_cfg);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#a4a82bff7665b62dd0ee3c1e052312072">main_UI_1</a>();</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="keywordtype">void</span> <a class="code hl_function" href="sevetest30___u_i_8h.html#af2e03be5d25fd5712b669758ede936e7">music_FFT_UI_start</a>(<a class="code hl_struct" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a>* UI_cfg, UBaseType_t priority);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="ttc" id="aboard__ctrl_8h_html"><div class="ttname"><a href="board__ctrl_8h.html">board_ctrl.h</a></div></div>
+<div class="ttc" id="asevetest30___led_array_8h_html_a56a0725fa7f743bec9d665033a24faec"><div class="ttname"><a href="sevetest30___led_array_8h.html#a56a0725fa7f743bec9d665033a24faec">value_max</a></div><div class="ttdeci">double value_max(double value1, double value2, double value3)</div><div class="ttdef"><b>Definition</b> sevetest30_LedArray.c:1301</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a0bc600f38331b4acbf6716c0e4ff772f"><div class="ttname"><a href="sevetest30___u_i_8h.html#a0bc600f38331b4acbf6716c0e4ff772f">cartoon_ctrl_hook_func_t</a></div><div class="ttdeci">void(* cartoon_ctrl_hook_func_t)(int, cartoon_ctrl_object_t *)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:167</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a1536783b2411dcb1685f8571928fd542"><div class="ttname"><a href="sevetest30___u_i_8h.html#a1536783b2411dcb1685f8571928fd542">add_new_key_frame</a></div><div class="ttdeci">uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change)</div><div class="ttdoc">添加新的关键帧到动画中(建议先添加渲染关键帧,后添加非渲染关键帧)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:298</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a189526d747bc8196b1ceace8c6be0ba4"><div class="ttname"><a href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">cartoon_run_mode_t</a></div><div class="ttdeci">cartoon_run_mode_t</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:180</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a189526d747bc8196b1ceace8c6be0ba4a4ca2b3be91d8aa9416a3affc9ac64a29"><div class="ttname"><a href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4a4ca2b3be91d8aa9416a3affc9ac64a29">CARTOON_RUN_MODE_PRE_RENDER</a></div><div class="ttdeci">@ CARTOON_RUN_MODE_PRE_RENDER</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:181</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a189526d747bc8196b1ceace8c6be0ba4aca61a0dfebb5be0cb5c64e91269eac2e"><div class="ttname"><a href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4aca61a0dfebb5be0cb5c64e91269eac2e">CARTOON_RUN_MODE_REAL_TIME_RENDER</a></div><div class="ttdeci">@ CARTOON_RUN_MODE_REAL_TIME_RENDER</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:182</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a4a82bff7665b62dd0ee3c1e052312072"><div class="ttname"><a href="sevetest30___u_i_8h.html#a4a82bff7665b62dd0ee3c1e052312072">main_UI_1</a></div><div class="ttdeci">void main_UI_1()</div><div class="ttdoc">主界面，所有UI页面的上层级</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:17019</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a53dfc9cdddc366dcc67104bb902f06c0"><div class="ttname"><a href="sevetest30___u_i_8h.html#a53dfc9cdddc366dcc67104bb902f06c0">_PRE_RENDER_ctrl_hook</a></div><div class="ttdeci">void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t *object)</div><div class="ttdoc">预渲染运行模式-动画运行控制钩子</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:177</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956da"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956da">steganography_mode_t</a></div><div class="ttdeci">steganography_mode_t</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:124</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956daa28431eccbb9adaa9435067f5488438b6"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa28431eccbb9adaa9435067f5488438b6">STEGANOGRAPHY_MODE_MAPPING_DIVISION</a></div><div class="ttdeci">@ STEGANOGRAPHY_MODE_MAPPING_DIVISION</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:132</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956daa3ac0fe939f1b0a34fb966ed2043a2cc4"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa3ac0fe939f1b0a34fb966ed2043a2cc4">STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION</a></div><div class="ttdeci">@ STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:130</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956daa7e6e92ee5e4520439cc56ebdc81870cb"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa7e6e92ee5e4520439cc56ebdc81870cb">STEGANOGRAPHY_MODE_MAPPING_ADDITION</a></div><div class="ttdeci">@ STEGANOGRAPHY_MODE_MAPPING_ADDITION</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:129</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956daa8744e3d869b8cf9ef3e032003f38536f"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa8744e3d869b8cf9ef3e032003f38536f">STEGANOGRAPHY_MODE_MAPPING_EQUATION</a></div><div class="ttdeci">@ STEGANOGRAPHY_MODE_MAPPING_EQUATION</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:128</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a5b97add21a53284854bfb8c3cd7956daa894add0a4c457f4d0de9ae978e880074"><div class="ttname"><a href="sevetest30___u_i_8h.html#a5b97add21a53284854bfb8c3cd7956daa894add0a4c457f4d0de9ae978e880074">STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION</a></div><div class="ttdeci">@ STEGANOGRAPHY_MODE_MAPPING_MULTIPLICATION</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:131</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a62944b735214a319f7aa83ce4214b8fd"><div class="ttname"><a href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a></div><div class="ttdeci">cartoon_support_t * cartoon_handle_t</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:177</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a838cbb7bad8b790ff2b70ba268c3d8bd"><div class="ttname"><a href="sevetest30___u_i_8h.html#a838cbb7bad8b790ff2b70ba268c3d8bd">time_UI_1</a></div><div class="ttdeci">void time_UI_1(int16_t x, int16_t y, uint8_t change)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:16732</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a8b639bb35cee3220c3fc491ea43b4b1a"><div class="ttname"><a href="sevetest30___u_i_8h.html#a8b639bb35cee3220c3fc491ea43b4b1a">temp_to_color</a></div><div class="ttdeci">void temp_to_color(int temp, uint8_t value_max, uint8_t *high, uint8_t *comfort, uint8_t *low)</div><div class="ttdoc">将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:346</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_a989913e89b959169beea7e3c60b301c2"><div class="ttname"><a href="sevetest30___u_i_8h.html#a989913e89b959169beea7e3c60b301c2">sevetest30_fft_ui_running_flag</a></div><div class="ttdeci">bool volatile sevetest30_fft_ui_running_flag</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_aa7a885036d18b783c0a8c197b315f48d"><div class="ttname"><a href="sevetest30___u_i_8h.html#aa7a885036d18b783c0a8c197b315f48d">cartoon_new</a></div><div class="ttdeci">cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, bool en_color, bool en_change, int key_frame_max)</div><div class="ttdoc">创建新动画</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:217</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ac08a046e47d13126ab0310ebc48448ae"><div class="ttname"><a href="sevetest30___u_i_8h.html#ac08a046e47d13126ab0310ebc48448ae">_PRE_RENDER_create_callback</a></div><div class="ttdeci">void _PRE_RENDER_create_callback(cartoon_handle_t handle, int32_t total_step)</div><div class="ttdoc">预渲染运行模式-动画生成回调</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:127</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ac187e07e4c3977c4e5b8a476e323584f"><div class="ttname"><a href="sevetest30___u_i_8h.html#ac187e07e4c3977c4e5b8a476e323584f">data_to_color</a></div><div class="ttdeci">void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high, uint8_t *comfort, uint8_t *low)</div><div class="ttdoc">将数据大小体现在颜色上</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:380</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ac41453cde0c1bea6c30f76de15070247"><div class="ttname"><a href="sevetest30___u_i_8h.html#ac41453cde0c1bea6c30f76de15070247">cartoon_delete</a></div><div class="ttdeci">void cartoon_delete(cartoon_handle_t handle)</div><div class="ttdoc">删除动画</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:272</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ac4c62dec526b28bf5f5b989dbbbc6178"><div class="ttname"><a href="sevetest30___u_i_8h.html#ac4c62dec526b28bf5f5b989dbbbc6178">weather_UI_1</a></div><div class="ttdeci">void weather_UI_1(int16_t x, int16_t y, uint8_t change)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:409</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad24016a691cd754d328ec3fd0a5410ea"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad24016a691cd754d328ec3fd0a5410ea">music_FFT_UI_draw</a></div><div class="ttdeci">void music_FFT_UI_draw(music_FFT_UI_cfg_t *UI_cfg)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:16999</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920a"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a></div><div class="ttdeci">key_frame_attr_t</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:98</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aa45ca6fdc046c7887806c0ed1de9531a8"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa45ca6fdc046c7887806c0ed1de9531a8">KEY_FRAME_ATTR_LINEAR</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_LINEAR</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:100</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aa4b1856e7c185d54181594219e0906918"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa4b1856e7c185d54181594219e0906918">KEY_FRAME_ATTR_FITTING</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_FITTING</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:105</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aa59fd9bb03d46e65c80f6f4a3e3fcec4b"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa59fd9bb03d46e65c80f6f4a3e3fcec4b">KEY_FRAME_ATTR_EASE_IN</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_EASE_IN</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:101</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aa6e0fd8992646f3db253a02d69821dc3e"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa6e0fd8992646f3db253a02d69821dc3e">KEY_FRAME_ATTR_EASE_OUT</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_EASE_OUT</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:102</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aa70613754b15171e6018dd6562c3f7d18"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aa70613754b15171e6018dd6562c3f7d18">KEY_FRAME_ATTR_STEGANOGRAPHY</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_STEGANOGRAPHY</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:107</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aabcb1928884d493b015569b47a20144bf"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aabcb1928884d493b015569b47a20144bf">KEY_FRAME_ATTR_CONTINUOUS</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_CONTINUOUS</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:103</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad266f74dd78f4b0275efd7127d54920aaecd32d1cc5fde4d7b1d8ebde72e84127"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920aaecd32d1cc5fde4d7b1d8ebde72e84127">KEY_FRAME_ATTR_HOLD</a></div><div class="ttdeci">@ KEY_FRAME_ATTR_HOLD</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:104</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad791f106f61ad6d7f1437e6c64a1984c"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad791f106f61ad6d7f1437e6c64a1984c">CARTOON_KEY_FRAME_PCT_MAX</a></div><div class="ttdeci">#define CARTOON_KEY_FRAME_PCT_MAX</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:55</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_ad991613a2204caa270ce8d3ce16a17f6"><div class="ttname"><a href="sevetest30___u_i_8h.html#ad991613a2204caa270ce8d3ce16a17f6">cartoon_create_callback_func_t</a></div><div class="ttdeci">void(* cartoon_create_callback_func_t)(int, int32_t)</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:164</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_af2e03be5d25fd5712b669758ede936e7"><div class="ttname"><a href="sevetest30___u_i_8h.html#af2e03be5d25fd5712b669758ede936e7">music_FFT_UI_start</a></div><div class="ttdeci">void music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg, UBaseType_t priority)</div><div class="ttdoc">启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:16793</div></div>
+<div class="ttc" id="asevetest30___u_i_8h_html_afc972054f7b59c25e7643fe7727284bd"><div class="ttname"><a href="sevetest30___u_i_8h.html#afc972054f7b59c25e7643fe7727284bd">time_UI_2</a></div><div class="ttdeci">void time_UI_2(int16_t x, int16_t y, uint8_t change)</div><div class="ttdoc">显示了当前系统时间 秒</div><div class="ttdef"><b>Definition</b> sevetest30_UI.c:16764</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:58</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a0e80c7452da8d2116b2430b206f97612"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a0e80c7452da8d2116b2430b206f97612">UI_color_visual_cfg_t::public_divisor</a></div><div class="ttdeci">int public_divisor</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:63</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a2778ca00354edfef410e54aea98be321"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a2778ca00354edfef410e54aea98be321">UI_color_visual_cfg_t::x_move</a></div><div class="ttdeci">float x_move</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:65</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a45a8fc657753ebdace63c7b2a459bf56"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a45a8fc657753ebdace63c7b2a459bf56">UI_color_visual_cfg_t::value_max</a></div><div class="ttdeci">uint8_t value_max</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:59</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a53d5401d2e760024bcf14b3a9dbdcf62"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a53d5401d2e760024bcf14b3a9dbdcf62">UI_color_visual_cfg_t::low</a></div><div class="ttdeci">int low</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:62</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a6e88c7fee046e40591ee1a9817089bbc"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a6e88c7fee046e40591ee1a9817089bbc">UI_color_visual_cfg_t::medium</a></div><div class="ttdeci">int medium</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:61</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a88a3fffdca8dddde56701c5bb88d1cdd"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a88a3fffdca8dddde56701c5bb88d1cdd">UI_color_visual_cfg_t::x_multiples</a></div><div class="ttdeci">float x_multiples</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:64</div></div>
+<div class="ttc" id="astruct_u_i__color__visual__cfg__t_html_a8f32ce4adda20edea0b82f664c2c4a4d"><div class="ttname"><a href="struct_u_i__color__visual__cfg__t.html#a8f32ce4adda20edea0b82f664c2c4a4d">UI_color_visual_cfg_t::high</a></div><div class="ttdeci">int high</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:60</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html"><div class="ttname"><a href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:88</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html_a092f870455d5bcaddbfeda083ed21cb0"><div class="ttname"><a href="structcartoon__ctrl__object__t.html#a092f870455d5bcaddbfeda083ed21cb0">cartoon_ctrl_object_t::py</a></div><div class="ttdeci">int32_t * py</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:91</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html_a2812ad8960e8885ac5b20bf18ad02c3b"><div class="ttname"><a href="structcartoon__ctrl__object__t.html#a2812ad8960e8885ac5b20bf18ad02c3b">cartoon_ctrl_object_t::pcolor</a></div><div class="ttdeci">uint8_t * pcolor</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:92</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html_a4d376bf1ce8c36e692325dec3b4c5f34"><div class="ttname"><a href="structcartoon__ctrl__object__t.html#a4d376bf1ce8c36e692325dec3b4c5f34">cartoon_ctrl_object_t::pstep</a></div><div class="ttdeci">uint32_t * pstep</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:89</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html_a4ecc08b32613cc5943c5ca5aa685bb31"><div class="ttname"><a href="structcartoon__ctrl__object__t.html#a4ecc08b32613cc5943c5ca5aa685bb31">cartoon_ctrl_object_t::pchange</a></div><div class="ttdeci">uint8_t * pchange</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:93</div></div>
+<div class="ttc" id="astructcartoon__ctrl__object__t_html_ab1f68d07dd6d1de105a4b779eba1c85e"><div class="ttname"><a href="structcartoon__ctrl__object__t.html#ab1f68d07dd6d1de105a4b779eba1c85e">cartoon_ctrl_object_t::px</a></div><div class="ttdeci">int32_t * px</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:90</div></div>
+<div class="ttc" id="astructcartoon__ctrl__param__t_html"><div class="ttname"><a href="structcartoon__ctrl__param__t.html">cartoon_ctrl_param_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:79</div></div>
+<div class="ttc" id="astructcartoon__ctrl__param__t_html_a1fe3a0e9c809b9b32edc3c9a537e6716"><div class="ttname"><a href="structcartoon__ctrl__param__t.html#a1fe3a0e9c809b9b32edc3c9a537e6716">cartoon_ctrl_param_t::y</a></div><div class="ttdeci">int32_t y</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:81</div></div>
+<div class="ttc" id="astructcartoon__ctrl__param__t_html_a20c54fc8030acc24e9532f1589241139"><div class="ttname"><a href="structcartoon__ctrl__param__t.html#a20c54fc8030acc24e9532f1589241139">cartoon_ctrl_param_t::color</a></div><div class="ttdeci">uint8_t color[3]</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:82</div></div>
+<div class="ttc" id="astructcartoon__ctrl__param__t_html_a3245d33b5f4135ff7d94dfffb4c426ef"><div class="ttname"><a href="structcartoon__ctrl__param__t.html#a3245d33b5f4135ff7d94dfffb4c426ef">cartoon_ctrl_param_t::x</a></div><div class="ttdeci">int32_t x</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:80</div></div>
+<div class="ttc" id="astructcartoon__ctrl__param__t_html_a627527527d31078b8df461cf73fc7694"><div class="ttname"><a href="structcartoon__ctrl__param__t.html#a627527527d31078b8df461cf73fc7694">cartoon_ctrl_param_t::change</a></div><div class="ttdeci">uint8_t change</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:83</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html"><div class="ttname"><a href="structcartoon__plan__t.html">cartoon_plan_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:151</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_a23904beb6bf0def3af78ddaad50f5e57"><div class="ttname"><a href="structcartoon__plan__t.html#a23904beb6bf0def3af78ddaad50f5e57">cartoon_plan_t::x_en</a></div><div class="ttdeci">bool x_en</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:153</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_a65962bcc60030c656ffc531d069cfddb"><div class="ttname"><a href="structcartoon__plan__t.html#a65962bcc60030c656ffc531d069cfddb">cartoon_plan_t::y_en</a></div><div class="ttdeci">bool y_en</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:154</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_a70fa9b63ca21ab1cb23b6235bdce5984"><div class="ttname"><a href="structcartoon__plan__t.html#a70fa9b63ca21ab1cb23b6235bdce5984">cartoon_plan_t::key_frame_database</a></div><div class="ttdeci">key_frame_t * key_frame_database</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:152</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_a999a76e96763a1bfcebb96d891289edf"><div class="ttname"><a href="structcartoon__plan__t.html#a999a76e96763a1bfcebb96d891289edf">cartoon_plan_t::change_en</a></div><div class="ttdeci">bool change_en</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:156</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_abd59ea8722bcae2e2a74faca7c2c6ba9"><div class="ttname"><a href="structcartoon__plan__t.html#abd59ea8722bcae2e2a74faca7c2c6ba9">cartoon_plan_t::total_key_frame</a></div><div class="ttdeci">uint32_t total_key_frame</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:157</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_add97917ca1cdf01b36f6cf15bedb67b5"><div class="ttname"><a href="structcartoon__plan__t.html#add97917ca1cdf01b36f6cf15bedb67b5">cartoon_plan_t::total_step_buf</a></div><div class="ttdeci">uint32_t total_step_buf</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:158</div></div>
+<div class="ttc" id="astructcartoon__plan__t_html_aed705fa7beffc009b9a2e5c75ec999e0"><div class="ttname"><a href="structcartoon__plan__t.html#aed705fa7beffc009b9a2e5c75ec999e0">cartoon_plan_t::color_en</a></div><div class="ttdeci">bool color_en</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:155</div></div>
+<div class="ttc" id="astructcartoon__support__t_html"><div class="ttname"><a href="structcartoon__support__t.html">cartoon_support_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:170</div></div>
+<div class="ttc" id="astructcartoon__support__t_html_a128d932d98718b9f813b2e7727805dce"><div class="ttname"><a href="structcartoon__support__t.html#a128d932d98718b9f813b2e7727805dce">cartoon_support_t::ctrl_hook</a></div><div class="ttdeci">cartoon_ctrl_hook_func_t ctrl_hook</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:174</div></div>
+<div class="ttc" id="astructcartoon__support__t_html_a17689d6b40789a632e4b467800f68138"><div class="ttname"><a href="structcartoon__support__t.html#a17689d6b40789a632e4b467800f68138">cartoon_support_t::cartoon_plan</a></div><div class="ttdeci">cartoon_plan_t cartoon_plan</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:171</div></div>
+<div class="ttc" id="astructcartoon__support__t_html_a2dad4f18126dfadee4177b604573f538"><div class="ttname"><a href="structcartoon__support__t.html#a2dad4f18126dfadee4177b604573f538">cartoon_support_t::ctrl_param_list</a></div><div class="ttdeci">cartoon_ctrl_param_t * ctrl_param_list</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:172</div></div>
+<div class="ttc" id="astructcartoon__support__t_html_a38f3bb6b5c5280ef788e28cc66cf6888"><div class="ttname"><a href="structcartoon__support__t.html#a38f3bb6b5c5280ef788e28cc66cf6888">cartoon_support_t::create_callback</a></div><div class="ttdeci">cartoon_create_callback_func_t create_callback</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:173</div></div>
+<div class="ttc" id="astructkey__frame__t_html"><div class="ttname"><a href="structkey__frame__t.html">key_frame_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:138</div></div>
+<div class="ttc" id="astructkey__frame__t_html_a04721801ddd46317bda1cacbcd576e91"><div class="ttname"><a href="structkey__frame__t.html#a04721801ddd46317bda1cacbcd576e91">key_frame_t::frame_attribute</a></div><div class="ttdeci">key_frame_attr_t frame_attribute</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:139</div></div>
+<div class="ttc" id="astructkey__frame__t_html_a12c0378189b8b3f42dea21bdb1dc7919"><div class="ttname"><a href="structkey__frame__t.html#a12c0378189b8b3f42dea21bdb1dc7919">key_frame_t::x</a></div><div class="ttdeci">int32_t x</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:142</div></div>
+<div class="ttc" id="astructkey__frame__t_html_a5ba0f9cb314396aee484d7a5b8baceb0"><div class="ttname"><a href="structkey__frame__t.html#a5ba0f9cb314396aee484d7a5b8baceb0">key_frame_t::percentage</a></div><div class="ttdeci">int32_t percentage</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:140</div></div>
+<div class="ttc" id="astructkey__frame__t_html_a92edb167faa486c265537090441a7d6f"><div class="ttname"><a href="structkey__frame__t.html#a92edb167faa486c265537090441a7d6f">key_frame_t::y</a></div><div class="ttdeci">int32_t y</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:143</div></div>
+<div class="ttc" id="astructkey__frame__t_html_ac1b15873dbdc184bcde1b6e0ae810f5d"><div class="ttname"><a href="structkey__frame__t.html#ac1b15873dbdc184bcde1b6e0ae810f5d">key_frame_t::color</a></div><div class="ttdeci">int32_t color[3]</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:144</div></div>
+<div class="ttc" id="astructkey__frame__t_html_ad5856d17691d44016c341358d16dd26a"><div class="ttname"><a href="structkey__frame__t.html#ad5856d17691d44016c341358d16dd26a">key_frame_t::change</a></div><div class="ttdeci">int32_t change</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:145</div></div>
+<div class="ttc" id="astructkey__frame__t_html_ade0b9ac93ff22cabafc6bf50c18ad254"><div class="ttname"><a href="structkey__frame__t.html#ade0b9ac93ff22cabafc6bf50c18ad254">key_frame_t::step_buf</a></div><div class="ttdeci">int32_t step_buf</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:141</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a></div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:69</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_aa09dc98b4f5168e86115d76d0079aaf0"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#aa09dc98b4f5168e86115d76d0079aaf0">music_FFT_UI_cfg_t::y</a></div><div class="ttdeci">int16_t y</div><div class="ttdoc">起始位置X坐标</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:71</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_aa5cf8d790305e205a63fb90295abe514"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#aa5cf8d790305e205a63fb90295abe514">music_FFT_UI_cfg_t::x</a></div><div class="ttdeci">int16_t x</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:70</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_ab879d5a5b74b2aed966bba14d0c26952"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#ab879d5a5b74b2aed966bba14d0c26952">music_FFT_UI_cfg_t::visual_cfg</a></div><div class="ttdeci">UI_color_visual_cfg_t visual_cfg</div><div class="ttdoc">显示高度 会裁切不在显示高度的图谱</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:75</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_acb0ea3a869f4bd6afd7df87396d27d1e"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#acb0ea3a869f4bd6afd7df87396d27d1e">music_FFT_UI_cfg_t::width</a></div><div class="ttdeci">int width</div><div class="ttdoc">亮度调制</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:73</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_ad7b953c48b209d31aca006d9adc7f896"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#ad7b953c48b209d31aca006d9adc7f896">music_FFT_UI_cfg_t::change</a></div><div class="ttdeci">uint8_t change</div><div class="ttdoc">起始位置Y坐标</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:72</div></div>
+<div class="ttc" id="astructmusic___f_f_t___u_i__cfg__t_html_ad93cd2afe2db5b6b9585490be6e4fe2c"><div class="ttname"><a href="structmusic___f_f_t___u_i__cfg__t.html#ad93cd2afe2db5b6b9585490be6e4fe2c">music_FFT_UI_cfg_t::height</a></div><div class="ttdeci">int height</div><div class="ttdoc">视口宽度 图谱显示会自动适应视口宽度</div><div class="ttdef"><b>Definition</b> sevetest30_UI.h:74</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_409f97388efe006bc3438b95e9edef48.html">components</a></li><li class="navelem"><a class="el" href="dir_7c248e60cc65cb3496ca29923b77bb83.html">sevetest30_board</a></li><li class="navelem"><a class="el" href="dir_093d3a29e6ea19b39be97ff26f05d1dd.html">include</a></li><li class="navelem"><a class="el" href="sevetest30___u_i_8h.html">sevetest30_UI.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

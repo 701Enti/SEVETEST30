@@ -1,4 +1,4 @@
-// Copyright 2018-2019 Espressif Systems (Shanghai) PTE LTD
+// Copyright 2018-2023 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ TEST_CASE("dsps_ccorr_f32_ansi functionality", "[dsps]")
     for (size_t la = 1; la < lenA; la++) {
         for (size_t lb = 1; lb < lenB; lb++) {
             for (int i = 0 ; i < lenA ; i++) {
-                inputA[i] = (float)rand() / INT32_MAX;
+                inputA[i] = (float)rand() / (float)INT32_MAX;
             }
             for (int i = 0 ; i < lenB ; i++) {
-                inputB[i] = (float)rand() / INT32_MAX;
+                inputB[i] = (float)rand() / (float)INT32_MAX;
             }
             for (int i = 0 ; i < (lenA + lenB  - 1 + 2); i++) {
                 output_fwd[i] = -1;
@@ -104,9 +104,9 @@ TEST_CASE("dsps_ccorr_f32_ansi benchmark", "[dsps]")
         y[i] = 1000;
     }
 
-    unsigned int start_b = xthal_get_ccount();
+    unsigned int start_b = dsp_get_cpu_cycle_count();
     dsps_ccorr_f32_ansi(x, max_N, y, conv_size, &z[0]);
-    unsigned int end_b = xthal_get_ccount();
+    unsigned int end_b = dsp_get_cpu_cycle_count();
 
     float cycles = end_b - start_b;
     ESP_LOGI(TAG, "dsps_conv_f32_ansi - %f cycles for signal %i and pattern %i", cycles, max_N, conv_size);

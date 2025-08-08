@@ -1,0 +1,7 @@
+<map id="GS_calibration_t" name="GS_calibration_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="117,108,245,133"/>
+<area shape="rect" id="Node000002" href="$struct_g_s__static__calibration__model__t.html" title="地磁传感器静态校准模型(解决固有误差问题,会被存储到Flash,反复使用)" alt="" coords="5,5,164,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,53,170,106,167,110,112,57"/>
+<area shape="rect" id="Node000003" href="$struct_g_s__dynamic__calibration__model__t.html" title="地磁传感器动态校准模型(解决动态误差问题,仅临时变量,不会被存储到Flash)" alt="" coords="189,5,367,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,59,238,86,205,110,202,106,235,82,257,55"/>
+</map>

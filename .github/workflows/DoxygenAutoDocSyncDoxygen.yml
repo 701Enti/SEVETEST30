@@ -1,14 +1,22 @@
+# 自动生成 SEVETEST30 文档(基于Doxygen)
+# 当 SEVETEST30 仓库的关键分支有新的 push/pull&request 时(或者手动触发),自动在 Github 工作流中使用 Doxygen 生成文档,并提交新文档到文档仓库的同名分支
+# 例如 SEVETEST30 名为 A 分支的推送,将触发文档仓库名为 A 分支的更新
+# 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
+# 为保证资源充足,只会为关键分支提供自动文档生成,具体会触发工作流的关键分支在下方"on"中可设置和查看
+# 值得声明的是, SEVETEST30 文档仓库不是私有仓库,您完全可以push个人分支生成的文档到独立分支,甚至可以是您对SEVETEST30的见解等其他任何与SEVETEST30相关的内容,只要您没有影响自动文档或进行不合理的推送
+# 当然,如果您希望自己的分支像关键分支一样可云端部署文档,您可以在本地运行 Doxygen 生成文档,并推送到 SEVETEST30 文档仓库与个人分支同名的分支,之后可联系 SEVETEST30 团队协商,他们管理文档的云端部署
+# 更多信息可参考项目根目录README.md文件 - 文档相关
 name: DoxygenAutoDocSyncDoxygen
 on:
   push:
-    branches: [master]
+    branches: ["master"]
   pull_request:
-    branches: [master]
+    branches: ["master"]
 
   workflow_dispatch:
 
 jobs:
-  build:
+  prepare:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     outputs:
@@ -42,11 +50,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact
+          name: codefile
           path: ./
 
   call-reusable-workflow:
-    needs: build
+    needs: prepare
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
       BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}

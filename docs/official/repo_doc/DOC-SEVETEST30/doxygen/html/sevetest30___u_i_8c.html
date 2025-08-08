@@ -1,0 +1,991 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: main/sevetest30_UI.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('sevetest30___u_i_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">sevetest30_UI.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="sevetest30___u_i_8h_source.html">sevetest30_UI.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sevetest30__sound_8h_source.html">sevetest30_sound.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sevetest30__touch_8h_source.html">sevetest30_touch.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sevetest30___i_w_e_d_a_8h_source.html">sevetest30_IWEDA.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sevetest30___s_w_e_d_a_8h_source.html">sevetest30_SWEDA.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sevetest30___led_array_8h_source.html">sevetest30_LedArray.h</a>&gt;</code><br />
+<code>#include &lt;esp_log.h&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
+<code>#include &lt;esp_random.h&gt;</code><br />
+<code>#include &lt;esp_dsp.h&gt;</code><br />
+<code>#include &lt;audio_mem.h&gt;</code><br />
+<code>#include &lt;board_def.h&gt;</code><br />
+<code>#include &lt;soc/soc_caps.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+sevetest30_UI.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="sevetest30___u_i_8c__incl.svg" width="3372" height="476"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a9aec97c3bc404cc94036981f707a7e31" id="r_a9aec97c3bc404cc94036981f707a7e31"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a9aec97c3bc404cc94036981f707a7e31">LOW_TEMP_MULTIPLE</a>&#160;&#160;&#160;20</td></tr>
+<tr class="separator:a9aec97c3bc404cc94036981f707a7e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aa97e24fea4daabae6b4e5d534ac8066d" id="r_aa97e24fea4daabae6b4e5d534ac8066d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#aa97e24fea4daabae6b4e5d534ac8066d">__attribute__</a> ((aligned(16)))</td></tr>
+<tr class="separator:aa97e24fea4daabae6b4e5d534ac8066d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac08a046e47d13126ab0310ebc48448ae" id="r_ac08a046e47d13126ab0310ebc48448ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ac08a046e47d13126ab0310ebc48448ae">_PRE_RENDER_create_callback</a> (<a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> handle, int32_t total_step)</td></tr>
+<tr class="memdesc:ac08a046e47d13126ab0310ebc48448ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">预渲染运行模式-动画生成回调  <br /></td></tr>
+<tr class="separator:ac08a046e47d13126ab0310ebc48448ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53dfc9cdddc366dcc67104bb902f06c0" id="r_a53dfc9cdddc366dcc67104bb902f06c0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a53dfc9cdddc366dcc67104bb902f06c0">_PRE_RENDER_ctrl_hook</a> (<a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> handle, <a class="el" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a> *object)</td></tr>
+<tr class="memdesc:a53dfc9cdddc366dcc67104bb902f06c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">预渲染运行模式-动画运行控制钩子  <br /></td></tr>
+<tr class="separator:a53dfc9cdddc366dcc67104bb902f06c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7a885036d18b783c0a8c197b315f48d" id="r_aa7a885036d18b783c0a8c197b315f48d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#aa7a885036d18b783c0a8c197b315f48d">cartoon_new</a> (<a class="el" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">cartoon_run_mode_t</a> run_mode, bool en_x, bool en_y, bool en_color, bool en_change, int key_frame_max)</td></tr>
+<tr class="memdesc:aa7a885036d18b783c0a8c197b315f48d"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建新动画  <br /></td></tr>
+<tr class="separator:aa7a885036d18b783c0a8c197b315f48d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac41453cde0c1bea6c30f76de15070247" id="r_ac41453cde0c1bea6c30f76de15070247"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ac41453cde0c1bea6c30f76de15070247">cartoon_delete</a> (<a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> handle)</td></tr>
+<tr class="memdesc:ac41453cde0c1bea6c30f76de15070247"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除动画  <br /></td></tr>
+<tr class="separator:ac41453cde0c1bea6c30f76de15070247"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1536783b2411dcb1685f8571928fd542" id="r_a1536783b2411dcb1685f8571928fd542"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a1536783b2411dcb1685f8571928fd542">add_new_key_frame</a> (<a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> handle, <a class="el" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a> attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change)</td></tr>
+<tr class="memdesc:a1536783b2411dcb1685f8571928fd542"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加新的关键帧到动画中(建议先添加渲染关键帧,后添加非渲染关键帧)  <br /></td></tr>
+<tr class="separator:a1536783b2411dcb1685f8571928fd542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b639bb35cee3220c3fc491ea43b4b1a" id="r_a8b639bb35cee3220c3fc491ea43b4b1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a8b639bb35cee3220c3fc491ea43b4b1a">temp_to_color</a> (int temp, uint8_t <a class="el" href="sevetest30___led_array_8h.html#a56a0725fa7f743bec9d665033a24faec">value_max</a>, uint8_t *high, uint8_t *comfort, uint8_t *low)</td></tr>
+<tr class="memdesc:a8b639bb35cee3220c3fc491ea43b4b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)  <br /></td></tr>
+<tr class="separator:a8b639bb35cee3220c3fc491ea43b4b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac187e07e4c3977c4e5b8a476e323584f" id="r_ac187e07e4c3977c4e5b8a476e323584f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ac187e07e4c3977c4e5b8a476e323584f">data_to_color</a> (int data, <a class="el" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a> *visual_cfg, uint8_t *high, uint8_t *comfort, uint8_t *low)</td></tr>
+<tr class="memdesc:ac187e07e4c3977c4e5b8a476e323584f"><td class="mdescLeft">&#160;</td><td class="mdescRight">将数据大小体现在颜色上  <br /></td></tr>
+<tr class="separator:ac187e07e4c3977c4e5b8a476e323584f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4c62dec526b28bf5f5b989dbbbc6178" id="r_ac4c62dec526b28bf5f5b989dbbbc6178"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ac4c62dec526b28bf5f5b989dbbbc6178">weather_UI_1</a> (int16_t x, int16_t y, uint8_t change)</td></tr>
+<tr class="separator:ac4c62dec526b28bf5f5b989dbbbc6178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a838cbb7bad8b790ff2b70ba268c3d8bd" id="r_a838cbb7bad8b790ff2b70ba268c3d8bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a838cbb7bad8b790ff2b70ba268c3d8bd">time_UI_1</a> (int16_t x, int16_t y, uint8_t change)</td></tr>
+<tr class="separator:a838cbb7bad8b790ff2b70ba268c3d8bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc972054f7b59c25e7643fe7727284bd" id="r_afc972054f7b59c25e7643fe7727284bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#afc972054f7b59c25e7643fe7727284bd">time_UI_2</a> (int16_t x, int16_t y, uint8_t change)</td></tr>
+<tr class="memdesc:afc972054f7b59c25e7643fe7727284bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示了当前系统时间 秒  <br /></td></tr>
+<tr class="separator:afc972054f7b59c25e7643fe7727284bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2e03be5d25fd5712b669758ede936e7" id="r_af2e03be5d25fd5712b669758ede936e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#af2e03be5d25fd5712b669758ede936e7">music_FFT_UI_start</a> (<a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *UI_cfg, UBaseType_t priority)</td></tr>
+<tr class="memdesc:af2e03be5d25fd5712b669758ede936e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现  <br /></td></tr>
+<tr class="separator:af2e03be5d25fd5712b669758ede936e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a443e41043ebca7f929b7ef8fa0552b0f" id="r_a443e41043ebca7f929b7ef8fa0552b0f"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a443e41043ebca7f929b7ef8fa0552b0f">music_FFT_init</a> ()</td></tr>
+<tr class="memdesc:a443e41043ebca7f929b7ef8fa0552b0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化音频频谱UI,初始化FFT并申请重要内存  <br /></td></tr>
+<tr class="separator:a443e41043ebca7f929b7ef8fa0552b0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c73a25b3d40fa0a6896ac49f6350172" id="r_a8c73a25b3d40fa0a6896ac49f6350172"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a8c73a25b3d40fa0a6896ac49f6350172">music_FFT_deinit</a> ()</td></tr>
+<tr class="memdesc:a8c73a25b3d40fa0a6896ac49f6350172"><td class="mdescLeft">&#160;</td><td class="mdescRight">反初始化音频频谱UI  <br /></td></tr>
+<tr class="separator:a8c73a25b3d40fa0a6896ac49f6350172"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9aa41f7a87385058c6bb69466aa6751" id="r_ac9aa41f7a87385058c6bb69466aa6751"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ac9aa41f7a87385058c6bb69466aa6751">music_FFT_UI_refresh_Task</a> (<a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *UI_cfg)</td></tr>
+<tr class="memdesc:ac9aa41f7a87385058c6bb69466aa6751"><td class="mdescLeft">&#160;</td><td class="mdescRight">利用 FFT 刷新音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程  <br /></td></tr>
+<tr class="separator:ac9aa41f7a87385058c6bb69466aa6751"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad24016a691cd754d328ec3fd0a5410ea" id="r_ad24016a691cd754d328ec3fd0a5410ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ad24016a691cd754d328ec3fd0a5410ea">music_FFT_UI_draw</a> (<a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *UI_cfg)</td></tr>
+<tr class="separator:ad24016a691cd754d328ec3fd0a5410ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a82bff7665b62dd0ee3c1e052312072" id="r_a4a82bff7665b62dd0ee3c1e052312072"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a4a82bff7665b62dd0ee3c1e052312072">main_UI_1</a> ()</td></tr>
+<tr class="memdesc:a4a82bff7665b62dd0ee3c1e052312072"><td class="mdescLeft">&#160;</td><td class="mdescRight">主界面，所有UI页面的上层级  <br /></td></tr>
+<tr class="separator:a4a82bff7665b62dd0ee3c1e052312072"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8dee9043d26fe727479f50a861e8122" id="r_aa8dee9043d26fe727479f50a861e8122"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#aa8dee9043d26fe727479f50a861e8122">steganography_service</a> (<a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> handle, int idx)</td></tr>
+<tr class="memdesc:aa8dee9043d26fe727479f50a861e8122"><td class="mdescLeft">&#160;</td><td class="mdescRight">隐写支持服务  <br /></td></tr>
+<tr class="separator:aa8dee9043d26fe727479f50a861e8122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a4414bd93fe30d3087c7f171aa6ab15c7" id="r_a4414bd93fe30d3087c7f171aa6ab15c7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a4414bd93fe30d3087c7f171aa6ab15c7">weather_change_flag</a> = 0</td></tr>
+<tr class="separator:a4414bd93fe30d3087c7f171aa6ab15c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a873fcc0e34a3a17415f4b3292e3b7edb" id="r_a873fcc0e34a3a17415f4b3292e3b7edb"><td class="memItemLeft" align="right" valign="top">float *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a873fcc0e34a3a17415f4b3292e3b7edb">src_data</a> = NULL</td></tr>
+<tr class="separator:a873fcc0e34a3a17415f4b3292e3b7edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c655f98752c5d095296c9b6f40d0987" id="r_a2c655f98752c5d095296c9b6f40d0987"><td class="memItemLeft" align="right" valign="top">float *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a2c655f98752c5d095296c9b6f40d0987">wind</a> = NULL</td></tr>
+<tr class="separator:a2c655f98752c5d095296c9b6f40d0987"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab60ec5889ee35b36cef158a51e556844" id="r_ab60ec5889ee35b36cef158a51e556844"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#ab60ec5889ee35b36cef158a51e556844">unit_led_color</a> [<a class="el" href="sevetest30___u_i_8h.html#a6cc612327a8c53b80112c2a8392539b1">FFT_VIEW_WIDTH_MAX</a>] = { 0 }</td></tr>
+<tr class="separator:ab60ec5889ee35b36cef158a51e556844"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5eaf39b2fd802e79757ab21cc58a065c" id="r_a5eaf39b2fd802e79757ab21cc58a065c"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___u_i_8c.html#a5eaf39b2fd802e79757ab21cc58a065c">unit_led_high</a> [<a class="el" href="sevetest30___u_i_8h.html#a6cc612327a8c53b80112c2a8392539b1">FFT_VIEW_WIDTH_MAX</a>] = { 0 }</td></tr>
+<tr class="separator:a5eaf39b2fd802e79757ab21cc58a065c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a9aec97c3bc404cc94036981f707a7e31" name="a9aec97c3bc404cc94036981f707a7e31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aec97c3bc404cc94036981f707a7e31">&#9670;&#160;</a></span>LOW_TEMP_MULTIPLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOW_TEMP_MULTIPLE&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="aa97e24fea4daabae6b4e5d534ac8066d" name="aa97e24fea4daabae6b4e5d534ac8066d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa97e24fea4daabae6b4e5d534ac8066d">&#9670;&#160;</a></span>__attribute__()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">__attribute__ </td>
+          <td>(</td>
+          <td class="paramtype">(aligned(16))&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac08a046e47d13126ab0310ebc48448ae" name="ac08a046e47d13126ab0310ebc48448ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac08a046e47d13126ab0310ebc48448ae">&#9670;&#160;</a></span>_PRE_RENDER_create_callback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _PRE_RENDER_create_callback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td>
+          <td class="paramname"><em>handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>total_step</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>预渲染运行模式-动画生成回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>动画句柄 </td></tr>
+    <tr><td class="paramname">total_step</td><td>实际显示总细分步个数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a53dfc9cdddc366dcc67104bb902f06c0" name="a53dfc9cdddc366dcc67104bb902f06c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53dfc9cdddc366dcc67104bb902f06c0">&#9670;&#160;</a></span>_PRE_RENDER_ctrl_hook()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _PRE_RENDER_ctrl_hook </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td>
+          <td class="paramname"><em>handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcartoon__ctrl__object__t.html">cartoon_ctrl_object_t</a> *&#160;</td>
+          <td class="paramname"><em>object</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>预渲染运行模式-动画运行控制钩子 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>动画句柄 </td></tr>
+    <tr><td class="paramname">object</td><td>控制对象，需要显示函数填写信息再导入 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1536783b2411dcb1685f8571928fd542" name="a1536783b2411dcb1685f8571928fd542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1536783b2411dcb1685f8571928fd542">&#9670;&#160;</a></span>add_new_key_frame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t add_new_key_frame </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td>
+          <td class="paramname"><em>handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#ad266f74dd78f4b0275efd7127d54920a">key_frame_attr_t</a>&#160;</td>
+          <td class="paramname"><em>attr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>pct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>step</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>color</em>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>change</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>添加新的关键帧到动画中(建议先添加渲染关键帧,后添加非渲染关键帧) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>动画句柄 </td></tr>
+    <tr><td class="paramname">attr</td><td>关键帧属性 </td></tr>
+    <tr><td class="paramname">pct</td><td>对渲染关键帧:关键帧百分位置,取值0-[CARTOON_KEY_FRAME_PCT_MAX],表示播放步数百分比(末两位数表示小数部分) 对非渲染关键帧:含义特殊,需要参考上下文 </td></tr>
+    <tr><td class="paramname">step</td><td>对渲染关键帧:无效参数填写任意值 对非渲染关键帧:含义特殊,需要参考上下文 </td></tr>
+    <tr><td class="paramname">x</td><td>x轴坐标 </td></tr>
+    <tr><td class="paramname">y</td><td>y轴坐标 </td></tr>
+    <tr><td class="paramname">color</td><td>颜色 </td></tr>
+    <tr><td class="paramname">change</td><td>亮度0-100 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>这次添加完成的关键帧的角标位置 </dd></dl>
+
+</div>
+</div>
+<a id="ac41453cde0c1bea6c30f76de15070247" name="ac41453cde0c1bea6c30f76de15070247"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac41453cde0c1bea6c30f76de15070247">&#9670;&#160;</a></span>cartoon_delete()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void cartoon_delete </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td>
+          <td class="paramname"><em>handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>删除动画 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>动画句柄 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa7a885036d18b783c0a8c197b315f48d" name="aa7a885036d18b783c0a8c197b315f48d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7a885036d18b783c0a8c197b315f48d">&#9670;&#160;</a></span>cartoon_new()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a> cartoon_new </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a189526d747bc8196b1ceace8c6be0ba4">cartoon_run_mode_t</a>&#160;</td>
+          <td class="paramname"><em>run_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>en_x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>en_y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>en_color</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>en_change</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>key_frame_max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建新动画 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">run_mode</td><td>运行模式，这是一个枚举类型 </td></tr>
+    <tr><td class="paramname">en_x</td><td>打开x轴数据的渲染开关 </td></tr>
+    <tr><td class="paramname">en_y</td><td>打开y轴数据的渲染开关 </td></tr>
+    <tr><td class="paramname">en_color</td><td>打开颜色数据的渲染开关 </td></tr>
+    <tr><td class="paramname">en_change</td><td>打开亮度数据的渲染开关 </td></tr>
+    <tr><td class="paramname">key_frame_max</td><td>最大关键帧个数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动画的全局句柄 </dd></dl>
+
+</div>
+</div>
+<a id="ac187e07e4c3977c4e5b8a476e323584f" name="ac187e07e4c3977c4e5b8a476e323584f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac187e07e4c3977c4e5b8a476e323584f">&#9670;&#160;</a></span>data_to_color()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void data_to_color </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_u_i__color__visual__cfg__t.html">UI_color_visual_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>visual_cfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>high</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>comfort</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>low</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将数据大小体现在颜色上 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>数据值 </td></tr>
+    <tr><td class="paramname">visual_cfg</td><td>可视化配置 </td></tr>
+    <tr><td class="paramname">high</td><td>高值分量 越趋近预设高温 向高值分量侧倾 </td></tr>
+    <tr><td class="paramname">comfort</td><td>适宜分量 越趋近预设适宜温度 向适宜分量侧倾 </td></tr>
+    <tr><td class="paramname">low</td><td>低值分量 越趋近预设低温 向低值分量侧倾 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4a82bff7665b62dd0ee3c1e052312072" name="a4a82bff7665b62dd0ee3c1e052312072"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a82bff7665b62dd0ee3c1e052312072">&#9670;&#160;</a></span>main_UI_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void main_UI_1 </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>主界面，所有UI页面的上层级 </p>
+
+</div>
+</div>
+<a id="a8c73a25b3d40fa0a6896ac49f6350172" name="a8c73a25b3d40fa0a6896ac49f6350172"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c73a25b3d40fa0a6896ac49f6350172">&#9670;&#160;</a></span>music_FFT_deinit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t music_FFT_deinit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>反初始化音频频谱UI </p>
+<dl class="section return"><dt>返回</dt><dd>成功 ESP_OK 失败 ESP_FAIL </dd></dl>
+
+</div>
+</div>
+<a id="a443e41043ebca7f929b7ef8fa0552b0f" name="a443e41043ebca7f929b7ef8fa0552b0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a443e41043ebca7f929b7ef8fa0552b0f">&#9670;&#160;</a></span>music_FFT_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t music_FFT_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化音频频谱UI,初始化FFT并申请重要内存 </p>
+<dl class="section return"><dt>返回</dt><dd>成功 ESP_OK 失败 ESP_FAIL </dd></dl>
+
+</div>
+</div>
+<a id="ad24016a691cd754d328ec3fd0a5410ea" name="ad24016a691cd754d328ec3fd0a5410ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad24016a691cd754d328ec3fd0a5410ea">&#9670;&#160;</a></span>music_FFT_UI_draw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void music_FFT_UI_draw </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>UI_cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac9aa41f7a87385058c6bb69466aa6751" name="ac9aa41f7a87385058c6bb69466aa6751"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9aa41f7a87385058c6bb69466aa6751">&#9670;&#160;</a></span>music_FFT_UI_refresh_Task()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void music_FFT_UI_refresh_Task </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>UI_cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>利用 FFT 刷新音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">UI_cfg</td><td>UI配置 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af2e03be5d25fd5712b669758ede936e7" name="af2e03be5d25fd5712b669758ede936e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2e03be5d25fd5712b669758ede936e7">&#9670;&#160;</a></span>music_FFT_UI_start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void music_FFT_UI_start </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmusic___f_f_t___u_i__cfg__t.html">music_FFT_UI_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>UI_cfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">UBaseType_t&#160;</td>
+          <td class="paramname"><em>priority</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">UI_cfg</td><td>FFT的UI配置 </td></tr>
+    <tr><td class="paramname">priority</td><td>任务优先级 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa8dee9043d26fe727479f50a861e8122" name="aa8dee9043d26fe727479f50a861e8122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8dee9043d26fe727479f50a861e8122">&#9670;&#160;</a></span>steganography_service()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void steganography_service </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="sevetest30___u_i_8h.html#a62944b735214a319f7aa83ce4214b8fd">cartoon_handle_t</a>&#160;</td>
+          <td class="paramname"><em>handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>idx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>隐写支持服务 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>动画句柄 </td></tr>
+    <tr><td class="paramname">idx</td><td>触发隐写的隐写关键帧在关键帧数据库的角标位置 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8b639bb35cee3220c3fc491ea43b4b1a" name="a8b639bb35cee3220c3fc491ea43b4b1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b639bb35cee3220c3fc491ea43b4b1a">&#9670;&#160;</a></span>temp_to_color()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void temp_to_color </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>temp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>value_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>high</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>comfort</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>low</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">temp</td><td>温度值 </td></tr>
+    <tr><td class="paramname">value_max</td><td>最大映射值 </td></tr>
+    <tr><td class="paramname">high</td><td>高值分量 越趋近预设高温 向高值分量侧倾 </td></tr>
+    <tr><td class="paramname">comfort</td><td>适宜分量 越趋近预设适宜温度 向适宜分量侧倾 </td></tr>
+    <tr><td class="paramname">low</td><td>低值分量 越趋近预设低温 向低值分量侧倾 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a838cbb7bad8b790ff2b70ba268c3d8bd" name="a838cbb7bad8b790ff2b70ba268c3d8bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a838cbb7bad8b790ff2b70ba268c3d8bd">&#9670;&#160;</a></span>time_UI_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void time_UI_1 </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>change</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afc972054f7b59c25e7643fe7727284bd" name="afc972054f7b59c25e7643fe7727284bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc972054f7b59c25e7643fe7727284bd">&#9670;&#160;</a></span>time_UI_2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void time_UI_2 </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>change</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>显示了当前系统时间 秒 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>起始坐标x </td></tr>
+    <tr><td class="paramname">y</td><td>起始坐标y </td></tr>
+    <tr><td class="paramname">change</td><td>亮度值0-100% 为0不会任何进行显示操作 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac4c62dec526b28bf5f5b989dbbbc6178" name="ac4c62dec526b28bf5f5b989dbbbc6178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4c62dec526b28bf5f5b989dbbbc6178">&#9670;&#160;</a></span>weather_UI_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void weather_UI_1 </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>change</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a873fcc0e34a3a17415f4b3292e3b7edb" name="a873fcc0e34a3a17415f4b3292e3b7edb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a873fcc0e34a3a17415f4b3292e3b7edb">&#9670;&#160;</a></span>src_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* src_data = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab60ec5889ee35b36cef158a51e556844" name="ab60ec5889ee35b36cef158a51e556844"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab60ec5889ee35b36cef158a51e556844">&#9670;&#160;</a></span>unit_led_color</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t unit_led_color[<a class="el" href="sevetest30___u_i_8h.html#a6cc612327a8c53b80112c2a8392539b1">FFT_VIEW_WIDTH_MAX</a>] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5eaf39b2fd802e79757ab21cc58a065c" name="a5eaf39b2fd802e79757ab21cc58a065c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5eaf39b2fd802e79757ab21cc58a065c">&#9670;&#160;</a></span>unit_led_high</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t unit_led_high[<a class="el" href="sevetest30___u_i_8h.html#a6cc612327a8c53b80112c2a8392539b1">FFT_VIEW_WIDTH_MAX</a>] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4414bd93fe30d3087c7f171aa6ab15c7" name="a4414bd93fe30d3087c7f171aa6ab15c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4414bd93fe30d3087c7f171aa6ab15c7">&#9670;&#160;</a></span>weather_change_flag</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool weather_change_flag = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c655f98752c5d095296c9b6f40d0987" name="a2c655f98752c5d095296c9b6f40d0987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c655f98752c5d095296c9b6f40d0987">&#9670;&#160;</a></span>wind</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* wind = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_5c982d53a68cdbcd421152b4020263a9.html">main</a></li><li class="navelem"><a class="el" href="sevetest30___u_i_8c.html">sevetest30_UI.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

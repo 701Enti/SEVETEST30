@@ -1,13 +1,54 @@
-# 文档
+# 文档相关
 
 ## 在 Github 上可访问/编辑的 SEVETEST30 文档仓库
 
 - **仓库链接**: https://github.com/701Enti/DOC-SEVETEST30
-- **文档撰写方式**: Doxygen 生成 + 贡献者修改
-- **相关技术实现**: 当 SEVETEST30 仓库有新的推送时,自动在 Github 工作流中使用 Doxygen 生成文档,并提交新文档到文档仓库
+- **文档撰写方式**: Doxygen 根据代码和注释生成
+- **特别声明**:
+  - SEVETEST30 文档仓库不是私有仓库,您完全可以 push 个人分支生成的文档到独立分支,甚至可以是您对 SEVETEST30 的见解等其他任何与 SEVETEST30 相关的内容,只要您没有影响自动文档或进行不合理的推送
+  - 为保证资源充足,只会为关键分支提供自动文档生成,具体会触发工作流的关键分支在工作流文件 DoxygenAutoDocSync.yml 中可设置和查看
+  - 当然,如果您希望自己的分支像关键分支一样可云端部署文档,您可以在本地运行 Doxygen 生成文档,并推送到 SEVETEST30 文档仓库与个人分支同名的分支,之后可联系 SEVETEST30 团队协商,他们管理文档的云端部署
+- **文档修改**:
+  - 更改 SEVETEST30 仓库的源码和注释内容即可,因为生成就是根据这些完成的,代码即文档
+  - 由于生成结果文件非常多,不适合编辑修改管理工作,并且生成后的推送会覆盖之前的所有内容,更改源码注释反而更可靠,因此,目前不考虑生成后文件内容再修改的工作,即使是发布分支
+- **相关技术实现**:
+  - 当 SEVETEST30 仓库的关键分支有新的 push/pull&request 时(或者手动触发),自动在 Github 工作流中使用 Doxygen 生成文档,并提交新文档到文档仓库的同名分支
+  - 例如 SEVETEST30 名为 A 分支的推送,将触发文档仓库名为 A 分支的更新
+  - 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
+  - 为保证资源充足,只会为关键分支提供自动文档生成,具体会触发工作流的关键分支在工作流文件 DoxygenAutoDocSync.yml 中可设置和查看
 - **相关工作流**:
-  - https://github.com/701Enti/SEVETEST30/blob/develop/.github/workflows/DoxygenAutoDocSync.yml
+  - .github/workflows/DoxygenAutoDocSync.yml
   - https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml
+
+# 安全设施
+
+## .gitignore 敏感文件排除
+
+- **SDK 配置文件 - sdkconfig**
+
+  - SEVETEST30 的 WIFI 连接密码和 API 相关密钥均需要在 SDK 配置编辑器(menuconfig)设置,其生成的 sdkconfig 硬编码这些敏感内容
+  - sdkconfig 及其任意扩展名的文件均被排除,包括 sdkconfig.default
+  - 在本仓库任何分支中都请不要使用 sdkconfig.default 配置默认值,请在./main/Kconfig.prebuild 直接配置默认值,它更易维护
+
+- **其他常见敏感文件**:
+  - 环境变量和其他配置文件（含 API 密钥/数据库密码）
+  - 加密密钥和证书文件（SSL/SSH 私钥）
+  - 云服务凭证文件（AWS/GCP 访问密钥）
+  - 数据库文件和备份（可能含敏感数据）
+  - 日志文件（可能泄露调试信息）
+  - 开发工具配置文件（含私有仓库令牌）
+  - 网络连接配置文件（VPN/RDP 凭证）
+
+## 关键分支的 PR 检查(基于 Gitleaks)
+
+- **相关技术实现**:
+
+  - 当 SEVETEST30 仓库的关键分支有新的 pull&request 时,必须经过 Github 工作流检查才可以进行 pull&request(需要仓库设置规则)
+  - 工作流中使用 Gitleaks 检查整个提交历史是否含敏感内容
+  - 也可以手动触发来人工检查结果
+
+- **相关工作流**:
+  - .github/workflows/GitleaksPRCheck.yml
 
 # 第三方代码使用声明
 

@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: main/sevetest30_SWEDA.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('sevetest30___s_w_e_d_a_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">sevetest30_SWEDA.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="sevetest30___s_w_e_d_a_8h_source.html">sevetest30_SWEDA.h</a>&quot;</code><br />
+<code>#include &quot;esp_sntp.h&quot;</code><br />
+<code>#include &quot;esp_log.h&quot;</code><br />
+<code>#include &quot;driver/adc.h&quot;</code><br />
+<code>#include &quot;esp_adc_cal.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="sevetest30__gpio_8h_source.html">sevetest30_gpio.h</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+sevetest30_SWEDA.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="sevetest30___s_w_e_d_a_8c__incl.svg" width="954" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a6318e5153eac27b950da3ee9946b2328" id="r_a6318e5153eac27b950da3ee9946b2328"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a6318e5153eac27b950da3ee9946b2328">refresh_systemtime_data</a> ()</td></tr>
+<tr class="memdesc:a6318e5153eac27b950da3ee9946b2328"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 <a class="el" href="sevetest30___i_w_e_d_a_8h.html">sevetest30_IWEDA.h</a>)  <br /></td></tr>
+<tr class="separator:a6318e5153eac27b950da3ee9946b2328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0cea770e9b8b0f2982acb59155bb9c7" id="r_ac0cea770e9b8b0f2982acb59155bb9c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#ac0cea770e9b8b0f2982acb59155bb9c7">refresh_battery_data</a> ()</td></tr>
+<tr class="memdesc:ac0cea770e9b8b0f2982acb59155bb9c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新缓存的电池数据，充电状态，该函数需要频繁调用  <br /></td></tr>
+<tr class="separator:ac0cea770e9b8b0f2982acb59155bb9c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e2cca92cf2324bce0f264f4e05b6d41" id="r_a0e2cca92cf2324bce0f264f4e05b6d41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a0e2cca92cf2324bce0f264f4e05b6d41">refresh_env_temp_hum_data</a> (bool crc_flag)</td></tr>
+<tr class="memdesc:a0e2cca92cf2324bce0f264f4e05b6d41"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新当前环境的温度湿度数据,使用硬件传感器  <br /></td></tr>
+<tr class="separator:a0e2cca92cf2324bce0f264f4e05b6d41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a711152696ed4a83dd8a5c3d1726ce8a4" id="r_a711152696ed4a83dd8a5c3d1726ce8a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a711152696ed4a83dd8a5c3d1726ce8a4">refresh_env_TVOC_data</a> (bool crc_flag)</td></tr>
+<tr class="memdesc:a711152696ed4a83dd8a5c3d1726ce8a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新当前环境的空气质量数据,使用硬件传感器  <br /></td></tr>
+<tr class="separator:a711152696ed4a83dd8a5c3d1726ce8a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab250ac2500b9625962fb2f89abbf05dd" id="r_ab250ac2500b9625962fb2f89abbf05dd"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#ab250ac2500b9625962fb2f89abbf05dd">refresh_IMU_FIFO_data</a> (<a class="el" href="struct_i_m_u__reg__mapping__t.html">IMU_reg_mapping_t</a> *FIFO_database, int map_num, int read_num)</td></tr>
+<tr class="memdesc:ab250ac2500b9625962fb2f89abbf05dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新姿态传感器FIFO抽取后的数据,有(默认方式)和(自定义方式)  <br /></td></tr>
+<tr class="separator:ab250ac2500b9625962fb2f89abbf05dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ce5a5e707e64d8a53e32e751432227e" id="r_a3ce5a5e707e64d8a53e32e751432227e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a3ce5a5e707e64d8a53e32e751432227e">start_ext_rtc_alarm</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm, <a class="el" href="structsystemtime__t.html">systemtime_t</a> *time, <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *cycle_plan)</td></tr>
+<tr class="memdesc:a3ce5a5e707e64d8a53e32e751432227e"><td class="mdescLeft">&#160;</td><td class="mdescRight">启动外部离线RTC闹钟,时间和配置在电池接入正常运行时掉电保存  <br /></td></tr>
+<tr class="separator:a3ce5a5e707e64d8a53e32e751432227e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89a0b4b2cf30584837e8f633b90ce24d" id="r_a89a0b4b2cf30584837e8f633b90ce24d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a89a0b4b2cf30584837e8f633b90ce24d">sync_systemtime_to_ext_rtc</a> ()</td></tr>
+<tr class="memdesc:a89a0b4b2cf30584837e8f633b90ce24d"><td class="mdescLeft">&#160;</td><td class="mdescRight">同步系统实时时间到外部RTC  <br /></td></tr>
+<tr class="separator:a89a0b4b2cf30584837e8f633b90ce24d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1387f9bfce884853609242278e053a4b" id="r_a1387f9bfce884853609242278e053a4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a1387f9bfce884853609242278e053a4b">sync_systemtime_from_ext_rtc</a> ()</td></tr>
+<tr class="memdesc:a1387f9bfce884853609242278e053a4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">从外部RTC获取时间数据，同步系统实时时间，这往往是无网络连接下的同步选择  <br /></td></tr>
+<tr class="separator:a1387f9bfce884853609242278e053a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a95b544de17e1678d73a50a41fde12a54" id="r_a95b544de17e1678d73a50a41fde12a54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsystemtime__t.html">systemtime_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a95b544de17e1678d73a50a41fde12a54">systemtime_data</a> = { 0 }</td></tr>
+<tr class="separator:a95b544de17e1678d73a50a41fde12a54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2cc0c093b62ce90b74b9d5b68139054" id="r_ab2cc0c093b62ce90b74b9d5b68139054"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbattery__data__t.html">battery_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#ab2cc0c093b62ce90b74b9d5b68139054">battery_data</a> = { 0 }</td></tr>
+<tr class="separator:ab2cc0c093b62ce90b74b9d5b68139054"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58f94e802d63a4b8c0db68f6dc53d31b" id="r_a58f94e802d63a4b8c0db68f6dc53d31b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="sevetest30___s_w_e_d_a_8h.html#a6b98906c595381739548dfbabf917b40">env_temp_hum_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a58f94e802d63a4b8c0db68f6dc53d31b">env_temp_hum_data</a> = { 0 }</td></tr>
+<tr class="separator:a58f94e802d63a4b8c0db68f6dc53d31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4059208e0222e210d94cb18224e49c4a" id="r_a4059208e0222e210d94cb18224e49c4a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="sevetest30___s_w_e_d_a_8h.html#aff279bde9f68ef70b0a7c5d6d310ab91">env_TVOC_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a4059208e0222e210d94cb18224e49c4a">env_TVOC_data</a> = { 0 }</td></tr>
+<tr class="separator:a4059208e0222e210d94cb18224e49c4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade8f458fc4ba87687daf7ae6a388b7d3" id="r_ade8f458fc4ba87687daf7ae6a388b7d3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#ade8f458fc4ba87687daf7ae6a388b7d3">IMU_Gx_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:ade8f458fc4ba87687daf7ae6a388b7d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a2f70eda75d40de07c2c1ae6e1d471f" id="r_a2a2f70eda75d40de07c2c1ae6e1d471f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a2a2f70eda75d40de07c2c1ae6e1d471f">IMU_Gx_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a2a2f70eda75d40de07c2c1ae6e1d471f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa2d6c2ce5dbc924423937afc7ee1f53" id="r_aaa2d6c2ce5dbc924423937afc7ee1f53"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#aaa2d6c2ce5dbc924423937afc7ee1f53">IMU_Gy_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:aaa2d6c2ce5dbc924423937afc7ee1f53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78963e8733b41caa658393a0bdb15a10" id="r_a78963e8733b41caa658393a0bdb15a10"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a78963e8733b41caa658393a0bdb15a10">IMU_Gy_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a78963e8733b41caa658393a0bdb15a10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d728ea4221bb21a77d4a08c2bff14f4" id="r_a5d728ea4221bb21a77d4a08c2bff14f4"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a5d728ea4221bb21a77d4a08c2bff14f4">IMU_Gz_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a5d728ea4221bb21a77d4a08c2bff14f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc97c3d10adce9c8b77f10e44886f4a9" id="r_acc97c3d10adce9c8b77f10e44886f4a9"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#acc97c3d10adce9c8b77f10e44886f4a9">IMU_Gz_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:acc97c3d10adce9c8b77f10e44886f4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77568ad2a0a1de84af5c720601d52bbe" id="r_a77568ad2a0a1de84af5c720601d52bbe"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a77568ad2a0a1de84af5c720601d52bbe">IMU_XLx_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a77568ad2a0a1de84af5c720601d52bbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33254c170bd6c3930ef2fa3b6606796f" id="r_a33254c170bd6c3930ef2fa3b6606796f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a33254c170bd6c3930ef2fa3b6606796f">IMU_XLx_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a33254c170bd6c3930ef2fa3b6606796f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c6ca5c1f86ae8713148b19dd79b04ec" id="r_a8c6ca5c1f86ae8713148b19dd79b04ec"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a8c6ca5c1f86ae8713148b19dd79b04ec">IMU_XLy_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a8c6ca5c1f86ae8713148b19dd79b04ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bcc2930d06758082d903c66c2282488" id="r_a6bcc2930d06758082d903c66c2282488"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a6bcc2930d06758082d903c66c2282488">IMU_XLy_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a6bcc2930d06758082d903c66c2282488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3195a9d516ef2d840ff62da29ed312ea" id="r_a3195a9d516ef2d840ff62da29ed312ea"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a3195a9d516ef2d840ff62da29ed312ea">IMU_XLz_L</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a3195a9d516ef2d840ff62da29ed312ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3df433a45c6ceccdcafae28680b3de67" id="r_a3df433a45c6ceccdcafae28680b3de67"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___s_w_e_d_a_8c.html#a3df433a45c6ceccdcafae28680b3de67">IMU_XLz_H</a> [IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td></tr>
+<tr class="separator:a3df433a45c6ceccdcafae28680b3de67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="ac0cea770e9b8b0f2982acb59155bb9c7" name="ac0cea770e9b8b0f2982acb59155bb9c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0cea770e9b8b0f2982acb59155bb9c7">&#9670;&#160;</a></span>refresh_battery_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_battery_data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新缓存的电池数据，充电状态，该函数需要频繁调用 </p>
+<p>数据保存至全局变量 </p>
+
+</div>
+</div>
+<a id="a0e2cca92cf2324bce0f264f4e05b6d41" name="a0e2cca92cf2324bce0f264f4e05b6d41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e2cca92cf2324bce0f264f4e05b6d41">&#9670;&#160;</a></span>refresh_env_temp_hum_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_env_temp_hum_data </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>crc_flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新当前环境的温度湿度数据,使用硬件传感器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">crc_flag</td><td>启用CRC校验 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a711152696ed4a83dd8a5c3d1726ce8a4" name="a711152696ed4a83dd8a5c3d1726ce8a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a711152696ed4a83dd8a5c3d1726ce8a4">&#9670;&#160;</a></span>refresh_env_TVOC_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_env_TVOC_data </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>crc_flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新当前环境的空气质量数据,使用硬件传感器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">crc_flag</td><td>启用CRC校验 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab250ac2500b9625962fb2f89abbf05dd" name="ab250ac2500b9625962fb2f89abbf05dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab250ac2500b9625962fb2f89abbf05dd">&#9670;&#160;</a></span>refresh_IMU_FIFO_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t refresh_IMU_FIFO_data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_i_m_u__reg__mapping__t.html">IMU_reg_mapping_t</a> *&#160;</td>
+          <td class="paramname"><em>FIFO_database</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>map_num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>read_num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新姿态传感器FIFO抽取后的数据,有(默认方式)和(自定义方式) </p>
+<p>数据保存至全局变量(默认方式) / 数据保存至FIFO_database预设内存区域(自定义方式) </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">FIFO_database</td><td>[填写参数为 NULL 使用默认数据库(默认方式)] / 导入自定义的FIFO映射数据库(自定义方式) </td></tr>
+    <tr><td class="paramname">map_num</td><td>[使用默认数据库,忽略这个参数(默认方式)] / (必须准确)数据库的条目数量即MAP_BASE个数(自定义方式) </td></tr>
+    <tr><td class="paramname">read_num</td><td>[使用默认数据库,忽略这个参数(默认方式)] / (必须准确)读取的FIFO数据帧个数,一帧FIFO数据往往包含多个传感器的数据(自定义方式) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_OK / ESP_FAIL </dd></dl>
+
+</div>
+</div>
+<a id="a6318e5153eac27b950da3ee9946b2328" name="a6318e5153eac27b950da3ee9946b2328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6318e5153eac27b950da3ee9946b2328">&#9670;&#160;</a></span>refresh_systemtime_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_systemtime_data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 <a class="el" href="sevetest30___i_w_e_d_a_8h.html">sevetest30_IWEDA.h</a>) </p>
+<p>数据保存至全局变量 </p>
+
+</div>
+</div>
+<a id="a3ce5a5e707e64d8a53e32e751432227e" name="a3ce5a5e707e64d8a53e32e751432227e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ce5a5e707e64d8a53e32e751432227e">&#9670;&#160;</a></span>start_ext_rtc_alarm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void start_ext_rtc_alarm </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structsystemtime__t.html">systemtime_t</a> *&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *&#160;</td>
+          <td class="paramname"><em>cycle_plan</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>启动外部离线RTC闹钟,时间和配置在电池接入正常运行时掉电保存 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择要设置的闹钟,这是一个枚举类型 </td></tr>
+    <tr><td class="paramname">time</td><td>要设置的时间数据的地址,除了 时 分 其他都是无效的 </td></tr>
+    <tr><td class="paramname">cycle_plan</td><td>要设置的重复计划的数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1387f9bfce884853609242278e053a4b" name="a1387f9bfce884853609242278e053a4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1387f9bfce884853609242278e053a4b">&#9670;&#160;</a></span>sync_systemtime_from_ext_rtc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sync_systemtime_from_ext_rtc </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>从外部RTC获取时间数据，同步系统实时时间，这往往是无网络连接下的同步选择 </p>
+
+</div>
+</div>
+<a id="a89a0b4b2cf30584837e8f633b90ce24d" name="a89a0b4b2cf30584837e8f633b90ce24d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89a0b4b2cf30584837e8f633b90ce24d">&#9670;&#160;</a></span>sync_systemtime_to_ext_rtc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sync_systemtime_to_ext_rtc </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>同步系统实时时间到外部RTC </p>
+<p>舍去前两位，如2024年存储24</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="ab2cc0c093b62ce90b74b9d5b68139054" name="ab2cc0c093b62ce90b74b9d5b68139054"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2cc0c093b62ce90b74b9d5b68139054">&#9670;&#160;</a></span>battery_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structbattery__data__t.html">battery_data_t</a> battery_data = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a58f94e802d63a4b8c0db68f6dc53d31b" name="a58f94e802d63a4b8c0db68f6dc53d31b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58f94e802d63a4b8c0db68f6dc53d31b">&#9670;&#160;</a></span>env_temp_hum_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="sevetest30___s_w_e_d_a_8h.html#a6b98906c595381739548dfbabf917b40">env_temp_hum_data_t</a> env_temp_hum_data = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4059208e0222e210d94cb18224e49c4a" name="a4059208e0222e210d94cb18224e49c4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4059208e0222e210d94cb18224e49c4a">&#9670;&#160;</a></span>env_TVOC_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="sevetest30___s_w_e_d_a_8h.html#aff279bde9f68ef70b0a7c5d6d310ab91">env_TVOC_data_t</a> env_TVOC_data = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a2f70eda75d40de07c2c1ae6e1d471f" name="a2a2f70eda75d40de07c2c1ae6e1d471f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a2f70eda75d40de07c2c1ae6e1d471f">&#9670;&#160;</a></span>IMU_Gx_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade8f458fc4ba87687daf7ae6a388b7d3" name="ade8f458fc4ba87687daf7ae6a388b7d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade8f458fc4ba87687daf7ae6a388b7d3">&#9670;&#160;</a></span>IMU_Gx_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a78963e8733b41caa658393a0bdb15a10" name="a78963e8733b41caa658393a0bdb15a10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78963e8733b41caa658393a0bdb15a10">&#9670;&#160;</a></span>IMU_Gy_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gy_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaa2d6c2ce5dbc924423937afc7ee1f53" name="aaa2d6c2ce5dbc924423937afc7ee1f53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa2d6c2ce5dbc924423937afc7ee1f53">&#9670;&#160;</a></span>IMU_Gy_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gy_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acc97c3d10adce9c8b77f10e44886f4a9" name="acc97c3d10adce9c8b77f10e44886f4a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc97c3d10adce9c8b77f10e44886f4a9">&#9670;&#160;</a></span>IMU_Gz_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gz_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5d728ea4221bb21a77d4a08c2bff14f4" name="a5d728ea4221bb21a77d4a08c2bff14f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d728ea4221bb21a77d4a08c2bff14f4">&#9670;&#160;</a></span>IMU_Gz_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_Gz_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a33254c170bd6c3930ef2fa3b6606796f" name="a33254c170bd6c3930ef2fa3b6606796f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33254c170bd6c3930ef2fa3b6606796f">&#9670;&#160;</a></span>IMU_XLx_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a77568ad2a0a1de84af5c720601d52bbe" name="a77568ad2a0a1de84af5c720601d52bbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77568ad2a0a1de84af5c720601d52bbe">&#9670;&#160;</a></span>IMU_XLx_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6bcc2930d06758082d903c66c2282488" name="a6bcc2930d06758082d903c66c2282488"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bcc2930d06758082d903c66c2282488">&#9670;&#160;</a></span>IMU_XLy_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLy_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c6ca5c1f86ae8713148b19dd79b04ec" name="a8c6ca5c1f86ae8713148b19dd79b04ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c6ca5c1f86ae8713148b19dd79b04ec">&#9670;&#160;</a></span>IMU_XLy_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLy_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3df433a45c6ceccdcafae28680b3de67" name="a3df433a45c6ceccdcafae28680b3de67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3df433a45c6ceccdcafae28680b3de67">&#9670;&#160;</a></span>IMU_XLz_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3195a9d516ef2d840ff62da29ed312ea" name="a3195a9d516ef2d840ff62da29ed312ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3195a9d516ef2d840ff62da29ed312ea">&#9670;&#160;</a></span>IMU_XLz_L</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t IMU_XLz_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95b544de17e1678d73a50a41fde12a54" name="a95b544de17e1678d73a50a41fde12a54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95b544de17e1678d73a50a41fde12a54">&#9670;&#160;</a></span>systemtime_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsystemtime__t.html">systemtime_t</a> systemtime_data = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_5c982d53a68cdbcd421152b4020263a9.html">main</a></li><li class="navelem"><a class="el" href="sevetest30___s_w_e_d_a_8c.html">sevetest30_SWEDA.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

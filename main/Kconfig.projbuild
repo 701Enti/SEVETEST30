@@ -23,19 +23,19 @@ config LOCAL_TZ
 # NTP时间服务器
 config NTP_SERVER_0
     string "the first ntp server name"
-    default "ntp.aliyun.com"
+    default "time.google.com"
     help
         the first ntp server name
 
 config NTP_SERVER_1
     string "the second ntp server name"
-    default "ntp1.aliyun.com"
+    default "time.cloudflare.com"
     help
         the second ntp server name
 
 config NTP_SERVER_2
     string "the third ntp server name"
-    default "ntp2.aliyun.com"
+    default "ntp.aliyun.com"
     help
         the third ntp server name
 

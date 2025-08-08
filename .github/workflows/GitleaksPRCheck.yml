@@ -1,0 +1,27 @@
+# 关键分支的 PR 检查(基于 Gitleaks)
+# 当 SEVETEST30 仓库的关键分支有新的 pull&request 时,必须经过 Github 工作流检查才可以进行 pull&request(需要仓库设置规则)
+# 工作流中使用 Gitleaks 检查整个提交历史是否含敏感内容
+# 也可以手动触发来人工检查结果
+# 更多信息可参考项目根目录README.md文件 - 安全设施
+name: GitleaksPRCheck
+
+on:
+  pull_request:
+    branches: ["master"]
+
+  workflow_dispatch:
+
+jobs:
+  scan:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          config-type: "default"
+          exit-code: "1"

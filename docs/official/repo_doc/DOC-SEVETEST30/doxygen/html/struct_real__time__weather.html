@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: Real_time_weather结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('struct_real__time__weather.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public 属性</a> &#124;
+<a href="struct_real__time__weather-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">Real_time_weather结构体 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="sevetest30___i_w_e_d_a_8h_source.html">sevetest30_IWEDA.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public 属性</h2></td></tr>
+<tr class="memitem:a4f8c19766a6e6103bb8caabefaaad4f2" id="r_a4f8c19766a6e6103bb8caabefaaad4f2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a4f8c19766a6e6103bb8caabefaaad4f2">icon</a></td></tr>
+<tr class="separator:a4f8c19766a6e6103bb8caabefaaad4f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a169f65c2da4724b0b0b2dd98237938e5" id="r_a169f65c2da4724b0b0b2dd98237938e5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a169f65c2da4724b0b0b2dd98237938e5">text</a></td></tr>
+<tr class="separator:a169f65c2da4724b0b0b2dd98237938e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dd2156d87943d691420af1a86604ffc" id="r_a9dd2156d87943d691420af1a86604ffc"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a9dd2156d87943d691420af1a86604ffc">temp</a></td></tr>
+<tr class="separator:a9dd2156d87943d691420af1a86604ffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae544b520ace9f9b47d979505cf0ec744" id="r_ae544b520ace9f9b47d979505cf0ec744"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#ae544b520ace9f9b47d979505cf0ec744">feelsLike</a></td></tr>
+<tr class="separator:ae544b520ace9f9b47d979505cf0ec744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab78ae843feae177bd248b28038098b67" id="r_ab78ae843feae177bd248b28038098b67"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#ab78ae843feae177bd248b28038098b67">vis</a></td></tr>
+<tr class="separator:ab78ae843feae177bd248b28038098b67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a609a6ffece722ba5d0a9cbc12070925f" id="r_a609a6ffece722ba5d0a9cbc12070925f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a609a6ffece722ba5d0a9cbc12070925f">humidity</a></td></tr>
+<tr class="separator:a609a6ffece722ba5d0a9cbc12070925f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c7b03768a77a5576dbee2348842ff5f" id="r_a5c7b03768a77a5576dbee2348842ff5f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a5c7b03768a77a5576dbee2348842ff5f">precip</a></td></tr>
+<tr class="separator:a5c7b03768a77a5576dbee2348842ff5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1dc2382a884dd4c5b720e02cab92070" id="r_ab1dc2382a884dd4c5b720e02cab92070"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#ab1dc2382a884dd4c5b720e02cab92070">windDir</a></td></tr>
+<tr class="separator:ab1dc2382a884dd4c5b720e02cab92070"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac48ac149f50353dfdf63440dc66e4560" id="r_ac48ac149f50353dfdf63440dc66e4560"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#ac48ac149f50353dfdf63440dc66e4560">wind360</a></td></tr>
+<tr class="separator:ac48ac149f50353dfdf63440dc66e4560"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57996cc38cf88a9ca22c1243d7c6fad9" id="r_a57996cc38cf88a9ca22c1243d7c6fad9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a57996cc38cf88a9ca22c1243d7c6fad9">windScale</a></td></tr>
+<tr class="separator:a57996cc38cf88a9ca22c1243d7c6fad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4771a668f1cebeea13796a44c880a255" id="r_a4771a668f1cebeea13796a44c880a255"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a4771a668f1cebeea13796a44c880a255">windSpeed</a></td></tr>
+<tr class="separator:a4771a668f1cebeea13796a44c880a255"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64087287b33b0c59c41e305613968658" id="r_a64087287b33b0c59c41e305613968658"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a64087287b33b0c59c41e305613968658">pressure</a></td></tr>
+<tr class="separator:a64087287b33b0c59c41e305613968658"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fbc8a32b281fc0e75214b9d580baec5" id="r_a3fbc8a32b281fc0e75214b9d580baec5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a3fbc8a32b281fc0e75214b9d580baec5">cloud</a></td></tr>
+<tr class="separator:a3fbc8a32b281fc0e75214b9d580baec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fa2d25174ad2426f2d7ea7963ac1696" id="r_a9fa2d25174ad2426f2d7ea7963ac1696"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a9fa2d25174ad2426f2d7ea7963ac1696">dew</a></td></tr>
+<tr class="separator:a9fa2d25174ad2426f2d7ea7963ac1696"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d1dd969b95b8df7171eacad73c6ed8f" id="r_a4d1dd969b95b8df7171eacad73c6ed8f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_real__time__weather.html#a4d1dd969b95b8df7171eacad73c6ed8f">obsTime</a></td></tr>
+<tr class="separator:a4d1dd969b95b8df7171eacad73c6ed8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a3fbc8a32b281fc0e75214b9d580baec5" name="a3fbc8a32b281fc0e75214b9d580baec5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fbc8a32b281fc0e75214b9d580baec5">&#9670;&#160;</a></span>cloud</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::cloud</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9fa2d25174ad2426f2d7ea7963ac1696" name="a9fa2d25174ad2426f2d7ea7963ac1696"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fa2d25174ad2426f2d7ea7963ac1696">&#9670;&#160;</a></span>dew</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::dew</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae544b520ace9f9b47d979505cf0ec744" name="ae544b520ace9f9b47d979505cf0ec744"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae544b520ace9f9b47d979505cf0ec744">&#9670;&#160;</a></span>feelsLike</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::feelsLike</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a609a6ffece722ba5d0a9cbc12070925f" name="a609a6ffece722ba5d0a9cbc12070925f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a609a6ffece722ba5d0a9cbc12070925f">&#9670;&#160;</a></span>humidity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::humidity</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4f8c19766a6e6103bb8caabefaaad4f2" name="a4f8c19766a6e6103bb8caabefaaad4f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8c19766a6e6103bb8caabefaaad4f2">&#9670;&#160;</a></span>icon</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::icon</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4d1dd969b95b8df7171eacad73c6ed8f" name="a4d1dd969b95b8df7171eacad73c6ed8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d1dd969b95b8df7171eacad73c6ed8f">&#9670;&#160;</a></span>obsTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::obsTime</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5c7b03768a77a5576dbee2348842ff5f" name="a5c7b03768a77a5576dbee2348842ff5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c7b03768a77a5576dbee2348842ff5f">&#9670;&#160;</a></span>precip</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::precip</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a64087287b33b0c59c41e305613968658" name="a64087287b33b0c59c41e305613968658"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64087287b33b0c59c41e305613968658">&#9670;&#160;</a></span>pressure</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::pressure</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9dd2156d87943d691420af1a86604ffc" name="a9dd2156d87943d691420af1a86604ffc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dd2156d87943d691420af1a86604ffc">&#9670;&#160;</a></span>temp</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::temp</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a169f65c2da4724b0b0b2dd98237938e5" name="a169f65c2da4724b0b0b2dd98237938e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a169f65c2da4724b0b0b2dd98237938e5">&#9670;&#160;</a></span>text</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::text</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab78ae843feae177bd248b28038098b67" name="ab78ae843feae177bd248b28038098b67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab78ae843feae177bd248b28038098b67">&#9670;&#160;</a></span>vis</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::vis</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac48ac149f50353dfdf63440dc66e4560" name="ac48ac149f50353dfdf63440dc66e4560"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac48ac149f50353dfdf63440dc66e4560">&#9670;&#160;</a></span>wind360</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::wind360</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab1dc2382a884dd4c5b720e02cab92070" name="ab1dc2382a884dd4c5b720e02cab92070"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1dc2382a884dd4c5b720e02cab92070">&#9670;&#160;</a></span>windDir</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::windDir</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a57996cc38cf88a9ca22c1243d7c6fad9" name="a57996cc38cf88a9ca22c1243d7c6fad9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57996cc38cf88a9ca22c1243d7c6fad9">&#9670;&#160;</a></span>windScale</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::windScale</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4771a668f1cebeea13796a44c880a255" name="a4771a668f1cebeea13796a44c880a255"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4771a668f1cebeea13796a44c880a255">&#9670;&#160;</a></span>windSpeed</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Real_time_weather::windSpeed</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>该结构体的文档由以下文件生成:<ul>
+<li>components/sevetest30_board/include/<a class="el" href="sevetest30___i_w_e_d_a_8h_source.html">sevetest30_IWEDA.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="struct_real__time__weather.html">Real_time_weather</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

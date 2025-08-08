@@ -1,0 +1,11 @@
+<map id="components/sevetest30_board/include/sevetest30_touch.h" name="components/sevetest30_board/include/sevetest30_touch.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="197,5,391,60"/>
+<area shape="rect" id="Node000002" href="$board__ctrl_8c.html" title=" " alt="" coords="5,108,140,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,68,103,110,101,105,213,63"/>
+<area shape="rect" id="Node000003" href="$main_8c.html" title=" " alt="" coords="164,108,267,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="263,72,228,109,224,106,259,68"/>
+<area shape="rect" id="Node000004" href="$sevetest30___u_i_8c.html" title=" " alt="" coords="291,108,454,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="329,68,364,106,360,109,325,72"/>
+<area shape="rect" id="Node000005" href="$sevetest30__touch_8c.html" title=" " alt="" coords="479,108,664,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="393,62,535,105,534,111,391,67"/>
+</map>

@@ -1,4 +1,76 @@
+# 常规排除
 build/
-sdkconfig
-sdkconfig.old
 docs/doxygen-awesome-css
+
+# 防信息泄露的特别安全考虑
+
+# ============ 配置文件(含sdkconfig) ============
+config.ini
+config.yml
+config.yaml
+config.json
+settings.py
+secrets.json
+credentials.json
+sdkconfig
+sdkconfig.*
+
+# ============ 环境变量文件 ============
+.env
+.env.local
+.env.prod
+.env.dev
+.env.test
+.env.*
+.envrc
+
+# ============ 密钥与证书文件 ============
+*.key
+*.pem
+*.cer
+*.crt
+*.pfx
+*.der
+id_rsa
+id_dsa
+*.gpg
+*.pgp
+
+# ============ 数据库文件 ============
+*.db
+*.sqlite
+*.sql
+*.dump
+*.mdb
+*.bak
+*.backup
+
+# ============ 日志与临时文件 ============
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# ============ 云服务凭据 ============
+aws/credentials
+google-credentials.json
+azure_profile.json
+oci_config
+
+# ============ 开发者工具文件 ============
+.npmrc
+.pypirc
+.dockercfg
+.terraform/
+.vagrant/
+*.kubeconfig
+
+# ============ 其他高危文件 ============
+*.ovpn
+*.ica
+*.rdp
+*.vmdk
+*.ova
+*.ovf
+

@@ -1,0 +1,15 @@
+<map id="components/sevetest30_board/include/lsm6ds3trc.h" name="components/sevetest30_board/include/lsm6ds3trc.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="317,5,522,45"/>
+<area shape="rect" id="Node000002" href="$sevetest30___s_w_e_d_a_8h.html" title=" " alt="" coords="135,93,328,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="370,54,285,96,283,91,368,49"/>
+<area shape="rect" id="Node000006" href="$board__ctrl_8c.html" title=" " alt="" coords="352,108,487,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="422,59,422,108,417,108,417,59"/>
+<area shape="rect" id="Node000007" href="$lsm6ds3trc_8c.html" title=" " alt="" coords="511,108,653,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="465,50,563,106,561,110,463,54"/>
+<area shape="rect" id="Node000003" href="$main_8c.html" title=" " alt="" coords="5,196,108,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="167,156,81,198,79,193,165,152"/>
+<area shape="rect" id="Node000004" href="$sevetest30___s_w_e_d_a_8c.html" title=" " alt="" coords="133,196,330,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="234,162,234,196,229,196,229,162"/>
+<area shape="rect" id="Node000005" href="$sevetest30___u_i_8c.html" title=" " alt="" coords="354,196,517,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="307,151,409,193,407,198,305,156"/>
+</map>
