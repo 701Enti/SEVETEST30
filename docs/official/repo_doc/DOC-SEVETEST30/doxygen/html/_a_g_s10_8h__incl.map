@@ -1,0 +1,7 @@
+<map id="components/sevetest30_board/include/AGS10.h" name="components/sevetest30_board/include/AGS10.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,5,206,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,105,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,47,75,84,71,81,100,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="130,93,229,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,44,163,81,159,84,130,47"/>
+</map>

@@ -1,0 +1,873 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: components/sevetest30_board/include/BL5372.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_b_l5372_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">BL5372.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;esp_types.h&quot;</code><br />
+<code>#include &quot;esp_err.h&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+BL5372.h 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="_b_l5372_8h__incl.svg" width="216" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><div class="textblock"><div class="dynheader">
+此图展示该文件直接或间接的被哪些文件引用了:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="_b_l5372_8h__dep__incl.svg" width="1350" height="403"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div>
+<p><a href="_b_l5372_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a534b76ba10d1f1380d2618173c257cdf" id="r_a534b76ba10d1f1380d2618173c257cdf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a534b76ba10d1f1380d2618173c257cdf">BL5372_DEVICE_ADD</a>&#160;&#160;&#160;0x32</td></tr>
+<tr class="separator:a534b76ba10d1f1380d2618173c257cdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0640adbed26214327a7c0a2a8416e0b0" id="r_a0640adbed26214327a7c0a2a8416e0b0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a0640adbed26214327a7c0a2a8416e0b0">BL5372_DEFAULT_INIT_CONFIG</a></td></tr>
+<tr class="separator:a0640adbed26214327a7c0a2a8416e0b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:af557d5dba18e309f9e783df5fb4e38e3" id="r_af557d5dba18e309f9e783df5fb4e38e3"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#af557d5dba18e309f9e783df5fb4e38e3">BL5372_cfg_t</a></td></tr>
+<tr class="separator:af557d5dba18e309f9e783df5fb4e38e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf950e3da729812e1664c141c2cae301" id="r_adf950e3da729812e1664c141c2cae301"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#adf950e3da729812e1664c141c2cae301">BL5372_time_t</a></td></tr>
+<tr class="separator:adf950e3da729812e1664c141c2cae301"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72448396760b656492d80eee50f0791a" id="r_a72448396760b656492d80eee50f0791a"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a72448396760b656492d80eee50f0791a">BL5372_alarm_cycle_plan_t</a></td></tr>
+<tr class="separator:a72448396760b656492d80eee50f0791a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a726ca809ffd3d67ab4b8476646f26635" id="r_a726ca809ffd3d67ab4b8476646f26635"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635aba534620a5eb4f03343ec1b6bf8ee347">BL5372_REG_TIME_SEC</a> = 0x00
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635aaee49ff9f20ff7e3a503172161b3b078">BL5372_REG_TIME_MIN</a> = 0x01
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a4ae8f097ea77e65ebf4ca9e4a24ed77a">BL5372_REG_TIME_HOUR</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a3aaf8381d8c100bde91ba58668c222a0">BL5372_REG_TIME_WEEK</a>
+, <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a4d0d971adf633ce83ae6fa4f35e3047f">BL5372_REG_TIME_DAY</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a9bcd72fb2d2d95809fdfec6f6bfcb8e5">BL5372_REG_TIME_MON</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a8a102b1406fdfbe575cbcf0c777ab60e">BL5372_REG_TIME_YEAR</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a20ad721e547f146b50de7c2ccd88b5f7">BL5372_REG_CTRL_COMPENSATE</a>
+, <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635afff35c0871b092e11be2d33dadd6a675">BL5372_REG_ALARM_A_MIN</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635ad9c0ae67b1d81ff8ec666ee6f0e8fed7">BL5372_REG_ALARM_A_HOUR</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a1367836207f7326af7e44e3f1a6bddb0">BL5372_REG_ALARM_A_PLAN</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a2c078226c6618160af726e6eb1c79d3d">BL5372_REG_ALARM_B_MIN</a>
+, <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635acfe81549b99a316588ccc3d83229b1fb">BL5372_REG_ALARM_B_HOUR</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a7a87da471b7b5745c825b969494fe513">BL5372_REG_ALARM_B_PLAN</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635aa3c0e10aadbc2e086454173f16fc4cc9">BL5372_REG_CTRL_1</a>
+, <a class="el" href="_b_l5372_8h.html#a726ca809ffd3d67ab4b8476646f26635a1cb29d9e6297654d802ddc6c3210ff69">BL5372_REG_CTRL_2</a>
+<br />
+ }</td></tr>
+<tr class="separator:a726ca809ffd3d67ab4b8476646f26635"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b3fb5c003cb6efac9efcd986465200e" id="r_a5b3fb5c003cb6efac9efcd986465200e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> { <a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200ea634977e113f734e6955c49ae9add8893">BL5372_ALARM_A</a> = 0
+, <a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200eab1235a7d6243a5bca18789cb92dfaa48">BL5372_ALARM_B</a> = 1
+ }</td></tr>
+<tr class="separator:a5b3fb5c003cb6efac9efcd986465200e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0042441c665a855a21ce8e2b014e64b8" id="r_a0042441c665a855a21ce8e2b014e64b8"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8">BL5372_intr_out_mode_t</a> { <a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8ac1897750bfa96c5d88af5c2a21a3966e">BL5372_INTR_OUT_MODE0</a> = 0x00
+, <a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8a73bd72ca16123c2e3141a86e3a1fbef6">BL5372_INTR_OUT_MODE1</a> = 0x01
+, <a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff">BL5372_INTR_OUT_MODE2</a>
+, <a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8ab59694d10b0cdc6be3ebf322eaeb32b7">BL5372_INTR_OUT_MODE3</a>
+ }</td></tr>
+<tr class="separator:a0042441c665a855a21ce8e2b014e64b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6a4d8a2e4c5bee14457d3d1be60577d" id="r_ab6a4d8a2e4c5bee14457d3d1be60577d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577d">BL5372_INT_module_mode_t</a> { <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382">BL5372_INT_MOD_MODE0</a> = 0x00
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da57ed19b3dc7d238225c2615b5bab42af">BL5372_INT_MOD_MODE1</a> = 0x01
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da8c51e0a4cea33adfa8d38dab0902597a">BL5372_INT_MOD_MODE2</a>
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da4a549e8389744c5fbd6e39a981bdd64a">BL5372_INT_MOD_MODE3</a>
+, <br />
+&#160;&#160;<a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577daac8fecf564b59440f06f6ec9c3ad59fb">BL5372_INT_MOD_MODE4</a>
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577dacc01cf70cb3504bf2ce73c816d7f1565">BL5372_INT_MOD_MODE5</a>
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da9883d131ad5d19cc5bfebefca0d1b983">BL5372_INT_MOD_MODE6</a>
+, <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577dab33165a4c63681433c6f8f9058b77874">BL5372_INT_MOD_MODE7</a>
+<br />
+ }</td></tr>
+<tr class="separator:ab6a4d8a2e4c5bee14457d3d1be60577d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a9f50e705fd6c89cbf1f38b8f6bcdcb14" id="r_a9f50e705fd6c89cbf1f38b8f6bcdcb14"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a9f50e705fd6c89cbf1f38b8f6bcdcb14">BL5372_config_init</a> ()</td></tr>
+<tr class="memdesc:a9f50e705fd6c89cbf1f38b8f6bcdcb14"><td class="mdescLeft">&#160;</td><td class="mdescRight">以默认配置初始化BL5372的运行配置  <br /></td></tr>
+<tr class="separator:a9f50e705fd6c89cbf1f38b8f6bcdcb14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4ffd22ffd5487ae847853e73f024c14" id="r_ab4ffd22ffd5487ae847853e73f024c14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#ab4ffd22ffd5487ae847853e73f024c14">BL5372_time_now_set</a> (<a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *time)</td></tr>
+<tr class="memdesc:ab4ffd22ffd5487ae847853e73f024c14"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置BL5372实时时间  <br /></td></tr>
+<tr class="separator:ab4ffd22ffd5487ae847853e73f024c14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc6efb96aec0a2b7eeb07433f95fe108" id="r_abc6efb96aec0a2b7eeb07433f95fe108"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#abc6efb96aec0a2b7eeb07433f95fe108">BL5372_time_now_get</a> (<a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *time)</td></tr>
+<tr class="memdesc:abc6efb96aec0a2b7eeb07433f95fe108"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取BL5372实时时间  <br /></td></tr>
+<tr class="separator:abc6efb96aec0a2b7eeb07433f95fe108"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad90b138ff5484df450e72058392f2b5f" id="r_ad90b138ff5484df450e72058392f2b5f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#ad90b138ff5484df450e72058392f2b5f">BL5372_time_alarm_set</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm, <a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *time, <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *cycle_plan)</td></tr>
+<tr class="memdesc:ad90b138ff5484df450e72058392f2b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置任意闹钟的设置时间,设置完成后不会进行打开关闭闹钟操作，需要自行调用BL5372_alarm_status_set  <br /></td></tr>
+<tr class="separator:ad90b138ff5484df450e72058392f2b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5b481a6186c79a8ba0f7c5cb763a455" id="r_af5b481a6186c79a8ba0f7c5cb763a455"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#af5b481a6186c79a8ba0f7c5cb763a455">BL5372_time_alarm_get</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm, <a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *time, <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *cycle_plan)</td></tr>
+<tr class="memdesc:af5b481a6186c79a8ba0f7c5cb763a455"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取任意闹钟的设置时间  <br /></td></tr>
+<tr class="separator:af5b481a6186c79a8ba0f7c5cb763a455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b386df2388bfa20826c41cad4384605" id="r_a0b386df2388bfa20826c41cad4384605"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a0b386df2388bfa20826c41cad4384605">BL5372_alarm_status_set</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm, bool status)</td></tr>
+<tr class="memdesc:a0b386df2388bfa20826c41cad4384605"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置任意闹钟的打开状态  <br /></td></tr>
+<tr class="separator:a0b386df2388bfa20826c41cad4384605"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d467c2faa5c9b661e35d64e02adf865" id="r_a9d467c2faa5c9b661e35d64e02adf865"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a9d467c2faa5c9b661e35d64e02adf865">BL5372_alarm_status_get</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm)</td></tr>
+<tr class="memdesc:a9d467c2faa5c9b661e35d64e02adf865"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取任意闹钟的打开状态  <br /></td></tr>
+<tr class="separator:a9d467c2faa5c9b661e35d64e02adf865"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae54bf5c6e718ab6e80d9213e2286ae26" id="r_ae54bf5c6e718ab6e80d9213e2286ae26"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#ae54bf5c6e718ab6e80d9213e2286ae26">BL5372_alarm_is_ringing</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm)</td></tr>
+<tr class="memdesc:ae54bf5c6e718ab6e80d9213e2286ae26"><td class="mdescLeft">&#160;</td><td class="mdescRight">现在选择的闹钟是否在响铃  <br /></td></tr>
+<tr class="separator:ae54bf5c6e718ab6e80d9213e2286ae26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cb8d59ef43d0b02948c035e6a4d9dc3" id="r_a8cb8d59ef43d0b02948c035e6a4d9dc3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a8cb8d59ef43d0b02948c035e6a4d9dc3">BL5372_alarm_stop_ringing</a> (<a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a> alarm)</td></tr>
+<tr class="memdesc:a8cb8d59ef43d0b02948c035e6a4d9dc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">让选择的闹钟停止响铃,但是不会关闭闹钟，需要自行调用BL5372_alarm_status_set  <br /></td></tr>
+<tr class="separator:a8cb8d59ef43d0b02948c035e6a4d9dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a556eba0c5d44c1d5fbae4cfcbba7706c" id="r_a556eba0c5d44c1d5fbae4cfcbba7706c"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a556eba0c5d44c1d5fbae4cfcbba7706c">BL5372_config_set</a> (<a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a> *rtc_cfg)</td></tr>
+<tr class="memdesc:a556eba0c5d44c1d5fbae4cfcbba7706c"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置BL5372的运行配置  <br /></td></tr>
+<tr class="separator:a556eba0c5d44c1d5fbae4cfcbba7706c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03b6a3018212103a03136c019770e92f" id="r_a03b6a3018212103a03136c019770e92f"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a03b6a3018212103a03136c019770e92f">BL5372_config_get</a> (<a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a> *rtc_cfg)</td></tr>
+<tr class="memdesc:a03b6a3018212103a03136c019770e92f"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取BL5372的运行配置  <br /></td></tr>
+<tr class="separator:a03b6a3018212103a03136c019770e92f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa29e8f8bbd40c71b00619d1cafba5ee1" id="r_aa29e8f8bbd40c71b00619d1cafba5ee1"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#aa29e8f8bbd40c71b00619d1cafba5ee1">BCD8421_transform_recode</a> (uint8_t bin_dat)</td></tr>
+<tr class="memdesc:aa29e8f8bbd40c71b00619d1cafba5ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">由8bits 8421BCD码解码为十进制数  <br /></td></tr>
+<tr class="separator:aa29e8f8bbd40c71b00619d1cafba5ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b7ac499765d27486d43ac3fc8f2dd2d" id="r_a0b7ac499765d27486d43ac3fc8f2dd2d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_b_l5372_8h.html#a0b7ac499765d27486d43ac3fc8f2dd2d">BCD8421_transform_decode</a> (uint8_t dec_dat)</td></tr>
+<tr class="memdesc:a0b7ac499765d27486d43ac3fc8f2dd2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">由十进制数编码为8bits 8421BCD码  <br /></td></tr>
+<tr class="separator:a0b7ac499765d27486d43ac3fc8f2dd2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a0640adbed26214327a7c0a2a8416e0b0" name="a0640adbed26214327a7c0a2a8416e0b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0640adbed26214327a7c0a2a8416e0b0">&#9670;&#160;</a></span>BL5372_DEFAULT_INIT_CONFIG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BL5372_DEFAULT_INIT_CONFIG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        { \</div>
+<div class="line">        .alarm_A_en = <span class="keyword">false</span>,                     \</div>
+<div class="line">        .alarm_B_en = <span class="keyword">false</span>,                     \</div>
+<div class="line">        .intr_out_mode = <a class="code hl_enumvalue" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff">BL5372_INTR_OUT_MODE2</a>,  \</div>
+<div class="line">        .test_en = <span class="keyword">false</span>,                        \</div>
+<div class="line">        .INT_module_mode = <a class="code hl_enumvalue" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382">BL5372_INT_MOD_MODE0</a>, \</div>
+<div class="line">        .hour_24_clock_en = <span class="keyword">true</span>,                \</div>
+<div class="line">        .adj_en_or_xstp = <span class="keyword">false</span>,                 \</div>
+<div class="line">        .out_32KHz_false = <span class="keyword">true</span>,                 \</div>
+<div class="line">        .INT_out_flag_or_out_keep = <span class="keyword">false</span>,       \</div>
+<div class="line">        .alarm_A_out_flag_or_out_keep = <span class="keyword">false</span>,   \</div>
+<div class="line">        .alarm_B_out_flag_or_out_keep = <span class="keyword">false</span>,   \</div>
+<div class="line">    }</div>
+<div class="ttc" id="a_b_l5372_8h_html_a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff"><div class="ttname"><a href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff">BL5372_INTR_OUT_MODE2</a></div><div class="ttdeci">@ BL5372_INTR_OUT_MODE2</div><div class="ttdef"><b>Definition</b> BL5372.h:69</div></div>
+<div class="ttc" id="a_b_l5372_8h_html_ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382"><div class="ttname"><a href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382">BL5372_INT_MOD_MODE0</a></div><div class="ttdeci">@ BL5372_INT_MOD_MODE0</div><div class="ttdef"><b>Definition</b> BL5372.h:76</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a534b76ba10d1f1380d2618173c257cdf" name="a534b76ba10d1f1380d2618173c257cdf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a534b76ba10d1f1380d2618173c257cdf">&#9670;&#160;</a></span>BL5372_DEVICE_ADD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BL5372_DEVICE_ADD&#160;&#160;&#160;0x32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a72448396760b656492d80eee50f0791a" name="a72448396760b656492d80eee50f0791a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72448396760b656492d80eee50f0791a">&#9670;&#160;</a></span>BL5372_alarm_cycle_plan_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> <a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af557d5dba18e309f9e783df5fb4e38e3" name="af557d5dba18e309f9e783df5fb4e38e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af557d5dba18e309f9e783df5fb4e38e3">&#9670;&#160;</a></span>BL5372_cfg_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a> <a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf950e3da729812e1664c141c2cae301" name="adf950e3da729812e1664c141c2cae301"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf950e3da729812e1664c141c2cae301">&#9670;&#160;</a></span>BL5372_time_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> <a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="a726ca809ffd3d67ab4b8476646f26635" name="a726ca809ffd3d67ab4b8476646f26635"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a726ca809ffd3d67ab4b8476646f26635">&#9670;&#160;</a></span>anonymous enum</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">anonymous enum</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635aba534620a5eb4f03343ec1b6bf8ee347" name="a726ca809ffd3d67ab4b8476646f26635aba534620a5eb4f03343ec1b6bf8ee347"></a>BL5372_REG_TIME_SEC&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635aaee49ff9f20ff7e3a503172161b3b078" name="a726ca809ffd3d67ab4b8476646f26635aaee49ff9f20ff7e3a503172161b3b078"></a>BL5372_REG_TIME_MIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a4ae8f097ea77e65ebf4ca9e4a24ed77a" name="a726ca809ffd3d67ab4b8476646f26635a4ae8f097ea77e65ebf4ca9e4a24ed77a"></a>BL5372_REG_TIME_HOUR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a3aaf8381d8c100bde91ba58668c222a0" name="a726ca809ffd3d67ab4b8476646f26635a3aaf8381d8c100bde91ba58668c222a0"></a>BL5372_REG_TIME_WEEK&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a4d0d971adf633ce83ae6fa4f35e3047f" name="a726ca809ffd3d67ab4b8476646f26635a4d0d971adf633ce83ae6fa4f35e3047f"></a>BL5372_REG_TIME_DAY&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a9bcd72fb2d2d95809fdfec6f6bfcb8e5" name="a726ca809ffd3d67ab4b8476646f26635a9bcd72fb2d2d95809fdfec6f6bfcb8e5"></a>BL5372_REG_TIME_MON&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a8a102b1406fdfbe575cbcf0c777ab60e" name="a726ca809ffd3d67ab4b8476646f26635a8a102b1406fdfbe575cbcf0c777ab60e"></a>BL5372_REG_TIME_YEAR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a20ad721e547f146b50de7c2ccd88b5f7" name="a726ca809ffd3d67ab4b8476646f26635a20ad721e547f146b50de7c2ccd88b5f7"></a>BL5372_REG_CTRL_COMPENSATE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635afff35c0871b092e11be2d33dadd6a675" name="a726ca809ffd3d67ab4b8476646f26635afff35c0871b092e11be2d33dadd6a675"></a>BL5372_REG_ALARM_A_MIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635ad9c0ae67b1d81ff8ec666ee6f0e8fed7" name="a726ca809ffd3d67ab4b8476646f26635ad9c0ae67b1d81ff8ec666ee6f0e8fed7"></a>BL5372_REG_ALARM_A_HOUR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a1367836207f7326af7e44e3f1a6bddb0" name="a726ca809ffd3d67ab4b8476646f26635a1367836207f7326af7e44e3f1a6bddb0"></a>BL5372_REG_ALARM_A_PLAN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a2c078226c6618160af726e6eb1c79d3d" name="a726ca809ffd3d67ab4b8476646f26635a2c078226c6618160af726e6eb1c79d3d"></a>BL5372_REG_ALARM_B_MIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635acfe81549b99a316588ccc3d83229b1fb" name="a726ca809ffd3d67ab4b8476646f26635acfe81549b99a316588ccc3d83229b1fb"></a>BL5372_REG_ALARM_B_HOUR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a7a87da471b7b5745c825b969494fe513" name="a726ca809ffd3d67ab4b8476646f26635a7a87da471b7b5745c825b969494fe513"></a>BL5372_REG_ALARM_B_PLAN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635aa3c0e10aadbc2e086454173f16fc4cc9" name="a726ca809ffd3d67ab4b8476646f26635aa3c0e10aadbc2e086454173f16fc4cc9"></a>BL5372_REG_CTRL_1&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a726ca809ffd3d67ab4b8476646f26635a1cb29d9e6297654d802ddc6c3210ff69" name="a726ca809ffd3d67ab4b8476646f26635a1cb29d9e6297654d802ddc6c3210ff69"></a>BL5372_REG_CTRL_2&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="a5b3fb5c003cb6efac9efcd986465200e" name="a5b3fb5c003cb6efac9efcd986465200e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b3fb5c003cb6efac9efcd986465200e">&#9670;&#160;</a></span>BL5372_alarm_select_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a5b3fb5c003cb6efac9efcd986465200ea634977e113f734e6955c49ae9add8893" name="a5b3fb5c003cb6efac9efcd986465200ea634977e113f734e6955c49ae9add8893"></a>BL5372_ALARM_A&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5b3fb5c003cb6efac9efcd986465200eab1235a7d6243a5bca18789cb92dfaa48" name="a5b3fb5c003cb6efac9efcd986465200eab1235a7d6243a5bca18789cb92dfaa48"></a>BL5372_ALARM_B&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="ab6a4d8a2e4c5bee14457d3d1be60577d" name="ab6a4d8a2e4c5bee14457d3d1be60577d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6a4d8a2e4c5bee14457d3d1be60577d">&#9670;&#160;</a></span>BL5372_INT_module_mode_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="_b_l5372_8h.html#ab6a4d8a2e4c5bee14457d3d1be60577d">BL5372_INT_module_mode_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382" name="ab6a4d8a2e4c5bee14457d3d1be60577da767e0e8957c6676f143400212ba93382"></a>BL5372_INT_MOD_MODE0&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577da57ed19b3dc7d238225c2615b5bab42af" name="ab6a4d8a2e4c5bee14457d3d1be60577da57ed19b3dc7d238225c2615b5bab42af"></a>BL5372_INT_MOD_MODE1&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577da8c51e0a4cea33adfa8d38dab0902597a" name="ab6a4d8a2e4c5bee14457d3d1be60577da8c51e0a4cea33adfa8d38dab0902597a"></a>BL5372_INT_MOD_MODE2&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577da4a549e8389744c5fbd6e39a981bdd64a" name="ab6a4d8a2e4c5bee14457d3d1be60577da4a549e8389744c5fbd6e39a981bdd64a"></a>BL5372_INT_MOD_MODE3&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577daac8fecf564b59440f06f6ec9c3ad59fb" name="ab6a4d8a2e4c5bee14457d3d1be60577daac8fecf564b59440f06f6ec9c3ad59fb"></a>BL5372_INT_MOD_MODE4&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577dacc01cf70cb3504bf2ce73c816d7f1565" name="ab6a4d8a2e4c5bee14457d3d1be60577dacc01cf70cb3504bf2ce73c816d7f1565"></a>BL5372_INT_MOD_MODE5&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577da9883d131ad5d19cc5bfebefca0d1b983" name="ab6a4d8a2e4c5bee14457d3d1be60577da9883d131ad5d19cc5bfebefca0d1b983"></a>BL5372_INT_MOD_MODE6&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab6a4d8a2e4c5bee14457d3d1be60577dab33165a4c63681433c6f8f9058b77874" name="ab6a4d8a2e4c5bee14457d3d1be60577dab33165a4c63681433c6f8f9058b77874"></a>BL5372_INT_MOD_MODE7&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="a0042441c665a855a21ce8e2b014e64b8" name="a0042441c665a855a21ce8e2b014e64b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0042441c665a855a21ce8e2b014e64b8">&#9670;&#160;</a></span>BL5372_intr_out_mode_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="_b_l5372_8h.html#a0042441c665a855a21ce8e2b014e64b8">BL5372_intr_out_mode_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a0042441c665a855a21ce8e2b014e64b8ac1897750bfa96c5d88af5c2a21a3966e" name="a0042441c665a855a21ce8e2b014e64b8ac1897750bfa96c5d88af5c2a21a3966e"></a>BL5372_INTR_OUT_MODE0&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0042441c665a855a21ce8e2b014e64b8a73bd72ca16123c2e3141a86e3a1fbef6" name="a0042441c665a855a21ce8e2b014e64b8a73bd72ca16123c2e3141a86e3a1fbef6"></a>BL5372_INTR_OUT_MODE1&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff" name="a0042441c665a855a21ce8e2b014e64b8ace8f7bdd5c8004be3c6d46bb3bde87ff"></a>BL5372_INTR_OUT_MODE2&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0042441c665a855a21ce8e2b014e64b8ab59694d10b0cdc6be3ebf322eaeb32b7" name="a0042441c665a855a21ce8e2b014e64b8ab59694d10b0cdc6be3ebf322eaeb32b7"></a>BL5372_INTR_OUT_MODE3&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a0b7ac499765d27486d43ac3fc8f2dd2d" name="a0b7ac499765d27486d43ac3fc8f2dd2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b7ac499765d27486d43ac3fc8f2dd2d">&#9670;&#160;</a></span>BCD8421_transform_decode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t BCD8421_transform_decode </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>dec_dat</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>由十进制数编码为8bits 8421BCD码 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dec_dat</td><td>十进制数,必须小于或等于两位的数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>8421BCD码8bits </dd></dl>
+
+</div>
+</div>
+<a id="aa29e8f8bbd40c71b00619d1cafba5ee1" name="aa29e8f8bbd40c71b00619d1cafba5ee1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa29e8f8bbd40c71b00619d1cafba5ee1">&#9670;&#160;</a></span>BCD8421_transform_recode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t BCD8421_transform_recode </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>bin_dat</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>由8bits 8421BCD码解码为十进制数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bin_dat</td><td>8421BCD码,必须小于或等于8个bit </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>十进制数,小于或等于两位 </dd></dl>
+
+</div>
+</div>
+<a id="ae54bf5c6e718ab6e80d9213e2286ae26" name="ae54bf5c6e718ab6e80d9213e2286ae26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae54bf5c6e718ab6e80d9213e2286ae26">&#9670;&#160;</a></span>BL5372_alarm_is_ringing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool BL5372_alarm_is_ringing </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>现在选择的闹钟是否在响铃 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>true表示正在响铃 </dd></dl>
+
+</div>
+</div>
+<a id="a9d467c2faa5c9b661e35d64e02adf865" name="a9d467c2faa5c9b661e35d64e02adf865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d467c2faa5c9b661e35d64e02adf865">&#9670;&#160;</a></span>BL5372_alarm_status_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool BL5372_alarm_status_get </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取任意闹钟的打开状态 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>闹钟的状态，true为闹钟打开 </dd></dl>
+
+</div>
+</div>
+<a id="a0b386df2388bfa20826c41cad4384605" name="a0b386df2388bfa20826c41cad4384605"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b386df2388bfa20826c41cad4384605">&#9670;&#160;</a></span>BL5372_alarm_status_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_alarm_status_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置任意闹钟的打开状态 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+    <tr><td class="paramname">status</td><td>设置的状态,设置为true打开闹钟 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8cb8d59ef43d0b02948c035e6a4d9dc3" name="a8cb8d59ef43d0b02948c035e6a4d9dc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cb8d59ef43d0b02948c035e6a4d9dc3">&#9670;&#160;</a></span>BL5372_alarm_stop_ringing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_alarm_stop_ringing </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>让选择的闹钟停止响铃,但是不会关闭闹钟，需要自行调用BL5372_alarm_status_set </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a03b6a3018212103a03136c019770e92f" name="a03b6a3018212103a03136c019770e92f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03b6a3018212103a03136c019770e92f">&#9670;&#160;</a></span>BL5372_config_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t BL5372_config_get </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>rtc_cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取BL5372的运行配置 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rtc_cfg</td><td>保存运行配置的数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 成功] <br  />
+ </dd>
+<dd>
+[ESP_ERR_INVALID_ARG 参数错误] </dd>
+<dd>
+[ESP_FAIL 发送命令时发现问题, TCA6416A未应答] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] </dd>
+<dd>
+[ESP_ERR_TIMEOUT 操作超时因为总线忙] </dd></dl>
+
+</div>
+</div>
+<a id="a9f50e705fd6c89cbf1f38b8f6bcdcb14" name="a9f50e705fd6c89cbf1f38b8f6bcdcb14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f50e705fd6c89cbf1f38b8f6bcdcb14">&#9670;&#160;</a></span>BL5372_config_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t BL5372_config_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>以默认配置初始化BL5372的运行配置 </p>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 成功] <br  />
+ </dd>
+<dd>
+[ESP_ERR_INVALID_ARG 参数错误] </dd>
+<dd>
+[ESP_FAIL 发送命令时发现问题, TCA6416A未应答] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] </dd>
+<dd>
+[ESP_ERR_TIMEOUT 操作超时因为总线忙] </dd></dl>
+
+</div>
+</div>
+<a id="a556eba0c5d44c1d5fbae4cfcbba7706c" name="a556eba0c5d44c1d5fbae4cfcbba7706c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a556eba0c5d44c1d5fbae4cfcbba7706c">&#9670;&#160;</a></span>BL5372_config_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t BL5372_config_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__cfg__t.html">BL5372_cfg_t</a> *&#160;</td>
+          <td class="paramname"><em>rtc_cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置BL5372的运行配置 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rtc_cfg</td><td>作为运行配置的数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 成功] <br  />
+ </dd>
+<dd>
+[ESP_ERR_INVALID_ARG 参数错误] </dd>
+<dd>
+[ESP_FAIL 发送命令时发现问题, TCA6416A未应答] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] </dd>
+<dd>
+[ESP_ERR_TIMEOUT 操作超时因为总线忙] </dd></dl>
+
+</div>
+</div>
+<a id="af5b481a6186c79a8ba0f7c5cb763a455" name="af5b481a6186c79a8ba0f7c5cb763a455"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5b481a6186c79a8ba0f7c5cb763a455">&#9670;&#160;</a></span>BL5372_time_alarm_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_time_alarm_get </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *&#160;</td>
+          <td class="paramname"><em>cycle_plan</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取任意闹钟的设置时间 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+    <tr><td class="paramname">time</td><td>保存设置时间的数据的地址,除了 时 分 其他都是无效的 </td></tr>
+    <tr><td class="paramname">cycle_plan</td><td>保存闹钟重复数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad90b138ff5484df450e72058392f2b5f" name="ad90b138ff5484df450e72058392f2b5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad90b138ff5484df450e72058392f2b5f">&#9670;&#160;</a></span>BL5372_time_alarm_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_time_alarm_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_b_l5372_8h.html#a5b3fb5c003cb6efac9efcd986465200e">BL5372_alarm_select_t</a>&#160;</td>
+          <td class="paramname"><em>alarm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__alarm__cycle__plan__t.html">BL5372_alarm_cycle_plan_t</a> *&#160;</td>
+          <td class="paramname"><em>cycle_plan</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置任意闹钟的设置时间,设置完成后不会进行打开关闭闹钟操作，需要自行调用BL5372_alarm_status_set </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alarm</td><td>选择闹钟，这是一个枚举类型 </td></tr>
+    <tr><td class="paramname">time</td><td>要设置的时间数据的地址,除了 时 分 其他都是无效的 </td></tr>
+    <tr><td class="paramname">cycle_plan</td><td>闹钟重复计划数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abc6efb96aec0a2b7eeb07433f95fe108" name="abc6efb96aec0a2b7eeb07433f95fe108"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc6efb96aec0a2b7eeb07433f95fe108">&#9670;&#160;</a></span>BL5372_time_now_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_time_now_get </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *&#160;</td>
+          <td class="paramname"><em>time</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取BL5372实时时间 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>保存实时时间的数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab4ffd22ffd5487ae847853e73f024c14" name="ab4ffd22ffd5487ae847853e73f024c14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4ffd22ffd5487ae847853e73f024c14">&#9670;&#160;</a></span>BL5372_time_now_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BL5372_time_now_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_b_l5372__time__t.html">BL5372_time_t</a> *&#160;</td>
+          <td class="paramname"><em>time</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置BL5372实时时间 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>作为设置实时时间的数据的地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_409f97388efe006bc3438b95e9edef48.html">components</a></li><li class="navelem"><a class="el" href="dir_7c248e60cc65cb3496ca29923b77bb83.html">sevetest30_board</a></li><li class="navelem"><a class="el" href="dir_093d3a29e6ea19b39be97ff26f05d1dd.html">include</a></li><li class="navelem"><a class="el" href="_b_l5372_8h.html">BL5372.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

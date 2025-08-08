@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: components/sevetest30_board/include/math_tools_fp64.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('math__tools__fp64_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">math_tools_fp64.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="math__tools__fp64_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * 701Enti MIT License</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Copyright © 2025 &lt;701Enti organization&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * a copy of this software and associated documentation files (the “Software”),</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * to deal in the Software without restriction, including without limitation</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> <span class="comment">// 包含各种基于ESP-DSP的数学工具函数</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> <span class="comment">// &quot;fp64&quot;表示相关计算使用double类型进行</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> <span class="comment">// 部分矩阵运算,使用由esp-dsp项目中的一些运算函数修改而来的double版本函数构成的matrix_f64库,非常感谢原作者,具体声明见本项目README和相关源文件声明</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="comment">// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="comment">// github: https://github.com/701Enti</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> <span class="comment">// bilibili: 701Enti</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;esp_heap_caps.h&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="math__tools__fp64_8h.html#a92129c7c250640a23e9c0532a6752880">   33</a></span><span class="preprocessor">#define MATH_TOOLS_MALLOC_CAP_DEFAULT MALLOC_CAP_SPIRAM </span><span class="comment">//默认内存申请位置</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> /*******基本最小操作*******/</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="comment">//基本矩阵编辑操作</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a7a4b1666083bc375d1e3e9cd30581c37">matrix_transpose_fp64</a>(<span class="keywordtype">double</span>* input, <span class="keywordtype">double</span>* output, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keywordtype">void</span> <a class="code hl_function" href="math__tools__fp64_8h.html#a5ba16975c489c27d2db54a548887c7fd">matrix_swap_rows_fp64</a>(<span class="keywordtype">double</span>* A, <span class="keywordtype">int</span> n, <span class="keywordtype">int</span> r1, <span class="keywordtype">int</span> r2);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keywordtype">double</span> <a class="code hl_function" href="math__tools__fp64_8h.html#a09d05adeb95bf2dcd4e0d5febe9bea58">matrix_only_row_elimination_step_fp64</a>(<span class="keywordtype">double</span>* A, <span class="keywordtype">int</span> aim_row, <span class="keywordtype">int</span> pivot_row, <span class="keywordtype">int</span> pivot_col, <span class="keywordtype">bool</span> major_default, <span class="keywordtype">int</span> LDA);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">//基本矩阵提取操作</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keywordtype">int</span> <a class="code hl_function" href="math__tools__fp64_8h.html#acadb6e136578a07308b9a53f80fc25e0">matrix_get_the_row_of_aim_col_pivot_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* A, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n, <span class="keywordtype">int</span> aim_col, <span class="keywordtype">int</span> start_row);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keywordtype">void</span> <a class="code hl_function" href="math__tools__fp64_8h.html#aaceb996e09dee600111a6b7ce5b263aa">matrix_extract_triangle_region_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* A, <span class="keywordtype">double</span>* output, <span class="keywordtype">int</span> n, <span class="keywordtype">bool</span> lower, <span class="keywordtype">bool</span> other, <span class="keywordtype">bool</span> set1, <span class="keywordtype">bool</span> set2);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">//基本矩阵可视化操作</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keywordtype">void</span> <a class="code hl_function" href="math__tools__fp64_8h.html#a98959bc36b88ce34991e450be3cb74d0">matrix_log_print_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* A, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n, <span class="keywordtype">bool</span> major_default, <span class="keywordtype">bool</span> show_rc);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">/*******二级封装操作(经典基本数学计算方法实现)*******/</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">//LU相关</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a9b797cb1b6284c23146f7dbf722b062f">matrix_decomposition_LU_fp64</a>(<span class="keywordtype">double</span>* A, <span class="keywordtype">double</span>* L, <span class="keywordtype">double</span>* U, <span class="keywordtype">int</span>* P, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a1b06acc998d5d0182487f1c26e08e774">matrix_square_solve_LU_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* L, <span class="keyword">const</span> <span class="keywordtype">double</span>* U, <span class="keyword">const</span> <span class="keywordtype">int</span>* P, <span class="keywordtype">double</span>* b, <span class="keywordtype">double</span>* x, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a0305685c3c2db3869219876f69898d46">matrix_inverse_LU_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* A, <span class="keywordtype">double</span>* inv_A, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">/*******三级封装操作(开箱即用实用化操作)*******/</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">//求解 - solve_x</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a48f52060bbe54168188bb10277dd92ae">solve_overdet_system_ols_mlr_fp64</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* X, <span class="keyword">const</span> <span class="keywordtype">double</span>* y, <span class="keywordtype">double</span>* beta, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">//评估 - appraisal_x</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>esp_err_t <a class="code hl_function" href="math__tools__fp64_8h.html#a8973ecc2382aa74458f5298f29911758">appraisal_residual_linear_model_fp64</a>(<span class="keywordtype">double</span>* r, <span class="keywordtype">double</span>* J, <span class="keyword">const</span> <span class="keywordtype">double</span>* X, <span class="keyword">const</span> <span class="keywordtype">double</span>* y, <span class="keywordtype">double</span>* beta, <span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a0305685c3c2db3869219876f69898d46"><div class="ttname"><a href="math__tools__fp64_8h.html#a0305685c3c2db3869219876f69898d46">matrix_inverse_LU_fp64</a></div><div class="ttdeci">esp_err_t matrix_inverse_LU_fp64(const double *A, double *inv_A, int n)</div><div class="ttdoc">[目前仅支持行主序]矩阵(方阵)求逆-LU求逆(不会修改源数据矩阵)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:348</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a09d05adeb95bf2dcd4e0d5febe9bea58"><div class="ttname"><a href="math__tools__fp64_8h.html#a09d05adeb95bf2dcd4e0d5febe9bea58">matrix_only_row_elimination_step_fp64</a></div><div class="ttdeci">double matrix_only_row_elimination_step_fp64(double *A, int aim_row, int pivot_row, int pivot_col, bool major_default, int LDA)</div><div class="ttdoc">(会修改源数据矩阵)矩阵仅行消元操作(高斯消元)(之前要预先完成如归一化,行交换等预处理),用主元行消去目标行(高斯消元),本函数是消元操作步骤中的单一一步,不会遍历迭代完成所有消元,...</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:222</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a1b06acc998d5d0182487f1c26e08e774"><div class="ttname"><a href="math__tools__fp64_8h.html#a1b06acc998d5d0182487f1c26e08e774">matrix_square_solve_LU_fp64</a></div><div class="ttdeci">esp_err_t matrix_square_solve_LU_fp64(const double *L, const double *U, const int *P, double *b, double *x, int n)</div><div class="ttdoc">[目前仅支持行主序]矩阵(方阵)求解-LU求解(LU分解的原矩阵A必须为方阵n x n,否则无法支持)(不会修改源数据矩阵)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:302</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a48f52060bbe54168188bb10277dd92ae"><div class="ttname"><a href="math__tools__fp64_8h.html#a48f52060bbe54168188bb10277dd92ae">solve_overdet_system_ols_mlr_fp64</a></div><div class="ttdeci">esp_err_t solve_overdet_system_ols_mlr_fp64(const double *X, const double *y, double *beta, int m, int n)</div><div class="ttdoc">[目前仅支持行主序]求解超定方程组 - 基于普通最小二乘法(OLS)实现的多元线性回归(MLR)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:451</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a5ba16975c489c27d2db54a548887c7fd"><div class="ttname"><a href="math__tools__fp64_8h.html#a5ba16975c489c27d2db54a548887c7fd">matrix_swap_rows_fp64</a></div><div class="ttdeci">void matrix_swap_rows_fp64(double *A, int n, int r1, int r2)</div><div class="ttdoc">[目前仅支持行主序](会修改源数据矩阵)矩阵中的两行(r1和r2)交换所有元素</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:151</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a7a4b1666083bc375d1e3e9cd30581c37"><div class="ttname"><a href="math__tools__fp64_8h.html#a7a4b1666083bc375d1e3e9cd30581c37">matrix_transpose_fp64</a></div><div class="ttdeci">esp_err_t matrix_transpose_fp64(double *input, double *output, int m, int n)</div><div class="ttdoc">[目前仅支持行主序]矩阵转置,自动根据上下文参数选择更优更快的处理方式(如何触发见下方备注),若满足多个优化条件,优化可能叠加 (一般不会修改源数据矩阵,除非方阵触发原地转置优化)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:81</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a8973ecc2382aa74458f5298f29911758"><div class="ttname"><a href="math__tools__fp64_8h.html#a8973ecc2382aa74458f5298f29911758">appraisal_residual_linear_model_fp64</a></div><div class="ttdeci">esp_err_t appraisal_residual_linear_model_fp64(double *r, double *J, const double *X, const double *y, double *beta, int m, int n)</div><div class="ttdoc">[目前仅支持行主序]残差评估 - 获取任意线性模型的残差</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:539</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a98959bc36b88ce34991e450be3cb74d0"><div class="ttname"><a href="math__tools__fp64_8h.html#a98959bc36b88ce34991e450be3cb74d0">matrix_log_print_fp64</a></div><div class="ttdeci">void matrix_log_print_fp64(const double *A, int m, int n, bool major_default, bool show_rc)</div><div class="ttdoc">矩阵在日志中打印出来</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:412</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_a9b797cb1b6284c23146f7dbf722b062f"><div class="ttname"><a href="math__tools__fp64_8h.html#a9b797cb1b6284c23146f7dbf722b062f">matrix_decomposition_LU_fp64</a></div><div class="ttdeci">esp_err_t matrix_decomposition_LU_fp64(double *A, double *L, double *U, int *P, int m, int n)</div><div class="ttdoc">[目前仅支持行主序]矩阵分解-LU分解(带部分主元法,支持非方阵,自动解决主元为0情况而不报错)(不会修改源数据矩阵)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:252</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_aaceb996e09dee600111a6b7ce5b263aa"><div class="ttname"><a href="math__tools__fp64_8h.html#aaceb996e09dee600111a6b7ce5b263aa">matrix_extract_triangle_region_fp64</a></div><div class="ttdeci">void matrix_extract_triangle_region_fp64(const double *A, double *output, int n, bool lower, bool other, bool set1, bool set2)</div><div class="ttdoc">[目前仅支持行主序]提取矩阵(nxn,必须为方阵)中的三角区(上三角/下三角),含对角线(不会修改源数据矩阵)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:176</div></div>
+<div class="ttc" id="amath__tools__fp64_8h_html_acadb6e136578a07308b9a53f80fc25e0"><div class="ttname"><a href="math__tools__fp64_8h.html#acadb6e136578a07308b9a53f80fc25e0">matrix_get_the_row_of_aim_col_pivot_fp64</a></div><div class="ttdeci">int matrix_get_the_row_of_aim_col_pivot_fp64(const double *A, int m, int n, int aim_col, int start_row)</div><div class="ttdoc">[目前仅支持行主序]获取矩阵中目标列的主元的行号(找出矩阵目标列中的主元位置,输出它的行号)(不会修改源数据矩阵)</div><div class="ttdef"><b>Definition</b> math_tools_fp64.c:131</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_409f97388efe006bc3438b95e9edef48.html">components</a></li><li class="navelem"><a class="el" href="dir_7c248e60cc65cb3496ca29923b77bb83.html">sevetest30_board</a></li><li class="navelem"><a class="el" href="dir_093d3a29e6ea19b39be97ff26f05d1dd.html">include</a></li><li class="navelem"><a class="el" href="math__tools__fp64_8h.html">math_tools_fp64.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

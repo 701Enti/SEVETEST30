@@ -1,0 +1,1067 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: main/math_tools_fp64.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('math__tools__fp64_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">math_tools_fp64.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="math__tools__fp64_8h_source.html">math_tools_fp64.h</a>&quot;</code><br />
+<code>#include &quot;esp_err.h&quot;</code><br />
+<code>#include &quot;esp_check.h&quot;</code><br />
+<code>#include &quot;esp_log.h&quot;</code><br />
+<code>#include &quot;esp_dsp.h&quot;</code><br />
+<code>#include &quot;esp_cpu.h&quot;</code><br />
+<code>#include &lt;stdbool.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
+<code>#include &quot;matrix_fp64.h&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+math_tools_fp64.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="math__tools__fp64_8c__incl.svg" width="1147" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a309ce19729bfb095cc04c8e27fe48f22" id="r_a309ce19729bfb095cc04c8e27fe48f22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a309ce19729bfb095cc04c8e27fe48f22">general_matrix_transpose_fp64</a> (double *input, double *output, int m, int n)</td></tr>
+<tr class="memdesc:a309ce19729bfb095cc04c8e27fe48f22"><td class="mdescLeft">&#160;</td><td class="mdescRight">通用矩阵转置  <br /></td></tr>
+<tr class="separator:a309ce19729bfb095cc04c8e27fe48f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9609c71a71156df827194fc5e60ae559" id="r_a9609c71a71156df827194fc5e60ae559"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a9609c71a71156df827194fc5e60ae559">aligned_16_matrix_transpose_fp64</a> (double *input, double *output, int m, int n)</td></tr>
+<tr class="separator:a9609c71a71156df827194fc5e60ae559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af49ef77dcbe906db8bc3c9462f5fe5cb" id="r_af49ef77dcbe906db8bc3c9462f5fe5cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#af49ef77dcbe906db8bc3c9462f5fe5cb">square_matrix_transpose_fp64</a> (double *local, int n)</td></tr>
+<tr class="separator:af49ef77dcbe906db8bc3c9462f5fe5cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34b967168888a6a07bd037eed9972338" id="r_a34b967168888a6a07bd037eed9972338"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a34b967168888a6a07bd037eed9972338">square_aligned_16_matrix_transpose_fp64</a> (double *local, int n)</td></tr>
+<tr class="separator:a34b967168888a6a07bd037eed9972338"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a4b1666083bc375d1e3e9cd30581c37" id="r_a7a4b1666083bc375d1e3e9cd30581c37"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a7a4b1666083bc375d1e3e9cd30581c37">matrix_transpose_fp64</a> (double *input, double *output, int m, int n)</td></tr>
+<tr class="memdesc:a7a4b1666083bc375d1e3e9cd30581c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]矩阵转置,自动根据上下文参数选择更优更快的处理方式(如何触发见下方备注),若满足多个优化条件,优化可能叠加 (一般不会修改源数据矩阵,除非方阵触发原地转置优化)  <br /></td></tr>
+<tr class="separator:a7a4b1666083bc375d1e3e9cd30581c37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acadb6e136578a07308b9a53f80fc25e0" id="r_acadb6e136578a07308b9a53f80fc25e0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#acadb6e136578a07308b9a53f80fc25e0">matrix_get_the_row_of_aim_col_pivot_fp64</a> (const double *A, int m, int n, int aim_col, int start_row)</td></tr>
+<tr class="memdesc:acadb6e136578a07308b9a53f80fc25e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]获取矩阵中目标列的主元的行号(找出矩阵目标列中的主元位置,输出它的行号)(不会修改源数据矩阵)  <br /></td></tr>
+<tr class="separator:acadb6e136578a07308b9a53f80fc25e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ba16975c489c27d2db54a548887c7fd" id="r_a5ba16975c489c27d2db54a548887c7fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a5ba16975c489c27d2db54a548887c7fd">matrix_swap_rows_fp64</a> (double *A, int n, int r1, int r2)</td></tr>
+<tr class="memdesc:a5ba16975c489c27d2db54a548887c7fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序](会修改源数据矩阵)矩阵中的两行(r1和r2)交换所有元素  <br /></td></tr>
+<tr class="separator:a5ba16975c489c27d2db54a548887c7fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaceb996e09dee600111a6b7ce5b263aa" id="r_aaceb996e09dee600111a6b7ce5b263aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#aaceb996e09dee600111a6b7ce5b263aa">matrix_extract_triangle_region_fp64</a> (const double *A, double *output, int n, bool lower, bool other, bool set1, bool set2)</td></tr>
+<tr class="memdesc:aaceb996e09dee600111a6b7ce5b263aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]提取矩阵(nxn,必须为方阵)中的三角区(上三角/下三角),含对角线(不会修改源数据矩阵)  <br /></td></tr>
+<tr class="separator:aaceb996e09dee600111a6b7ce5b263aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09d05adeb95bf2dcd4e0d5febe9bea58" id="r_a09d05adeb95bf2dcd4e0d5febe9bea58"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a09d05adeb95bf2dcd4e0d5febe9bea58">matrix_only_row_elimination_step_fp64</a> (double *A, int aim_row, int pivot_row, int pivot_col, bool major_default, int LDA)</td></tr>
+<tr class="memdesc:a09d05adeb95bf2dcd4e0d5febe9bea58"><td class="mdescLeft">&#160;</td><td class="mdescRight">(会修改源数据矩阵)矩阵仅行消元操作(高斯消元)(之前要预先完成如归一化,行交换等预处理),用主元行消去目标行(高斯消元),本函数是消元操作步骤中的单一一步,不会遍历迭代完成所有消元,需要外部手动遍历  <br /></td></tr>
+<tr class="separator:a09d05adeb95bf2dcd4e0d5febe9bea58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b797cb1b6284c23146f7dbf722b062f" id="r_a9b797cb1b6284c23146f7dbf722b062f"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a9b797cb1b6284c23146f7dbf722b062f">matrix_decomposition_LU_fp64</a> (double *A, double *L, double *U, int *P, int m, int n)</td></tr>
+<tr class="memdesc:a9b797cb1b6284c23146f7dbf722b062f"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]矩阵分解-LU分解(带部分主元法,支持非方阵,自动解决主元为0情况而不报错)(不会修改源数据矩阵)  <br /></td></tr>
+<tr class="separator:a9b797cb1b6284c23146f7dbf722b062f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b06acc998d5d0182487f1c26e08e774" id="r_a1b06acc998d5d0182487f1c26e08e774"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a1b06acc998d5d0182487f1c26e08e774">matrix_square_solve_LU_fp64</a> (const double *L, const double *U, const int *P, double *b, double *x, int n)</td></tr>
+<tr class="memdesc:a1b06acc998d5d0182487f1c26e08e774"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]矩阵(方阵)求解-LU求解(LU分解的原矩阵A必须为方阵n x n,否则无法支持)(不会修改源数据矩阵)  <br /></td></tr>
+<tr class="separator:a1b06acc998d5d0182487f1c26e08e774"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0305685c3c2db3869219876f69898d46" id="r_a0305685c3c2db3869219876f69898d46"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a0305685c3c2db3869219876f69898d46">matrix_inverse_LU_fp64</a> (const double *A, double *inv_A, int n)</td></tr>
+<tr class="memdesc:a0305685c3c2db3869219876f69898d46"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]矩阵(方阵)求逆-LU求逆(不会修改源数据矩阵)  <br /></td></tr>
+<tr class="separator:a0305685c3c2db3869219876f69898d46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98959bc36b88ce34991e450be3cb74d0" id="r_a98959bc36b88ce34991e450be3cb74d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a98959bc36b88ce34991e450be3cb74d0">matrix_log_print_fp64</a> (const double *A, int m, int n, bool major_default, bool show_rc)</td></tr>
+<tr class="memdesc:a98959bc36b88ce34991e450be3cb74d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">矩阵在日志中打印出来  <br /></td></tr>
+<tr class="separator:a98959bc36b88ce34991e450be3cb74d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48f52060bbe54168188bb10277dd92ae" id="r_a48f52060bbe54168188bb10277dd92ae"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a48f52060bbe54168188bb10277dd92ae">solve_overdet_system_ols_mlr_fp64</a> (const double *X, const double *y, double *beta, int m, int n)</td></tr>
+<tr class="memdesc:a48f52060bbe54168188bb10277dd92ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]求解超定方程组 - 基于普通最小二乘法(OLS)实现的多元线性回归(MLR)  <br /></td></tr>
+<tr class="separator:a48f52060bbe54168188bb10277dd92ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6072e111ebc856f1150798fb72e2b795" id="r_a6072e111ebc856f1150798fb72e2b795"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="math__tools__fp64_8c.html#a6072e111ebc856f1150798fb72e2b795">appraisal_residual_linear_model_fp64</a> (double *r, double *SSR, const double *X, const double *y, double *beta, int m, int n)</td></tr>
+<tr class="memdesc:a6072e111ebc856f1150798fb72e2b795"><td class="mdescLeft">&#160;</td><td class="mdescRight">[目前仅支持行主序]残差评估 - 获取任意线性模型的残差  <br /></td></tr>
+<tr class="separator:a6072e111ebc856f1150798fb72e2b795"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="a9609c71a71156df827194fc5e60ae559" name="a9609c71a71156df827194fc5e60ae559"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9609c71a71156df827194fc5e60ae559">&#9670;&#160;</a></span>aligned_16_matrix_transpose_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void aligned_16_matrix_transpose_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6072e111ebc856f1150798fb72e2b795" name="a6072e111ebc856f1150798fb72e2b795"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6072e111ebc856f1150798fb72e2b795">&#9670;&#160;</a></span>appraisal_residual_linear_model_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t appraisal_residual_linear_model_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>SSR</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]残差评估 - 获取任意线性模型的残差 </p>
+<dl class="section note"><dt>注解</dt><dd>运算过程中的X * beta临时值暂时会在r上缓存以节省内存,这不会产生任何其他影响或需求,正常传入残差向量(m x 1)存储位置即可</dd></dl>
+<p>[适用问题]判断线性运算结果的可靠性</p>
+<p>[适用领域]可由于如传感器校准(椭球拟合结果可靠性验证等)和数据分析,机器学习等领域</p>
+<p>[运算原理] 残差r = X * beta - y </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>残差向量 (m x 1) 存储到 </td></tr>
+    <tr><td class="paramname">SSR</td><td>残差平方和(double数值) 存储到 </td></tr>
+    <tr><td class="paramname">X</td><td>设计矩阵 (m x n) </td></tr>
+    <tr><td class="paramname">y</td><td>观测向量 (m x 1) </td></tr>
+    <tr><td class="paramname">beta</td><td>结果参数向量 (n x 1) , 其结构和意义由设计向量决定 </td></tr>
+    <tr><td class="paramname">m</td><td>设计矩阵的行数(样本个数/方程个数) </td></tr>
+    <tr><td class="paramname">n</td><td>设计矩阵的列数(参数个数,列数) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] <br  />
+ </dd>
+<dd>
+[ESP_ERR_NO_MEM 内存不足] </dd>
+<dd>
+[ESP_ERR_INVALID_ARG X为NULL / y为NULL / beta为NULL / m &lt;= 0 / n &lt;= 0] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a309ce19729bfb095cc04c8e27fe48f22" name="a309ce19729bfb095cc04c8e27fe48f22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a309ce19729bfb095cc04c8e27fe48f22">&#9670;&#160;</a></span>general_matrix_transpose_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void general_matrix_transpose_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通用矩阵转置 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>矩阵输入 </td></tr>
+    <tr><td class="paramname">output</td><td>矩阵输出 </td></tr>
+    <tr><td class="paramname">m</td><td>原矩阵的行数 </td></tr>
+    <tr><td class="paramname">n</td><td>原矩阵的列数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9b797cb1b6284c23146f7dbf722b062f" name="a9b797cb1b6284c23146f7dbf722b062f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b797cb1b6284c23146f7dbf722b062f">&#9670;&#160;</a></span>matrix_decomposition_LU_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t matrix_decomposition_LU_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>L</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>U</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>P</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]矩阵分解-LU分解(带部分主元法,支持非方阵,自动解决主元为0情况而不报错)(不会修改源数据矩阵) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>要进行分解的矩阵(m x n) </td></tr>
+    <tr><td class="paramname">L</td><td>下三角/梯形矩阵 L (m x min(m,n)) 输出到 </td></tr>
+    <tr><td class="paramname">U</td><td>上三角/梯形矩阵 U (min(m,n) x n) 输出到 </td></tr>
+    <tr><td class="paramname">P</td><td>置换数组 P (m) (存储为普通int一维数组,大小为m) 输出到 [置换矩阵P记录行交换索引,本函数运行完后,有P[原行号]=现行号(若不需要可以设置为NULL以禁止输出矩阵P,但是其他任何操作正常执行,包括自动解决主元为0情况)] </td></tr>
+    <tr><td class="paramname">m</td><td>矩阵A行数 </td></tr>
+    <tr><td class="paramname">n</td><td>矩阵A列数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] </dd>
+<dd>
+[ESP_ERR_INVALID_ARG A为NULL / L为NULL / U为NULL / m &lt;= 0 / n &lt;= 0] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="aaceb996e09dee600111a6b7ce5b263aa" name="aaceb996e09dee600111a6b7ce5b263aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaceb996e09dee600111a6b7ce5b263aa">&#9670;&#160;</a></span>matrix_extract_triangle_region_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void matrix_extract_triangle_region_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>lower</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>other</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>set1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>set2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]提取矩阵(nxn,必须为方阵)中的三角区(上三角/下三角),含对角线(不会修改源数据矩阵) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>从矩阵A(nxn,必须为方阵)中提取 </td></tr>
+    <tr><td class="paramname">output</td><td>提取后输出到output(nxn,必须为方阵) </td></tr>
+    <tr><td class="paramname">n</td><td>矩阵A的边长n </td></tr>
+    <tr><td class="paramname">lower</td><td>true = 提取下三角 / false = 提取上三角 </td></tr>
+    <tr><td class="paramname">other</td><td>是否对超出提取区域位置处output的元素设置为0 (true = 设置为0 / false = 不进行任何操作) </td></tr>
+    <tr><td class="paramname">set1</td><td>true = 强制输出矩阵对角线元素为固定值,固定值由set2设置 / false = 根据set2执行其他方案 </td></tr>
+    <tr><td class="paramname">set2[情况1.当set1=true]</td><td>选择强制输出矩阵的对角线元素为1还是0 (true = 强制对角线元素为1 / false = 强制对角线元素为0) </td></tr>
+    <tr><td class="paramname">set2[情况2.当set1=false]</td><td>执行其他方案, (true = 复制矩阵A对角线元素到输出矩阵对角线元素 / false = 跳过输出矩阵对角线元素存储区域,不进行任何更改) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acadb6e136578a07308b9a53f80fc25e0" name="acadb6e136578a07308b9a53f80fc25e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acadb6e136578a07308b9a53f80fc25e0">&#9670;&#160;</a></span>matrix_get_the_row_of_aim_col_pivot_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int matrix_get_the_row_of_aim_col_pivot_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>aim_col</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>start_row</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]获取矩阵中目标列的主元的行号(找出矩阵目标列中的主元位置,输出它的行号)(不会修改源数据矩阵) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>需要进行查找操作的矩阵A(m x n) </td></tr>
+    <tr><td class="paramname">m</td><td>矩阵A的总行数 </td></tr>
+    <tr><td class="paramname">n</td><td>矩阵A的总列数 </td></tr>
+    <tr><td class="paramname">aim_col</td><td>目标列(列号,范围 0 - n-1) </td></tr>
+    <tr><td class="paramname">start_row</td><td>[优化参数]要求从行号(范围 0 - m-1)为start_row的行开始向下查找,不需要填写0即可(整列数全部参与查找) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>目标列中的主元的行号(范围 0 - m-1) </dd></dl>
+
+</div>
+</div>
+<a id="a0305685c3c2db3869219876f69898d46" name="a0305685c3c2db3869219876f69898d46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0305685c3c2db3869219876f69898d46">&#9670;&#160;</a></span>matrix_inverse_LU_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t matrix_inverse_LU_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>inv_A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]矩阵(方阵)求逆-LU求逆(不会修改源数据矩阵) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>输入原矩阵A (n x n) </td></tr>
+    <tr><td class="paramname">inv_A</td><td>输出逆矩阵inv_A (n x n) </td></tr>
+    <tr><td class="paramname">n</td><td>原矩阵A 的边长 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE 原矩阵奇异, 求逆操作无法完成] </dd>
+<dd>
+[ESP_ERR_INVALID_ARG A为NULL / inv_A为NULL / n &lt;= 0] </dd>
+<dd>
+[ESP_ERR_NO_MEM 内存不足] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a98959bc36b88ce34991e450be3cb74d0" name="a98959bc36b88ce34991e450be3cb74d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98959bc36b88ce34991e450be3cb74d0">&#9670;&#160;</a></span>matrix_log_print_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void matrix_log_print_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>major_default</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>show_rc</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>矩阵在日志中打印出来 </p>
+<dl class="section note"><dt>注解</dt><dd>输入矩阵为NULL时,会只打印NULL字符 </dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>输入需要打印的矩阵(输入矩阵为NULL时,会只打印NULL字符) </td></tr>
+    <tr><td class="paramname">m</td><td>需要打印的矩阵的行数 </td></tr>
+    <tr><td class="paramname">n</td><td>需要打印的矩阵的列数 </td></tr>
+    <tr><td class="paramname">major_default</td><td>是否使用默认主序(行主序),无要求的话填写true [ture = 使用行主序(C语言惯用,默认) / false = 使用列主序(这不是标准C语言支持的主序,需要手动实现内存策略)] </td></tr>
+    <tr><td class="paramname">show_rc</td><td>显示元素的行和列(坐标表示),假设A中一个元素1.123456,它在第2行第3列,当show_rc设为true,显示为(2,3)[1.123456] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a09d05adeb95bf2dcd4e0d5febe9bea58" name="a09d05adeb95bf2dcd4e0d5febe9bea58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09d05adeb95bf2dcd4e0d5febe9bea58">&#9670;&#160;</a></span>matrix_only_row_elimination_step_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double matrix_only_row_elimination_step_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>aim_row</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pivot_row</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pivot_col</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>major_default</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>LDA</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>(会修改源数据矩阵)矩阵仅行消元操作(高斯消元)(之前要预先完成如归一化,行交换等预处理),用主元行消去目标行(高斯消元),本函数是消元操作步骤中的单一一步,不会遍历迭代完成所有消元,需要外部手动遍历 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>需要操作的矩阵,非必须为方阵 </td></tr>
+    <tr><td class="paramname">aim_row</td><td>目标行 </td></tr>
+    <tr><td class="paramname">pivot_row</td><td>主元行 </td></tr>
+    <tr><td class="paramname">pivot_col</td><td>主元列 </td></tr>
+    <tr><td class="paramname">major_default</td><td>是否使用默认主序(行主序),无要求的话填写true [ture = 使用行主序(C语言惯用,默认) / false = 使用列主序(列主序情况下,内存访问连续,效率更高,但是这不是标准C语言支持的主序,需要手动实现内存策略)] </td></tr>
+    <tr><td class="paramname">LDA</td><td>逻辑存储跨度,表示需要操作的范围的列数(行主序情况下)或行数(列主序情况下),单位: 个元素,无要求的话,为输入矩阵的列数(当major_default = true) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>当前乘数,如果需要的话,可以存储在外部,如存储在L矩阵用于LU消元过程 </dd></dl>
+
+</div>
+</div>
+<a id="a1b06acc998d5d0182487f1c26e08e774" name="a1b06acc998d5d0182487f1c26e08e774"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b06acc998d5d0182487f1c26e08e774">&#9670;&#160;</a></span>matrix_square_solve_LU_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t matrix_square_solve_LU_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>L</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>U</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *&#160;</td>
+          <td class="paramname"><em>P</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]矩阵(方阵)求解-LU求解(LU分解的原矩阵A必须为方阵n x n,否则无法支持)(不会修改源数据矩阵) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">L</td><td>(导入LU分解的输出结果)下三角矩阵L(n x n,并且对角线元素需要为1) </td></tr>
+    <tr><td class="paramname">U</td><td>(导入LU分解的输出结果)上三角矩阵U(n x n) </td></tr>
+    <tr><td class="paramname">P</td><td>(导入LU分解的输出结果)置换数组P(n) (设置为NULL表示明确无置换) (存储为普通int一维数组,大小为n) [置换矩阵P记录行交换索引,LU分解运行完后,有P[原行号]=现行号] </td></tr>
+    <tr><td class="paramname">b</td><td>右端项向量b(n) (存储为普通double一维数组,大小为n) </td></tr>
+    <tr><td class="paramname">x</td><td>解向量x(n) 输出到 (存储为普通double一维数组,大小为n) </td></tr>
+    <tr><td class="paramname">n</td><td>LU分解的原矩阵A边长 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE 原矩阵奇异, 求解操作无法完成] </dd>
+<dd>
+[ESP_ERR_INVALID_ARG L为NULL / U为NULL / P为NULL / b为NULL / X为NULL / m &lt;= 0 / n &lt;= 0] </dd>
+<dd>
+[ESP_ERR_NO_MEM 内存不足] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a5ba16975c489c27d2db54a548887c7fd" name="a5ba16975c489c27d2db54a548887c7fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ba16975c489c27d2db54a548887c7fd">&#9670;&#160;</a></span>matrix_swap_rows_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void matrix_swap_rows_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>r1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>r2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序](会修改源数据矩阵)矩阵中的两行(r1和r2)交换所有元素 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>需要进行交换操作的矩阵A(m x n) </td></tr>
+    <tr><td class="paramname">n</td><td>矩阵A的总列数 </td></tr>
+    <tr><td class="paramname">r1</td><td>需要进行交换操作的行号(范围 0 - m-1) </td></tr>
+    <tr><td class="paramname">r2</td><td>需要进行交换操作的行号(范围 0 - m-1) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7a4b1666083bc375d1e3e9cd30581c37" name="a7a4b1666083bc375d1e3e9cd30581c37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a4b1666083bc375d1e3e9cd30581c37">&#9670;&#160;</a></span>matrix_transpose_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t matrix_transpose_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]矩阵转置,自动根据上下文参数选择更优更快的处理方式(如何触发见下方备注),若满足多个优化条件,优化可能叠加 (一般不会修改源数据矩阵,除非方阵触发原地转置优化) </p>
+<dl class="section note"><dt>注解</dt><dd>[触发-内存16对齐优化]通过一些方式,在申请内存后获得16对齐内存(可获得更快的速度) </dd>
+<dd>
+[触发-方阵优化(前提是运算对象是方阵)](会修改源数据矩阵)使得 m = n , input == output , input != NULL , output != NULL 同时满足,即输入输出都是一个内存区域(可实现原地转置,减少内存消耗) </dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>矩阵输入 </td></tr>
+    <tr><td class="paramname">output</td><td>矩阵输出 </td></tr>
+    <tr><td class="paramname">m</td><td>原矩阵的行数 </td></tr>
+    <tr><td class="paramname">n</td><td>原矩阵的列数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] <br  />
+ </dd>
+<dd>
+[ESP_ERR_INVALID_ARG input为NULL / output为NULL / m &lt;= 0 / n &lt;= 0] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a48f52060bbe54168188bb10277dd92ae" name="a48f52060bbe54168188bb10277dd92ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48f52060bbe54168188bb10277dd92ae">&#9670;&#160;</a></span>solve_overdet_system_ols_mlr_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t solve_overdet_system_ols_mlr_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[目前仅支持行主序]求解超定方程组 - 基于普通最小二乘法(OLS)实现的多元线性回归(MLR) </p>
+<dl class="section note"><dt>注解</dt><dd>[注意]当用于普通线性回归,多项式回归等需要获取截距beta[0]的情况,设计向量左侧必须为全一列以获取beta[0];需要强制无截距时,或者多项式方程中有其他偏移决定项(如椭球方程的一次项)而无需显式beta[0]的情况,设计向量全部都是直接填充正常样本数据即可</dd></dl>
+<p>[适用问题]适用于求解m个形如 y = beta[0] + beta[1]*x[1] + beta[2]*x[2] + ... + beta[n]*x[n] (可以没有beta[0]) 的方程构成的超定方程组 X * beta = y (超定方程组即方程组满足m&gt;n,但建议要有m&gt;&gt;n以避免过拟合)</p>
+<p>[适用领域]可由于传感器校准(椭球方程求逆等)和数据分析,机器学习等领域</p>
+<p>[运算原理] 对于超定方程组, 给定 X* beta = y, 最小二乘解即为 beta = (XT * X)^{-1} * XT * y, 其中T代表转置 , ^{-1}代表矩阵求逆(inverse)运算 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">X</td><td>设计矩阵 (m x n,必须有m&gt;n,并且建议要有m&gt;&gt;n以避免过拟合,当需要获取截距beta[0]时,左侧必须为全一列以获取beta[0]) </td></tr>
+    <tr><td class="paramname">y</td><td>观测向量 (m x 1) </td></tr>
+    <tr><td class="paramname">beta</td><td>输出参数向量 (n x 1) , 其结构和意义由设计向量决定 </td></tr>
+    <tr><td class="paramname">m</td><td>设计矩阵的行数(样本个数/方程个数) </td></tr>
+    <tr><td class="paramname">n</td><td>设计矩阵的列数(参数个数,列数,当需要获取截距beta[0]时,beta[0]占一个参数个数) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>[ESP_OK 运算完成] <br  />
+ </dd>
+<dd>
+[ESP_ERR_INVALID_ARG X为NULL / y为NULL / beta为NULL / m &lt;= 0 / n &lt;= 0] </dd>
+<dd>
+[ESP_ERR_INVALID_STATE 运算时失败,矩阵 XT * X 无法求逆] </dd>
+<dd>
+[ESP_ERR_NOT_SUPPORTED m&lt;=n 的方程组] </dd>
+<dd>
+[ESP_ERR_NO_MEM 内存不足] <br  />
+ </dd></dl>
+
+</div>
+</div>
+<a id="a34b967168888a6a07bd037eed9972338" name="a34b967168888a6a07bd037eed9972338"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34b967168888a6a07bd037eed9972338">&#9670;&#160;</a></span>square_aligned_16_matrix_transpose_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void square_aligned_16_matrix_transpose_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>local</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af49ef77dcbe906db8bc3c9462f5fe5cb" name="af49ef77dcbe906db8bc3c9462f5fe5cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af49ef77dcbe906db8bc3c9462f5fe5cb">&#9670;&#160;</a></span>square_matrix_transpose_fp64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void square_matrix_transpose_fp64 </td>
+          <td>(</td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>local</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_5c982d53a68cdbcd421152b4020263a9.html">main</a></li><li class="navelem"><a class="el" href="math__tools__fp64_8c.html">math_tools_fp64.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<map id="board_ctrl_t" name="board_ctrl_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,93,209,119"/>
+<area shape="rect" id="Node000002" href="$struct_t_c_a6416_a__mode__t.html" title=" " alt="" coords="5,5,149,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,41,111,67,141,91,138,95,107,71,88,44"/>
+<area shape="rect" id="Node000003" href="$struct_t_c_a6416_a__level__t.html" title=" " alt="" coords="173,5,312,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="234,45,215,71,184,95,180,91,211,67,229,42"/>
+</map>

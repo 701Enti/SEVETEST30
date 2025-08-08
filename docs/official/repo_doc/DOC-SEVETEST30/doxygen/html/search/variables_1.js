@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['b_0',['B',['../struct_g_s__static__calibration__model__t.html#aaae57f30dbc190b1792b097ad07d0a15',1,'GS_static_calibration_model_t']]],
+  ['baidu_5faccess_5ftoken_1',['baidu_access_token',['../sevetest30__sound_8c.html#a3769db1bdce6d250c7d859a551ced0db',1,'sevetest30_sound.c']]],
+  ['baidu_5fernie_5fbot_5faccess_5ftoken_2',['baidu_ERNIE_Bot_access_token',['../sevetest30___i_w_e_d_a_8c.html#aae31c687cd82dc52352b25eee3055227',1,'sevetest30_IWEDA.c']]],
+  ['battery_5fdata_3',['battery_data',['../sevetest30___s_w_e_d_a_8c.html#ab2cc0c093b62ce90b74b9d5b68139054',1,'battery_data:&#160;sevetest30_SWEDA.c'],['../sevetest30___s_w_e_d_a_8h.html#ab2cc0c093b62ce90b74b9d5b68139054',1,'battery_data:&#160;sevetest30_SWEDA.c']]],
+  ['blue_5fy1_4',['blue_y1',['../sevetest30___led_array_8c.html#ab762caa46e1cb6b2c7728e38a2a40253',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy10_5',['blue_y10',['../sevetest30___led_array_8c.html#adcd0acc99a935f349189bc6869eb3b15',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy11_6',['blue_y11',['../sevetest30___led_array_8c.html#a5d3079898178520150951b2510402570',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy12_7',['blue_y12',['../sevetest30___led_array_8c.html#a06afd935739fe99465ecc66472ea75a3',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy2_8',['blue_y2',['../sevetest30___led_array_8c.html#a5113018ac08ad0103de383e4d5c269d8',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy3_9',['blue_y3',['../sevetest30___led_array_8c.html#a20312d7632a95d178b319c63bd372a3c',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy4_10',['blue_y4',['../sevetest30___led_array_8c.html#ab93b7c1b7542d1a593b9b472439ca831',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy5_11',['blue_y5',['../sevetest30___led_array_8c.html#a5699e1e932a740cf0e1f458ffc06aeda',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy6_12',['blue_y6',['../sevetest30___led_array_8c.html#a8be7d772d2f591ba28b5557ad253f5aa',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy7_13',['blue_y7',['../sevetest30___led_array_8c.html#ac405ab48a40101a4f204b6640a664058',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy8_14',['blue_y8',['../sevetest30___led_array_8c.html#ac74003f8060ad60a09320238f5c296fd',1,'sevetest30_LedArray.c']]],
+  ['blue_5fy9_15',['blue_y9',['../sevetest30___led_array_8c.html#ac25cee29209cacfa7ca7117034e2f5ae',1,'sevetest30_LedArray.c']]],
+  ['board_5fctrl_5fbuf_16',['board_ctrl_buf',['../board__ctrl_8c.html#ae697ce7d8a54f4c08d7b3d842d19d273',1,'board_ctrl.c']]],
+  ['board_5fctrl_5finit_5freport_17',['board_ctrl_init_report',['../board__ctrl_8c.html#a445c868a22258071fa13ac1e6cd60709',1,'board_ctrl.c']]],
+  ['boost_5fvoltage_18',['boost_voltage',['../structboard__ctrl__t.html#a75d27430d446afc5d0442d6163de5498',1,'board_ctrl_t']]],
+  ['buy_5fsum_19',['buy_sum',['../struct_ps_p2_p___d_m__node__t.html#a6552f24accf35c3a6eda61e12b34a69c',1,'PsP2P_DM_node_t']]],
+  ['bx_20',['Bx',['../struct_g_s__magnetic__flux__density__data__t.html#a6132708f76dfff58a7fa5c88b646337c',1,'GS_magnetic_flux_density_data_t']]],
+  ['by_21',['By',['../struct_g_s__magnetic__flux__density__data__t.html#a4ead51a252bba7121e278f2fe1dc3c85',1,'GS_magnetic_flux_density_data_t']]],
+  ['bz_22',['Bz',['../struct_g_s__magnetic__flux__density__data__t.html#a03ec8c57c39efb360adfb280c3f23a92',1,'GS_magnetic_flux_density_data_t']]]
+];

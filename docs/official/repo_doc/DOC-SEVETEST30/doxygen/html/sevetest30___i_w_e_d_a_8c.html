@@ -1,0 +1,1074 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>SEVETEST30: main/sevetest30_IWEDA.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/jothepro/doxygen-awesome-css" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="sevetest30-logo.svg"/></td>
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SEVETEST30
+   </div>
+   <div id="projectbrief">物联网AI个性化智能时钟</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('sevetest30___i_w_e_d_a_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">sevetest30_IWEDA.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;zlib.h&quot;</code><br />
+<code>#include &quot;zutil.h&quot;</code><br />
+<code>#include &quot;inftrees.h&quot;</code><br />
+<code>#include &quot;inflate.h&quot;</code><br />
+<code>#include &lt;sys/time.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &quot;freertos/FreeRTOS.h&quot;</code><br />
+<code>#include &quot;freertos/task.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="sevetest30___i_w_e_d_a_8h_source.html">sevetest30_IWEDA.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="sevetest30__sound_8h_source.html">sevetest30_sound.h</a>&quot;</code><br />
+<code>#include &quot;baidu_access_token.h&quot;</code><br />
+<code>#include &quot;esp_log.h&quot;</code><br />
+<code>#include &quot;esp_wifi.h&quot;</code><br />
+<code>#include &quot;nvs_flash.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="sdkconfig_8h_source.html">sdkconfig.h</a>&quot;</code><br />
+<code>#include &quot;esp_sntp.h&quot;</code><br />
+<code>#include &quot;periph_wifi.h&quot;</code><br />
+<code>#include &quot;board.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="board__ctrl_8h_source.html">board_ctrl.h</a>&quot;</code><br />
+<code>#include &quot;cJSON.h&quot;</code><br />
+<code>#include &quot;audio_idf_version.h&quot;</code><br />
+<code>#include &quot;esp_netif.h&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+sevetest30_IWEDA.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="sevetest30___i_w_e_d_a_8c__incl.svg" width="2563" height="330"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a7e37a9a731dbc6ae76209c2bf82d6ed9" id="r_a7e37a9a731dbc6ae76209c2bf82d6ed9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a7e37a9a731dbc6ae76209c2bf82d6ed9">transform_ip_address</a> ()</td></tr>
+<tr class="separator:a7e37a9a731dbc6ae76209c2bf82d6ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e45a7edd8edbe3b4a405d4bb66ec91e" id="r_a9e45a7edd8edbe3b4a405d4bb66ec91e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a9e45a7edd8edbe3b4a405d4bb66ec91e">transform_postcode</a> ()</td></tr>
+<tr class="separator:a9e45a7edd8edbe3b4a405d4bb66ec91e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ee1c1d994236e8eee7199baae486b01" id="r_a4ee1c1d994236e8eee7199baae486b01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a4ee1c1d994236e8eee7199baae486b01">transform_lng_lat</a> ()</td></tr>
+<tr class="separator:a4ee1c1d994236e8eee7199baae486b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9ce0a4f817dcba7dbf0729d0d7449a" id="r_aec9ce0a4f817dcba7dbf0729d0d7449a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aec9ce0a4f817dcba7dbf0729d0d7449a">transform_locationID</a> ()</td></tr>
+<tr class="separator:aec9ce0a4f817dcba7dbf0729d0d7449a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f7f523937b41549158ede27ddeb6550" id="r_a1f7f523937b41549158ede27ddeb6550"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a1f7f523937b41549158ede27ddeb6550">transform_real_time_weather_data</a> ()</td></tr>
+<tr class="separator:a1f7f523937b41549158ede27ddeb6550"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a05edcb6723e4f73dc2cebf30b86ba1" id="r_a1a05edcb6723e4f73dc2cebf30b86ba1"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a1a05edcb6723e4f73dc2cebf30b86ba1">wifi_init</a> (esp_periph_config_t *periph_config)</td></tr>
+<tr class="memdesc:a1a05edcb6723e4f73dc2cebf30b86ba1"><td class="mdescLeft">&#160;</td><td class="mdescRight">WIFI外设初始化  <br /></td></tr>
+<tr class="separator:a1a05edcb6723e4f73dc2cebf30b86ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a692bbc21a4fc6fbd33865a0f9e21be79" id="r_a692bbc21a4fc6fbd33865a0f9e21be79"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a692bbc21a4fc6fbd33865a0f9e21be79">wifi_connect</a> (periph_wifi_cfg_t *wifi_cfg)</td></tr>
+<tr class="memdesc:a692bbc21a4fc6fbd33865a0f9e21be79"><td class="mdescLeft">&#160;</td><td class="mdescRight">通用网络连接函数  <br /></td></tr>
+<tr class="separator:a692bbc21a4fc6fbd33865a0f9e21be79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec71d466f36992a2eba45408ef193056" id="r_aec71d466f36992a2eba45408ef193056"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aec71d466f36992a2eba45408ef193056">baidu_get_AccessToken</a> (char *client_id, char *client_secret, char *AccessToken)</td></tr>
+<tr class="memdesc:aec71d466f36992a2eba45408ef193056"><td class="mdescLeft">&#160;</td><td class="mdescRight">百度API获取AccessToken,保存到char数组  <br /></td></tr>
+<tr class="separator:aec71d466f36992a2eba45408ef193056"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af968b606d4533f7eee5953cd5bda499b" id="r_af968b606d4533f7eee5953cd5bda499b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#af968b606d4533f7eee5953cd5bda499b">refresh_position_data</a> ()</td></tr>
+<tr class="separator:af968b606d4533f7eee5953cd5bda499b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71180d898510335fe528eb67d5ea6484" id="r_a71180d898510335fe528eb67d5ea6484"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a71180d898510335fe528eb67d5ea6484">refresh_weather_data</a> ()</td></tr>
+<tr class="separator:a71180d898510335fe528eb67d5ea6484"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a219bd6694bce503b164a4c07c1ae896b" id="r_a219bd6694bce503b164a4c07c1ae896b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a219bd6694bce503b164a4c07c1ae896b">init_time_data_sntp</a> ()</td></tr>
+<tr class="separator:a219bd6694bce503b164a4c07c1ae896b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bf7359c50e40d51701bee3becfaf201" id="r_a1bf7359c50e40d51701bee3becfaf201"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a1bf7359c50e40d51701bee3becfaf201">http_check_response_content</a> (esp_http_client_handle_t client_handle)</td></tr>
+<tr class="memdesc:a1bf7359c50e40d51701bee3becfaf201"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查响应内容是不是可以直接获取资源  <br /></td></tr>
+<tr class="separator:a1bf7359c50e40d51701bee3becfaf201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87dac3e875ff547b5217b6b5f1f7f59d" id="r_a87dac3e875ff547b5217b6b5f1f7f59d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a87dac3e875ff547b5217b6b5f1f7f59d">http_check_common_url</a> (const char *url)</td></tr>
+<tr class="memdesc:a87dac3e875ff547b5217b6b5f1f7f59d"><td class="mdescLeft">&#160;</td><td class="mdescRight">检测URL的可用性，进行针对如音频资源的可用检查而无其他复杂上下文  <br /></td></tr>
+<tr class="separator:a87dac3e875ff547b5217b6b5f1f7f59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3c434acd88497068768e177bfda1048" id="r_aa3c434acd88497068768e177bfda1048"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aa3c434acd88497068768e177bfda1048">change_url_if_need_redirect</a> (char **url)</td></tr>
+<tr class="memdesc:aa3c434acd88497068768e177bfda1048"><td class="mdescLeft">&#160;</td><td class="mdescRight">如果这个url需要重定向,更改url内容  <br /></td></tr>
+<tr class="separator:aa3c434acd88497068768e177bfda1048"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9c17de9ad3e974ac5dbcfa04b69aa17" id="r_ab9c17de9ad3e974ac5dbcfa04b69aa17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#ab9c17de9ad3e974ac5dbcfa04b69aa17">http_init_get_request</a> ()</td></tr>
+<tr class="memdesc:ab9c17de9ad3e974ac5dbcfa04b69aa17"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化GET请求  <br /></td></tr>
+<tr class="separator:ab9c17de9ad3e974ac5dbcfa04b69aa17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a028a26229a83f29f38df40c82a3715c1" id="r_a028a26229a83f29f38df40c82a3715c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a028a26229a83f29f38df40c82a3715c1">http_get_request_send</a> (bool *flag)</td></tr>
+<tr class="separator:a028a26229a83f29f38df40c82a3715c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d019480577b2ef75c99737c66688672" id="r_a4d019480577b2ef75c99737c66688672"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a4d019480577b2ef75c99737c66688672">gzip_decompress</a> (void *input, void *output, int len)</td></tr>
+<tr class="separator:a4d019480577b2ef75c99737c66688672"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae582dc867f61fa36c8cc9e243b0bbed6" id="r_ae582dc867f61fa36c8cc9e243b0bbed6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#ae582dc867f61fa36c8cc9e243b0bbed6">json_line_unit_num_get</a> (char *data, int len)</td></tr>
+<tr class="memdesc:ae582dc867f61fa36c8cc9e243b0bbed6"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取JSON_Line数据中的有效数据单元个数  <br /></td></tr>
+<tr class="separator:ae582dc867f61fa36c8cc9e243b0bbed6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1e58ef555264a706495314a1247c464" id="r_ac1e58ef555264a706495314a1247c464"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#ac1e58ef555264a706495314a1247c464">json_line_unit_copy</a> (char *dest, char *src, int unit_id, int max_len)</td></tr>
+<tr class="memdesc:ac1e58ef555264a706495314a1247c464"><td class="mdescLeft">&#160;</td><td class="mdescRight">选定JSON_Line数据中的一个数据单元复制到外部字符缓存区  <br /></td></tr>
+<tr class="separator:ac1e58ef555264a706495314a1247c464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6713306ef66b3a5f97efaade9ef65706" id="r_a6713306ef66b3a5f97efaade9ef65706"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a6713306ef66b3a5f97efaade9ef65706">ERNIE_Bot_4_chat_transform</a> (char *chat_response)</td></tr>
+<tr class="memdesc:a6713306ef66b3a5f97efaade9ef65706"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存)  <br /></td></tr>
+<tr class="separator:a6713306ef66b3a5f97efaade9ef65706"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b4a89294fdd0ea7d8b14eae9cc14a58" id="r_a5b4a89294fdd0ea7d8b14eae9cc14a58"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a5b4a89294fdd0ea7d8b14eae9cc14a58">ERNIE_Bot_4_chat_over_status</a> (char *chat_response)</td></tr>
+<tr class="memdesc:a5b4a89294fdd0ea7d8b14eae9cc14a58"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元) 获取聊天传输状态是否结束  <br /></td></tr>
+<tr class="separator:a5b4a89294fdd0ea7d8b14eae9cc14a58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cd770bd0608c2ae8ff52ff4728ee04d" id="r_a3cd770bd0608c2ae8ff52ff4728ee04d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a3cd770bd0608c2ae8ff52ff4728ee04d">ERNIE_Bot_4_chat_http_Task</a> (bool *flag)</td></tr>
+<tr class="memdesc:a3cd770bd0608c2ae8ff52ff4728ee04d"><td class="mdescLeft">&#160;</td><td class="mdescRight">[使用流式传输模式]ERNIE-4.0聊天传输任务,使用POST请求  <br /></td></tr>
+<tr class="separator:a3cd770bd0608c2ae8ff52ff4728ee04d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b985c45f6a665a338a423b498bbdb9d" id="r_a8b985c45f6a665a338a423b498bbdb9d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a8b985c45f6a665a338a423b498bbdb9d">ERNIE_Bot_4_chat_tex_exchange</a> (char *user_content)</td></tr>
+<tr class="memdesc:a8b985c45f6a665a338a423b498bbdb9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">[使用流式传输模式]文心一言ERNIE-Bot 4.0文本交互  <br /></td></tr>
+<tr class="separator:a8b985c45f6a665a338a423b498bbdb9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea77672640e2d57865fcd3e7c26dc4b1" id="r_aea77672640e2d57865fcd3e7c26dc4b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aea77672640e2d57865fcd3e7c26dc4b1">asr_data_save_result</a> (char *asr_response)</td></tr>
+<tr class="memdesc:aea77672640e2d57865fcd3e7c26dc4b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex  <br /></td></tr>
+<tr class="separator:aea77672640e2d57865fcd3e7c26dc4b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13078dc6808f00e12a3e2625fe21f8f5" id="r_a13078dc6808f00e12a3e2625fe21f8f5"><td class="memItemLeft" align="right" valign="top">esp_err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a13078dc6808f00e12a3e2625fe21f8f5">get_music_lyric_by_url</a> (char *url, char *dest, int len_max)</td></tr>
+<tr class="memdesc:a13078dc6808f00e12a3e2625fe21f8f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">通过特定URL提取json数据中音乐歌词(LRC格式数据)  <br /></td></tr>
+<tr class="separator:a13078dc6808f00e12a3e2625fe21f8f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a96720c6d525cfe2398069bb871f6ff3d" id="r_a96720c6d525cfe2398069bb871f6ff3d"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a96720c6d525cfe2398069bb871f6ff3d">http_output_buf</a> [<a class="el" href="sevetest30___i_w_e_d_a_8h.html#a39df150cec693d7e56c68ce387ed6517">HTTP_BUF_MAX</a>] = { 0 }</td></tr>
+<tr class="separator:a96720c6d525cfe2398069bb871f6ff3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b695cd309c55961dc8814c3c1955f06" id="r_a9b695cd309c55961dc8814c3c1955f06"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a9b695cd309c55961dc8814c3c1955f06">http_url_buf</a> [<a class="el" href="sevetest30___i_w_e_d_a_8h.html#a39df150cec693d7e56c68ce387ed6517">HTTP_BUF_MAX</a>] = { 0 }</td></tr>
+<tr class="separator:a9b695cd309c55961dc8814c3c1955f06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43cfeffd1fd4cfd457c5183f70d3cdaf" id="r_a43cfeffd1fd4cfd457c5183f70d3cdaf"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a43cfeffd1fd4cfd457c5183f70d3cdaf">ip_address</a></td></tr>
+<tr class="separator:a43cfeffd1fd4cfd457c5183f70d3cdaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b1df1a1a353073fa2f8db3dd6fe3f26" id="r_a2b1df1a1a353073fa2f8db3dd6fe3f26"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a2b1df1a1a353073fa2f8db3dd6fe3f26">sevetest30_asr_result_tex</a> = NULL</td></tr>
+<tr class="separator:a2b1df1a1a353073fa2f8db3dd6fe3f26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae874bcbe8211c4b22a94996c49debcc9" id="r_ae874bcbe8211c4b22a94996c49debcc9"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#ae874bcbe8211c4b22a94996c49debcc9">ERNIE_Bot_4_chat_result</a> = NULL</td></tr>
+<tr class="separator:ae874bcbe8211c4b22a94996c49debcc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4718fd08964287860f61766475e96858" id="r_a4718fd08964287860f61766475e96858"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a4718fd08964287860f61766475e96858">ERNIE_Bot_4_chat_user_content</a> = NULL</td></tr>
+<tr class="separator:a4718fd08964287860f61766475e96858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7bb61d4f7ba5faf047aa01bbf89956f" id="r_ac7bb61d4f7ba5faf047aa01bbf89956f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_real__time__weather.html">Real_time_weather</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#ac7bb61d4f7ba5faf047aa01bbf89956f">real_time_weather_data</a></td></tr>
+<tr class="separator:ac7bb61d4f7ba5faf047aa01bbf89956f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9a1aac211eb71e3942f10b52638f904" id="r_aa9a1aac211eb71e3942f10b52638f904"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structip__position.html">ip_position</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aa9a1aac211eb71e3942f10b52638f904">ip_position_data</a></td></tr>
+<tr class="separator:aa9a1aac211eb71e3942f10b52638f904"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b345caa4a83ec4fe1a4efc8e96a9f38" id="r_a8b345caa4a83ec4fe1a4efc8e96a9f38"><td class="memItemLeft" align="right" valign="top">esp_http_client_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#a8b345caa4a83ec4fe1a4efc8e96a9f38">http_client_handle</a> = NULL</td></tr>
+<tr class="separator:a8b345caa4a83ec4fe1a4efc8e96a9f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc57b1fb678068603324cf957c2e4cc9" id="r_acc57b1fb678068603324cf957c2e4cc9"><td class="memItemLeft" align="right" valign="top">esp_periph_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#acc57b1fb678068603324cf957c2e4cc9">se30_wifi_periph_handle</a> = NULL</td></tr>
+<tr class="separator:acc57b1fb678068603324cf957c2e4cc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae31c687cd82dc52352b25eee3055227" id="r_aae31c687cd82dc52352b25eee3055227"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sevetest30___i_w_e_d_a_8c.html#aae31c687cd82dc52352b25eee3055227">baidu_ERNIE_Bot_access_token</a> [<a class="el" href="sevetest30___i_w_e_d_a_8h.html#ab8f59cf8e85982e5f25ab7974f6f280e">ACCESSTOKEN_SIZE_MAX</a>] = { 0 }</td></tr>
+<tr class="separator:aae31c687cd82dc52352b25eee3055227"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="aea77672640e2d57865fcd3e7c26dc4b1" name="aea77672640e2d57865fcd3e7c26dc4b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea77672640e2d57865fcd3e7c26dc4b1">&#9670;&#160;</a></span>asr_data_save_result()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void asr_data_save_result </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>asr_response</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">asr_response</td><td>语音识别响应的数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aec71d466f36992a2eba45408ef193056" name="aec71d466f36992a2eba45408ef193056"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec71d466f36992a2eba45408ef193056">&#9670;&#160;</a></span>baidu_get_AccessToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t baidu_get_AccessToken </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>client_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>client_secret</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>AccessToken</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>百度API获取AccessToken,保存到char数组 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">client_id</td><td>client_id 字符串 </td></tr>
+    <tr><td class="paramname">client_secret</td><td>client_secret 字符串 </td></tr>
+    <tr><td class="paramname">AccessToken</td><td>char数组地址 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_FAIL / ESP_OK </dd></dl>
+
+</div>
+</div>
+<a id="aa3c434acd88497068768e177bfda1048" name="aa3c434acd88497068768e177bfda1048"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3c434acd88497068768e177bfda1048">&#9670;&#160;</a></span>change_url_if_need_redirect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void change_url_if_need_redirect </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>url</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>如果这个url需要重定向,更改url内容 </p>
+<p>原来url数据不会清除, 只是参数url指代位置切换到location_url缓存</p>
+<p>请尽快使用或复制该url, 在下次change_url_if_need_redirect调用之前 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td><br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3cd770bd0608c2ae8ff52ff4728ee04d" name="a3cd770bd0608c2ae8ff52ff4728ee04d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cd770bd0608c2ae8ff52ff4728ee04d">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_http_Task()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ERNIE_Bot_4_chat_http_Task </td>
+          <td>(</td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[使用流式传输模式]ERNIE-4.0聊天传输任务,使用POST请求 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">flag</td><td>传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5b4a89294fdd0ea7d8b14eae9cc14a58" name="a5b4a89294fdd0ea7d8b14eae9cc14a58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b4a89294fdd0ea7d8b14eae9cc14a58">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_over_status()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ERNIE_Bot_4_chat_over_status </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>chat_response</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元) 获取聊天传输状态是否结束 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">chat_response</td><td>单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>true 结束 / false 进行中(或者错误) </dd></dl>
+
+</div>
+</div>
+<a id="a8b985c45f6a665a338a423b498bbdb9d" name="a8b985c45f6a665a338a423b498bbdb9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b985c45f6a665a338a423b498bbdb9d">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_tex_exchange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * ERNIE_Bot_4_chat_tex_exchange </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>user_content</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[使用流式传输模式]文心一言ERNIE-Bot 4.0文本交互 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">user_content</td><td>用户内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>对话返回结果/NULL(错误) </dd></dl>
+
+</div>
+</div>
+<a id="a6713306ef66b3a5f97efaade9ef65706" name="a6713306ef66b3a5f97efaade9ef65706"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6713306ef66b3a5f97efaade9ef65706">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_transform()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ERNIE_Bot_4_chat_transform </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>chat_response</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">chat_response</td><td>单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a13078dc6808f00e12a3e2625fe21f8f5" name="a13078dc6808f00e12a3e2625fe21f8f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13078dc6808f00e12a3e2625fe21f8f5">&#9670;&#160;</a></span>get_music_lyric_by_url()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t get_music_lyric_by_url </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>dest</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>len_max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通过特定URL提取json数据中音乐歌词(LRC格式数据) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>获取音乐歌词使用的完整URL </td></tr>
+    <tr><td class="paramname">dest</td><td>读取保存到的位置 </td></tr>
+    <tr><td class="paramname">len_max</td><td>最大允许保存的字符长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4d019480577b2ef75c99737c66688672" name="a4d019480577b2ef75c99737c66688672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d019480577b2ef75c99737c66688672">&#9670;&#160;</a></span>gzip_decompress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gzip_decompress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a87dac3e875ff547b5217b6b5f1f7f59d" name="a87dac3e875ff547b5217b6b5f1f7f59d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87dac3e875ff547b5217b6b5f1f7f59d">&#9670;&#160;</a></span>http_check_common_url()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int http_check_common_url </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>url</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>检测URL的可用性，进行针对如音频资源的可用检查而无其他复杂上下文 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>需要检测的URL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_FAIL 无法连接 ESP_OK 正确可用 否则返回 响应错误码 </dd></dl>
+
+</div>
+</div>
+<a id="a1bf7359c50e40d51701bee3becfaf201" name="a1bf7359c50e40d51701bee3becfaf201"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bf7359c50e40d51701bee3becfaf201">&#9670;&#160;</a></span>http_check_response_content()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int http_check_response_content </td>
+          <td>(</td>
+          <td class="paramtype">esp_http_client_handle_t&#160;</td>
+          <td class="paramname"><em>client_handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>检查响应内容是不是可以直接获取资源 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">client_handle</td><td>连接句柄 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_OK 可以直接获取资源 否则(不可用/需要重定向)返回 响应码 </dd></dl>
+
+</div>
+</div>
+<a id="a028a26229a83f29f38df40c82a3715c1" name="a028a26229a83f29f38df40c82a3715c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a028a26229a83f29f38df40c82a3715c1">&#9670;&#160;</a></span>http_get_request_send()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void http_get_request_send </td>
+          <td>(</td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab9c17de9ad3e974ac5dbcfa04b69aa17" name="ab9c17de9ad3e974ac5dbcfa04b69aa17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9c17de9ad3e974ac5dbcfa04b69aa17">&#9670;&#160;</a></span>http_init_get_request()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void http_init_get_request </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化GET请求 </p>
+
+</div>
+</div>
+<a id="a219bd6694bce503b164a4c07c1ae896b" name="a219bd6694bce503b164a4c07c1ae896b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a219bd6694bce503b164a4c07c1ae896b">&#9670;&#160;</a></span>init_time_data_sntp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void init_time_data_sntp </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac1e58ef555264a706495314a1247c464" name="ac1e58ef555264a706495314a1247c464"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1e58ef555264a706495314a1247c464">&#9670;&#160;</a></span>json_line_unit_copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void json_line_unit_copy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>dest</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>unit_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>选定JSON_Line数据中的一个数据单元复制到外部字符缓存区 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dest</td><td>外部字符缓存区,需要在外部函数提前申请好连续内存 </td></tr>
+    <tr><td class="paramname">src</td><td>JSON_Line格式源数据字符串 </td></tr>
+    <tr><td class="paramname">unit_id</td><td>选定复制的数据单元ID,第一个单元为0,第二个单元为1.... </td></tr>
+    <tr><td class="paramname">max_len</td><td>最多复制max_len个字符 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae582dc867f61fa36c8cc9e243b0bbed6" name="ae582dc867f61fa36c8cc9e243b0bbed6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae582dc867f61fa36c8cc9e243b0bbed6">&#9670;&#160;</a></span>json_line_unit_num_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int json_line_unit_num_get </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取JSON_Line数据中的有效数据单元个数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>要扫描的JSON_Line数据字符串或字符数组首地址 </td></tr>
+    <tr><td class="paramname">len</td><td>要扫描的字符长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>合法的数据单元个数 </dd></dl>
+
+</div>
+</div>
+<a id="af968b606d4533f7eee5953cd5bda499b" name="af968b606d4533f7eee5953cd5bda499b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af968b606d4533f7eee5953cd5bda499b">&#9670;&#160;</a></span>refresh_position_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_position_data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a71180d898510335fe528eb67d5ea6484" name="a71180d898510335fe528eb67d5ea6484"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71180d898510335fe528eb67d5ea6484">&#9670;&#160;</a></span>refresh_weather_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void refresh_weather_data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7e37a9a731dbc6ae76209c2bf82d6ed9" name="a7e37a9a731dbc6ae76209c2bf82d6ed9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e37a9a731dbc6ae76209c2bf82d6ed9">&#9670;&#160;</a></span>transform_ip_address()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void transform_ip_address </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4ee1c1d994236e8eee7199baae486b01" name="a4ee1c1d994236e8eee7199baae486b01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ee1c1d994236e8eee7199baae486b01">&#9670;&#160;</a></span>transform_lng_lat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void transform_lng_lat </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aec9ce0a4f817dcba7dbf0729d0d7449a" name="aec9ce0a4f817dcba7dbf0729d0d7449a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9ce0a4f817dcba7dbf0729d0d7449a">&#9670;&#160;</a></span>transform_locationID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void transform_locationID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9e45a7edd8edbe3b4a405d4bb66ec91e" name="a9e45a7edd8edbe3b4a405d4bb66ec91e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e45a7edd8edbe3b4a405d4bb66ec91e">&#9670;&#160;</a></span>transform_postcode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void transform_postcode </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1f7f523937b41549158ede27ddeb6550" name="a1f7f523937b41549158ede27ddeb6550"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f7f523937b41549158ede27ddeb6550">&#9670;&#160;</a></span>transform_real_time_weather_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void transform_real_time_weather_data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a692bbc21a4fc6fbd33865a0f9e21be79" name="a692bbc21a4fc6fbd33865a0f9e21be79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a692bbc21a4fc6fbd33865a0f9e21be79">&#9670;&#160;</a></span>wifi_connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t wifi_connect </td>
+          <td>(</td>
+          <td class="paramtype">periph_wifi_cfg_t *&#160;</td>
+          <td class="paramname"><em>wifi_cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通用网络连接函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">wifi_cfg</td><td>网络配置,要连接的网络SSID和密码必填 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_OK / ESP_FAIL </dd></dl>
+
+</div>
+</div>
+<a id="a1a05edcb6723e4f73dc2cebf30b86ba1" name="a1a05edcb6723e4f73dc2cebf30b86ba1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a05edcb6723e4f73dc2cebf30b86ba1">&#9670;&#160;</a></span>wifi_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_err_t wifi_init </td>
+          <td>(</td>
+          <td class="paramtype">esp_periph_config_t *&#160;</td>
+          <td class="paramname"><em>periph_config</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>WIFI外设初始化 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">periph_config</td><td>网络外设配置 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>ESP_OK / ESP_FAIL </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="aae31c687cd82dc52352b25eee3055227" name="aae31c687cd82dc52352b25eee3055227"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae31c687cd82dc52352b25eee3055227">&#9670;&#160;</a></span>baidu_ERNIE_Bot_access_token</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char baidu_ERNIE_Bot_access_token[<a class="el" href="sevetest30___i_w_e_d_a_8h.html#ab8f59cf8e85982e5f25ab7974f6f280e">ACCESSTOKEN_SIZE_MAX</a>] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae874bcbe8211c4b22a94996c49debcc9" name="ae874bcbe8211c4b22a94996c49debcc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae874bcbe8211c4b22a94996c49debcc9">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_result</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* ERNIE_Bot_4_chat_result = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4718fd08964287860f61766475e96858" name="a4718fd08964287860f61766475e96858"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4718fd08964287860f61766475e96858">&#9670;&#160;</a></span>ERNIE_Bot_4_chat_user_content</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* ERNIE_Bot_4_chat_user_content = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8b345caa4a83ec4fe1a4efc8e96a9f38" name="a8b345caa4a83ec4fe1a4efc8e96a9f38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b345caa4a83ec4fe1a4efc8e96a9f38">&#9670;&#160;</a></span>http_client_handle</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_http_client_handle_t http_client_handle = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a96720c6d525cfe2398069bb871f6ff3d" name="a96720c6d525cfe2398069bb871f6ff3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96720c6d525cfe2398069bb871f6ff3d">&#9670;&#160;</a></span>http_output_buf</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char http_output_buf[<a class="el" href="sevetest30___i_w_e_d_a_8h.html#a39df150cec693d7e56c68ce387ed6517">HTTP_BUF_MAX</a>] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9b695cd309c55961dc8814c3c1955f06" name="a9b695cd309c55961dc8814c3c1955f06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b695cd309c55961dc8814c3c1955f06">&#9670;&#160;</a></span>http_url_buf</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char http_url_buf[<a class="el" href="sevetest30___i_w_e_d_a_8h.html#a39df150cec693d7e56c68ce387ed6517">HTTP_BUF_MAX</a>] = { 0 }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43cfeffd1fd4cfd457c5183f70d3cdaf" name="a43cfeffd1fd4cfd457c5183f70d3cdaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43cfeffd1fd4cfd457c5183f70d3cdaf">&#9670;&#160;</a></span>ip_address</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* ip_address</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa9a1aac211eb71e3942f10b52638f904" name="aa9a1aac211eb71e3942f10b52638f904"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9a1aac211eb71e3942f10b52638f904">&#9670;&#160;</a></span>ip_position_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structip__position.html">ip_position</a>* ip_position_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac7bb61d4f7ba5faf047aa01bbf89956f" name="ac7bb61d4f7ba5faf047aa01bbf89956f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7bb61d4f7ba5faf047aa01bbf89956f">&#9670;&#160;</a></span>real_time_weather_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_real__time__weather.html">Real_time_weather</a>* real_time_weather_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acc57b1fb678068603324cf957c2e4cc9" name="acc57b1fb678068603324cf957c2e4cc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc57b1fb678068603324cf957c2e4cc9">&#9670;&#160;</a></span>se30_wifi_periph_handle</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">esp_periph_handle_t se30_wifi_periph_handle = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2b1df1a1a353073fa2f8db3dd6fe3f26" name="a2b1df1a1a353073fa2f8db3dd6fe3f26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b1df1a1a353073fa2f8db3dd6fe3f26">&#9670;&#160;</a></span>sevetest30_asr_result_tex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* sevetest30_asr_result_tex = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_5c982d53a68cdbcd421152b4020263a9.html">main</a></li><li class="navelem"><a class="el" href="sevetest30___i_w_e_d_a_8c.html">sevetest30_IWEDA.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
