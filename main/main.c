@@ -93,18 +93,18 @@ void app_main(void)
 
 
 
-  esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
+  // esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
 
-  wifi_init(&wifi_periph_config);
+  // wifi_init(&wifi_periph_config);
 
-  // 载入wifi信息
-  periph_wifi_cfg_t wifi_cfg = { .disable_auto_reconnect = false,.wifi_config.sta.ssid = CONFIG_WIFI_SSID,.wifi_config.sta.password = CONFIG_WIFI_PASSWORD, };
+  // // 载入wifi信息
+  // periph_wifi_cfg_t wifi_cfg = { .disable_auto_reconnect = false,.wifi_config.sta.ssid = CONFIG_WIFI_SSID,.wifi_config.sta.password = CONFIG_WIFI_PASSWORD, };
 
 
-  if (wifi_connect(&wifi_cfg) != ESP_OK)
-    ESP_LOGE("MAIN", "网络连接失败");
-  else
-    ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
+  // if (wifi_connect(&wifi_cfg) != ESP_OK)
+  //   ESP_LOGE("MAIN", "网络连接失败");
+  // else
+  //   ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
 
 
 
@@ -211,14 +211,14 @@ void app_main(void)
   hscdtd008a_mode_set(GS_MODE_ACTIVE);
   hscdtd008a_state_set(GS_STATE_NORMAL);
 
-
   ESP_LOGI("ME", "5s后开始校准");
   vTaskDelay(pdMS_TO_TICKS(5000));
+
 
   calibration_tools_init_PsP2P_DM_Producer();
 
   GS_calibration_static_model_t static_model;
-  esp_err_t ret = generate_GS_calibration_static_model(&static_model, 1000, 50);
+  esp_err_t ret = generate_GS_calibration_static_model(&static_model, 100, 50);
 
   if (ret == ESP_OK) {
     put_GS_calibration_static_model(&static_model);
@@ -236,6 +236,8 @@ void app_main(void)
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
   }
+
+
 
 
 
