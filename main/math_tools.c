@@ -55,8 +55,17 @@ void aligned_16_matrix_transpose(float* input, float* output, int m, int n) {
 
 }
 
-void square_matrix_transpose(float* local, int n) {
-
+/// @brief 方阵原地转置,直接在输入上操作
+/// @param local 矩阵输入 
+/// @param n 原矩阵(n,n)的列数
+void square_matrix_inplace_transpose(float* local, int n) {
+    for (int i = 0;i < n;i++) {
+        for (int j = i + 1;j < n;j++) {//仅遍历上三角
+            float buf = local[i * n + j];
+            local[i * n + j] = local[j * n + i];
+            local[j * n + i] = buf;
+        }
+    }
 }
 
 
@@ -100,7 +109,7 @@ esp_err_t matrix_transpose(float* input, float* output, int m, int n) {
     //         //在同一内存区域操作
     //         if (m == n) {
     //             //[触发-方阵优化] <- 方阵 + 在同一内存区域操作
-    //             square_matrix_transpose(input, n);
+    //             square_matrix_inplace_transpose(input, n);
     //             return ESP_OK;
     //         }
     //     }
@@ -371,9 +380,10 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
     for (int c = 0;c < n;c++) {
         //对单位矩阵拆分为n列,作为右端项向量b求解即可求逆
         //因为单位矩阵的每一列都是固定的, 直接确定当前右端项向量b
+        //注意,此处求解结果填充存在隐式转置,逐列求解结果应按列填充,但由于默认行主序,因此我们会暂时行填充,之后转置
         b[c] = 1.0f;
         if (c != 0)b[c - 1] = 0.0f;//如果之前其他位置置1,取消之前的置1
-        esp_err_t solve_ret = matrix_square_solve_LU(L, U, P, b, &inv_A[c * n], n);
+        esp_err_t solve_ret = matrix_square_solve_LU(L, U, P, b, &inv_A[c * n], n);//注意,inv_A存在隐式转置(列求解结果暂时强制行填充)
         if (solve_ret != ESP_OK) {
             heap_caps_free(L);
             heap_caps_free(U);
@@ -386,6 +396,7 @@ esp_err_t matrix_inverse_LU(const float* A, float* inv_A, int n) {
             ESP_RETURN_ON_FALSE(false, solve_ret, math_tools_TAG, "求解时发现问题 描述%s", esp_err_to_name(solve_ret));
         }
     }
+    square_matrix_inplace_transpose(inv_A, n);//原地转置,解决LU求解时的隐式转置问题
 
     //[5.内存释放,返回]
     heap_caps_free(L);
@@ -477,11 +488,7 @@ esp_err_t solve_overdet_system_ols_mlr(const float* X, const float* y, float* be
     matrix_transpose(X, XT, m, n);
 
     //计算 XT * y (T代表转置)
-    for (int i = 0;i < n;i++) {
-        for (int j = 0;j < m;j++) {
-            XTy[i] += XT[i * m + j] * y[j];
-        }
-    }
+    dspm_mult_f32(XT, y, XTy, n, m, 1);
 
     //计算 XT * X (T代表转置)
     dspm_mult_f32(XT, X, XTX, n, m, n);

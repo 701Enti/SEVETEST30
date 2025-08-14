@@ -1,5 +1,6 @@
 # 常规排除
 build/
+managed_components/
 docs/doxygen-awesome-css
 
 # 防信息泄露的特别安全考虑

@@ -47,8 +47,6 @@ static const char* name_of_PsP2P_DM_Producer = __FILE__;
 PsP2P_DM_node_handle_t PsP2P_DM_Producer = NULL;
 
 
-
-
 /// @brief 生成磁传感器静态校准模型
 /// @param static_model 导入静态校准模型结果存储位置
 /// @param sample_size 计算样本量,一定范围下,越高校准模型计算越精确,必须大于9(构造超定方程组),建议大于或等于50
