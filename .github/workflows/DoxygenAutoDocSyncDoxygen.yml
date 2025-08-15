@@ -57,7 +57,7 @@ jobs:
     needs: prepare
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
-      BRANCH_NAME: ${{ needs.build.outputs.BRANCH_NAME }}
-      docRepo: ${{ needs.build.outputs.DOC_REPO }}
+      BRANCH_NAME: ${{ needs.prepare.outputs.BRANCH_NAME }}
+      docRepo: ${{ needs.prepare.outputs.DOC_REPO }}
     secrets:
       docRepoSecret: ${{ secrets.ORG_DOC_SYNC_SECRET }}
