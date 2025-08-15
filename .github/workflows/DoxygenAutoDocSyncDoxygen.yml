@@ -10,8 +10,9 @@ name: DoxygenAutoDocSyncDoxygen
 on:
   push:
     branches: ["master"]
-  pull_request:
-    branches: ["master"]
+    # 防止文档仓库同步后,更新SEVETEST30仓库文档子模块时的push再次触发此工作流导致无限循环
+    paths-ignore:
+      - "docs/official/repo_doc/DOC-SEVETEST30"
 
   workflow_dispatch:
 
