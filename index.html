@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="refresh" content="0; url=/docs/official/repo_doc/DOC-SEVETEST30/doxygen/html/">
-    </head>
+    <script>
+        function getBasePath(){
+            let path = window.location.pathname;
+            if(path.endsWith('index.html')){
+                //当前路径以 /index.html 结尾
+                path = path.replace(/index\.html$/,'');
+            }
+            if(!path.endsWith('/')){
+                //当前路径不以 / 结尾
+                path += '/';
+            }
+            return path;
+        }
+        const basePath = getBasePath();
+        const addPath = "docs/official/repo_doc/DOC-SEVETEST30/doxygen/html/"
+        window.location.href = `${basePath}${addPath}index.html`;
+    </script>
     <body>
     </body>
 </html>
