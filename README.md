@@ -166,6 +166,13 @@
 - **修改说明**:
   - 更改为项目需要的数值设置
 
+## main/AGS10.c 和 components/sevetest30_board/include/AGS10.h 的 Calc_CRC8 函数
+
+- **原文件**:来自奥松电子官方的 AGS10 数据手册内(需登录后点击"文件下载"获取手册) https://www.aosong.com/Products/info.aspx?lcid=&proid=49
+- **原文件协议类型**: (未发现声明)
+- **修改说明**:
+  - 添加日志打印相关
+
 ## [^1]: 值得明确的是修改为 double 后,运算需要的时间可能延长
 
 ## [^2]: 在原程序基础上,取消了 base64 编码的"\n"操作,因为将音频编码为 base64 时添加"\n"引起了一些 API 服务无法识别的问题

@@ -68,7 +68,7 @@ void AGS10_I2C_freq_support(bool run) {
 }
 
 
-/// @brief AGS10的CRC校验计算,来自奥松电子官方的AGS10数据手册内 http://aosong.com/products-132.html
+/// @brief AGS10的CRC校验计算,来自奥松电子官方的AGS10数据手册内(需登录后点击"文件下载"获取手册) https://www.aosong.com/Products/info.aspx?lcid=&proid=49 
 /// @param dat 数据位置
 /// @param Num 数据字节个数
 /// @return CRC校验码
