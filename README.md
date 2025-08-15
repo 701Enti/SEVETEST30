@@ -39,16 +39,16 @@
   - 开发工具配置文件（含私有仓库令牌）
   - 网络连接配置文件（VPN/RDP 凭证）
 
-## 关键分支的 PR 检查(基于 Gitleaks)
+## 关键分支的 PR 检查(基于 TruffleHog)
 
 - **相关技术实现**:
 
   - 当 SEVETEST30 仓库的关键分支有新的 pull&request 时,必须经过 Github 工作流检查才可以进行 pull&request(需要仓库设置规则)
-  - 工作流中使用 Gitleaks 检查整个提交历史是否含敏感内容
+  - 工作流中使用 TruffleHog 检查整个提交历史是否含敏感内容
   - 也可以手动触发来人工检查结果
 
 - **相关工作流**:
-  - .github/workflows/GitleaksPRCheck.yml
+  - .github/workflows/TruffleHogPRCheck.yml
 
 # 第三方代码使用声明
 
