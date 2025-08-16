@@ -89,7 +89,6 @@ jobs:
 
   call-OfficialDocSubmoduleSync:
     needs: [prepare, call-doxygen-auto-code-to-doc]
-    if: always()
     uses: 701Enti/SEVETEST30/.github/workflows/OfficialDocSubmoduleSync.yml@master
     with:
       UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
