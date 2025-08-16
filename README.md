@@ -119,9 +119,16 @@
   - 为保证资源充足,只会为关键分支提供自动文档生成,具体会触发工作流的关键分支在工作流文件 DoxygenAutoDocSync.yml 中可设置和查看
 - **全流程案例**:
   - 以下是通过 Doxygen 自动生成官方文档的相关工作全流程(仅针对关键分支,如分支 A)
-  - SEVETEST30 仓库关键分支 A 的 push -> DoxygenAutoDocSyncDoxygen 触发 -> 调用触发可复用工作流(Doxygen 文档生成工作流)
-  - -> DoxygenAutoDocSyncDoxygen 在完成调用可复用工作流后结束 -> DoxygenAutoDocSyncDoxygen 结束被 OfficialDocSubmoduleSync 发现
-  - -> OfficialDocSubmoduleSync 触发,更新子模块,将更改推送到 A 分支的机器人分支并发起该分支到 A 分支的 PR-> PR 审查 -> 完成
+  - SEVETEST30 仓库关键分支 A 的 push
+  - -> DoxygenAutoDocSyncDoxygen 触发
+  - -> DoxygenAutoDocSyncDoxygen 调用 doxygen-auto-code-to-doc
+  - -> doxygen-auto-code-to-doc 触发,根据 A 分支代码生成文档并将更改推送到文档仓库的 A 分支
+  - (doxygen-auto-code-to-doc 结束)
+  - -> DoxygenAutoDocSyncDoxygen 调用 OfficialDocSubmoduleSync
+  - -> OfficialDocSubmoduleSync 触发,更新子模块,将更改推送到 A 分支的机器人分支并发起该分支到 A 分支的 PR
+  - (OfficialDocSubmoduleSync 结束)
+  - (DoxygenAutoDocSyncDoxygen 结束)
+  - -> PR 审查 -> 完成
 - **相关工作流**:
   - .github/workflows/DoxygenAutoDocSync.yml
   - .github/workflows/OfficialDocSubmoduleSync.yml

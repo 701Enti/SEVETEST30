@@ -7,9 +7,16 @@
 # 例如 SEVETEST30 名为 A 分支的推送,将触发文档仓库名为 A 分支的更新
 
 # 以下是通过Doxygen自动生成官方文档的相关工作全流程(仅针对关键分支,如分支A)
-# SEVETEST30仓库关键分支A的push -> DoxygenAutoDocSyncDoxygen触发 -> 调用触发可复用工作流(Doxygen文档生成工作流)
-# -> DoxygenAutoDocSyncDoxygen在完成调用可复用工作流后结束 -> DoxygenAutoDocSyncDoxygen结束被OfficialDocSubmoduleSync发现
-# -> OfficialDocSubmoduleSync触发,更新子模块,将更改推送到A分支的机器人分支并发起该分支到A分支的PR-> PR审查 -> 完成
+# SEVETEST30仓库关键分支A的push
+# -> DoxygenAutoDocSyncDoxygen触发
+# -> DoxygenAutoDocSyncDoxygen调用doxygen-auto-code-to-doc
+# -> doxygen-auto-code-to-doc触发,根据A分支代码生成文档并将更改推送到文档仓库的A分支
+# (doxygen-auto-code-to-doc结束)
+# -> DoxygenAutoDocSyncDoxygen调用OfficialDocSubmoduleSync
+# -> OfficialDocSubmoduleSync触发,更新子模块,将更改推送到A分支的机器人分支并发起该分支到A分支的PR
+# (OfficialDocSubmoduleSync结束)
+# (DoxygenAutoDocSyncDoxygen结束)
+# -> PR审查 -> 完成
 
 # 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
 
@@ -34,6 +41,8 @@ jobs:
     outputs:
       BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
       DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
+      DOC_REPO_NAME: ${{ steps.set_output.outputs.DOC_REPO_NAME }}
+      CODE_REPO_NAME: ${{ steps.set_output.outputs.CODE_REPO_NAME }}
 
     steps:
       - name: Wait for push to complete
@@ -58,6 +67,8 @@ jobs:
         run: |
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
+          echo "DOC_REPO_NAME=DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
+          echo "CODE_REPO_NAME=${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -65,7 +76,7 @@ jobs:
           name: codefile
           path: ./
 
-  call-reusable-workflow:
+  call-doxygen-auto-code-to-doc:
     needs: prepare
     uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
@@ -73,3 +84,12 @@ jobs:
       docRepo: ${{ needs.prepare.outputs.DOC_REPO }}
     secrets:
       docRepoSecret: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+
+  call-OfficialDocSubmoduleSync:
+    needs: [prepare,call-doxygen-auto-code-to-doc]
+    uses: ./.github/workflows/OfficialDocSubmoduleSync.yml
+    with:
+      UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
+      docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
+      codeRepoName: ${{ needs.prepare.outputs.CODE_REPO_NAME }}  
+
