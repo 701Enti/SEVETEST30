@@ -1,0 +1,160 @@
+# -------------------------------------------------------------------
+# This workflow file is dedicated to the public domain under CC0 1.0.
+# See https://creativecommons.org/publicdomain/zero/1.0/
+# -------------------------------------------------------------------
+# 更新SEVETEST30的官方文档子模块,仅在文档同步可复用工作流成功完成后触发
+# 考虑到未来官方文档可能不限于Doxygen生成文档,相关业务代码为动态输入参数运行,后续只需更改下方触发条件即可
+
+# 以下是通过Doxygen自动生成官方文档的相关工作全流程(仅针对关键分支,如分支A)
+# SEVETEST30仓库关键分支A的push -> DoxygenAutoDocSyncDoxygen触发 -> 调用触发Doxygen文档生成可复用工作流
+# -> 可复用工作流工作成功,被OfficialDocSubmoduleSync发现 -> OfficialDocSubmoduleSync更新子模块
+# -> OfficialDocSubmoduleSync将更改推送到A分支的机器人分支并发起该分支到A分支的PR -> PR审查 -> 完成
+
+# 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
+
+# 为保证资源充足,只会为关键分支提供自动文档生成,具体会触发工作流的关键分支在下方"on"中可设置和查看
+# 值得声明的是, SEVETEST30 文档仓库不是私有仓库,您完全可以push个人分支生成的文档到独立分支,甚至可以是您对SEVETEST30的见解等其他任何与SEVETEST30相关的内容,只要您没有影响自动文档或进行不合理的推送
+# 当然,如果您希望自己的分支像关键分支一样可云端部署文档,您可以在本地运行 Doxygen 生成文档,并推送到 SEVETEST30 文档仓库与个人分支同名的分支,之后可联系 SEVETEST30 团队协商,他们管理文档的云端部署
+# 更多信息可参考项目根目录README.md文件 - 文档相关
+name: OfficialDocSubmoduleSync
+on:
+  workflow_run:
+    workflows: ["DoxygenAutoCodeToDoc"] #需要和文档同步可复用工作流的名称name一致,不是工作流文件名
+    branches: ["**"]
+    types: [completed]
+
+jobs:
+  submodule_update:
+    if: >
+      github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_commit.message,'[skip ci]')
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    outputs:
+      robot_branch_exists: ${{ steps.checkout-robot-branch.outputs.robot_branch_exists }}
+      codeRepo: ${{ steps.extract.outputs.codeRepo}}
+      docRepo: ${{ steps.extract.outputs.docRepo}}
+      BRANCH_NAME: ${{ steps.extract.outputs.BRANCH_NAME}}
+      ROBOT_BRANCH_NAME: ${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}
+    steps:
+      - name: Wait for docRepo push to complete
+        run: sleep 30
+
+      - name: Checkout all branches with submodules
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: refs/heads/*
+          submodules: recursive
+
+      - name: Extract context information
+        id: extract
+        run: |
+          codeRepo=$(basename "$PWD")
+          echo "codeRepo=${codeRepo}" >> $GITHUB_OUTPUT
+          docRepo="${{ github.event.workflow_run.event.inputs.docRepo}}"
+          echo "docRepo=${docRepo}" >> $GITHUB_OUTPUT
+          BRANCH_NAME="${{ github.event.workflow_run.event.inputs.BRANCH_NAME}}"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "ROBOT_BRANCH_NAME=OfficialDocRobot-${BRANCH_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Checkout robot branch (create if not exists)
+        id: checkout-robot-branch
+        run: |
+          if git show-ref --quiet --verify "refs/heads/${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}"; then
+            echo "robot_branch_exists=true" >> $GITHUB_OUTPUT
+            git checkout "${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}"
+          else
+            echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
+            git checkout -b "${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}" "${{ steps.extract.outputs.BRANCH_NAME}}"
+          fi
+
+      - name: Update Submodule named docRepo
+        run: |
+          git submodule update --remote --merge "${{ steps.extract.outputs.docRepo}}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated
+          path: ./
+
+  exists_false:
+    runs-on: ubuntu-latest
+    needs: submodule_update
+    if: ${{ needs.submodule_update.outputs.robot_branch_exists == 'false' }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: updated
+
+      - name: Push changes to code repository
+        id: push_changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          CODE_REPO: ${{ needs.submodule_update.outputs.codeRepo}}
+          DOC_REPO: ${{ needs.submodule_update.outputs.docRepo}}
+          ROBOT_BRANCH_NAME: ${{ needs.submodule_update.outputs.ROBOT_BRANCH_NAME}}
+        run: |
+          cd $CODE_REPO
+          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ github.event.workflow_run.event.inputs.docRepo}}" rev-parse --short HEAD)
+          echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
+          git push -u origin $ROBOT_BRANCH_NAME
+
+      - name: Wait for codeRepo push to complete
+        run: sleep 30
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "(New Robot branch)Update documentation ${{ needs.submodule_update.outputs.docRepo}} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA}}"
+          branch: ${{ needs.submodule_update.outputs.ROBOT_BRANCH_NAME}}
+          base: ${{ needs.submodule_update.outputs.BRANCH_NAME}}
+          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }} ]"
+
+  exists_true:
+    runs-on: ubuntu-latest
+    needs: submodule_update
+    if: ${{ needs.submodule_update.outputs.robot_branch_exists == 'true' }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: updated
+
+      - name: Push changes to code repository
+        id: push_changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          CODE_REPO: ${{ needs.submodule_update.outputs.codeRepo}}
+          DOC_REPO: ${{ needs.submodule_update.outputs.docRepo}}
+          ROBOT_BRANCH_NAME: ${{ needs.submodule_update.outputs.ROBOT_BRANCH_NAME}}
+        run: |
+          cd $CODE_REPO
+          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ github.event.workflow_run.event.inputs.docRepo}}" rev-parse --short HEAD)
+          echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit"
+            exit 1
+          else
+            git commit -m "Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
+            git push -u origin $ROBOT_BRANCH_NAME
+          fi
+
+      - name: Wait for codeRepo push to complete
+        run: sleep 30
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Update documentation ${{ needs.submodule_update.outputs.docRepo}} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA}}"
+          branch: ${{ needs.submodule_update.outputs.ROBOT_BRANCH_NAME}}
+          base: ${{ needs.submodule_update.outputs.BRANCH_NAME}}
+          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }} ]"
