@@ -6,9 +6,9 @@
 # 考虑到未来官方文档可能不限于Doxygen生成文档,相关业务代码为动态输入参数运行,后续只需更改下方触发条件即可
 
 # 以下是通过Doxygen自动生成官方文档的相关工作全流程(仅针对关键分支,如分支A)
-# SEVETEST30仓库关键分支A的push -> DoxygenAutoDocSyncDoxygen触发 -> 调用触发Doxygen文档生成可复用工作流
-# -> 可复用工作流工作成功,被OfficialDocSubmoduleSync发现 -> OfficialDocSubmoduleSync更新子模块
-# -> OfficialDocSubmoduleSync将更改推送到A分支的机器人分支并发起该分支到A分支的PR -> PR审查 -> 完成
+# SEVETEST30仓库关键分支A的push -> DoxygenAutoDocSyncDoxygen触发 -> 调用触发可复用工作流(Doxygen文档生成工作流)
+# -> DoxygenAutoDocSyncDoxygen在完成调用可复用工作流后结束 -> DoxygenAutoDocSyncDoxygen结束被OfficialDocSubmoduleSync发现
+# -> OfficialDocSubmoduleSync触发,更新子模块,将更改推送到A分支的机器人分支并发起该分支到A分支的PR-> PR审查 -> 完成
 
 # 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
 
@@ -19,8 +19,7 @@
 name: OfficialDocSubmoduleSync
 on:
   workflow_run:
-    workflows: ["DoxygenAutoCodeToDoc"] #需要和文档同步可复用工作流的名称name一致,不是工作流文件名
-    branches: ["**"]
+    workflows: ["DoxygenAutoDocSyncDoxygen"] #需要和文档同步可复用工作流的名称name一致,不是工作流文件名
     types: [completed]
 
 jobs:
