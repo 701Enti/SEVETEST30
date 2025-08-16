@@ -30,19 +30,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       robot_branch_exists: ${{ steps.checkout-robot-branch.outputs.robot_branch_exists }}
-      codeRepo: ${{ steps.extract.outputs.codeRepo}}
-      docRepo: ${{ steps.extract.outputs.docRepo}}
-      BRANCH_NAME: ${{ steps.extract.outputs.BRANCH_NAME}}
-      ROBOT_BRANCH_NAME: ${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}
+      codeRepo: ${{ steps.extract.outputs.codeRepo }}
+      docRepo: ${{ steps.extract.outputs.docRepo }}
+      BRANCH_NAME: ${{ steps.extract.outputs.BRANCH_NAME }}
+      ROBOT_BRANCH_NAME: ${{ steps.extract.outputs.ROBOT_BRANCH_NAME }}
     steps:
       - name: Wait for docRepo push to complete
         run: sleep 30
 
-      - name: Checkout all branches with submodules
+      - name: Checkout with submodules
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: refs/heads/*
           submodules: recursive
 
       - name: Extract context information
@@ -50,26 +49,26 @@ jobs:
         run: |
           codeRepo=$(basename "$PWD")
           echo "codeRepo=${codeRepo}" >> $GITHUB_OUTPUT
-          docRepo="${{ github.event.workflow_run.event.inputs.docRepo}}"
+          docRepo="${{github.event.workflow_run.event.inputs.docRepo}}"
           echo "docRepo=${docRepo}" >> $GITHUB_OUTPUT
           BRANCH_NAME="${{ github.event.workflow_run.event.inputs.BRANCH_NAME}}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-          echo "ROBOT_BRANCH_NAME=OfficialDocRobot-${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "ROBOT_BRANCH_NAME=OfficialDocRobot-${docRepo}-${BRANCH_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Checkout robot branch (create if not exists)
+      - name: Checkout robot branch
         id: checkout-robot-branch
         run: |
-          if git show-ref --quiet --verify "refs/heads/${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}"; then
+          git checkout -b "${{steps.extract.outputs.ROBOT_BRANCH_NAME}}" "${{steps.extract.outputs.BRANCH_NAME}}"
+          branch_exists=$(git ls-remote --heads "https://github.com/${{steps.extract.outputs.codeRepo}}.git" "${{steps.extract.outputs.ROBOT_BRANCH_NAME}}")
+          if [ -n "$branch_exists" ]; then
             echo "robot_branch_exists=true" >> $GITHUB_OUTPUT
-            git checkout "${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}"
           else
             echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
-            git checkout -b "${{ steps.extract.outputs.ROBOT_BRANCH_NAME}}" "${{ steps.extract.outputs.BRANCH_NAME}}"
           fi
 
-      - name: Update Submodule named docRepo
+      - name: Update Submodule
         run: |
-          git submodule update --remote --merge "${{ steps.extract.outputs.docRepo}}"
+          git submodule update --remote --merge "${{steps.extract.outputs.docRepo}}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -120,11 +119,6 @@ jobs:
     needs: submodule_update
     if: ${{ needs.submodule_update.outputs.robot_branch_exists == 'true' }}
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: updated
-
       - name: Push changes to code repository
         id: push_changes
         env:
@@ -139,13 +133,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          if git diff-index --quiet HEAD; then
-            echo "No changes to commit"
-            exit 1
-          else
-            git commit -m "Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
-            git push -u origin $ROBOT_BRANCH_NAME
-          fi
+          git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
+          git push origin --delete $ROBOT_BRANCH_NAME 
+          git push -u origin $ROBOT_BRANCH_NAME
 
       - name: Wait for codeRepo push to complete
         run: sleep 30
@@ -153,7 +143,7 @@ jobs:
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
-          title: "Update documentation ${{ needs.submodule_update.outputs.docRepo}} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA}}"
+          title: "(New Robot branch)Update documentation ${{ needs.submodule_update.outputs.docRepo}} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA}}"
           branch: ${{ needs.submodule_update.outputs.ROBOT_BRANCH_NAME}}
           base: ${{ needs.submodule_update.outputs.BRANCH_NAME}}
           body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }} ]"
