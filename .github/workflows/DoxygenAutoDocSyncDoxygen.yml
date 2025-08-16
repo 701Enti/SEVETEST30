@@ -80,7 +80,7 @@ jobs:
 
   call-doxygen-auto-code-to-doc:
     needs: prepare
-    uses: ${{ needs.prepare.outputs.OWNER }}/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@${{ needs.prepare.outputs.BRANCH_NAME }}
+    uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
     with:
       BRANCH_NAME: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepo: ${{ needs.prepare.outputs.DOC_REPO }}
@@ -89,7 +89,7 @@ jobs:
 
   call-OfficialDocSubmoduleSync:
     needs: [prepare,call-doxygen-auto-code-to-doc]
-    uses: ${{ needs.prepare.outputs.OWNER }}/${{ needs.prepare.outputs.CODE_REPO_NAME }}/.github/workflows/OfficialDocSubmoduleSync.yml@${{ needs.prepare.outputs.BRANCH_NAME }}
+    uses: 701Enti/SEVETEST30/.github/workflows/OfficialDocSubmoduleSync.yml@master
     with:
       UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
