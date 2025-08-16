@@ -1,3 +1,7 @@
+# -------------------------------------------------------------------
+# This workflow file is dedicated to the public domain under CC0 1.0.
+# See https://creativecommons.org/publicdomain/zero/1.0/
+# -------------------------------------------------------------------
 # 关键分支的 PR 检查(基于 TruffleHog)
 # 当 SEVETEST30 仓库的关键分支有新的 pull&request 时,必须经过 Github 工作流检查才可以进行 pull&request(需要仓库设置规则)
 # 工作流中使用 TruffleHog 检查整个提交历史是否含敏感内容
