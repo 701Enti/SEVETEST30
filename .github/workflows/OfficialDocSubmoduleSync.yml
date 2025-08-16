@@ -53,7 +53,7 @@ jobs:
           echo "docRepo=${docRepo}" >> $GITHUB_OUTPUT
           BRANCH_NAME="${{ github.event.workflow_run.event.inputs.BRANCH_NAME}}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-          echo "ROBOT_BRANCH_NAME=OfficialDocRobot-${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "ROBOT_BRANCH_NAME=OfficialDocRobot-${docRepo}-${BRANCH_NAME}" >> $GITHUB_OUTPUT
 
       - name: Checkout robot branch
         id: checkout-robot-branch
