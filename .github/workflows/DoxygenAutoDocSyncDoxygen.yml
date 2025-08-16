@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       BRANCH_NAME: ${{ steps.set_output.outputs.BRANCH_NAME }}
+      OWNER: ${{ steps.set_output.outputs.OWNER }}
       DOC_REPO: ${{ steps.set_output.outputs.DOC_REPO }}
       DOC_REPO_NAME: ${{ steps.set_output.outputs.DOC_REPO_NAME }}
       CODE_REPO_NAME: ${{ steps.set_output.outputs.CODE_REPO_NAME }}
@@ -66,6 +67,7 @@ jobs:
         id: set_output
         run: |
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+          echo "OWNER=${{ env.OWNER }}" >> $GITHUB_OUTPUT
           echo "DOC_REPO=${{ env.OWNER }}/DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
           echo "DOC_REPO_NAME=DOC-${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
           echo "CODE_REPO_NAME=${{ env.REPO_NAME }}" >> $GITHUB_OUTPUT
@@ -78,7 +80,7 @@ jobs:
 
   call-doxygen-auto-code-to-doc:
     needs: prepare
-    uses: 701Enti/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@master
+    uses: ${{ needs.prepare.outputs.OWNER }}/Github-WorkFlows/.github/workflows/doxygen-auto-code-to-doc.yml@${{ needs.prepare.outputs.BRANCH_NAME }}
     with:
       BRANCH_NAME: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepo: ${{ needs.prepare.outputs.DOC_REPO }}
@@ -87,7 +89,7 @@ jobs:
 
   call-OfficialDocSubmoduleSync:
     needs: [prepare,call-doxygen-auto-code-to-doc]
-    uses: ./.github/workflows/OfficialDocSubmoduleSync.yml
+    uses: ${{ needs.prepare.outputs.OWNER }}/${{ needs.prepare.outputs.CODE_REPO_NAME }}/.github/workflows/OfficialDocSubmoduleSync.yml@${{ needs.prepare.outputs.BRANCH_NAME }}
     with:
       UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
