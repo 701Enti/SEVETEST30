@@ -106,7 +106,7 @@ jobs:
           DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
-          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
+          NEW_DOC_COMMIT_SHA=$(git -C ""docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -155,7 +155,7 @@ jobs:
           DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
-          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
+          NEW_DOC_COMMIT_SHA=$(git -C ""docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
