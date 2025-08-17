@@ -91,7 +91,7 @@ jobs:
 
       - name: Update Submodule
         run: |
-          git submodule update --remote --merge "${{steps.extract.outputs.docRepoName}}"
+          git submodule update --remote --merge -- "docs/official/repo_doc/${{steps.extract.outputs.docRepoName}}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -122,7 +122,7 @@ jobs:
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add "docs/official/repo_doc/${DOC_REPO}"
           git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
           git push -u origin $ROBOT_UPDATE_BRANCH
 
@@ -155,7 +155,7 @@ jobs:
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add "docs/official/repo_doc/${DOC_REPO}"
           git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
           git push origin --delete $ROBOT_UPDATE_BRANCH 
           git push -u origin $ROBOT_UPDATE_BRANCH
