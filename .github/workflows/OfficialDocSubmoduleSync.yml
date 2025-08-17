@@ -46,7 +46,7 @@ on:
         type: string
 
 jobs:
-  submodule_update:
+  information_collect:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     outputs:
@@ -57,15 +57,6 @@ jobs:
       ROBOT_UPDATE_BRANCH: ${{ steps.extract.outputs.ROBOT_UPDATE_BRANCH }}
       robot_branch_exists: ${{ steps.extract.outputs.robot_branch_exists }}      
     steps:
-      - name: Wait for document repository push to complete
-        run: sleep 30
-
-      - name: Checkout with submodules
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: recursive
-
       - name: Extract context information
         id: extract
         run: |
@@ -85,40 +76,37 @@ jobs:
             echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
           fi
 
+  exists_false:
+    runs-on: ubuntu-latest
+    needs: information_collect
+    if: ${{ needs.information_collect.outputs.robot_branch_exists == 'false' }}
+    steps:
+      - name: Wait for document repository push to complete
+        run: sleep 30
+
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
       - name: Checkout robot branch
         run: |
-          git checkout -b "${{steps.extract.outputs.ROBOT_UPDATE_BRANCH}}" "${{steps.extract.outputs.UPDATE_BRANCH}}"
+          git checkout -b "${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}" "${{ needs.information_collect.outputs.UPDATE_BRANCH }}"
 
       - name: Update Submodule
         run: |
-          git submodule update --remote --merge -- "docs/official/repo_doc/${{steps.extract.outputs.docRepoName}}"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: updated
-          path: ./
-
-  exists_false:
-    runs-on: ubuntu-latest
-    needs: submodule_update
-    if: ${{ needs.submodule_update.outputs.robot_branch_exists == 'false' }}
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: updated
+          git submodule update --remote --merge -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}}"
 
       - name: Push changes to code repository
         id: push_changes
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
-          CODE_REPO: ${{ needs.submodule_update.outputs.codeRepoName }}
-          DOC_REPO: ${{ needs.submodule_update.outputs.docRepoName }}
-          ROBOT_UPDATE_BRANCH: ${{ needs.submodule_update.outputs.ROBOT_UPDATE_BRANCH }}
+          CODE_REPO: ${{ needs.information_collect.outputs.codeRepoName }}
+          DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
+          ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
-          cd $CODE_REPO
-          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.submodule_update.outputs.docRepoName }}" rev-parse --short HEAD)
+          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -132,26 +120,42 @@ jobs:
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
-          title: "(New Robot branch)Update documentation ${{ needs.submodule_update.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-          branch: ${{ needs.submodule_update.outputs.ROBOT_UPDATE_BRANCH }}
-          base: ${{ needs.submodule_update.outputs.UPDATE_BRANCH }}
+          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
+          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
           body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
 
   exists_true:
     runs-on: ubuntu-latest
-    needs: submodule_update
-    if: ${{ needs.submodule_update.outputs.robot_branch_exists == 'true' }}
+    needs: information_collect
+    if: ${{ needs.information_collect.outputs.robot_branch_exists == 'true' }}
     steps:
+      - name: Wait for document repository push to complete
+        run: sleep 30
+
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Checkout robot branch
+        run: |
+          git checkout -b "${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}" "${{ needs.information_collect.outputs.UPDATE_BRANCH }}"
+
+      - name: Update Submodule
+        run: |
+          git submodule update --remote --merge -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}}"
+
       - name: Push changes to code repository
         id: push_changes
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
-          CODE_REPO: ${{ needs.submodule_update.outputs.codeRepoName }}
-          DOC_REPO: ${{ needs.submodule_update.outputs.docRepoName }}
-          ROBOT_UPDATE_BRANCH: ${{ needs.submodule_update.outputs.ROBOT_UPDATE_BRANCH }}
+          CODE_REPO: ${{ needs.information_collect.outputs.codeRepoName }}
+          DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
+          ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
-          cd $CODE_REPO
-          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.submodule_update.outputs.docRepoName }}" rev-parse --short HEAD)
+          NEW_DOC_COMMIT_SHA=$(git -C "submodules/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -166,7 +170,7 @@ jobs:
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
-          title: "(New Robot branch)Update documentation ${{ needs.submodule_update.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-          branch: ${{ needs.submodule_update.outputs.ROBOT_UPDATE_BRANCH }}
-          base: ${{ needs.submodule_update.outputs.UPDATE_BRANCH }}
+          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
+          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
           body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
