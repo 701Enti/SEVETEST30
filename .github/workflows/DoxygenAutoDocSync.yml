@@ -17,6 +17,7 @@
 # (OfficialDocSubmoduleSync结束)
 # (DoxygenAutoDocSync结束)
 # -> PR审查 -> 完成
+# [注意: SEVETEST30仓库是将每个文档仓库作为子模块独立管理的,子模块名必须与文档仓库名一致]
 
 # 文档生成和推送工作使用可复用工作流: https://github.com/701Enti/Github-WorkFlows/blob/master/.github/workflows/doxygen-auto-code-to-doc.yml (它存储在 701Enti 的专门工作流文件存储库)
 

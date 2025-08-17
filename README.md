@@ -129,6 +129,7 @@
   - (OfficialDocSubmoduleSync 结束)
   - (DoxygenAutoDocSync 结束)
   - -> PR 审查 -> 完成
+  - [注意: SEVETEST30 仓库是将每个文档仓库作为子模块独立管理的,子模块名必须与文档仓库名一致]
 - **相关工作流**:
   - .github/workflows/DoxygenAutoDocSync.yml
   - .github/workflows/OfficialDocSubmoduleSync.yml
