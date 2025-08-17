@@ -35,6 +35,9 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   prepare:
     timeout-minutes: 30
@@ -94,6 +97,5 @@ jobs:
     with:
       UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
-      codeRepoName: ${{ needs.prepare.outputs.CODE_REPO_NAME }}  
-      owner: ${{ needs.prepare.outputs.OWNER }} 
-
+      codeRepoName: ${{ needs.prepare.outputs.CODE_REPO_NAME }}
+      owner: ${{ needs.prepare.outputs.OWNER }}
