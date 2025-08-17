@@ -27,6 +27,10 @@ name: OfficialDocSubmoduleSync
 on:
   workflow_call:
     inputs:
+      owner:
+        description: "the name of code repository owner"
+        required: true
+        type: string
       codeRepoName:
         description: "the name of code repository"
         required: true
@@ -45,11 +49,12 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     outputs:
-      robot_branch_exists: ${{ steps.checkout-robot-branch.outputs.robot_branch_exists }}
+      owner: ${{ steps.extract.outputs.owner }}
       codeRepoName: ${{ steps.extract.outputs.codeRepoName }}
       docRepoName: ${{ steps.extract.outputs.docRepoName }}
       UPDATE_BRANCH: ${{ steps.extract.outputs.UPDATE_BRANCH }}
       ROBOT_UPDATE_BRANCH: ${{ steps.extract.outputs.ROBOT_UPDATE_BRANCH }}
+      robot_branch_exists: ${{ steps.extract.outputs.robot_branch_exists }}      
     steps:
       - name: Wait for document repository push to complete
         run: sleep 30
@@ -63,6 +68,8 @@ jobs:
       - name: Extract context information
         id: extract
         run: |
+          owner="${{ inputs.owner }}"
+          echo "owner=${owner}" >> $GITHUB_OUTPUT
           codeRepoName="${{ inputs.codeRepoName }}"
           echo "codeRepoName=${codeRepoName}" >> $GITHUB_OUTPUT
           docRepoName="${{ inputs.docRepoName }}"
@@ -70,17 +77,16 @@ jobs:
           UPDATE_BRANCH="${{ inputs.UPDATE_BRANCH }}"
           echo "UPDATE_BRANCH=${UPDATE_BRANCH}" >> $GITHUB_OUTPUT
           echo "ROBOT_UPDATE_BRANCH=OfficialDocRobot-${docRepoName}-${UPDATE_BRANCH}" >> $GITHUB_OUTPUT
-
-      - name: Checkout robot branch
-        id: checkout-robot-branch
-        run: |
-          git checkout -b "${{steps.extract.outputs.ROBOT_UPDATE_BRANCH}}" "${{steps.extract.outputs.UPDATE_BRANCH}}"
-          branch_exists=$(git ls-remote --heads "https://github.com/${{steps.extract.outputs.codeRepoName}}.git" "${{steps.extract.outputs.ROBOT_UPDATE_BRANCH}}")
+          branch_exists=$(git ls-remote --heads "https://github.com/${owner}/${codeRepoName}.git" "${ROBOT_UPDATE_BRANCH}")
           if [ -n "$branch_exists" ]; then
             echo "robot_branch_exists=true" >> $GITHUB_OUTPUT
           else
             echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
           fi
+
+      - name: Checkout robot branch
+        run: |
+          git checkout -b "${{steps.extract.outputs.ROBOT_UPDATE_BRANCH}}" "${{steps.extract.outputs.UPDATE_BRANCH}}"
 
       - name: Update Submodule
         run: |
