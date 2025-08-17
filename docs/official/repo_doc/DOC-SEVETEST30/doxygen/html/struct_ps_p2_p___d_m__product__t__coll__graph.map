@@ -1,8 +1,0 @@
-<map id="PsP2P_DM_product_t" name="PsP2P_DM_product_t">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,7,164,33"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="180,11,191,20,183,28,165,32,164,27,180,24,185,20,176,15"/>
-<area shape="rect" id="Node000002" href="$struct_ps_p2_p___d_m__node__t.html" title=" " alt="" coords="14,114,155,139"/>
-<area shape="poly" id="edge4_Node000002_Node000001" title=" " alt="" coords="40,42,22,60,17,73,22,87,35,101,52,112,49,116,31,105,17,89,12,73,17,57,36,38"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="106,102,116,87,119,73,116,60,108,46,97,35,101,31,112,43,120,58,124,73,120,89,111,105"/>
-<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="171,117,182,126,174,135,156,139,155,134,171,131,177,127,168,121"/>
-</map>
