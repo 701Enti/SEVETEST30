@@ -45,6 +45,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   information_collect:
     timeout-minutes: 30
@@ -55,7 +58,7 @@ jobs:
       docRepoName: ${{ steps.extract.outputs.docRepoName }}
       UPDATE_BRANCH: ${{ steps.extract.outputs.UPDATE_BRANCH }}
       ROBOT_UPDATE_BRANCH: ${{ steps.extract.outputs.ROBOT_UPDATE_BRANCH }}
-      robot_branch_exists: ${{ steps.extract.outputs.robot_branch_exists }}      
+      robot_branch_exists: ${{ steps.extract.outputs.robot_branch_exists }}
     steps:
       - name: Extract context information
         id: extract
