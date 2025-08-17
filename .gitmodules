@@ -1,3 +1,7 @@
 [submodule "docs/doxygen-awesome-css"]
 	path = docs/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "DOC-SEVETEST30"]
+	path = DOC-SEVETEST30
+	url = https://github.com/701Enti/DOC-SEVETEST30.git
+	branch = master

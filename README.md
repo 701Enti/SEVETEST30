@@ -120,15 +120,16 @@
 - **全流程案例**:
   - 以下是通过 Doxygen 自动生成官方文档的相关工作全流程(仅针对关键分支,如分支 A)
   - SEVETEST30 仓库关键分支 A 的 push
-  - -> DoxygenAutoDocSyncDoxygen 触发
-  - -> DoxygenAutoDocSyncDoxygen 调用 doxygen-auto-code-to-doc
+  - -> DoxygenAutoDocSync 触发
+  - -> DoxygenAutoDocSync 调用 doxygen-auto-code-to-doc
   - -> doxygen-auto-code-to-doc 触发,根据 A 分支代码生成文档并将更改推送到文档仓库的 A 分支
   - (doxygen-auto-code-to-doc 结束)
-  - -> DoxygenAutoDocSyncDoxygen 调用 OfficialDocSubmoduleSync
+  - -> DoxygenAutoDocSync 调用 OfficialDocSubmoduleSync
   - -> OfficialDocSubmoduleSync 触发,更新子模块,将更改推送到 A 分支的机器人分支并发起该分支到 A 分支的 PR
   - (OfficialDocSubmoduleSync 结束)
-  - (DoxygenAutoDocSyncDoxygen 结束)
+  - (DoxygenAutoDocSync 结束)
   - -> PR 审查 -> 完成
+  - [注意: SEVETEST30 仓库是将每个文档仓库作为子模块独立管理的,子模块名必须与文档仓库名一致]
 - **相关工作流**:
   - .github/workflows/DoxygenAutoDocSync.yml
   - .github/workflows/OfficialDocSubmoduleSync.yml
