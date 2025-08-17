@@ -1,7 +1,0 @@
-<map id="components/sevetest30_board/include/sevetest30_touch.h" name="components/sevetest30_board/include/sevetest30_touch.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="49,5,243,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,135,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,62,91,99,87,96,121,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="159,108,287,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,58,206,96,202,99,168,62"/>
-</map>
