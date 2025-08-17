@@ -94,4 +94,5 @@ jobs:
       UPDATE_BRANCH: ${{ needs.prepare.outputs.BRANCH_NAME }}
       docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
       codeRepoName: ${{ needs.prepare.outputs.CODE_REPO_NAME }}  
+      owner: ${{ needs.prepare.outputs.OWNER }} 
 
