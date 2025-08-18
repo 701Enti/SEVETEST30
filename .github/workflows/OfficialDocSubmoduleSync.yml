@@ -113,6 +113,9 @@ jobs:
           name: before_code_repo_push
           path: before_code_repo_push.tar.gz
 
+      - name: Delete temporary file
+        run: rm before_code_repo_push.tar.gz
+
       - name: Push changes to code repository
         id: push_changes
         env:
@@ -173,6 +176,9 @@ jobs:
         with:
           name: before_code_repo_push
           path: before_code_repo_push.tar.gz
+
+      - name: Delete temporary file
+        run: rm before_code_repo_push.tar.gz
 
       - name: Push changes to code repository
         id: push_changes
