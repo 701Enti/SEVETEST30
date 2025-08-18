@@ -120,29 +120,36 @@ jobs:
         id: push_changes
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
-          CODE_REPO: ${{ needs.information_collect.outputs.codeRepoName }}
-          DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
+          DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
           NEW_DOC_COMMIT_SHA=$(git -C "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "docs/official/repo_doc/${DOC_REPO}"
-          git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
+          git add "docs/official/repo_doc/${DOC_REPO_NAME}"
+          git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
           git push -u origin $ROBOT_UPDATE_BRANCH
 
       - name: Wait for code repository push to complete
-        run: sleep 60
+        run: sleep 30
 
-      - name: Create PR
-        uses: peter-evans/create-pull-request@v5
-        with:
-          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
-          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
-          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
-          labels: automation
+      - name: Create PR 
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
+          ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
+          NEW_DOC_COMMIT_SHA: ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh pr create \
+            --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
+            --base ${UPDATE_BRANCH} \
+            --head ${ROBOT_UPDATE_BRANCH} \
+            --body "The pull&request is created by ${WORKFLOW} [run_id: - ${RUN_ID}]" \
+            --label "document,robot,automation"
 
   robot_branch_exists_true:
     runs-on: ubuntu-latest
@@ -184,27 +191,34 @@ jobs:
         id: push_changes
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
-          CODE_REPO: ${{ needs.information_collect.outputs.codeRepoName }}
-          DOC_REPO: ${{ needs.information_collect.outputs.docRepoName }}
+          DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
         run: |
           NEW_DOC_COMMIT_SHA=$(git -C "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}" rev-parse --short HEAD)
           echo "NEW_DOC_COMMIT_SHA=${NEW_DOC_COMMIT_SHA}" >> $GITHUB_OUTPUT
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "docs/official/repo_doc/${DOC_REPO}"
-          git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
+          git add "docs/official/repo_doc/${DOC_REPO_NAME}"
+          git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
           git push origin --delete $ROBOT_UPDATE_BRANCH 
           git push -u origin $ROBOT_UPDATE_BRANCH
 
       - name: Wait for code repository push to complete
-        run: sleep 60
+        run: sleep 30
 
-      - name: Create PR
-        uses: peter-evans/create-pull-request@v5
-        with:
-          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
-          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
-          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
-          labels: automation
+      - name: Create PR 
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
+          ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
+          NEW_DOC_COMMIT_SHA: ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh pr create \
+            --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
+            --base ${UPDATE_BRANCH} \
+            --head ${ROBOT_UPDATE_BRANCH} \
+            --body "The pull&request is created by ${WORKFLOW} [run_id: - ${RUN_ID}]" \
+            --label "document,robot,automation"
