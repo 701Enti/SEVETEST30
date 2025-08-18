@@ -136,7 +136,7 @@ jobs:
 
       - name: Create PR 
         env:
-          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
           UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
@@ -208,7 +208,7 @@ jobs:
 
       - name: Create PR 
         env:
-          GITHUB_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
           UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
