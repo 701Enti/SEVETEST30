@@ -27,4 +27,4 @@ jobs:
           fetch-depth: 0
       - uses: trufflesecurity/trufflehog@main
         with:
-          args: "git file://. --no-verification"
+          args: "filesystem --directory=. --json"
