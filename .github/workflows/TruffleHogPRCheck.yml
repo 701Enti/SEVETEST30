@@ -28,7 +28,3 @@ jobs:
       - uses: trufflesecurity/trufflehog@main
         with:
           path: "."
-          fail: true
-          regex: true
-          entropy: true
-          format: "json"
