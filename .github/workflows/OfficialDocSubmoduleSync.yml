@@ -103,6 +103,15 @@ jobs:
           rm -rf "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
           git submodule update --init --remote --force -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
 
+      - name: Run tar to pack all
+        run: tar czf before_code_repo_push.tar.gz . || true
+        
+      - name: Upload artifact (before_code_repo_push) 
+        uses: actions/upload-artifact@v4
+        with:
+          name: before_code_repo_push
+          path: before_code_repo_push.tar.gz
+
       - name: Push changes to code repository
         id: push_changes
         env:
@@ -154,6 +163,15 @@ jobs:
           rm -rf ".git/modules/docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
           rm -rf "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
           git submodule update --init --remote --force -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
+
+      - name: Run tar to pack all
+        run: tar czf before_code_repo_push.tar.gz . || true
+        
+      - name: Upload artifact (before_code_repo_push) 
+        uses: actions/upload-artifact@v4
+        with:
+          name: before_code_repo_push
+          path: before_code_repo_push.tar.gz
 
       - name: Push changes to code repository
         id: push_changes
