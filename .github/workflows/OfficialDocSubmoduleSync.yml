@@ -149,6 +149,8 @@ jobs:
 
       - name: Update Submodule
         run: |
+          rm -rf ".git/modules/docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
+          rm -rf "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
           git submodule update --remote --force -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
 
       - name: Push changes to code repository
