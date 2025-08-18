@@ -146,6 +146,7 @@ jobs:
           WORKFLOW: ${{ github.workflow }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          echo "$GH_TOKEN" | gh auth login --with-token
           gh pr create \
             --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
             --base ${UPDATE_BRANCH} \
@@ -218,6 +219,7 @@ jobs:
           WORKFLOW: ${{ github.workflow }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          echo "$GH_TOKEN" | gh auth login --with-token
           gh pr create \
             --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
             --base ${UPDATE_BRANCH} \
