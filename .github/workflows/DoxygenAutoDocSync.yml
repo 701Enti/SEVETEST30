@@ -37,6 +37,7 @@ on:
 
 permissions:
   pull-requests: write
+  checks: write
   contents: write
 
 jobs:
