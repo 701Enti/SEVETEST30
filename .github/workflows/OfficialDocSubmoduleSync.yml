@@ -46,6 +46,7 @@ on:
         type: string
 
 permissions:
+  pull-requests: write
   contents: write
 
 jobs:
