@@ -161,7 +161,6 @@ jobs:
           gh --version
           gh config set git_protocol https --host github.com
           gh config set prompt disabled --host github.com
-          echo "$GH_TOKEN" | gh auth login --with-token --hostname github.com
           gh pr create \
             --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
             --base ${UPDATE_BRANCH} \
@@ -247,7 +246,6 @@ jobs:
           gh --version
           gh config set git_protocol https --host github.com
           gh config set prompt disabled --host github.com
-          echo "$GH_TOKEN" | gh auth login --with-token --hostname github.com
           gh pr create \
             --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
             --base ${UPDATE_BRANCH} \
