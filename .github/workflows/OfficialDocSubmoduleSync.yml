@@ -71,7 +71,8 @@ jobs:
           echo "docRepoName=${docRepoName}" >> $GITHUB_OUTPUT
           UPDATE_BRANCH="${{ inputs.UPDATE_BRANCH }}"
           echo "UPDATE_BRANCH=${UPDATE_BRANCH}" >> $GITHUB_OUTPUT
-          echo "ROBOT_UPDATE_BRANCH=OfficialDocRobot-${docRepoName}-${UPDATE_BRANCH}" >> $GITHUB_OUTPUT
+          ROBOT_UPDATE_BRANCH="OfficialDocRobot-${docRepoName}-${UPDATE_BRANCH}"
+          echo "ROBOT_UPDATE_BRANCH=${ROBOT_UPDATE_BRANCH}" >> $GITHUB_OUTPUT
           branch_exists=$(git ls-remote --heads "https://github.com/${owner}/${codeRepoName}.git" "${ROBOT_UPDATE_BRANCH}")
           if [ -n "$branch_exists" ]; then
             echo "robot_branch_exists=true" >> $GITHUB_OUTPUT
