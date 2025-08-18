@@ -79,7 +79,7 @@ jobs:
             echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
           fi
 
-  exists_false:
+  robot_branch_exists_false:
     runs-on: ubuntu-latest
     needs: information_collect
     if: ${{ needs.information_collect.outputs.robot_branch_exists == 'false' }}
@@ -131,7 +131,7 @@ jobs:
           body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
           labels: automation
 
-  exists_true:
+  robot_branch_exists_true:
     runs-on: ubuntu-latest
     needs: information_collect
     if: ${{ needs.information_collect.outputs.robot_branch_exists == 'true' }}
