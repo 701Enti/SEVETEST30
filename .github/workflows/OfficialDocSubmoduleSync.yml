@@ -130,13 +130,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "docs/official/repo_doc/${DOC_REPO_NAME}"
-          git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
-          git push -u origin $ROBOT_UPDATE_BRANCH
+          if git diff-index --quiet HEAD; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+            echo "No changes to commit"
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+            git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
+            git push -u origin $ROBOT_UPDATE_BRANCH
+          fi
 
       - name: Wait for code repository push to complete
+        if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         run: sleep 30
 
       - name: Create PR 
+        if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         env:
           GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
@@ -202,14 +210,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "docs/official/repo_doc/${DOC_REPO_NAME}"
-          git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
-          git push origin --delete $ROBOT_UPDATE_BRANCH 
-          git push -u origin $ROBOT_UPDATE_BRANCH
+          if git diff-index --quiet HEAD; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+            echo "No changes to commit"
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+            git commit -m "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA} "
+            git push origin --delete $ROBOT_UPDATE_BRANCH 
+            git push -u origin $ROBOT_UPDATE_BRANCH
+          fi
+
 
       - name: Wait for code repository push to complete
+        if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         run: sleep 30
 
       - name: Create PR 
+        if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         env:
           GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
