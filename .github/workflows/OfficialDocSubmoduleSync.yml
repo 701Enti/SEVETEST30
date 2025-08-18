@@ -219,6 +219,8 @@ jobs:
           WORKFLOW: ${{ github.workflow }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          sudo apt update && sudo apt install -y gh
+          gh --version
           echo "$GH_TOKEN" | gh auth login --with-token --hostname github.com
           gh pr create \
             --title "(New Robot branch)Update documentation ${DOC_REPO_NAME} | ${NEW_DOC_COMMIT_SHA}" \
