@@ -132,17 +132,17 @@ jobs:
           git commit -m "(New Robot branch)Update documentation ${DOC_REPO} | ${NEW_DOC_COMMIT_SHA} "
           git push -u origin $ROBOT_UPDATE_BRANCH
 
-      # - name: Wait for code repository push to complete
-      #   run: sleep 30
+      - name: Wait for code repository push to complete
+        run: sleep 60
 
-      # - name: Create PR
-      #   uses: peter-evans/create-pull-request@v5
-      #   with:
-      #     base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
-      #     branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
-      #     title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-      #     body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
-      #     labels: automation
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
+          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
+          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
+          labels: automation
 
   robot_branch_exists_true:
     runs-on: ubuntu-latest
@@ -197,14 +197,14 @@ jobs:
           git push origin --delete $ROBOT_UPDATE_BRANCH 
           git push -u origin $ROBOT_UPDATE_BRANCH
 
-      # - name: Wait for code repository push to complete
-      #   run: sleep 30
+      - name: Wait for code repository push to complete
+        run: sleep 60
 
-      # - name: Create PR
-      #   uses: peter-evans/create-pull-request@v5
-      #   with:
-      #     base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
-      #     branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
-      #     title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
-      #     body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
-      #     labels: automation
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          base: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
+          branch: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
+          title: "(New Robot branch)Update documentation ${{ needs.information_collect.outputs.docRepoName }} |  ${{ steps.push_changes.outputs.NEW_DOC_COMMIT_SHA }}"
+          body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
+          labels: automation

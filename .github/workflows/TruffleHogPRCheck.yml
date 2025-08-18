@@ -27,4 +27,8 @@ jobs:
           fetch-depth: 0
       - uses: trufflesecurity/trufflehog@main
         with:
-          args: "filesystem --directory=. --json"
+          path: "."
+          fail: true
+          regex: true
+          entropy: true
+          format: "json"
