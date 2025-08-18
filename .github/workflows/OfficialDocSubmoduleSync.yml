@@ -79,7 +79,7 @@ jobs:
             echo "robot_branch_exists=false" >> $GITHUB_OUTPUT  
           fi
 
-  exists_false:
+  robot_branch_exists_false:
     runs-on: ubuntu-latest
     needs: information_collect
     if: ${{ needs.information_collect.outputs.robot_branch_exists == 'false' }}
@@ -99,7 +99,9 @@ jobs:
 
       - name: Update Submodule
         run: |
-          git submodule update --remote --merge -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
+          rm -rf ".git/modules/docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
+          rm -rf "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
+          git submodule update --init --remote --force -- "docs/official/repo_doc/${{ needs.information_collect.outputs.docRepoName }}"
 
       - name: Push changes to code repository
         id: push_changes
@@ -129,7 +131,7 @@ jobs:
           body: "The pull&request is created by ${{ github.workflow }} [run_id: - ${{ github.run_id }}]"
           labels: automation
 
-  exists_true:
+  robot_branch_exists_true:
     runs-on: ubuntu-latest
     needs: information_collect
     if: ${{ needs.information_collect.outputs.robot_branch_exists == 'true' }}
