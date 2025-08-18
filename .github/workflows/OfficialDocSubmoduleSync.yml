@@ -133,7 +133,7 @@ jobs:
           git push -u origin $ROBOT_UPDATE_BRANCH
 
       - name: Wait for code repository push to complete
-        run: sleep 30
+        run: sleep 60
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
@@ -198,7 +198,7 @@ jobs:
           git push -u origin $ROBOT_UPDATE_BRANCH
 
       - name: Wait for code repository push to complete
-        run: sleep 30
+        run: sleep 60
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
