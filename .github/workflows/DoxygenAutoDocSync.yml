@@ -101,3 +101,5 @@ jobs:
       docRepoName: ${{ needs.prepare.outputs.DOC_REPO_NAME }}
       codeRepoName: ${{ needs.prepare.outputs.CODE_REPO_NAME }}
       owner: ${{ needs.prepare.outputs.OWNER }}
+    secrets:
+      codeRepoSecret: ${{ secrets.ORG_DOC_SYNC_SECRET }}  

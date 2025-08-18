@@ -44,6 +44,9 @@ on:
         description: "the branch to update in code repository"
         required: true
         type: string
+    secrets:
+      codeRepoSecret:
+        required: true    
 
 permissions:
   pull-requests: write
@@ -146,7 +149,7 @@ jobs:
       - name: Create PR 
         if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         env:
-          GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          GH_TOKEN: ${{ secrets.codeRepoSecret }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
           UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
@@ -228,7 +231,7 @@ jobs:
       - name: Create PR 
         if: ${{ steps.push_changes.outputs.no_changes == 'false' }}
         env:
-          GH_TOKEN: ${{ secrets.ORG_DOC_SYNC_SECRET }}
+          GH_TOKEN: ${{ secrets.codeRepoSecret }}
           DOC_REPO_NAME: ${{ needs.information_collect.outputs.docRepoName }}
           ROBOT_UPDATE_BRANCH: ${{ needs.information_collect.outputs.ROBOT_UPDATE_BRANCH }}
           UPDATE_BRANCH: ${{ needs.information_collect.outputs.UPDATE_BRANCH }}
