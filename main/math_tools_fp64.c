@@ -172,6 +172,26 @@ void matrix_swap_rows_fp64(double* A, int n, int r1, int r2) {
     }
 }
 
+/// @brief [目前仅支持行主序](会修改源数据矩阵)矩阵中的两行(r1和r2)交换所有元素,但是其中列号大于等于k的列不进行任何交换操作
+/// @param A 需要进行交换操作的矩阵A(m x n)
+/// @param n 矩阵A的总列数
+/// @param r1 需要进行交换操作的行号(范围 0 - m-1)
+/// @param r2 需要进行交换操作的行号(范围 0 - m-1)
+/// @param k 交换列范围限制,列号大于等于k的列不进行任何交换操作
+void matrix_swap_rows_fp64_with_col_limit(double* A, int n, int r1, int r2, int k) {
+    if (r1 == r2) {
+        return;
+    }
+    else {
+        double buf = 0;//元素值缓存
+        for (int c = 0;c < k;c++) {
+            buf = A[r1 * n + c];
+            A[r1 * n + c] = A[r2 * n + c];
+            A[r2 * n + c] = buf;
+        }
+        return;
+    }
+}
 
 /// @brief [目前仅支持行主序]提取矩阵(nxn,必须为方阵)中的三角区(上三角/下三角),含对角线(不会修改源数据矩阵)
 /// @param A 从矩阵A(nxn,必须为方阵)中提取
@@ -250,9 +270,10 @@ double matrix_only_row_elimination_step_fp64(double* A, int aim_row, int pivot_r
 
 
 /// @brief [目前仅支持行主序]矩阵分解-LU分解(带部分主元法,支持非方阵,自动解决主元为0情况而不报错)(不会修改源数据矩阵)
+/// @note  分解结果U矩阵的数学无效区域将保留A矩阵对应原始值
 /// @param A 要进行分解的矩阵(m x n)
-/// @param L 下三角/梯形矩阵 L (m x min(m,n)) 输出到
-/// @param U 上三角/梯形矩阵 U (min(m,n) x n) 输出到
+/// @param L 下三角/梯形矩阵 L (m x n 其中数学定义有效区域尺寸 m x min(m,n)) 输出到
+/// @param U 上三角/梯形矩阵 U (m x n 其中数学定义有效区域尺寸 min(m,n) x n) 输出到
 /// @param P 置换数组 P (m) (存储为普通int一维数组,大小为m) 输出到 [置换矩阵P记录行交换索引,本函数运行完后,有P[原行号]=现行号(若不需要可以设置为NULL以禁止输出矩阵P,但是其他任何操作正常执行,包括自动解决主元为0情况)]
 /// @param m 矩阵A行数
 /// @param n 矩阵A列数
@@ -269,8 +290,8 @@ esp_err_t matrix_decomposition_LU_fp64(double* A, double* L, double* U, int* P, 
             P[r] = r;
         }
     }
-    //复制矩阵A到U以初始化U,初始化L矩阵为单位矩阵
-    for (int r = 0;r < n;r++) {
+    //复制矩阵A到U矩阵以初始化U矩阵,初始化L矩阵为单位矩阵
+    for (int r = 0;r < m;r++) {
         for (int c = 0;c < n;c++) {
             U[r * n + c] = A[r * n + c];
             L[r * n + c] = (r == c) ? 1.0f : 0.0f;
@@ -280,16 +301,20 @@ esp_err_t matrix_decomposition_LU_fp64(double* A, double* L, double* U, int* P, 
     for (int k = 0;k < m && k < n;k++) {
         int pivot_row = matrix_get_the_row_of_aim_col_pivot_fp64(U, m, n, k, k);//获取主元行
         matrix_swap_rows_fp64(U, n, k, pivot_row);//矩阵U当前行与主元行交换
-        if (k > 0)matrix_swap_rows_fp64(L, n, k, pivot_row);//矩阵L当前行与主元行交换(k=0的初始交换无意义)
+        if (k > 0)matrix_swap_rows_fp64_with_col_limit(L, n, k, pivot_row, k);//矩阵L当前行与主元行交换(k=0的初始交换无意义)
         //若需要输出 矩阵P (当矩阵P不等于NULL),更新矩阵P(记录行交换索引,本函数运行完后,有P[原行号]=现行号)
         if (P) {
             int buf = P[k];
             P[k] = P[pivot_row];
             P[pivot_row] = buf;
         }
+        if (fabs(U[k * n + k]) < 1e-12) {
+            continue;//所有候选主元均为零,跳过当前列消元,保留L对角线为1
+        }
         //高斯消元,顺便填充L矩阵
         for (int r = k + 1;r < m;r++) {
             L[r * n + k] = matrix_only_row_elimination_step_fp64(U, r, k, k, true, n);//注意,这里主元行的行号为k,因为之前进行了行交换,现在实际主元在行号为k的行,不是pivot_row
+            U[r * n + k] = 0.0;//消元后强制清零,以防止浮点误差可能导致的U下三角出现非零值
         }
     }
 
