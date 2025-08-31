@@ -218,7 +218,7 @@ void app_main(void)
   calibration_tools_init_PsP2P_DM_Producer();
 
   GS_calibration_static_model_t static_model;
-  esp_err_t ret = generate_GS_calibration_static_model(&static_model, 100, 50);
+  esp_err_t ret = generate_GS_calibration_static_model(&static_model, 200, 50);
 
   if (ret == ESP_OK) {
     put_GS_calibration_static_model(&static_model);

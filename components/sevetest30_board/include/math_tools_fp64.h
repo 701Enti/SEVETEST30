@@ -37,6 +37,7 @@
   //基本矩阵编辑操作
 esp_err_t matrix_transpose_fp64(double* input, double* output, int m, int n);
 void matrix_swap_rows_fp64(double* A, int n, int r1, int r2);
+void matrix_swap_rows_fp64_with_col_limit(double* A, int n, int r1, int r2, int k);
 double matrix_only_row_elimination_step_fp64(double* A, int aim_row, int pivot_row, int pivot_col, bool major_default, int LDA);
 
 //基本矩阵提取操作
