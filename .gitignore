@@ -1,4 +1,4 @@
-# 常规排除
+# 常规
 build/
 managed_components/
 docs/doxygen-awesome-css
@@ -14,7 +14,7 @@ settings.py
 secrets.json
 credentials.json
 sdkconfig
-sdkconfig.*
+sdkconfig.old
 
 # ============ 环境变量文件 ============
 .env

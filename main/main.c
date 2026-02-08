@@ -206,36 +206,36 @@ void app_main(void)
       // }
 
 
-  // hscdtd008a
+  // // hscdtd008a
 
-  hscdtd008a_mode_set(GS_MODE_ACTIVE);
-  hscdtd008a_state_set(GS_STATE_NORMAL);
+  // hscdtd008a_mode_set(GS_MODE_ACTIVE);
+  // hscdtd008a_state_set(GS_STATE_NORMAL);
 
-  ESP_LOGI("ME", "5s后开始校准");
-  vTaskDelay(pdMS_TO_TICKS(5000));
+  // ESP_LOGI("ME", "5s后开始校准");
+  // vTaskDelay(pdMS_TO_TICKS(5000));
 
 
-  calibration_tools_init_PsP2P_DM_Producer();
+  // calibration_tools_init_PsP2P_DM_Producer();
 
-  GS_calibration_static_model_t static_model;
-  esp_err_t ret = generate_GS_calibration_static_model(&static_model, 200, 50);
+  // GS_calibration_static_model_t static_model;
+  // esp_err_t ret = generate_GS_calibration_static_model(&static_model, 200, 50);
 
-  if (ret == ESP_OK) {
-    put_GS_calibration_static_model(&static_model);
+  // if (ret == ESP_OK) {
+  //   put_GS_calibration_static_model(&static_model);
 
-    GS_output_data_t output;
-    GS_magnetic_flux_density_data_t mfd;
-    GS_angle_data_t angle;
-    for (;;) {
-      hscdtd008a_output_data_get(&output);
-      to_magnetic_flux_density_data(&output, &mfd);
-      calculate_calibrated_GS_only_by_static_model(&static_model, &mfd);
-      to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
-      ESP_LOGI("Angle", "方位---[%f]--- 俯仰|%f|", angle.azimuth, angle.pitch);
-      // ESP_LOGI("MFD", "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By, mfd.Bz);
-      vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-  }
+  //   GS_output_data_t output;
+  //   GS_magnetic_flux_density_data_t mfd;
+  //   GS_angle_data_t angle;
+  //   for (;;) {
+  //     hscdtd008a_output_data_get(&output);
+  //     to_magnetic_flux_density_data(&output, &mfd);
+  //     calculate_calibrated_GS_only_by_static_model(&static_model, &mfd);
+  //     to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
+  //     ESP_LOGI("Angle", "方位---[%f]--- 俯仰|%f|", angle.azimuth, angle.pitch);
+  //     // ESP_LOGI("MFD", "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By, mfd.Bz);
+  //     vTaskDelay(pdMS_TO_TICKS(1000));
+  //   }
+  // }
 
 
 
@@ -267,7 +267,7 @@ void app_main(void)
 
 
 
-  // bluetooth_connect();
+  bluetooth_connect();
 
 
   // for (int i = 0; i <= 5; i++)
