@@ -22,7 +22,6 @@
  // 包含一些sevetest30的GPIO配置工作(内部+扩展)，主要为了TCA6416A控制函数的解耦
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体只针对sevetest30的硬件设计，该库代码中的配置是否合理会影响到设备能否正常运行，请谨慎修改
- //      此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空，请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
@@ -36,8 +35,8 @@
 #include "driver/gpio.h"
 
 ext_io_ctrl_t ext_io_ctrl = {
-  .auto_read_EN = true,
-  .auto_read_INT = false,
+  .auto_read_EN = true, //使能自动读取,读取由外部程序监控auto_read_INT并调用读取函数实现
+  .auto_read_INT = false,//true表示INT中断信号触发,外部调用读取函数成功读取后需自行复位到true
 };
 
 TCA6416A_mode_t* P_ext_io_mode_data = NULL; //扩展IO输入输出模式
@@ -114,10 +113,14 @@ esp_err_t ext_io_mode_service() {
 esp_err_t ext_io_reset_to_default(TCA6416A_mode_t* p_mode, TCA6416A_level_t* p_level) {
   const char* TAG = "ext_io_reset_to_default";
 
-  //此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空
-  //请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
   TCA6416A_mode_t mode_buf = TCA6416A_DEFAULT_CONFIG_MODE;
   TCA6416A_level_t value_buf = TCA6416A_DEFAULT_CONFIG_VALUE;
+
+  //TCA6416A硬件复位
+  gpio_set_level(TCA6416A_IO_RESET, 0);
+  vTaskDelay(pdMS_TO_TICKS(10));
+  gpio_set_level(TCA6416A_IO_RESET, 1);
+  vTaskDelay(pdMS_TO_TICKS(10));
 
   *p_mode = mode_buf;
   *p_level = value_buf;
@@ -125,10 +128,14 @@ esp_err_t ext_io_reset_to_default(TCA6416A_mode_t* p_mode, TCA6416A_level_t* p_l
   P_ext_io_value_data = p_level;
 
   esp_err_t ret = ESP_OK;
+  ret = TCA6416A_gpio_global_inversion_set(true);
+  ESP_RETURN_ON_ERROR(ret, TAG, "重置扩展GPIO引脚极性反转配置到默认时发现问题");
   ret = ext_io_mode_service();
-  ESP_RETURN_ON_ERROR(ret, TAG, "重置扩展GPIO电平到默认时发现问题");
+  ESP_RETURN_ON_ERROR(ret, TAG, "重置扩展GPIO引脚模式到默认时发现问题");
   ret = ext_io_level_service();
-  ESP_RETURN_ON_ERROR(ret, TAG, "重置扩展GPIO电平到默认时发现问题");
+  ESP_RETURN_ON_ERROR(ret, TAG, "重置扩展GPIO引脚电平到默认时发现问题");
+
+  ESP_LOGI(TAG, "扩展GPIO重置成功");
   return ESP_OK;
 }
 
@@ -149,18 +156,18 @@ esp_err_t sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode, TCA6416A_level_t* p_
   const char* TAG = "sevetest30_gpio_init";
   esp_err_t ret = ESP_OK;
 
-  //电池输入控制GPIO
-  gpio_config_t battery_in_ctrl_io_config = {
-  .pin_bit_mask = 1ULL << BAT_IN_CTRL_IO,
-  .mode = GPIO_MODE_OUTPUT,
+  //TCA6416A的RESET信号GPIO
+  gpio_config_t TCA6416A_reset_config = {
+  .pin_bit_mask = 1ULL << TCA6416A_IO_RESET,
+  .mode = GPIO_MODE_OUTPUT_OD,
   .pull_up_en = GPIO_PULLUP_DISABLE,
   .pull_down_en = GPIO_PULLDOWN_DISABLE,
   .intr_type = GPIO_INTR_DISABLE,
   };
-  ret = gpio_config(&battery_in_ctrl_io_config);//配置GPIO
-  ESP_RETURN_ON_ERROR(ret, TAG, "配置电池输入控制GPIO时发现问题");
-  ret = gpio_set_level(BAT_IN_CTRL_IO, 1);//设置GPIO初始电平
-  ESP_RETURN_ON_ERROR(ret, TAG, "设置电池输入控制GPIO初始电平时发现问题");
+  ret = gpio_config(&TCA6416A_reset_config);//配置GPIO
+  ESP_RETURN_ON_ERROR(ret, TAG, "配置TCA6416A的RESET信号GPIO时发现问题");
+  ret = gpio_set_level(TCA6416A_IO_RESET, 1);//设置GPIO初始电平
+  ESP_RETURN_ON_ERROR(ret, TAG, "设置TCA6416A的RESET信号GPIO初始电平时发现问题");
 
   //TCA6416A的INT信号GPIO
   gpio_config_t TCA6416A_int_config = {
@@ -181,8 +188,6 @@ esp_err_t sevetest30_gpio_init(TCA6416A_mode_t* p_ext_mode, TCA6416A_level_t* p_
   P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;//将自动读取标志值的地址作为ISR参数进行传输
   ret = gpio_isr_handler_add(TCA6416A_IO_INT, tca6416a_int_isr_handler, (void*)P_ext_io_auto_read_flag);//为选定的GPIO添加ISR句柄
   ESP_RETURN_ON_ERROR(ret, TAG, "添加TCA6416A的INT信号GPIO的ISR句柄时发现问题");
-
-  // 此处没有使用TCA6416A的RESET引脚，但并不代表RESET可以悬空，请将其上拉到VCC,并在RESET连接一个1uF左右电容到GND(这不是对TCA6416A的使用建议)
 
   ret = ext_io_reset_to_default(p_ext_mode, p_ext_value);//扩展gpio初始化
   ESP_RETURN_ON_ERROR(ret, TAG, "扩展GPIO重置到默认时发现问题");

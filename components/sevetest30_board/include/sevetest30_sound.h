@@ -34,13 +34,17 @@
 //元素配置
 #define ELEMENT_MP3_DECODER_TASK_CORE (1) //运行在的CPU核心-mp3编码器任务(音频元素)
 #define ELEMENT_MP3_DECODER_TASK_STACK_SIZE (4 * 1024) //运行堆栈大小(Byte)-mp3编码器任务(音频元素)
-#define ELEMENT_MP3_DECODER_RINGBUFFER_SIZE (4 * 1024) //循环缓冲区大小(Byte)-mp3编码器(音频元素)
 
+
+#define ELEMENT_MP3_DECODER_RINGBUFFER_SIZE (2048 * 1024) //循环缓冲区大小(Byte)-mp3编码器(音频元素)
+#define ELEMENT_I2S_STREAM_RINGBUFFER_SIZE (2048 * 1024) //循环缓冲区大小(Byte)-I2S(音频元素)
+#define ELEMENT_HTTP_STREAM_RINGBUFFER_SIZE (2048 * 1024) //循环缓冲区大小(Byte)-HTTP音频流(音频元素)
 #define ELEMENT_RAW_STREAM_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-RAW原始音频流(音频元素)
 
 //MUSIC_PLAY-音频播放功能
 #define MUSIC_PLAY_EVT_TASK_CORE (1) //运行在的CPU核心-音频播放功能的事件监听和处理任务
 #define MUSIC_PLAY_EVT_TASK_STACK_SIZE (4 * 1024) //运行堆栈大小(Byte)-音频播放功能的事件监听和处理任务
+
 
 //ASR-自动语音识别功能
 #define ASR_TIMEOUT_MS  10000//说话停顿超时时长(ms)-说话停顿超过该时长后认为话说完了,停止识别语音-语音识别功能的说话检测

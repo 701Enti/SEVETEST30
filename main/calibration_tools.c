@@ -35,16 +35,13 @@
 #include "esp_timer.h"
 #include "esp_check.h"
 #include "esp_log.h"
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/projdefs.h"
-#include "PsP2P_DM_for_idf.h"
 #include "cJSON.h"
 
 static const char* calibration_tools_TAG = __FILE__;
 static const char* name_of_PsP2P_DM_Producer = __FILE__;
-PsP2P_DM_node_handle_t PsP2P_DM_Producer = NULL;
 
 
 /// @brief 生成磁传感器静态校准模型
@@ -237,54 +234,6 @@ esp_err_t calculate_calibrated_GS_only_by_static_model(const GS_calibration_stat
 
 
 
-/// @brief 初始化本库的PsP2P_DM生产者节点
-void calibration_tools_init_PsP2P_DM_Producer() {
-    PsP2P_DM_Producer = PsP2P_DM_node_create(name_of_PsP2P_DM_Producer, PsP2P_DM_IDENTITY_PRODUCER, MESSAGE_QUEUE_LENGTH_PRODUCER_PSP2P_DM_CALIBRATION_TOOLS);
-}
-
-/// @brief 在PsP2P_DM生产者上架静态校准模型
-/// @param static_model 静态校准模型
-/// @return [ESP_OK 成功]
-/// @return [ESP_ERR_INVALID_ARG   同一生产者不可以有完全同名产品,对本生产者,产品名在自己的产品链表中已经被使用过 / 输入了无法处理的空指针]
-/// @return [ESP_ERR_INVALID_STATE 生产者未完成初始化 / 产品链表存在头或尾缺失,维护状态异常]
-/// @return [ESP_ERR_NOT_SUPPORTED 非生产者不可使用上架(put)操作]
-/// @return [ESP_ERR_NO_MEM 内存不足]
-esp_err_t put_GS_calibration_static_model(GS_calibration_static_model_t* static_model) {
-    ESP_RETURN_ON_FALSE(static_model, ESP_ERR_INVALID_ARG, calibration_tools_TAG, "输入了无法处理的空指针 描述 %s", esp_err_to_name(ESP_ERR_INVALID_ARG));
-    ESP_RETURN_ON_FALSE(PsP2P_DM_Producer, ESP_ERR_INVALID_STATE, calibration_tools_TAG, "生产者未完成初始化 描述 %s", esp_err_to_name(ESP_ERR_INVALID_STATE));
-    ///封装数据产品
-    cJSON* root = cJSON_CreateObject();
-    ESP_RETURN_ON_FALSE(root, ESP_ERR_NO_MEM, calibration_tools_TAG, "内存不足, 描述 %s", esp_err_to_name(ESP_ERR_NO_MEM));
-
-#if VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T == 1
-    cJSON* generate_time = cJSON_CreateObject();//struct timeval generate_time;//模型的生成时间
-    ESP_RETURN_ON_FALSE(generate_time, ESP_ERR_NO_MEM, calibration_tools_TAG, "内存不足, 描述 %s", esp_err_to_name(ESP_ERR_NO_MEM));
-    cJSON_AddNumberToObject(generate_time, "tv_sec", (double)static_model->generate_time_RTC.tv_sec);
-    cJSON_AddNumberToObject(generate_time, "tv_usec", (double)static_model->generate_time_RTC.tv_usec);
-    cJSON_AddItemToObject(root, "generate_time", generate_time);
-    //float SSR;//椭球拟合残差平方和 
-    cJSON_AddNumberToObject(root, "SSR", (double)static_model->SSR);
-    //float A, B, C, D, E, F, G, H, I;//椭球参数
-    cJSON_AddNumberToObject(root, "A", (double)static_model->A);
-    cJSON_AddNumberToObject(root, "B", (double)static_model->B);
-    cJSON_AddNumberToObject(root, "C", (double)static_model->C);
-    cJSON_AddNumberToObject(root, "D", (double)static_model->D);
-    cJSON_AddNumberToObject(root, "E", (double)static_model->E);
-    cJSON_AddNumberToObject(root, "F", (double)static_model->F);
-    cJSON_AddNumberToObject(root, "G", (double)static_model->G);
-    cJSON_AddNumberToObject(root, "H", (double)static_model->H);
-    cJSON_AddNumberToObject(root, "I", (double)static_model->I);
-    //float sx, sy, sz;//缩放量
-    cJSON_AddNumberToObject(root, "sx", (double)static_model->sx);
-    cJSON_AddNumberToObject(root, "sy", (double)static_model->sy);
-    cJSON_AddNumberToObject(root, "sz", (double)static_model->sz);
-    //float x0, y0, z0;//偏移量
-    cJSON_AddNumberToObject(root, "x0", (double)static_model->x0);
-    cJSON_AddNumberToObject(root, "y0", (double)static_model->y0);
-    cJSON_AddNumberToObject(root, "z0", (double)static_model->z0);
-#endif
-    return PsP2P_DM_put(PsP2P_DM_Producer, (void*)root, "GS_calibration_static_model");
-}
 
 
 

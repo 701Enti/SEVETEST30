@@ -24,11 +24,10 @@
  // 本库特性：1 由于IO控制时，有随时需要调用TCA6416A写入函数的需求，本库不会出现调用一次函数归定只能改一个IO或读一个IO还要传一系列参数的尴尬问题，而是一齐读写,同时还会保存实时IO数据，因此没有用到电平反转寄存器
  //          2 使用时直接修改公共变量以在项目非常方便使用，加之，可以像sevetest30_gpio.c封装后使用FreeRTOS支持，并添加中断支持，一但IO电平变化就读取，没有变就不读，客观上可以大大提高资源利用率
  // 读写原理：   运用结构体地址一般为结构体中第一个成员变量地址，并且本例中，成员类型均为bool,地址递加从而可以方便地扫描所有成员，
- // 敬告： 0 为更加方便后续开发或移植，本库不包含关于FreeRTOS支持的封装，公共变量修改方式的服务封装，以及中断服务的封装，如果需要参考，请参照sevetest30_gpio.c
- //       1 本库会保存实时IO数据，因此没有用到电平反转寄存器            
- //       2 文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
- //       3 请注意外部引脚模式设置，错误的配置可能导致您的设备损坏，我们不建议修改这些默认配置 
- //       4 对于设计现实的不同，您可以更改结构体成员变量名，但是必须确保对应的IO次序不变如 P00 P01 P02 P03 以此类推
+ // 敬告： 0 为更加方便后续开发或移植，本库不包含关于FreeRTOS支持的封装，公共变量修改方式的服务封装，以及中断服务的封装，如果需要参考，请参照sevetest30_gpio.c          
+ //       1 文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ //       2 请注意外部引脚模式设置，错误的配置可能导致您的设备损坏，我们不建议修改这些默认配置 
+ //       3 对于设计现实的不同，您可以更改结构体成员变量名，但是必须确保对应的IO次序不变如 P00 P01 P02 P03 以此类推
  //         同时成员变量名是上级程序识别操作引脚的关键，如果需要使用其上级程序而不仅仅是TCA6416A库函数，结构体成员变量名不应该随意修改，对当前硬件的更新必须修改上层代码
  // github: https://github.com/701Enti
  // bilibili: 701Enti
@@ -67,7 +66,7 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t* pTCA6416Amode)
 
   //确定设备地址
   uint8_t i2c_add = 0x20;
-  if (pTCA6416Amode->addr)
+  if (TCA6416A_ADDR_LEVEL)
     i2c_add = 0x21;
 
   // 依据pTCA6416Amode结构体递增地址对应的bool数值按8位缓冲变量对应的bit位置装载  
@@ -89,6 +88,7 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t* pTCA6416Amode)
     return ret;
   }
 
+  ESP_LOGI(TAG, "TCA6416A引脚模式设置完成");
   return ESP_OK;
 }
 
@@ -117,7 +117,7 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t* pTCA6416Alevel)
 
   //确定设备地址 
   uint8_t i2c_add = 0x20;
-  if (pTCA6416Alevel->addr)
+  if (TCA6416A_ADDR_LEVEL)
     i2c_add = 0x21;
 
   // 准备好两份8bit数据
@@ -160,7 +160,44 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t* pTCA6416Alevel)
     if (i >= 8) *p = data2 >> (i - 8) & 0x01; // 不断取出位移后data1最低位
   }
 
+  ESP_LOGI(TAG, "TCA6416A引脚电平读写完成");
   return ESP_OK;
+}
 
 
+
+/// @brief 设置全局引脚极性反转
+/// @param inversion true=反转/false=正常
+/// @param addr  ADDR引脚电平，用于设置主机地址
+/// @return [ESP_OK 成功]  
+/// @return [ESP_FAIL 发送命令时发现问题, TCA6416A未应答] 
+/// @return [ESP_ERR_INVALID_STATE I2C driver 未安装或没有运行在主机模式] 
+/// @return [ESP_ERR_TIMEOUT 操作超时因为总线忙]
+esp_err_t TCA6416A_gpio_global_inversion_set(bool inversion)
+{
+  const char* TAG = "TCA6416A_gpio_global_inversion_set";
+  esp_err_t ret = ESP_OK;
+
+  //确定设备地址
+  uint8_t i2c_add = 0x20;
+  if (TCA6416A_ADDR_LEVEL)
+    i2c_add = 0x21;
+
+  // 装载并写入
+  TCA6416A_data_buf[0] = TCA6416A_PI1;
+  if (inversion) {
+    TCA6416A_data_buf[1] = 0xFF, TCA6416A_data_buf[2] = 0xFF;
+  }
+  else {
+    TCA6416A_data_buf[1] = 0x00, TCA6416A_data_buf[2] = 0x00;
+  }
+
+  ret = i2c_master_write_to_device(DEVICE_I2C_PORT, i2c_add, TCA6416A_data_buf, sizeof(TCA6416A_data_buf), 1000 / portTICK_PERIOD_MS);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    return ret;
+  }
+
+  ESP_LOGI(TAG, "TCA6416A引脚模式设置完成");
+  return ESP_OK;
 }

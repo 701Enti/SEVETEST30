@@ -646,10 +646,13 @@ void element_cfg_data_reset()
   http_cfg = http_cfg_buf;
 
   http_cfg.type = AUDIO_STREAM_READER;
+  http_cfg.out_rb_size = ELEMENT_HTTP_STREAM_RINGBUFFER_SIZE;
 
   // I2S
   i2s_stream_cfg_t i2s_cfg_buf = I2S_STREAM_CFG_DEFAULT();
   i2s_cfg = i2s_cfg_buf;
+
+  i2s_cfg.out_rb_size = ELEMENT_I2S_STREAM_RINGBUFFER_SIZE;
 
   // MP3解码器
   mp3_decoder_cfg_t mp3_cfg_buf = DEFAULT_MP3_DECODER_CONFIG();

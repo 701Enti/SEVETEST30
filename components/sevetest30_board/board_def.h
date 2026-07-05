@@ -46,6 +46,8 @@
 #define CODEC_ADC_BITS_PER_SAMPLE I2S_DATA_BIT_WIDTH_16BIT
 #define CODEC_ADC_SAMPLE_RATE     (48000)
 
+
+//无用参数,不会生效
 #define RECORD_HARDWARE_AEC       (false)
 #define BOARD_PA_GAIN             (-30) /* Power amplifier gain defined by board (dB) */
 #define PA_ENABLE_GPIO            0 //SEVETEST30的功放使能只由board_ctrl控制
@@ -66,21 +68,6 @@
 #define ESP_SD_PIN_CD            -1
 #define ESP_SD_PIN_WP            -1
 
-//I2C配置-默认为音频设备控制提供(以下定义被board_pins_config为ES8388提供的回调函数应用)
-#define AUDIO_I2C_PORT      I2C_NUM_0
-#define AUDIO_I2C_SDA_IO    GPIO_NUM_48
-#define AUDIO_I2C_SCL_IO    GPIO_NUM_47
-//(通信频率在ES8838.c固定100kHz)
-
-//I2C配置-默认为其他设备控制提供
-#define DEVICE_I2C_PORT      I2C_NUM_0
-#define DEVICE_I2C_SDA_IO    GPIO_NUM_48
-#define DEVICE_I2C_SCL_IO    GPIO_NUM_47
-//SEVETEST30中设备与音频共用一个I2C_NUM_0,通信频率在ES8838.c固定100kHz
-//为了使该设置在board_ctrl生效,需要使用board_ctrl的device_i2c_init()
-#define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000) 
-
-
 //I2S总线通信相关
 #define I2S_MCK_IO GPIO_NUM_11;
 #define I2S_BCK_IO GPIO_NUM_12;
@@ -88,12 +75,26 @@
 #define I2S_DAC_DATA_IO GPIO_NUM_13;
 #define I2S_ADC_DATA_IO GPIO_NUM_21;
 
+//I2C配置-默认为音频设备控制提供(以下定义被board_pins_config为ES8388提供的回调函数应用)
+#define AUDIO_I2C_PORT      I2C_NUM_0
+#define AUDIO_I2C_SDA_IO    GPIO_NUM_18
+#define AUDIO_I2C_SCL_IO    GPIO_NUM_17
+//(通信频率在ES8838.c固定100kHz)
+
+//I2C配置-默认为其他设备控制提供
+#define DEVICE_I2C_PORT      I2C_NUM_0
+#define DEVICE_I2C_SDA_IO    GPIO_NUM_18
+#define DEVICE_I2C_SCL_IO    GPIO_NUM_17
+//SEVETEST30中设备与音频共用一个I2C_NUM_0,通信频率在ES8838.c固定100kHz
+//为了使该设置在board_ctrl生效,需要使用board_ctrl的device_i2c_init()
+#define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000) 
+
 
 //SPI总线通信相关
-#define SPI_CS_IO   GPIO_NUM_0;
-#define SPI_MOSI_IO GPIO_NUM_36;
+#define SPI_CS_IO   GPIO_NUM_41;
+#define SPI_MOSI_IO GPIO_NUM_39;
 #define SPI_MISO_IO GPIO_NUM_35;
-#define SPI_SCLK_IO GPIO_NUM_37;
+#define SPI_SCLK_IO GPIO_NUM_38;
 
 //字库芯片设置(挂载在SPI总线)
 #define FONT_CHIP_SPI_ID SPI2_HOST
@@ -116,8 +117,8 @@
 //以下是针对SE30硬件的特殊部分的定义
 
 //线性马达模块
-#define VIBRA_IN1_IO GPIO_NUM_9  //线性马达模块的驱动信号输入1
-#define VIBRA_IN2_IO GPIO_NUM_10 //线性马达模块的驱动信号输入2
+#define VIBRA_IN1_IO GPIO_NUM_10  //线性马达模块的驱动信号输入1
+#define VIBRA_IN2_IO GPIO_NUM_9 //线性马达模块的驱动信号输入2
 
 //数字电位器(TPL0401B)-音量控制 
 //寄存器设置值(step - 步数) = (AMP_VOL_MAX - [当前设置的音量]) * AMP_STEP_VOL
@@ -126,19 +127,10 @@
 #define  AMP_DP_COMMAND 0x00 //操作命令    部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送
 #define  AMP_STEP_VOL  0x01  //单位步长度(每一个单位,改变那么多寄存器设置值)    由于可以设置的阻值范围是比较大的，而屏幕大小有限，为了方便用户调节，将DC音量能够识别到的电压范围对应的阻值范围映射到到0-VOL_MAX个单位，其中一个单位所对应的寄存器设置值(step-步数)为STEP_VOL
 #define  AMP_VOL_MAX   100   //最大单位个数(最大音量值)  可以调整的最大单位个数,意味着音量有从0到AMP_VOL_MAX的那么多种选择
-//数字电位器(TPL0401A)-辅助电压5V 下调控制
-//寄存器设置值(step - 步数) = (BV_VOL_MAX - [当前设置的下调量]) * BV_STEP_VOL
-//[当前设置的下调量]允许范围为0 - BV_VOL_MAX
-#define  BV_DP_ADD    0x2E  //I2C地址    
-#define  BV_DP_COMMAND 0x00 //操作命令     部分数字电位器操作需要一个固有命令，在寄存器设置的8位数据之前发送
-#define  BV_STEP_VOL  0x01  //单位步长度(每一个单位,改变那么多寄存器设置值)   由于调压精度可以不用太高，为了方便调节，把寄存器设置值(step-步数)每下调STEP_VOL视为调压了一个单位
-#define  BV_VOL_MAX 100     //最大单位个数(最大下调量) 可以调整的最大单位个数,意味着电压有从0到AMP_VOL_MAX的那么多种选择
 
-//电池接入控制
-#define BAT_IN_CTRL_IO   GPIO_NUM_2
-
-// TCA6416A的中断信号输出
+// TCA6416A信号
 #define TCA6416A_IO_INT  GPIO_NUM_1
+#define TCA6416A_IO_RESET GPIO_NUM_2
 
 //姿态传感器 lsm6ds3trc 
 #define IMU_FIFO_DEFAULT_READ_NUM 3//默认FIFO周期读取个数(默认方式)
@@ -150,43 +142,43 @@
 // 默认模式 0=输出模式 1=输入模式
 // 默认关闭 闹钟中断 充电标识信号 红外发射 红外接收
 
+#define SEVETEST30_TCA6416A_ADDR_LEVEL 0//ADDR引脚电平，用于设置主机地址
+
 #define SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE   {\  
 .p00 = 1, \
 .p01 = 0, \
 .p02 = 1, \
 .p03 = 0, \
-.p04 = 0, \
-.p05 = 0, \
+.p04 = 1, \
+.p05 = 1, \
 .p06 = 0, \
 .p07 = 0, \
-.p10 = 0, \
+.p10 = 1, \
 .p11 = 1, \
 .p12 = 1, \
 .p13 = 1, \
 .p14 = 1, \
 .p15 = 0, \
-.p16 = 0, \
+.p16 = 1, \
 .p17 = 1, \
-.addr = 0, \
 }
 
 // 默认电平值
 #define SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE  {\
-   .main_button=1,                      \
-   .en_led_board=0,                     \
-   .hp_detect=0,                        \
-   .s2=1,                               \
-   .s1=1,                               \
-   .ir=0,                               \
-   .s4=1,                               \
-   .s3=1,                               \
+   .QC_TOUCH_L=0,                       \
+   .EN_LED_BOARD=1,                     \
+   .HP_DETECT=0,                        \
+   .BAT_QSTRT=0,                        \
+   .BAT_ALRT=1,                         \
+   .EMF_DRDY=0,                         \
+   .amplifier_MUTE=1,                   \
    .amplifier_SD=1,                     \
-   .IMU_INT=1,                          \
+   .IMU_INT2=1,                         \
+   .IMU_INT1=1,                         \
    .ALS_INT=1,                          \
    .thumbwheel_CCW=1,                   \
    .thumbwheel_CW=1,                    \
-   .OTG_EN=1,                           \
+   .OTG_EN=0,                           \
    .charge_SIGN=1,                      \
-   .ALARM_INT=1,                        \
-   .addr=0,                             \
+   .QC_TOUCH_R=0,                       \
 }

@@ -195,5 +195,6 @@
     "git.enabled": true,
     "C_Cpp.errorSquiggles": "disabled",
     "idf.flashType": "UART",
-    "idf.pythonInstallPath": "e:\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
+    "idf.pythonInstallPath": "e:\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.currentSetup": "D:\\.espressif\\v5.2.7\\esp-idf"
 }

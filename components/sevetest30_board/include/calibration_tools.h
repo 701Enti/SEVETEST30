@@ -30,6 +30,7 @@
 #include "hscdtd008a.h"
 #include "stdbool.h"
 #include "esp_err.h"
+#include <sys/time.h>
 
 #define VERSION_OF_GS_CALIBRATION_STATIC_MODEL_T 1
 

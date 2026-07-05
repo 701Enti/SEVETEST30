@@ -64,8 +64,8 @@ void app_main(void)
 
   i2c_config_t device_i2c_config = {
     .mode = I2C_MODE_MASTER,
-    .sda_pullup_en = GPIO_PULLUP_ENABLE,
-    .scl_pullup_en = GPIO_PULLUP_ENABLE,
+    .sda_pullup_en = GPIO_PULLUP_DISABLE,
+    .scl_pullup_en = GPIO_PULLUP_DISABLE,
     .master.clk_speed = DEVICE_I2C_DEFAULT_FREQ_HZ,
   };
   get_i2c_pins(DEVICE_I2C_PORT, &device_i2c_config);
@@ -74,9 +74,9 @@ void app_main(void)
       .p_i2c_device_config = &device_i2c_config,
       .p_ext_io_mode = &ext_io_mode_data,   // 存储IO模式信息的结构体的地址
       .p_ext_io_value = &ext_io_value_data, // 存储IO电平信息的结构体的地址
-      .boost_voltage = BV_VOL_MAX,
       .amplifier_volume = 90,
       .amplifier_mute = false,
+      .amplifier_sd = true,
       .codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START,
       .codec_mode = AUDIO_HAL_CODEC_MODE_BOTH,
       .codec_adc_gain = MIC_GAIN_MAX,
@@ -89,22 +89,24 @@ void app_main(void)
   sevetest30_all_device_init(&board_ctrl);
 
 
-  esp_log_level_set("gpio", ESP_LOG_NONE);
 
 
 
-  // esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
+  esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
 
-  // wifi_init(&wifi_periph_config);
+  wifi_init(&wifi_periph_config);
 
-  // // 载入wifi信息
-  // periph_wifi_cfg_t wifi_cfg = { .disable_auto_reconnect = false,.wifi_config.sta.ssid = CONFIG_WIFI_SSID,.wifi_config.sta.password = CONFIG_WIFI_PASSWORD, };
+  // 载入wifi信息
+  periph_wifi_cfg_t wifi_cfg = { .disable_auto_reconnect = false,.wifi_config.sta.ssid = CONFIG_WIFI_SSID,.wifi_config.sta.password = CONFIG_WIFI_PASSWORD, };
 
 
-  // if (wifi_connect(&wifi_cfg) != ESP_OK)
-  //   ESP_LOGE("MAIN", "网络连接失败");
-  // else
-  //   ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
+  if (wifi_connect(&wifi_cfg) != ESP_OK)
+    ESP_LOGE("MAIN", "网络连接失败");
+  else
+    ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
+
+
+
 
 
 
@@ -122,11 +124,6 @@ void app_main(void)
   //   //   ledarray_set_and_write(i);
   // }
 
-
-
-
-
-  // gpio_set_level(BAT_IN_CTRL_IO,0);//关机
 
 
 
@@ -206,6 +203,11 @@ void app_main(void)
       // }
 
 
+
+
+
+
+
   // // hscdtd008a
 
   // hscdtd008a_mode_set(GS_MODE_ACTIVE);
@@ -267,7 +269,12 @@ void app_main(void)
 
 
 
+
+
+
   bluetooth_connect();
+
+
 
 
   // for (int i = 0; i <= 5; i++)
@@ -292,21 +299,34 @@ void app_main(void)
   // };
 
 
-  // // 网络音乐播放
-  // char* url1 = "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
-  // // change_url_if_need_redirect(&url1);
+  // 网络音乐播放
+  char* url1 = "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
+  change_url_if_need_redirect(&url1);
 
-  // // 检查资源可用性
-  // if (http_check_common_url(url1) == ESP_OK)
-  // {
-  //   music_uri_or_url_play(url1, 1);
+  // 检查资源可用性
+  if (http_check_common_url(url1) == ESP_OK)
+  {
 
-    // vTaskDelay(pdMS_TO_TICKS(5000));
+    board_ctrl_t* b = board_status_get();
+    b->amplifier_mute = false;
+    b->amplifier_sd = true;
+    b->amplifier_volume = 60;
+    sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
-    // board_ctrl_t* b = board_status_get();
-    // b->amplifier_mute = false;
-    // b->amplifier_volume = 90;
-    // sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+    music_uri_or_url_play(url1, 1);
+
+    while (1)
+    {
+      if (ext_io_ctrl.auto_read_INT) {
+        if (ext_io_level_service() == ESP_OK) {
+          ESP_LOGW("main", "扩展GPIO自动读取中断触发成功");
+          ext_io_ctrl.auto_read_INT = false;
+        }
+      }
+      vTaskDelay(pdMS_TO_TICKS(500));
+    }
+
+
 
     // music_FFT_UI_start(&UI_cfg, 1);
 
@@ -315,16 +335,16 @@ void app_main(void)
     // while (sevetest30_music_running_flag)
     // {
 
-    //   // mp3_duration_calculate();
+      // mp3_duration_calculate();
 
-    //   // if (ext_io_ctrl.auto_read_INT == true)
-    //   // {
-    //   //   ext_io_ctrl.auto_read_INT = false;
-    //   //   ext_io_level_service();
-    //   // }
+      // if (ext_io_ctrl.auto_read_INT == true)
+      // {
+      //   ext_io_ctrl.auto_read_INT = false;m 
+      //   ext_io_level_service();
+      // }
 
-    //   music_FFT_UI_draw(&UI_cfg);
-    //   // main_UI_1();
+      // music_FFT_UI_draw(&UI_cfg);
+      // main_UI_1();
 
     //   for (int i = 0; i <= 5; i++)
     //   {
@@ -335,9 +355,7 @@ void app_main(void)
     // }
     // sevetest30_music_running_flag = false;
 
-
-
-  // }
+  }
 
 
 

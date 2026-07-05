@@ -69,7 +69,6 @@ typedef enum
    BOARD_CTRL_DEVICE_I2C,//设备I2C通讯相关(设备I2C端口号在board_def.h指定)
 
    BOARD_CTRL_AMPLIFIER,//音频功率放大器相关
-   BOARD_CTRL_BOOST,//5V辅助电源调整
 
    BOARD_CTRL_CODEC_MODE_AND_STATUS,//响应board_ctrl_t下的 codec_mode codec_audio_hal_ctrl 成员设定
    BOARD_CTRL_CODEC_DAC_PIN,//响应board_ctrl_t下的 codec_dac_pin 成员设定
@@ -90,9 +89,8 @@ typedef struct board_ctrl_t
    TCA6416A_level_t* p_ext_io_value; // 存储IO电平信息的结构体的地址，数据是保持的
 
    uint8_t amplifier_volume;         // 功放音量，取值为 0 - (board_def.h中常量AMP_VOL_MAX的值),等于 0 时将使得功放进入低功耗关断状态
-   bool amplifier_mute;              // 功放静音使能，true/false
-
-   uint8_t boost_voltage;            // 辅助电压，电压调整值 取值为 0 - (board_def.h中常量BV_VOL_MAX的值)
+   bool amplifier_mute;              // 功放静音，true/false
+   bool amplifier_sd;                // 功放使能，true/false
 
    audio_hal_codec_mode_t codec_mode;//音频编解码器模式
    audio_hal_ctrl_t codec_audio_hal_ctrl;//音频编解码器状态

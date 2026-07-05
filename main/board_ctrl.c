@@ -56,7 +56,6 @@ esp_periph_set_handle_t se30_periph_set_handle;
 board_ctrl_t* board_ctrl_buf = NULL;
 
 void amplifier_set(board_ctrl_t* board_ctrl);
-void boost_voltage_set(board_ctrl_t* board_ctrl);
 void codechip_mode_and_status_set(board_ctrl_t* board_ctrl);
 void codechip_volume_set(board_ctrl_t* board_ctrl);
 void board_ctrl_buf_map(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select);
@@ -104,18 +103,18 @@ esp_err_t device_i2c_init()
 esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl)
 {
     // //此处音频和其他设备共用端口，在audio_board_init()初始化，不需初始化I2C总线
-    device_i2c_init();
+    // device_i2c_init();
 
-    //初始化音频面板(包括了I2C的初始化和注册)
-    // board_ctrl_init_report[AUDIO_BOARD_INIT] = audio_board_init();
+    // //初始化音频面板(包括了I2C的初始化和注册)
+    board_ctrl_init_report[AUDIO_BOARD_INIT] = audio_board_init();
 
     // // 初始化其他设备
     board_ctrl_init_report[SEVETEST30_GPIO_INIT] = sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);//初始化GPIO服务(包括扩展GPIO)
     // board_ctrl_init_report[FONTS_CHIP_INIT] = fonts_chip_init();//字库芯片
-    board_ctrl_init_report[BL5372_CONFIG_INIT] = BL5372_config_init();//BL5372(离线RTC计时)
-    board_ctrl_init_report[AHT21_BEGIN] = AHT21_begin();//AHT21(温湿度传感器)
-    board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)
-    board_ctrl_init_report[VIBRA_MOTOR_INIT] = vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());//震动马达
+    // board_ctrl_init_report[BL5372_CONFIG_INIT] = BL5372_config_init();//BL5372(离线RTC计时)
+    // board_ctrl_init_report[AHT21_BEGIN] = AHT21_begin();//AHT21(温湿度传感器)
+    // board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)
+    // board_ctrl_init_report[VIBRA_MOTOR_INIT] = vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());//震动马达
     // board_ctrl_init_report[LEDARRAY_INIT] = ledarray_init();//LED阵列
 
     //全部初始化之后配置所有设备到指定模式
@@ -139,7 +138,6 @@ void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_se
     case BOARD_CTRL_ALL:
         i2c_param_config(DEVICE_I2C_PORT, board_ctrl->p_i2c_device_config);
         amplifier_set(board_ctrl);
-        boost_voltage_set(board_ctrl);
         codechip_mode_and_status_set(board_ctrl);
         codec_config_dac_output(board_ctrl);
         codechip_volume_set(board_ctrl);
@@ -156,10 +154,6 @@ void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_se
 
     case BOARD_CTRL_AMPLIFIER:
         amplifier_set(board_ctrl);
-        break;
-
-    case BOARD_CTRL_BOOST:
-        boost_voltage_set(board_ctrl);
         break;
 
     case BOARD_CTRL_CODEC_MODE_AND_STATUS:
@@ -220,7 +214,7 @@ void board_ctrl_buf_map(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_selec
         board_ctrl_buf->p_ext_io_value = board_ctrl->p_ext_io_value;
         board_ctrl_buf->amplifier_volume = board_ctrl->amplifier_volume;
         board_ctrl_buf->amplifier_mute = board_ctrl->amplifier_mute;
-        board_ctrl_buf->boost_voltage = board_ctrl->boost_voltage;
+        board_ctrl_buf->amplifier_sd = board_ctrl->amplifier_sd;
         board_ctrl_buf->codec_mode = board_ctrl->codec_mode;
         board_ctrl_buf->codec_audio_hal_ctrl = board_ctrl->codec_audio_hal_ctrl;
         board_ctrl_buf->codec_dac_pin = board_ctrl->codec_dac_pin;
@@ -237,10 +231,7 @@ void board_ctrl_buf_map(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_selec
     case BOARD_CTRL_AMPLIFIER:
         board_ctrl_buf->amplifier_volume = board_ctrl->amplifier_volume;
         board_ctrl_buf->amplifier_mute = board_ctrl->amplifier_mute;
-        break;
-
-    case BOARD_CTRL_BOOST:
-        board_ctrl_buf->boost_voltage = board_ctrl->boost_voltage;
+        board_ctrl_buf->amplifier_sd = board_ctrl->amplifier_sd;
         break;
 
     case BOARD_CTRL_CODEC_MODE_AND_STATUS:
@@ -302,7 +293,7 @@ void codechip_volume_set(board_ctrl_t* board_ctrl)
 
 // 小型设备控制
 
-// 音频功放设置，音量 取值为 0 -（board_def.h中常量AMP_VOL_MAX的值，原程序中为24）,等于 0 时将使得功放进入低功耗关断状态
+// 音频功放设置，音量 取值为 0 -（board_def.h中常量AMP_VOL_MAX的值，原程序中为24）,等于 0 时将使得功放进入静音状态
 void amplifier_set(board_ctrl_t* board_ctrl)
 {
     if (board_ctrl->amplifier_volume > AMP_VOL_MAX)
@@ -312,40 +303,30 @@ void amplifier_set(board_ctrl_t* board_ctrl)
     }
     uint8_t buf[2] = { AMP_DP_COMMAND, 0 }; // 设置值越高，实际音量越低
 
-    if (board_ctrl->amplifier_mute == true || board_ctrl->amplifier_volume == 0)
-    {
+    if (board_ctrl->amplifier_sd == true) {
+        if (board_ctrl->amplifier_mute == true || board_ctrl->amplifier_volume == 0)
+        {
+            board_ctrl->p_ext_io_value->amplifier_SD = 1;
+            board_ctrl->p_ext_io_value->amplifier_MUTE = 1;
+            buf[1] = (AMP_VOL_MAX - 0) * AMP_STEP_VOL;
+        }
+        else
+        {
+            board_ctrl->p_ext_io_value->amplifier_SD = 1;
+            board_ctrl->p_ext_io_value->amplifier_MUTE = 0;
+            buf[1] = (AMP_VOL_MAX - board_ctrl->amplifier_volume) * AMP_STEP_VOL;
+        }
+        esp_err_t err = ESP_OK;
+        err = i2c_master_write_to_device(DEVICE_I2C_PORT, AMP_DP_ADD, buf, sizeof(buf), 1000 / portTICK_PERIOD_MS);
+        sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_EXT_IO);
+        if (err != ESP_OK)
+            ESP_LOGE("amplifier_set", "与音量控制器通讯时发现问题 描述： %s", esp_err_to_name(err));
+        else
+            ESP_LOGI("amplifier_set", "扬声器配置已更新 当前: [功放音量 %d] [静音 %d] [使能 %d]", board_ctrl->amplifier_volume, board_ctrl->amplifier_mute, board_ctrl->amplifier_sd);
+    }
+    else {
         board_ctrl->p_ext_io_value->amplifier_SD = 0;
-        buf[1] = (AMP_VOL_MAX - 0) * AMP_STEP_VOL;
+        sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_EXT_IO);
+        ESP_LOGI("amplifier_set", "扬声器配置已更新 当前: [功放音量 %d] [静音 %d] [使能 %d]", board_ctrl->amplifier_volume, board_ctrl->amplifier_mute, board_ctrl->amplifier_sd);
     }
-    else
-    {
-        board_ctrl->p_ext_io_value->amplifier_SD = 1;
-        buf[1] = (AMP_VOL_MAX - board_ctrl->amplifier_volume) * AMP_STEP_VOL;
-    }
-    esp_err_t err = ESP_OK;
-    err = i2c_master_write_to_device(DEVICE_I2C_PORT, AMP_DP_ADD, buf, sizeof(buf), 1000 / portTICK_PERIOD_MS);
-    sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_EXT_IO);
-
-    if (err != ESP_OK)
-        ESP_LOGE("amplifier_set", "与音量控制器通讯时发现问题 描述： %s", esp_err_to_name(err));
-    else
-        ESP_LOGI("amplifier_set", "扬声器配置已更新 功放音量 %d", board_ctrl->amplifier_volume);
-}
-
-// 辅助电压设置，电压调整值 取值为 0 - (board_def.h中常量BV_VOL_MAX的值(24))
-void boost_voltage_set(board_ctrl_t* board_ctrl)
-{
-    if (board_ctrl->boost_voltage > BV_VOL_MAX)
-    {
-        ESP_LOGE("boost_voltage_set", "输入了一个超过范围的调整值 - %d", board_ctrl->boost_voltage);
-        board_ctrl->boost_voltage = BV_VOL_MAX;
-    }
-
-    uint8_t buf[2] = { BV_DP_COMMAND, (BV_VOL_MAX - board_ctrl->boost_voltage) * BV_STEP_VOL };
-    esp_err_t err = ESP_OK;
-    err = i2c_master_write_to_device(DEVICE_I2C_PORT, BV_DP_ADD, buf, sizeof(buf), 1000 / portTICK_PERIOD_MS);
-    if (err != ESP_OK)
-        ESP_LOGE("boost_voltage_set", "与电压控制器通讯时发现问题 请检查电池电源连接 描述： %s", esp_err_to_name(err));
-    else
-        ESP_LOGI("boost_voltage_set", "辅助电压5V已调整");
 }
