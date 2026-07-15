@@ -37,7 +37,7 @@
 #include "board_ctrl.h"
 
 //FFT相关
-#define FFT_UI_TASK_CORE (1)     // FFT UI绘制任务核心
+#define FFT_UI_TASK_CORE (0)     // FFT UI绘制任务核心
 #define FFT_UI_TASK_STACK_SIZE (3*1024)//FFT UI绘制任务堆栈大小
 
 #define FFT_N_SAMPLES 2048    // FFT 点数N 取2的整数次幂

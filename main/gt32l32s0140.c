@@ -26,8 +26,7 @@
  // bilibili: 701Enti
 
 #include "gt32l32s0140.h"
-#include "board_pins_config.h"
-#include "board_ctrl.h"
+#include "board.h"
 #include "driver/gpio.h"
 #include "esp_intr_alloc.h"
 #include "esp_log.h"
@@ -74,7 +73,7 @@ esp_err_t fonts_chip_init()
 
 
     //按照board_def中的引脚配置修改上面初步配置,之后是最终引脚配置
-    ret = get_spi_pins(&bus_config, &interface_config);
+    ret = get_spi_pins_font_chip(&bus_config, &interface_config);
 
     //电气检查,检测字库芯片是否真的硬件层面上连接到电路板或者可能存在损坏
     //如果字库芯片存在问题或者根本没有上件,那么下拉CS,MISO将不会处于被下拉状态
@@ -155,7 +154,7 @@ void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest)
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
-    get_spi_pins(NULL, &interface_config);
+    get_spi_pins_font_chip(NULL, &interface_config);
 
     //通讯开始
     gpio_set_level(interface_config.spics_io_num, 0);
@@ -197,7 +196,7 @@ void fonts_read_ASCII_6x12(uint32_t Unicode, uint8_t* dest) {
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
-    get_spi_pins(NULL, &interface_config);
+    get_spi_pins_font_chip(NULL, &interface_config);
 
     //通讯开始
     gpio_set_level(interface_config.spics_io_num, 0);
@@ -345,7 +344,7 @@ uint32_t UnicodeToGB2312(uint32_t code)
 
     //获取CS引脚GPIO_NUM
     spi_device_interface_config_t interface_config;
-    get_spi_pins(NULL, &interface_config);
+    get_spi_pins_font_chip(NULL, &interface_config);
 
     //通讯开始
     gpio_set_level(interface_config.spics_io_num, 0);

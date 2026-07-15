@@ -673,7 +673,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_100, change);
+        direct_draw(x, y, gImage_100);
         break;
     }
     case 101:
@@ -931,7 +931,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_101, change);
+        direct_draw(x, y, gImage_101);
         break;
     }
     case 102:
@@ -1189,7 +1189,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_102, change);
+        direct_draw(x, y, gImage_102);
         break;
     }
     case 103:
@@ -1447,7 +1447,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_103, change);
+        direct_draw(x, y, gImage_103);
         break;
     }
     case 104:
@@ -1705,7 +1705,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_104, change);
+        direct_draw(x, y, gImage_104);
         break;
     }
     case 150:
@@ -1963,7 +1963,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_150, change);
+        direct_draw(x, y, gImage_150);
         break;
     }
     case 151:
@@ -2221,7 +2221,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_151, change);
+        direct_draw(x, y, gImage_151);
         break;
     }
     case 152:
@@ -2479,7 +2479,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_152, change);
+        direct_draw(x, y, gImage_152);
         break;
     }
     case 153:
@@ -2737,7 +2737,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_153, change);
+        direct_draw(x, y, gImage_153);
         break;
     }
     case 300:
@@ -2995,7 +2995,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_300, change);
+        direct_draw(x, y, gImage_300);
         break;
     }
     case 301:
@@ -3253,7 +3253,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_301, change);
+        direct_draw(x, y, gImage_301);
         break;
     }
     case 302:
@@ -3511,7 +3511,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_302, change);
+        direct_draw(x, y, gImage_302);
         break;
     }
     case 303:
@@ -3769,7 +3769,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_303, change);
+        direct_draw(x, y, gImage_303);
         break;
     }
     case 304:
@@ -4027,7 +4027,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_304, change);
+        direct_draw(x, y, gImage_304);
         break;
     }
     case 305:
@@ -4285,7 +4285,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_305, change);
+        direct_draw(x, y, gImage_305);
         break;
     }
     case 306:
@@ -4543,7 +4543,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_306, change);
+        direct_draw(x, y, gImage_306);
         break;
     }
     case 307:
@@ -4801,7 +4801,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_307, change);
+        direct_draw(x, y, gImage_307);
         break;
     }
     case 308:
@@ -5059,7 +5059,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X27,
         };
-        direct_draw(x, y, gImage_308, change);
+        direct_draw(x, y, gImage_308);
         break;
     }
     case 309:
@@ -5317,7 +5317,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_309, change);
+        direct_draw(x, y, gImage_309);
         break;
     }
     case 310:
@@ -5575,7 +5575,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_310, change);
+        direct_draw(x, y, gImage_310);
         break;
     }
     case 311:
@@ -5833,7 +5833,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_311, change);
+        direct_draw(x, y, gImage_311);
         break;
     }
     case 312:
@@ -6091,7 +6091,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_312, change);
+        direct_draw(x, y, gImage_312);
         break;
     }
     case 313:
@@ -6349,7 +6349,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XD9,
             0XEA,
         };
-        direct_draw(x, y, gImage_313, change);
+        direct_draw(x, y, gImage_313);
         break;
     }
     case 350:
@@ -6607,7 +6607,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_350, change);
+        direct_draw(x, y, gImage_350);
         break;
     }
     case 351:
@@ -6865,7 +6865,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_351, change);
+        direct_draw(x, y, gImage_351);
         break;
     }
     case 399:
@@ -7123,7 +7123,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_399, change);
+        direct_draw(x, y, gImage_399);
         break;
     }
     case 400:
@@ -7381,7 +7381,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_400, change);
+        direct_draw(x, y, gImage_400);
         break;
     }
     case 401:
@@ -7639,7 +7639,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_401, change);
+        direct_draw(x, y, gImage_401);
         break;
     }
     case 402:
@@ -7897,7 +7897,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_402, change);
+        direct_draw(x, y, gImage_402);
         break;
     }
     case 403:
@@ -8155,7 +8155,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XC3,
             0XC3,
         };
-        direct_draw(x, y, gImage_403, change);
+        direct_draw(x, y, gImage_403);
         break;
     }
     case 404:
@@ -8413,7 +8413,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XC3,
             0XC3,
         };
-        direct_draw(x, y, gImage_404, change);
+        direct_draw(x, y, gImage_404);
         break;
     }
     case 405:
@@ -8671,7 +8671,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_405, change);
+        direct_draw(x, y, gImage_405);
         break;
     }
     case 406:
@@ -8929,7 +8929,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_406, change);
+        direct_draw(x, y, gImage_406);
         break;
     }
     case 407:
@@ -9187,7 +9187,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_407, change);
+        direct_draw(x, y, gImage_407);
         break;
     }
     case 456:
@@ -9445,7 +9445,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_456, change);
+        direct_draw(x, y, gImage_456);
         break;
     }
     case 457:
@@ -9703,7 +9703,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_457, change);
+        direct_draw(x, y, gImage_457);
         break;
     }
     case 499:
@@ -9961,7 +9961,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_499, change);
+        direct_draw(x, y, gImage_499);
         break;
     }
     case 500:
@@ -10219,7 +10219,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_500, change);
+        direct_draw(x, y, gImage_500);
         break;
     }
     case 501:
@@ -10477,7 +10477,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_501, change);
+        direct_draw(x, y, gImage_501);
         break;
     }
     case 502:
@@ -10735,7 +10735,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X7F,
         };
-        direct_draw(x, y, gImage_502, change);
+        direct_draw(x, y, gImage_502);
         break;
     }
     case 503:
@@ -10993,7 +10993,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XE4,
             0XB0,
         };
-        direct_draw(x, y, gImage_503, change);
+        direct_draw(x, y, gImage_503);
         break;
     }
     case 504:
@@ -11251,7 +11251,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XE4,
             0XB0,
         };
-        direct_draw(x, y, gImage_504, change);
+        direct_draw(x, y, gImage_504);
         break;
     }
     case 507:
@@ -11509,7 +11509,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X27,
         };
-        direct_draw(x, y, gImage_507, change);
+        direct_draw(x, y, gImage_507);
         break;
     }
     case 508:
@@ -11767,7 +11767,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X27,
         };
-        direct_draw(x, y, gImage_508, change);
+        direct_draw(x, y, gImage_508);
         break;
     }
     case 509:
@@ -12025,7 +12025,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_509, change);
+        direct_draw(x, y, gImage_509);
         break;
     }
     case 510:
@@ -12283,7 +12283,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_510, change);
+        direct_draw(x, y, gImage_510);
         break;
     }
     case 511:
@@ -12541,7 +12541,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XC3,
             0XC3,
         };
-        direct_draw(x, y, gImage_511, change);
+        direct_draw(x, y, gImage_511);
         break;
     }
     case 512:
@@ -12799,7 +12799,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XC3,
             0XC3,
         };
-        direct_draw(x, y, gImage_512, change);
+        direct_draw(x, y, gImage_512);
         break;
     }
     case 513:
@@ -13057,7 +13057,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X7F,
         };
-        direct_draw(x, y, gImage_513, change);
+        direct_draw(x, y, gImage_513);
         break;
     }
     case 514:
@@ -13315,7 +13315,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_514, change);
+        direct_draw(x, y, gImage_514);
         break;
     }
     case 515:
@@ -13573,7 +13573,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XFF,
             0XFF,
         };
-        direct_draw(x, y, gImage_515, change);
+        direct_draw(x, y, gImage_515);
         break;
     }
     case 900:
@@ -13831,7 +13831,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X7F,
             0X27,
         };
-        direct_draw(x, y, gImage_900, change);
+        direct_draw(x, y, gImage_900);
         break;
     }
     case 901:
@@ -14089,7 +14089,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_901, change);
+        direct_draw(x, y, gImage_901);
         break;
     }
 
@@ -14350,7 +14350,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_306, change);
+        direct_draw(x, y, gImage_306);
         break;
     }
 
@@ -14610,7 +14610,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_307, change);
+        direct_draw(x, y, gImage_307);
         break;
     }
 
@@ -14870,7 +14870,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_310, change);
+        direct_draw(x, y, gImage_310);
         break;
     }
 
@@ -15130,7 +15130,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_311, change);
+        direct_draw(x, y, gImage_311);
         break;
     }
 
@@ -15390,7 +15390,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XA2,
             0XE8,
         };
-        direct_draw(x, y, gImage_312, change);
+        direct_draw(x, y, gImage_312);
         break;
     }
 
@@ -15650,7 +15650,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_401, change);
+        direct_draw(x, y, gImage_401);
         break;
     }
 
@@ -15910,7 +15910,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_402, change);
+        direct_draw(x, y, gImage_402);
         break;
     }
 
@@ -16170,7 +16170,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0XC3,
             0XC3,
         };
-        direct_draw(x, y, gImage_403, change);
+        direct_draw(x, y, gImage_403);
         break;
     }
 
@@ -16430,7 +16430,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_999, change);
+        direct_draw(x, y, gImage_999);
         break;
     }
 
@@ -16689,7 +16689,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
             0X00,
             0X00,
         };
-        direct_draw(x, y, gImage_999, change);
+        direct_draw(x, y, gImage_999);
         break;
     }
     }
@@ -16712,9 +16712,9 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         {
             uint8_t* p = rectangle(2, 1);
             if (temp_buf >= 10)
-                separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
+                separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color);
             else
-                separation_draw(x - 1 + LINE_LED_NUMBER - 2 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color, change);
+                separation_draw(x - 1 + LINE_LED_NUMBER - 2 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color);
         }
 
         // 取出每位上的数
@@ -16722,9 +16722,9 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
         int8_t uints = temp_buf - tens * 10; // 个位
 
         // 显示温度数字
-        print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, uints, color, change); // 数字字模的尺寸为4x7
+        print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, uints, color); // 数字字模的尺寸为4x7
         if (tens > 0)
-            print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH * 2 - 1, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, tens, color, change); // 显示一个为0的十位显然没有意义的
+            print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH * 2 - 1, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, tens, color); // 显示一个为0的十位显然没有意义的
     }
 }
 
@@ -16747,13 +16747,13 @@ void time_UI_1(int16_t x, int16_t y, uint8_t change)
     {
         int8_t hour_tens = systemtime_data.hour / 10;                                                                                       // 十位
         int8_t hour_uints = systemtime_data.hour - hour_tens * 10;                                                                          // 个位
-        print_number(x - 1 + LINE_LED_NUMBER / 2 - (4 + 1) * 2 + 1, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, hour_tens, color, change); // 数字字模的尺寸为4x7
-        print_number(x - 1 + LINE_LED_NUMBER / 2 - (4 + 1) * 1 + 1, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, hour_uints, color, change);
+        print_number(x - 1 + LINE_LED_NUMBER / 2 - (4 + 1) * 2 + 1, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, hour_tens, color); // 数字字模的尺寸为4x7
+        print_number(x - 1 + LINE_LED_NUMBER / 2 - (4 + 1) * 1 + 1, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, hour_uints, color);
 
         int8_t minute_tens = systemtime_data.minute / 10;                                                                                 // 十位
         int8_t minute_uints = systemtime_data.minute - minute_tens * 10;                                                                  // 个位
-        print_number(x - 1 + LINE_LED_NUMBER - (4 + 1) * 2 + 0, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, minute_tens, color, change); // 数字字模的尺寸为4x7
-        print_number(x - 1 + LINE_LED_NUMBER - (4 + 1) * 1 + 0, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, minute_uints, color, change);
+        print_number(x - 1 + LINE_LED_NUMBER - (4 + 1) * 2 + 0, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, minute_tens, color); // 数字字模的尺寸为4x7
+        print_number(x - 1 + LINE_LED_NUMBER - (4 + 1) * 1 + 0, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, minute_uints, color);
     }
 }
 
@@ -16782,8 +16782,8 @@ void time_UI_2(int16_t x, int16_t y, uint8_t change)
     {
         int8_t second_tens = systemtime_data.second / 10;                                                                       // 十位
         int8_t second_uints = systemtime_data.second - second_tens * 10;                                                        // 个位
-        print_number(x - 1 + LINE_LED_NUMBER / 2 - 4, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, second_tens, color, change); // 数字字模的尺寸为4x7
-        print_number(x - 1 + LINE_LED_NUMBER / 2 + 2, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, second_uints, color, change);
+        print_number(x - 1 + LINE_LED_NUMBER / 2 - 4, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, second_tens, color); // 数字字模的尺寸为4x7
+        print_number(x - 1 + LINE_LED_NUMBER / 2 + 2, y - 1 + VERTICAL_LED_NUMBER / 2 - 7 / 2 + 1, second_uints, color);
     }
 }
 
@@ -17008,7 +17008,7 @@ void music_FFT_UI_draw(music_FFT_UI_cfg_t* UI_cfg)
             color_buf[0] = unit_led_color[j * 3 + 0];
             color_buf[1] = unit_led_color[j * 3 + 1];
             color_buf[2] = unit_led_color[j * 3 + 2];
-            separation_draw(UI_cfg->x + j, UI_cfg->y, 1, RECTANGLE_MATRIX(p), *p, color_buf, UI_cfg->change);
+            separation_draw(UI_cfg->x + j, UI_cfg->y, 1, RECTANGLE_MATRIX(p), *p, color_buf);
             free(p);
             p = NULL;
         }

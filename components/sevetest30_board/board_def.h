@@ -90,16 +90,15 @@
 #define DEVICE_I2C_DEFAULT_FREQ_HZ (100*1000) 
 
 
-//SPI总线通信相关
-#define SPI_CS_IO   GPIO_NUM_41;
-#define SPI_MOSI_IO GPIO_NUM_39;
-#define SPI_MISO_IO GPIO_NUM_35;
-#define SPI_SCLK_IO GPIO_NUM_38;
-
 //字库芯片设置(挂载在SPI总线)
 #define FONT_CHIP_SPI_ID SPI2_HOST
 #define FONT_CHIP_SPI_FREQ (1 * 1000 * 1000)//SPI通讯频率(单位HZ)
 #define FONT_CHIP_SPI_QUEUE_SIZE 7//SPI队列大小
+#define FONT_CHIP_SPI_CS_IO   GPIO_NUM_41;
+#define FONT_CHIP_SPI_MOSI_IO GPIO_NUM_39;
+#define FONT_CHIP_SPI_MISO_IO GPIO_NUM_35;
+#define FONT_CHIP_SPI_SCLK_IO GPIO_NUM_38;
+
 
 //音频编码芯片设置
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
@@ -116,6 +115,27 @@
 
 //以下是针对SE30硬件的特殊部分的定义
 
+//LedArray灯板阵列相关定义
+
+#define LINE_LED_NUMBER  32         //灯板横向(长边)LED灯数目，必须是8的倍数
+#define VERTICAL_LED_NUMBER 16      //灯板纵向(短边)LED灯数目，必须是2的倍数
+
+#define LEDARRAY_SPI_ID SPI3_HOST
+#define LEDARRAY_SPI_FREQ (10 * 1000 * 1000)//SPI通讯频率(单位HZ)
+
+#define LEDARRAY_SPI_CS_IO   -1
+#define LEDARRAY_SPI_MISO_IO -1
+#define LEDARRAY_SPI_MOSI_IO GPIO_NUM_4
+#define LEDARRAY_SPI_SCLK_IO GPIO_NUM_5
+
+#define LEDARRAY_LE_IO GPIO_NUM_6
+#define LEDARRAY_OE_IO GPIO_NUM_7
+
+#define LEDARRAY_CSE_IO GPIO_NUM_8
+#define LEDARRAY_CSA0_IO GPIO_NUM_2
+#define LEDARRAY_CSA1_IO GPIO_NUM_44
+#define LEDARRAY_CSA2_IO GPIO_NUM_42
+
 //线性马达模块
 #define VIBRA_IN1_IO GPIO_NUM_10  //线性马达模块的驱动信号输入1
 #define VIBRA_IN2_IO GPIO_NUM_9 //线性马达模块的驱动信号输入2
@@ -130,7 +150,6 @@
 
 // TCA6416A信号
 #define TCA6416A_IO_INT  GPIO_NUM_1
-#define TCA6416A_IO_RESET GPIO_NUM_2
 
 //姿态传感器 lsm6ds3trc 
 #define IMU_FIFO_DEFAULT_READ_NUM 3//默认FIFO周期读取个数(默认方式)
@@ -138,12 +157,12 @@
 //温湿度传感器 AHT21
 #define AHT21_DEFAULT_MEASURE_DELAY 200//默认触发后进行读取操作间隔的延时,单位ms
 
-//TCA6416A 控制IO端口次序名称定义
-// 默认模式 0=输出模式 1=输入模式
-// 默认关闭 闹钟中断 充电标识信号 红外发射 红外接收
+//TCA6416A 扩展IO芯片相关配置
 
 #define SEVETEST30_TCA6416A_ADDR_LEVEL 0//ADDR引脚电平，用于设置主机地址
 
+
+// 默认模式配置，0=输出模式 1=输入模式（未写入默认为输入模式）
 #define SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE   {\  
 .p00 = 1, \
 .p01 = 0, \
@@ -163,7 +182,7 @@
 .p17 = 1, \
 }
 
-// 默认电平值
+// 默认电平值( 0=低电平 1=高电平)
 #define SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE  {\
    .QC_TOUCH_L=0,                       \
    .EN_LED_BOARD=1,                     \

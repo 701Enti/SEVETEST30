@@ -75,7 +75,7 @@ extern "C" {
     esp_err_t get_i2s_pins(i2s_port_t port, board_i2s_pin_t* i2s_config);
 
     /**
-     * @brief                  Get spi pins configuration
+     * @brief                  (无效)Get spi pins configuration
      *
      * @param      spi_config                   spi bus configuration parameters
      * @param      spi_device_interface_config  spi device configuration parameters
@@ -86,144 +86,65 @@ extern "C" {
      */
     esp_err_t get_spi_pins(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config);
 
-    /**
-     * @brief  Get the gpio number for sdcard interrupt
+        /**
+     * @brief                  获取为字库芯片提供的SPI通讯IO定义
      *
-     * @return  -1      non-existent
-     *          Others  sdcard interrupt gpio number
+     * @param      spi_config                   spi bus configuration parameters
+     * @param      spi_device_interface_config  spi device configuration parameters
+     *
+     * @return
+     *     - ESP_OK
+     *     - ESP_FAIL
      */
+    esp_err_t get_spi_pins_font_chip(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config);
+
+    /**
+     * @brief                  获取为LED阵列提供的SPI通讯IO定义
+     *
+     * @param      spi_config                   spi bus configuration parameters
+     * @param      spi_device_interface_config  spi device configuration parameters
+     *
+     * @return
+     *     - ESP_OK
+     *     - ESP_FAIL
+     */
+    esp_err_t get_spi_pins_ledarray(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config);
+
+
+    /// @brief 获取振动电机IN1引脚GPIO号
+    int8_t get_vibra_motor_IN1_gpio(void);
+
+    /// @brief 获取振动电机IN2引脚GPIO号
+    int8_t get_vibra_motor_IN2_gpio(void);
+
+
+
+
+
+
+
+
+
+    //无效API,只是为了适配框架中的函数调用,但是没有实际意义,因为本项目中没有使用这些功能
     int8_t get_sdcard_intr_gpio(void);
-
-    /**
-     * @brief  Get sdcard maximum number of open files
-     *
-     * @return  -1      error
-     *          Others  max num
-     */
     int8_t get_sdcard_open_file_num_max(void);
-
-    /**
-     * @brief  Get the gpio number for auxin detection
-     *
-     * @return  -1      non-existent
-     *          Others  gpio number
-     */
     int8_t get_auxin_detect_gpio(void);
-
-    /**
-     * @brief  Get the gpio number for headphone detection
-     *
-     * @return  -1      non-existent
-     *          Others  gpio number
-     */
     int8_t get_headphone_detect_gpio(void);
-
-    /**
-     * @brief  Get the gpio number for PA enable
-     *
-     * @return  -1      non-existent
-     *          Others  gpio number
-     */
     int8_t get_pa_enable_gpio(void);
-
-    /**
-     * @brief  Get the gpio number for adc detection
-     *
-     * @return  -1      non-existent
-     *          Others  gpio number
-     */
     int8_t get_adc_detect_gpio(void);
-
-    /**
-     * @brief  Get the mclk gpio number of es7243
-     *
-     * @return  -1      non-existent
-     *          Others  gpio number
-     */
     int8_t get_es7243_mclk_gpio(void);
-
-    /**
-     * @brief  Get the record-button id for adc-button
-     *
-     * @return  -1      non-existent
-     *          Others  button id
-     */
     int8_t get_input_rec_id(void);
-
-    /**
-     * @brief  Get the number for mode-button
-     *
-     * @return  -1      non-existent
-     *          Others  number
-     */
     int8_t get_input_mode_id(void);
-
-    /**
-     * @brief Get number for set function
-     *
-     * @return -1       non-existent
-     *         Others   number
-     */
     int8_t get_input_set_id(void);
-
-    /**
-     * @brief Get number for play function
-     *
-     * @return -1       non-existent
-     *         Others   number
-     */
     int8_t get_input_play_id(void);
-
-    /**
-     * @brief number for volume up function
-     *
-     * @return -1       non-existent
-     *         Others   number
-     */
     int8_t get_input_volup_id(void);
-
-    /**
-     * @brief Get number for volume down function
-     *
-     * @return -1       non-existent
-     *         Others   number
-     */
     int8_t get_input_voldown_id(void);
-
-    /**
-     * @brief Get green led gpio number
-     *
-     * @return -1       non-existent
-     *        Others    gpio number
-     */
     int8_t get_reset_codec_gpio(void);
-
-    /**
-     * @brief Get DSP reset gpio number
-     *
-     * @return -1       non-existent
-     *         Others   gpio number
-     */
     int8_t get_reset_board_gpio(void);
-
-    /**
-     * @brief Get DSP reset gpio number
-     *
-     * @return -1       non-existent
-     *         Others   gpio number
-     */
     int8_t get_green_led_gpio(void);
-
-    /**
-     * @brief Get green led gpio number
-     *
-     * @return -1       non-existent
-     *         Others   gpio number
-     */
     int8_t get_blue_led_gpio(void);
 
-    int8_t get_vibra_motor_IN1_gpio(void);
-    int8_t get_vibra_motor_IN2_gpio(void);
+
 
 #ifdef __cplusplus
 }
