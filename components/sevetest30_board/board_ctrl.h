@@ -42,7 +42,7 @@
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
 #include "esp_peripherals.h"
-#include "BL5372.h"
+// #include "BL5372.h"
 
 
 extern esp_periph_set_handle_t se30_periph_set_handle;

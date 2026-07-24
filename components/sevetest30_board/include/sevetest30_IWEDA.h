@@ -166,7 +166,7 @@ esp_err_t wifi_init(esp_periph_config_t* periph_config);
 
 esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg);
 
-void init_time_data_sntp();
+esp_err_t init_time_data_sntp(uint32_t timeout_ms);
 
 void refresh_position_data();
 

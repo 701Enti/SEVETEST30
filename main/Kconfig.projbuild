@@ -22,23 +22,29 @@ config LOCAL_TZ
 
 # NTP时间服务器
 config NTP_SERVER_0
-    string "the first ntp server name"
-    default "time.google.com"
-    help
-        the first ntp server name
-
-config NTP_SERVER_1
-    string "the second ntp server name"
-    default "time.cloudflare.com"
-    help
-        the second ntp server name
-
-config NTP_SERVER_2
-    string "the third ntp server name"
+    string "the first ntp server address"
     default "ntp.aliyun.com"
     help
-        the third ntp server name
+        the first ntp server address
 
+config NTP_SERVER_1
+    string "the second ntp server address"
+    default "time.cloudflare.com"
+    help
+        the second ntp server address
+
+config NTP_SERVER_2
+    string "the third ntp server address"
+    default "time.google.com"
+    help
+        the third ntp server address
+
+# DNS服务器
+config DNS_SERVER
+    string "the dns server address"
+    default "223.5.5.5"
+    help
+        the dns server address
 
 # 百度语音服务的API相关
 config BAIDU_SPEECH_ACCESS_KEY

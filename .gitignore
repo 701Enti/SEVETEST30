@@ -2,6 +2,7 @@
 build/
 managed_components/
 docs/doxygen-awesome-css
+.cache/
 
 # 防信息泄露的特别安全考虑
 

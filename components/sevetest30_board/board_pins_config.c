@@ -96,11 +96,11 @@ esp_err_t get_spi_pins_ledarray(spi_bus_config_t* spi_config, spi_device_interfa
 {
     //获取为LED阵列提供的SPI通讯IO定义
     if (spi_device_interface_config == NULL)return ESP_FAIL;
-    spi_device_interface_config->spics_io_num = LEDARRAY_SPI_CS_IO;
+    spi_device_interface_config->spics_io_num = -1;
 
     if (spi_config == NULL)return ESP_FAIL;
     spi_config->mosi_io_num = LEDARRAY_SPI_MOSI_IO;
-    spi_config->miso_io_num = LEDARRAY_SPI_MISO_IO;
+    spi_config->miso_io_num = -1;
     spi_config->sclk_io_num = LEDARRAY_SPI_SCLK_IO;
 
     return ESP_OK;

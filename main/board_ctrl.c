@@ -110,7 +110,7 @@ esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl)
 
     //初始化其他设备
     board_ctrl_init_report[SEVETEST30_GPIO_INIT] = sevetest30_gpio_init(board_ctrl->p_ext_io_mode, board_ctrl->p_ext_io_value);//初始化GPIO服务(包括扩展GPIO)
-    // board_ctrl_init_report[FONTS_CHIP_INIT] = fonts_chip_init();//字库芯片
+    board_ctrl_init_report[FONTS_CHIP_INIT] = fonts_chip_init();//字库芯片
     // board_ctrl_init_report[BL5372_CONFIG_INIT] = BL5372_config_init();//BL5372(离线RTC计时)
     // board_ctrl_init_report[AHT21_BEGIN] = AHT21_begin();//AHT21(温湿度传感器)
     // board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)

@@ -39,18 +39,39 @@
 #define GT32L32S0140_READ_DUMMY_BITS  0     //普通读 假时钟 位长度，主机发送读取指令时的延时时钟位数，用于调整通讯质量
 #define GT32L32S0140_READ_TIMEOUT_MS 1000   //读取通讯超时时间,单位ms
 
-#define GT32L32S0140_GB2312_MAP_BASE_ADD 0x3E618B //Unicode到GB2312映射表基地址
-#define GT32L32S0140_ZH_CN_12x_BASE_ADD  0x09670E //12x12点阵GB2312汉字&字符基地址
-#define GT32L32S0140_ASCII_6X12_BASE_ADD 0x080900 //6x12点阵ASCII字符基地址
+
+#define FONT_CHIP_READ_ASCII_6X12_BYTES 12 //一个6x12ASCII字模数据字节数 
+#define FONT_CHIP_READ_ASCII_8X16_BYTES 16 //一个8x16ASCII字模数据字节数 
 
 #define FONT_CHIP_READ_ZH_CN_12X_BYTES 12 * 2 //一个12x12中文字模数据字节数 
-#define FONT_CHIP_READ_ASCII_6X12_BYTES 12 //一个6x12ASCII字模数据字节数 
+#define FONT_CHIP_READ_ZH_CN_16X_BYTES 16 * 2 //一个16x16中文字模数据字节数 
+
+
+#define GT32L32S0140_GB2312_MAP_BASE_ADD 0x3E618B //Unicode到GB2312映射表基地址
+
+//以下为读取并推导出的结果,可以参考手册并使用二分法确定具体值,几个字节的差别会使字符显示的坐标异常，这是因为地址误差而读取了空白区域，可以参考手册字模微调
+//可以使用 ! 啊 等第一个字符作为锚点进行定位,在程序设置显示出他们,并根据实际显示结果字符与他们的编码距离确定地址
+#define GT32L32S0140_ASCII_6X12_BASE_ADD 0x080900 //6x12点阵ASCII字符基地址(读取并推导出的结果)
+#define GT32L32S0140_ASCII_8X16_BASE_ADD (GT32L32S0140_ASCII_6X12_BASE_ADD + 96 * FONT_CHIP_READ_ASCII_6X12_BYTES + 0)//8x16点阵ASCII字符基地址(表达式末尾数字是读取并推导出的偏移)
+#define GT32L32S0140_ZH_CN_12x_BASE_ADD  0x09670E //12x12点阵GB2312汉字&字符基地址(读取并推导出的结果)
+#define GT32L32S0140_ZH_CN_16x_BASE_ADD  (GT32L32S0140_ZH_CN_12x_BASE_ADD + 6763 * FONT_CHIP_READ_ZH_CN_12X_BYTES + 20424) //16x16点阵GB2312汉字&字符基地址(表达式末尾数字是读取并推导出的偏移)
+
+
+
 
 esp_err_t fonts_chip_init();
 
-void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest);
 
 void fonts_read_ASCII_6x12(uint32_t Unicode, uint8_t* dest);
+
+void fonts_read_ASCII_8x16(uint32_t Unicode, uint8_t* dest);
+
+
+
+void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest);
+
+void fonts_read_zh_CN_16x(uint32_t Unicode, uint8_t* dest);
+
 
 uint32_t UTF8_Unicode_get(char* utf_dat, uint32_t* Unicode_dest, int dest_len);
 

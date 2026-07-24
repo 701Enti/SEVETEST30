@@ -10,7 +10,6 @@ configure_file(
   "sevetest30_touch.h"                              
   "sevetest30_BWEDA.h" 
   "sevetest30_sound.h"
-  "BL5372.h" 
   "lsm6ds3trc.h" 
   "AHT21.h" 
   "AGS10.h" 
@@ -18,4 +17,5 @@ configure_file(
   "math_tools.h"
   "math_tools_fp64.h"
   "calibration_tools.h"
+  "default_UI_icon_data.h"
   )

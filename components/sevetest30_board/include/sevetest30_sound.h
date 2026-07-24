@@ -30,15 +30,18 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "audio_event_iface.h"
+#include "ringbuf.h"
+#include "audio_element.h"
 
-//元素配置
+
 #define ELEMENT_MP3_DECODER_TASK_CORE (0) //运行在的CPU核心-mp3编码器任务(音频元素)
 #define ELEMENT_MP3_DECODER_TASK_STACK_SIZE (4 * 1024) //运行堆栈大小(Byte)-mp3编码器任务(音频元素)
-
-
 #define ELEMENT_MP3_DECODER_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-mp3编码器(音频元素)
+
 #define ELEMENT_I2S_STREAM_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-I2S(音频元素)
-#define ELEMENT_HTTP_STREAM_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-HTTP音频流(音频元素)
+
+#define ELEMENT_HTTP_STREAM_RINGBUFFER_SIZE (64 * 1024) //循环缓冲区大小(Byte)-HTTP音频流(音频元素)
+
 #define ELEMENT_RAW_STREAM_RINGBUFFER_SIZE (8 * 1024) //循环缓冲区大小(Byte)-RAW原始音频流(音频元素)
 
 //MUSIC_PLAY-音频播放功能
@@ -60,6 +63,21 @@
 #define BAIDU_TTS_ENDPOINT "http://tsn.baidu.com/text2audio"//百度TTS uri
 
 
+
+// 记录当前I2S总线音频数据，使用自定义element - current_sound_collecter嵌入pipeline读取
+// 不受当前运行的音频任务影响，在audio_element_all_init()初始化后一直存在，不会销毁
+// 格式为ADF的标准PCM,直接反映音频波形
+#define CURRENT_SOUND_COLLECTER_TASK_STACK_SIZE (8 * 1024) //运行堆栈大小(Byte)-当前音频采集任务(音频元素)
+#define CURRENT_SOUND_BUF_SIZE (16 * 1024) //缓冲区大小，单位字节
+#define CURRENT_SOUND_BUF_WRITE_WAIT_TIME_MS 0 //缓冲区锁竞争超时，0表示不等待锁，单位ms
+#define CURRENT_SOUND_BUF_OVERFLOW_CLEAR_TIME_MS 50 //当缓冲区溢出后超过多长时间清空所有数据并开始覆盖新的数据，单位ms
+extern xSemaphoreHandle current_sound_buf_mutex; //当前音频缓冲区互斥锁
+extern char* current_sound_buf; //当前音频缓冲区，外部需要竞争并拿到锁再访问
+extern audio_element_info_t current_sound_info; //当前音频信息，包含采样率,声道数,位深,比特率等
+extern uint32_t current_sound_drop_in_bytes; // 当前缓冲区实时断流字节数
+extern volatile bool sevetest30_current_sound_collecter_running_flag; // 当前音频采集任务是否正在运行
+extern volatile bool current_sound_buf_overflow_flag; // 当前缓冲区是否溢出标志位
+extern int64_t current_sound_buf_overflow_time;           // 当前缓冲区溢出时的系统时间，单位us
 
 
 

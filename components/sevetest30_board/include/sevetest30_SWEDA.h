@@ -35,8 +35,8 @@
 #include "board_def.h"
 #include "AHT21.h"
 #include "AGS10.h"
-#include "BL5372.h"
 #include "lsm6ds3trc.h"
+// #include "BL5372.h"
 
 
 
@@ -86,10 +86,6 @@ void refresh_env_TVOC_data(bool crc_flag);
 
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);
 
-void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t* time, BL5372_alarm_cycle_plan_t* cycle_plan);
-
-
-
-void sync_systemtime_to_ext_rtc();
-
-void sync_systemtime_from_ext_rtc();
+// void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t* time, BL5372_alarm_cycle_plan_t* cycle_plan);
+// void sync_systemtime_to_ext_rtc();
+// void sync_systemtime_from_ext_rtc();

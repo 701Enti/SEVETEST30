@@ -38,16 +38,14 @@
 
 //FFT相关
 #define FFT_UI_TASK_CORE (0)     // FFT UI绘制任务核心
-#define FFT_UI_TASK_STACK_SIZE (3*1024)//FFT UI绘制任务堆栈大小
+#define FFT_UI_TASK_STACK_SIZE (4*1024)//FFT UI绘制任务堆栈大小
 
 #define FFT_N_SAMPLES 2048    // FFT 点数N 取2的整数次幂
-#define DSP_MAX_FFT_SIZE    2048    //最大FFT缓冲区大小
+#define DSP_MAX_FFT_SIZE  CONFIG_DSP_MAX_FFT_SIZE    //最大FFT缓冲区大小
 
-#define FFT_DAMPEN_MULTIPLES 50 // FFT 音频数据衰减倍数
-#define FFT_VIEW_DATA_MIN 0   // FFT UI视口音频数据最小值
-#define FFT_VIEW_DATA_MAX 500// FFT UI视口音频数据最大值
+#define FFT_VIEW_WIDTH_MAX 128 //// FFT UI视口宽度最大值
 
-#define FFT_VIEW_WIDTH_MAX 100 //// FFT UI视口宽度最大值
+#define FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS 10 //FFT读取当前音频缓冲区锁竞争超时，0表示不等待锁，单位ms
 
 
 //动画相关
@@ -56,24 +54,51 @@
 
 typedef struct UI_color_visual_cfg_t
 {
-   uint8_t value_max;  // 映射结果的最大值
+   uint8_t value_max;  // 映射结果(RGB颜色数据)的最大值 0 - 255
    int high;           // 较高的值
    int medium;         // 中等的值
    int low;            // 较低的值
    int public_divisor; // 公共除数，抑制数据变化动态，过大过小都会出现全部填充value_max的情况，导致色彩单一,可从 (high - low)/2 开始 调整到可视化动态效果最加即可
-   float x_multiples;  // 视口横向缩放倍数,控制视口的横向放大缩小 缩小<1 放大>1 不进行 (如横向视口放大到200% x_multiples = 2)
-   float x_move;       // 视口偏移系数  左偏移<0 右偏移>0 不进行 0 (如把视口向右横向偏移屏幕的一半 x_move = 0.5)
 } UI_color_visual_cfg_t;
+
+//什么是视口
+//视口是指不受屏幕尺寸约束情况下的音频数据可视化区域，即对FFT原生输出图谱数据的处理得出
+//本质是将FFT原生输出图谱数据,根据视口参数,进行处理和映射,即将宽度为点数N的原生FFT数据,映射到宽度为视口宽度width的数据
+//每个单位宽度数据取对应原生FFT数据的最大值
+//你可以通过调整视口宽度和高度,以及视口横向缩放倍数和视口偏移系数,来改变视口显示效果
+//同时你可以通过改变屏幕打印使用的xy坐标,来改变屏幕从视口截取的图像位置
+//因此，你主要通过改变视口参数,来改变显示效果,不是控制屏幕显示,而是间接控制
+
+//注意:
+//1. 视口宽度大于LINE_LED_NUMBER会显示不完整视口
+//2. 视口高度大于VERTICAL_LED_NUMBER会显示不完整视口
+//3. 设置的视口参数对应视口位置如果超出FFT输出范围,会自动裁切超出部分,导致部分数据丢失
 
 typedef struct music_FFT_UI_cfg_t
 {
+   bool lr_switch;///选择显示左声道或右声道，0为左声道，1为右声道
    int16_t x;///起始位置X坐标
    int16_t y;///起始位置Y坐标
    uint8_t change;///亮度调制
-   int width;///视口宽度 图谱显示会自动适应视口宽度
-   int height;///显示高度 会裁切不在显示高度的图谱
-   UI_color_visual_cfg_t visual_cfg;//频谱颜色可视化配置
+   UI_color_visual_cfg_t color_visual_cfg;//频谱颜色可视化配置
+   float x_multiples;  // 视口横向缩放倍数(缩放原点为最低频点0),控制视口的横向放大缩小 缩小<1且大于0 放大>1 不进行=1 (如横向视口放大到200% x_multiples = 2)
+   float x_move;       // 视口偏移系数 左偏移<0 右偏移>0 不进行 0 (如把视口向右横向偏移视口宽度的一半 x_move = 0.5)
+   int width;///视口宽度 图谱显示会按照设置参数适应视口宽度,如果你想显示完整视口,必须设置为等于或小于LINE_LED_NUMBER
+   int show_height_max;///显示图像的高度的最大值 会裁切不在显示高度最大值范围内的图谱
+   float dampen_multiples;///数据衰减倍数,必须大于0 >1表示衰减到原来1/2倍 <1表示放大到原来2倍
+   float data_max;///衰减后数据的最大值 会裁切不在数据最大值范围内的图谱
+   float data_min;///衰减后数据的最小值 会裁切不在数据最小值范围内的图谱
 }music_FFT_UI_cfg_t;
+
+typedef struct music_FFT_UI_t
+{
+   music_FFT_UI_cfg_t cfg;
+   bool volatile running_flag;
+}music_FFT_UI_t;
+
+typedef struct music_FFT_UI_t* music_FFT_UI_handle_t;
+
+
 
 
 typedef struct cartoon_ctrl_param_t {
@@ -183,9 +208,6 @@ typedef enum {
 }cartoon_run_mode_t;
 
 
-
-extern bool volatile sevetest30_fft_ui_running_flag;
-
 // 数据可视化函数
 void data_to_color(int data, UI_color_visual_cfg_t* visual_cfg, uint8_t* high, uint8_t* comfort, uint8_t* low);
 
@@ -207,14 +229,17 @@ uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint3
 
 void weather_UI_1(int16_t x, int16_t y, uint8_t change);
 
-void time_UI_1(int16_t x, int16_t y, uint8_t change);
+void time_UI_h_m(int16_t x, int16_t y, uint8_t change);
 
-void time_UI_2(int16_t x, int16_t y, uint8_t change);
+void time_UI_s(int16_t x, int16_t y, uint8_t change);
 
-void music_FFT_UI_draw(music_FFT_UI_cfg_t* UI_cfg);
+void time_UI_h_m_s(int16_t x, int16_t y, uint8_t change);
+
+void music_FFT_UI_draw(music_FFT_UI_handle_t handle);
 
 void main_UI_1();
 
-void music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority);
+music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t* UI_cfg, UBaseType_t priority);
+esp_err_t music_FFT_UI_stop(music_FFT_UI_handle_t handle);
 
 

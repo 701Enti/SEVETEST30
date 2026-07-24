@@ -33,6 +33,7 @@
 // bilibili: 701Enti
 
 #include "sevetest30_LedArray.h"
+#include "hal/gpio_types.h"
 #include "sevetest30_UI.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -87,8 +88,8 @@ void refresh_ALL_ONCE_Task()
 	esp_task_wdt_add(NULL); // 将当前任务挂载到当前设置核心的任务看门狗
 	while (1)
 	{
-		ledarray_show_frame();
 		esp_task_wdt_reset(); // 及时喂狗,防止当前核心重启
+		ledarray_show_frame();
 	}
 }
 
@@ -99,7 +100,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode)
 	switch (refresh_mode_buf)
 	{
 	case LEDARRAY_AUTO_REFRESH_ALL_ONCE:
-		vTaskDelete(xTaskGetHandle("ALL_ONCE"));
+		vTaskDelete(xTaskGetHandle("LED_REFRESH_AO"));
 		break;
 
 	default:
@@ -109,7 +110,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode)
 	switch (mode)
 	{
 	case LEDARRAY_AUTO_REFRESH_ALL_ONCE:
-		xTaskCreatePinnedToCore(&refresh_ALL_ONCE_Task, "ALL_ONCE",
+		xTaskCreatePinnedToCore(&refresh_ALL_ONCE_Task, "LED_REFRESH_AO",
 								LEDARRAY_REFRESH_TASK_STACK_SIZE, NULL, LEDARRAY_REFRESH_TASK_PRIO, NULL, LEDARRAY_REFRESH_TASK_CORE);
 		break;
 
@@ -198,7 +199,7 @@ uint64_t matrix_size(uint8_t *matrix_data)
 /// @param p       导入字模指针
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB顺序）
-/// @return [ESP_OK 成功 / ESP_FAIL 失败,无法占用互斥量 / ESP_ERR_INVALID_ARG 失败,输入了无法处理的空指针]
+/// @return [ESP_OK 成功 / ESP_FAIL 失败 / ESP_ERR_INVALID_ARG 失败,输入了无法处理的空指针]
 esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p, uint64_t byte_number, uint8_t in_color[3])
 {
 	const char *TAG = "separation_draw";
@@ -207,53 +208,46 @@ esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p, uint
 		ESP_LOGE(TAG, "输入了无法处理的空指针");
 		return ESP_ERR_INVALID_ARG;
 	}
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)))
-	{
-		uint64_t Dx = 0, Dy = 0; // xy的增加量
-		uint8_t data = 0x00;	 // 临时数据存储
-		uint8_t i = 0;			 // 临时变量i
-		int sx = 0;				 // 临时存储选定的横坐标
-		bool flag = 0;			 // 该像素是否需要点亮
-		uint8_t black[3] = {0};
-		uint8_t color[3] = {in_color[0], in_color[1], in_color[2]}; // 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
 
-		p--; // 地址初始补偿
-		while (byte_number)
+	uint64_t Dx = 0, Dy = 0; // xy的增加量
+	uint8_t data = 0x00;	 // 临时数据存储
+	uint8_t i = 0;			 // 临时变量i
+	int sx = 0;				 // 临时存储选定的横坐标
+	bool flag = 0;			 // 该像素是否需要点亮
+	uint8_t black[3] = {0};
+	uint8_t color[3] = {in_color[0], in_color[1], in_color[2]}; // 因为数组本质也是指针，所以下级改动，上级数据也会破坏，所以需要隔离
+
+	p--; // 地址初始补偿
+	while (byte_number)
+	{
+		p++; // 地址偏移
+		for (i = 0; i <= 7; i++)
 		{
-			p++; // 地址偏移
-			for (i = 0; i <= 7; i++)
+			// 数据解析
+			data = *p;				   // 读取数据
+			flag = (data << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
+
+			// 存储到缓冲区
+			sx = x + Dx;
+
+			if (flag)
+				color_input(sx, y + Dy, color);
+			else
+				color_input(sx, y + Dy, black);
+
+			if (Dx == breadth - 1)
 			{
-				// 数据解析
-				data = *p;				   // 读取数据
-				flag = (data << i) & 0x80; // 位移取出一个bit数据，flag显示了选定的像素要不要点亮
-
-				// 存储到缓冲区
-				sx = x + Dx - 1;
-
-				if (flag)
-					color_input(sx, y + Dy, color);
-				else
-					color_input(sx, y + Dy, black);
-
-				if (Dx == breadth - 1)
-				{
-					Dx = 0; // 横向写入最后一个像素完毕，回车
-					Dy++;	// 横向写入最后一个像素完毕，回车
-					i = 8;	// 横向写入最后一个像素完毕，强制退出，等待地址偏移
-				}
-				else
-					Dx++; // 确定写入完成一个像素
+				Dx = 0; // 横向写入最后一个像素完毕，回车
+				Dy++;	// 横向写入最后一个像素完毕，回车
+				i = 8;	// 横向写入最后一个像素完毕，强制退出，等待地址偏移
 			}
-			byte_number--; // 一个字节写入完成
+			else
+				Dx++; // 确定写入完成一个像素
 		}
-		xSemaphoreGive(refresh_Task_Mutex);
-		return ESP_OK;
+		byte_number--; // 一个字节写入完成
 	}
-	else
-	{
-		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入绘制缓存");
-		return ESP_FAIL;
-	}
+
+	return ESP_OK;
 }
 
 /// @brief 彩色图像直显方式 取模方式适配Img2Lcd
@@ -262,7 +256,7 @@ esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p, uint
 /// @param x 图案横坐标(有效显示区x=1 到 LINE_LED_NUMBER，超出不显示，不报错)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(有效显示区y=1 到 VERTICAL_LED_NUMBER，超出不显示，不报错)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param p 导入图像数据(包含图像数据头)的位置
-/// @return [ESP_OK 成功 / ESP_FAIL 失败,无法占用互斥量 /ESP_ERR_INVALID_ARG  失败,输入了无法处理的空指针]
+/// @return [ESP_OK 成功 / ESP_FAIL 失败 /ESP_ERR_INVALID_ARG  失败,输入了无法处理的空指针]
 esp_err_t direct_draw(int x, int y, const uint8_t *p)
 {
 	const char *TAG = "direct_draw";
@@ -271,99 +265,69 @@ esp_err_t direct_draw(int x, int y, const uint8_t *p)
 		ESP_LOGE(TAG, "输入了无法处理的空指针");
 		return ESP_ERR_INVALID_ARG;
 	}
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)))
+
+	uint64_t Dx = 0, Dy = 0;			  // xy的增加量
+	int sx = 0;							  // 临时存储选定的横坐标
+	uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
+
+	// 获取图案长宽数据
+	uint64_t length = 0, breadth = 0; // 长宽信息
+	uint8_t data[4] = {0x00};		  // 临时数据存储
+	p += 0x02;						  // 偏移到长宽数据区
+	for (uint8_t i = 0; i < 4; i++)
 	{
-		uint64_t Dx = 0, Dy = 0;			  // xy的增加量
-		int sx = 0;							  // 临时存储选定的横坐标
-		uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
-
-		// 获取图案长宽数据
-		uint64_t length = 0, breadth = 0; // 长宽信息
-		uint8_t data[4] = {0x00};		  // 临时数据存储
-		p += 0x02;						  // 偏移到长宽数据区
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			data[i] = *p;
-			p++;
-		}
-		breadth = (data[1] << 8) | data[0];
-		length = (data[3] << 8) | data[2];
-		// 图像解析
-		p += 0x02;				   // 偏移到图像数据区
-		uint8_t color[3] = {0x00}; // 临时数据存储
-		while (length)
-		{
-			// 获取颜色数据
-			pT1 = p;
-			pT2 = p + 0x01;
-			pT3 = p + 0x02;
-			color[0] = *pT1;
-			color[1] = *pT2;
-			color[2] = *pT3;
-
-			sx = x + Dx - 1;
-			color_input(sx, y + Dy, color);
-
-			if (Dx == breadth - 1)
-			{
-				Dx = 0; // 横向写入最后一个像素完毕，回车
-				Dy++;	// 横向写入最后一个像素完毕，回车
-				length--;
-			}
-			else
-				Dx++;
-			p += 0x03; // 地址被动偏移
-		}
-		xSemaphoreGive(refresh_Task_Mutex);
-		return ESP_OK;
+		data[i] = *p;
+		p++;
 	}
-	else
+	breadth = (data[1] << 8) | data[0];
+	length = (data[3] << 8) | data[2];
+	// 图像解析
+	p += 0x02;				   // 偏移到图像数据区
+	uint8_t color[3] = {0x00}; // 临时数据存储
+	while (length)
 	{
-		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入绘制缓存");
-		return ESP_FAIL;
+		// 获取颜色数据
+		pT1 = p;
+		pT2 = p + 0x01;
+		pT3 = p + 0x02;
+		color[0] = *pT1;
+		color[1] = *pT2;
+		color[2] = *pT3;
+
+		sx = x + Dx - 1;
+		color_input(sx, y + Dy, color);
+
+		if (Dx == breadth - 1)
+		{
+			Dx = 0; // 横向写入最后一个像素完毕，回车
+			Dy++;	// 横向写入最后一个像素完毕，回车
+			length--;
+		}
+		else
+			Dx++;
+		p += 0x03; // 地址被动偏移
 	}
+	return ESP_OK;
 }
 
 /*******************************************************图像操作绘制函数**********************************************************/
 /// @brief 清空所有图像缓存
-/// @return [ESP_OK 成功 / ESP_FAIL 失败,无法占用互斥量]
-esp_err_t clean_all_draw_buf()
+void clean_all_draw_buf()
 {
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)))
-	{
-		memset(ledarray_blue_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-		memset(ledarray_green_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-		memset(ledarray_red_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-		memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
-		xSemaphoreGive(refresh_Task_Mutex);
-		return ESP_OK;
-	}
-	else
-	{
-		ESP_LOGE("clean_all_draw_buf", "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清空所有图像缓存");
-		return ESP_FAIL;
-	}
+	memset(ledarray_blue_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+	memset(ledarray_green_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+	memset(ledarray_red_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+	memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
 }
 
 /// @brief 清空指定行的图像缓存
 /// @param y 指定行纵坐标(从1开始,1到VERTICAL_LED_NUMBER)
-/// @return [ESP_OK 成功 / ESP_FAIL 失败,无法占用互斥量]
-esp_err_t clean_draw_buf(int y)
+void clean_draw_buf(int y)
 {
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)))
+	uint8_t data[3] = {0};
+	for (int i = 0; i < LINE_LED_NUMBER; i++)
 	{
-		uint8_t data[3] = {0};
-		for (int i = 0; i < LINE_LED_NUMBER; i++)
-		{
-			color_input(i, y, data);
-		}
-		xSemaphoreGive(refresh_Task_Mutex);
-		return ESP_OK;
-	}
-	else
-	{
-		ESP_LOGE("clean_draw_buf", "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清空指定行的图像缓存");
-		return ESP_FAIL;
+		color_input(i, y, data);
 	}
 }
 
@@ -371,49 +335,37 @@ esp_err_t clean_draw_buf(int y)
 /// @param y 指定行纵坐标
 /// @param step 步进值
 /// @param color 目标颜色
-/// @return [ESP_OK 成功 / ESP_FAIL 失败,无法占用互斥量]
-esp_err_t progress_draw_buf(int y, uint8_t step, uint8_t *color)
+void progress_draw_buf(int y, uint8_t step, uint8_t *color)
 {
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)))
+	uint8_t data[3] = {0};
+	for (int i = 0; i < LINE_LED_NUMBER; i++)
 	{
-		uint8_t data[3] = {0};
-		for (int i = 0; i < LINE_LED_NUMBER; i++)
+		color_output(i, y, data);
+		for (int j = 0; j < 3; j++)
 		{
-			color_output(i, y, data);
-			for (int j = 0; j < 3; j++)
+			if (color[j] >= 0 && color[j] <= 255)
 			{
-				if (color[j] >= 0 && color[j] <= 255)
+				if (data[j] < color[j])
 				{
-					if (data[j] < color[j])
-					{
-						if (255 - data[j] >= step)
-							data[j] += step;
-						else
-							data[j] = color[j];
-					}
-					if (data[j] > color[j])
-					{
-						if (data[j] >= step)
-							data[j] -= step;
-						else
-							data[j] = color[j];
-					}
+					if (255 - data[j] >= step)
+						data[j] += step;
+					else
+						data[j] = color[j];
 				}
-				else
+				if (data[j] > color[j])
 				{
-					data[j] = color[j];
+					if (data[j] >= step)
+						data[j] -= step;
+					else
+						data[j] = color[j];
 				}
 			}
-			color_input(i, y, data);
+			else
+			{
+				data[j] = color[j];
+			}
 		}
-
-		xSemaphoreGive(refresh_Task_Mutex);
-		return ESP_OK;
-	}
-	else
-	{
-		ESP_LOGE("progress_draw_buf", "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全渐进指定行的图像");
-		return ESP_FAIL;
+		color_input(i, y, data);
 	}
 }
 
@@ -478,7 +430,7 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3])
 	separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_7), color); // 因为，数字字模数据大小一样，随便输入一个字模就可以
 }
 
-/// @brief 通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @brief (12x12大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
 /// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
@@ -574,7 +526,7 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...)
 	font_buf = NULL;
 }
 
-/// @brief 通过字库芯片支持在LED阵列滚动打印任意字符
+/// @brief (12x12大小标准)通过字库芯片支持在LED阵列滚动打印任意字符
 /// @param x 初始横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
 /// @param y 初始纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
@@ -613,7 +565,6 @@ void font_roll_print_12x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 
 	// 获取所有要显示字符的Unicode,以及字符总个数
 	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
-
 	// 申请字符点阵数据缓存
 	uint8_t *font_buf = NULL;
 	font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t));
@@ -732,11 +683,264 @@ void font_roll_print_12x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 	font_buf = NULL;
 }
 
+/// @brief (16x16大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param format 形式同printf的可变参量表
+void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...)
+{
+	const char *TAG = "font_raw_print_16x";
+
+	// 申请字符unicode编码缓存
+	uint32_t *buf_unicode = NULL;
+	buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+	while (!buf_unicode)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
+		buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+	}
+	memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+
+	// 申请UTF-8编码缓存
+	char *str_buf = NULL;
+	str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+	while (!str_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+		str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+	}
+	memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+	// 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+	// 获取所有要显示字符的Unicode,以及字符总个数
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
+
+	// 申请字符点阵数据缓存
+	uint8_t *font_buf = NULL;
+	font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+	while (!font_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+		font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+	}
+	memset(font_buf, 0, total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+
+	int idx = 0;			// 选定操作的为[idx]号字符
+	uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+	// 从字库读取所有字符的点阵数据到font_buf
+	for (idx = 0; idx < total_unit; idx++)
+	{
+		if (buf_unicode[idx] >= 128)
+		{
+			fonts_read_zh_CN_16x(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
+		}
+		else
+		{																							  // Unicode小于128兼容ASCII字符集
+			fonts_read_ASCII_8x16(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
+			ASCII_num++;
+		}
+	}
+
+	int x_buf = 0;	// 当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_base = 0; // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
+
+	// 绘制所有字符
+	for (idx = 0; idx < total_unit; idx++)
+	{
+		x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+		if (buf_unicode[idx] >= 128)
+		{
+			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+				separation_draw(x_buf, y, 16, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ZH_CN_16X_BYTES, color);
+			x_base += 16;
+		}
+		else
+		{ // Unicode小于128兼容ASCII字符集
+			if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+				separation_draw(x_buf, y, 8, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ASCII_8X16_BYTES, color);
+			x_base += 8;
+		}
+	}
+	// 释放所有缓存
+	free(buf_unicode);
+	buf_unicode = NULL;
+	free(str_buf);
+	str_buf = NULL;
+	free(font_buf);
+	font_buf = NULL;
+}
+
+/// @brief (16x16大小标准)通过字库芯片支持在LED阵列滚动打印任意字符
+/// @param x 初始横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y 初始纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param cartoon_handle sevetest30_UI动画支持句柄,填写句柄启用预设的动画,填写NULL以使用默认效果
+/// @param format 形式同printf的可变参量表
+void font_roll_print_16x(int x, int y, uint8_t color[3], cartoon_handle_t cartoon_handle, char *format, ...)
+{
+	const char *TAG = "font_roll_print_16x";
+
+	// 申请字符unicode编码缓存
+	uint32_t *buf_unicode = NULL;
+	buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+	while (!buf_unicode)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
+		buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+	}
+	memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+
+	// 申请UTF-8编码缓存
+	char *str_buf = NULL;
+	str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+	while (!str_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+		str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+	}
+	memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+	// 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+	va_list ap;
+	va_start(ap, format);
+	vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+	// 获取所有要显示字符的Unicode,以及字符总个数
+	uint32_t total_unit = UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
+	// 申请字符点阵数据缓存
+	uint8_t *font_buf = NULL;
+	font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+	while (!font_buf)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+		font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+	}
+	memset(font_buf, 0, total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+
+	int idx = 0;			// 选定操作的为[idx]号字符
+	uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+	// 从字库读取所有字符的点阵数据到font_buf
+	for (idx = 0; idx < total_unit; idx++)
+	{
+		if (buf_unicode[idx] >= 128)
+		{
+			fonts_read_zh_CN_16x(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
+		}
+		else
+		{																							  // Unicode小于128兼容ASCII字符集
+			fonts_read_ASCII_8x16(buf_unicode[idx], &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
+			ASCII_num++;
+		}
+	}
+
+	// 绘制图像形成滚动效果
+	uint32_t step = 0; // 当前步进值
+	int x_buf = 0;	   // 当前选定的[idx]号字符点阵图像的起始x轴坐标
+	int x_base = 0;	   // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平步数距离,这在计算[idx-1]号字符时完成累加
+
+	// 如果把要滚动的字符看做一列火车车厢,屏幕看作一条小于车长的直隧洞
+	// 那么隧洞有车厢存在的时间,为车头进入一刻,直到车尾离开一刻,这段时间移动距离为隧洞和车厢总长和
+	// 因此这里,滚动总长度为字符链长+屏幕长,由于可显示的最小移动为一个像素点的偏移,将这个偏移称为1步,长度使用对应步数来标识
+	// 因为每个字符将发生的位移一致,使用变量step作为所有字符的当前向左偏移步数,由于偏移方向与规定的屏幕x轴正方向(向右)相反,在坐标偏移运算中作减法
+	// 从而,x_buf的值为对应字符([idx]号字符)在运动未开始时的初始x坐标,再减去step,过程中,step将由0累加到字符链长+屏幕长
+
+	// 第1种方式 - 使用默认动画绘制
+	if (!cartoon_handle)
+	{
+		for (step = 0; step < ASCII_num * 8 + (total_unit - ASCII_num) * 16 + LINE_LED_NUMBER; step++)
+		{
+			// 在当前step偏移下刷新一帧图像
+			for (idx = 0; idx < total_unit; idx++)
+			{
+				x_buf = (x - 1) + LINE_LED_NUMBER + x_base - step; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1为初始坐标的绝对偏移坐标)
+				// 仅对可视范围内字符进行绘制
+
+				if (buf_unicode[idx] >= 128)
+				{
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, y, 16, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ZH_CN_16X_BYTES, color);
+					x_base += 16;
+				}
+				else
+				{ // Unicode小于128兼容ASCII字符集
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, y, 8, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ASCII_8X16_BYTES, color);
+					x_base += 8;
+				}
+			}
+			vTaskDelay(pdMS_TO_TICKS(50));
+			x_base = 0; // 重置字符间隔偏移缓存
+		}
+	}
+
+	// 第2种方式 - 运行sevetest30_UI提供的动画支持服务
+	if (cartoon_handle)
+	{
+		cartoon_handle->create_callback(cartoon_handle,
+										ASCII_num * 8 + (total_unit - ASCII_num) * 16 + LINE_LED_NUMBER); // 生成动画
+		// 创建控制对象
+		int32_t cx = x;										// 需要控制的x轴坐标数据,hook函数只写
+		int32_t cy = y;										// 需要控制的y轴坐标数据,hook函数只写
+		uint8_t ccolor[3] = {color[0], color[1], color[2]}; // 需要控制的颜色数据,hook函数只写
+		cartoon_ctrl_object_t object = {
+			.pstep = &step,
+			.px = &cx,
+			.py = &cy,
+			.pcolor = ccolor,
+		};
+		for (step = 0; step < ASCII_num * 8 + (total_unit - ASCII_num) * 16 + LINE_LED_NUMBER; step++)
+		{
+			// 调用钩子函数调整控制对象
+			cartoon_handle->ctrl_hook(cartoon_handle, &object);
+			for (idx = 0; idx < total_unit; idx++)
+			{
+				x_buf = (x - 1) + (cx - 1) + LINE_LED_NUMBER + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1 cx-1为绝对偏移坐标)
+				// 仅对可视范围内字符进行绘制
+				if (buf_unicode[idx] >= 128)
+				{
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, cy + (y - 1), 16, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ZH_CN_16X_BYTES, ccolor);
+					x_base += 16;
+				}
+				else
+				{ // Unicode小于128兼容ASCII字符集
+					if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+						separation_draw(x_buf, cy + (y - 1), 8, &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES], FONT_CHIP_READ_ASCII_8X16_BYTES, ccolor);
+					x_base += 8;
+				}
+			}
+			vTaskDelay(pdMS_TO_TICKS(50));
+			x_base = 0; // 重置字符间隔偏移缓存
+		}
+	}
+
+	// 释放所有缓存
+	free(buf_unicode);
+	buf_unicode = NULL;
+	free(str_buf);
+	str_buf = NULL;
+	free(font_buf);
+	font_buf = NULL;
+}
+
 /*******************************************************显示驱动函数**********************************************************/
 
 /// @brief  初始化灯板阵列
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题 / refresh_Task_Mutex互斥量已经被意外创建]
+/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题 / 无法获取refresh_Task_Mutex互斥量 / refresh_Task_Mutex互斥量已经被意外创建]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 / RMT控制器之前已经安装,请调用对应rmt_driver_uninstall释放需要的资源]
 /// @return [ESP_ERR_INVALID_ARG 参数错误]
 /// @return [ESP_ERR_NO_MEM 内存不足]
@@ -768,110 +972,129 @@ esp_err_t ledarray_init()
 		}
 	}
 
-	xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS));
-
-	// 申请显示数据内存空间
-	ledarray_blue_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	ledarray_green_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	ledarray_red_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	ledarray_tx_buf = (uint8_t *)malloc(LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
-	if (!ledarray_blue_layer_buf || !ledarray_green_layer_buf || !ledarray_red_layer_buf || !ledarray_tx_buf)
+	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS)) == pdTRUE)
 	{
-		ESP_LOGE(TAG, "申请显示数据内存空间失败");
-		return ESP_ERR_NO_MEM;
-	}
-	memset(ledarray_blue_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	memset(ledarray_green_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	memset(ledarray_red_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-	memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
 
-	// 配置spi总线
-	spi_bus_config_t bus_config = {
-		.mosi_io_num = -1,
-		.miso_io_num = -1,
-		.sclk_io_num = -1,
-		.quadwp_io_num = -1,
-		.quadhd_io_num = -1,
-		.data4_io_num = -1,
-		.data5_io_num = -1,
-		.data6_io_num = -1,
-		.data7_io_num = -1,
-		.max_transfer_sz = SOC_SPI_MAXIMUM_BUFFER_SIZE,
-		.flags = SPICOMMON_BUSFLAG_MASTER,
-	};
-	spi_device_interface_config_t interface_config = {
-		.command_bits = 0,
-		.address_bits = 0,
-		.dummy_bits = 0,
-		.mode = 0,
-		.clock_speed_hz = LEDARRAY_SPI_FREQ,
-		.spics_io_num = -1,
-		.queue_size = 1,
-		.flags = SPI_DEVICE_HALFDUPLEX,
-	};
+		// 申请显示数据内存空间
+		ledarray_blue_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		ledarray_green_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		ledarray_red_layer_buf = (uint8_t *)malloc(LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		ledarray_tx_buf = (uint8_t *)malloc(LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
+		if (!ledarray_blue_layer_buf || !ledarray_green_layer_buf || !ledarray_red_layer_buf || !ledarray_tx_buf)
+		{
+			ESP_LOGE(TAG, "申请显示数据内存空间失败");
+			return ESP_ERR_NO_MEM;
+		}
+		memset(ledarray_blue_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		memset(ledarray_green_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		memset(ledarray_red_layer_buf, 0, LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+		memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
 
-	// 按照board_def中的引脚配置修改上面初步配置,之后是最终引脚配置
-	ESP_RETURN_ON_ERROR(get_spi_pins_ledarray(&bus_config, &interface_config), TAG, "获取为LED阵列提供的SPI通讯IO定义时发现问题");
+		// 配置spi总线
+		spi_bus_config_t bus_config = {
+			.mosi_io_num = -1,
+			.miso_io_num = -1,
+			.sclk_io_num = -1,
+			.quadwp_io_num = -1,
+			.quadhd_io_num = -1,
+			.data4_io_num = -1,
+			.data5_io_num = -1,
+			.data6_io_num = -1,
+			.data7_io_num = -1,
+			.max_transfer_sz = SOC_SPI_MAXIMUM_BUFFER_SIZE,
+			.flags = SPICOMMON_BUSFLAG_MASTER,
+		};
+		spi_device_interface_config_t interface_config = {
+			.command_bits = 0,
+			.address_bits = 0,
+			.dummy_bits = 0,
+			.mode = 0,
+			.clock_speed_hz = LEDARRAY_SPI_FREQ,
+			.spics_io_num = -1,
+			.queue_size = 1,
+			.flags = SPI_DEVICE_HALFDUPLEX,
+		};
 
-	// 配置spi并载入设备
-	ESP_RETURN_ON_ERROR(spi_bus_initialize(LEDARRAY_SPI_ID, &bus_config, SPI_DMA_CH_AUTO), TAG, "初始化SPI异常");
-	ESP_RETURN_ON_ERROR(spi_bus_add_device(LEDARRAY_SPI_ID, &interface_config, &ledarray_spi_handle), TAG, "添加SPI设备异常");
+		// 按照board_def中的引脚配置修改上面初步配置,之后是最终引脚配置
+		ESP_RETURN_ON_ERROR(get_spi_pins_ledarray(&bus_config, &interface_config), TAG, "获取为LED阵列提供的SPI通讯IO定义时发现问题");
 
-	// 配置其他IO
-	esp_err_t err = ESP_OK;
+		// 配置spi并载入设备
+		ESP_RETURN_ON_ERROR(spi_bus_initialize(LEDARRAY_SPI_ID, &bus_config, SPI_DMA_CH_AUTO), TAG, "初始化SPI异常");
+		ESP_RETURN_ON_ERROR(spi_bus_add_device(LEDARRAY_SPI_ID, &interface_config, &ledarray_spi_handle), TAG, "添加SPI设备异常");
 
-	gpio_config_t gpio_ledarray = {
-		.mode = GPIO_MODE_OUTPUT,
-		.pull_up_en = GPIO_PULLUP_DISABLE,
-		.pull_down_en = GPIO_PULLDOWN_DISABLE,
-		.intr_type = GPIO_INTR_DISABLE,
-	};
+		// 设置合适的灯板SPI相关引脚驱动能力,减少干扰并提升抗干扰能力
+		gpio_set_drive_capability(LEDARRAY_SPI_MOSI_IO, GPIO_DRIVE_CAP_0);
+		gpio_set_drive_capability(LEDARRAY_SPI_SCLK_IO, GPIO_DRIVE_CAP_3);
 
-	err |= gpio_force_unhold_all();
+		// 配置其他IO
+		esp_err_t err = ESP_OK;
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_LE_IO;
-	err |= gpio_reset_pin(LEDARRAY_LE_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_LE_IO, 0);
+		gpio_config_t gpio_ledarray = {
+			.mode = GPIO_MODE_OUTPUT,
+			.pull_up_en = GPIO_PULLUP_DISABLE,
+			.pull_down_en = GPIO_PULLDOWN_DISABLE,
+			.intr_type = GPIO_INTR_DISABLE,
+		};
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_OE_IO;
-	err |= gpio_reset_pin(LEDARRAY_OE_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_OE_IO, 1);
+		err |= gpio_force_unhold_all();
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSE_IO;
-	err |= gpio_reset_pin(LEDARRAY_CSE_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_CSE_IO, 0);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_LE_IO;
+		err |= gpio_reset_pin(LEDARRAY_LE_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_LE_IO, 0);
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA0_IO;
-	err |= gpio_reset_pin(LEDARRAY_CSA0_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_CSA0_IO, 0);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_OE_IO;
+		err |= gpio_reset_pin(LEDARRAY_OE_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_OE_IO, 1);
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA1_IO;
-	err |= gpio_reset_pin(LEDARRAY_CSA1_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_CSA1_IO, 0);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSE_IO;
+		err |= gpio_reset_pin(LEDARRAY_CSE_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_CSE_IO, 0);
 
-	gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA2_IO;
-	err |= gpio_reset_pin(LEDARRAY_CSA2_IO);
-	err |= gpio_config(&gpio_ledarray);
-	err |= gpio_set_level(LEDARRAY_CSA2_IO, 0);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA0_IO;
+		err |= gpio_reset_pin(LEDARRAY_CSA0_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_CSA0_IO, 0);
 
-	xSemaphoreGive(refresh_Task_Mutex);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA1_IO;
+		err |= gpio_reset_pin(LEDARRAY_CSA1_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_CSA1_IO, 0);
 
-	// 设置自动刷新模式为默认模式
-	ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
+		gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA2_IO;
+		err |= gpio_reset_pin(LEDARRAY_CSA2_IO);
+		err |= gpio_config(&gpio_ledarray);
+		err |= gpio_set_level(LEDARRAY_CSA2_IO, 0);
 
-	if (err == ESP_OK)
-	{
-		ESP_LOGW(TAG, " %d X %d LED阵列初始化完成 当前自动刷新服务模式 %d", LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_REFRESH_INIT_MODE);
-		return ESP_OK;
+		// 设置合适的引脚驱动能力,减少干扰并提升抗干扰能力
+		gpio_set_drive_capability(LEDARRAY_OE_IO, GPIO_DRIVE_CAP_3);
+		gpio_set_drive_capability(LEDARRAY_LE_IO, GPIO_DRIVE_CAP_3);
+		gpio_set_drive_capability(LEDARRAY_CSE_IO, GPIO_DRIVE_CAP_3);
+		gpio_set_drive_capability(LEDARRAY_CSA0_IO, GPIO_DRIVE_CAP_3);
+		gpio_set_drive_capability(LEDARRAY_CSA1_IO, GPIO_DRIVE_CAP_3);
+		gpio_set_drive_capability(LEDARRAY_CSA2_IO, GPIO_DRIVE_CAP_3);
+
+		xSemaphoreGive(refresh_Task_Mutex);
+
+		// 设置自动刷新模式为默认模式
+		ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
+
+		if (err == ESP_OK)
+		{
+			ESP_LOGW(TAG, " %d X %d LED阵列初始化完成 当前自动刷新服务模式 %d", LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_REFRESH_INIT_MODE);
+			return ESP_OK;
+		}
+		else
+		{
+			ESP_LOGE(TAG, "LED阵列初始化GPIO时发现问题");
+			return ESP_FAIL;
+		}
 	}
 	else
 	{
-		ESP_LOGE(TAG, "LED阵列初始化GPIO时发现问题");
+		ESP_LOGE(TAG, "LED阵列初始化时发现问题,无法获取refresh_Task_Mutex互斥量");
 		return ESP_FAIL;
 	}
 }
@@ -895,7 +1118,7 @@ esp_err_t ledarray_deinit()
 	ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 
 	// 安全终止工作并删除互斥量
-	BaseType_t ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS));
+	BaseType_t ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
 	if (ret != pdTRUE)
 	{
 		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清理");
@@ -907,7 +1130,7 @@ esp_err_t ledarray_deinit()
 	xSemaphoreGive(refresh_Task_Mutex);
 	vTaskDelay(100);
 
-	ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS));
+	ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
 	if (ret != pdTRUE)
 	{
 		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清理");
@@ -954,18 +1177,18 @@ esp_err_t ledarray_show_frame()
 
 	if (spi_device_acquire_bus(ledarray_spi_handle, portMAX_DELAY) == ESP_OK)
 	{
-		int bcm_bit_plane_idx = 0;								 // BCM调光算法 - 场索引
-		BaseType_t bcm_delay_nop_num = 1;						 // BCM调光算法 - 单位时延对应的NOP空指令个数
-		const int bcm_weight[8] = {1, 2, 4, 8, 16, 32, 64, 128}; // BCM调光算法 - 位权
+		int bcm_bit_plane_idx = 0;										   // BCM调光算法 - 场索引
+		BaseType_t bcm_delay_nop_num = LEDARRAY_REFRESH_BCM_DELAY_NOP_NUM; // BCM调光算法 - 单位时延对应的NOP空指令个数
+		const int bcm_weight[8] = {1, 2, 4, 8, 16, 32, 64, 128};		   // BCM调光算法 - 位权
 
 		spi_transaction_t trans_tx = {
 			.length = LINE_LED_NUMBER * 3,
 			.tx_buffer = ledarray_tx_buf,
 		};
 
-		if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS)) != pdTRUE)
+		if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) != pdTRUE)
 		{
-			ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
+			// ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
 			return ESP_FAIL;
 		}
 
@@ -975,6 +1198,7 @@ esp_err_t ledarray_show_frame()
 			{
 
 				// 计算行数据
+				memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
 				for (int m = 0; m < LINE_LED_NUMBER; m++)
 				{
 					// 级联中，越靠后的芯片数据越先发送,16bits先发高八位,再发低八位,每个字节的位号与引脚对应，如 D0(低八位) -> OUT0,D1(低八位) -> OUT1,D0(高八位)->OUT8,D1(高八位)->OUT9
@@ -983,7 +1207,7 @@ esp_err_t ledarray_show_frame()
 					ledarray_tx_buf[2 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_green_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
 				}
 
-				// 灭灯消隐
+				// 确保灭灯
 				gpio_set_level(LEDARRAY_OE_IO, 1);
 
 				// 发送行数据
@@ -993,27 +1217,29 @@ esp_err_t ledarray_show_frame()
 				gpio_set_level(LEDARRAY_LE_IO, 1);
 				gpio_set_level(LEDARRAY_LE_IO, 0);
 
+				// 选定ICND2013,仅需要在需要切换时改变电平
+				if (n == 0)
+				{
+					gpio_set_level(LEDARRAY_CSE_IO, 0); // 控制第一个ICND2013,对应y=1-8
+				}
+				if (n == VERTICAL_LED_NUMBER / 2)
+				{
+					gpio_set_level(LEDARRAY_CSE_IO, 1); // 控制第二个ICND2013,对应y=9-16
+				}
 
 				// 切换到下一行
 				uint32_t s = 0;
 				if (n >= 0 && n < VERTICAL_LED_NUMBER / 2)
 				{
-					gpio_set_level(LEDARRAY_CSE_IO, 0); // 控制第一个ICND2013,对应y=1-8
 					s = n;
 				}
 				else
 				{
-					gpio_set_level(LEDARRAY_CSE_IO, 1); // 控制第二个ICND2013,对应y=9-16
 					s = n - VERTICAL_LED_NUMBER / 2;
 				}
 				gpio_set_level(LEDARRAY_CSA0_IO, (s >> 0) & 0x01);
 				gpio_set_level(LEDARRAY_CSA1_IO, (s >> 1) & 0x01);
 				gpio_set_level(LEDARRAY_CSA2_IO, (s >> 2) & 0x01);
-
-				for (int d = 0; d < 50; d++)
-				{
-					asm volatile("nop");
-				}
 
 				// 点亮当前行
 				gpio_set_level(LEDARRAY_OE_IO, 0);
@@ -1023,6 +1249,7 @@ esp_err_t ledarray_show_frame()
 				{
 					asm volatile("nop");
 				}
+
 			}
 		}
 

@@ -6,12 +6,12 @@ set(COMPONENT_SRCS
 ./sevetest30_LedArray.c
 ./sevetest30_gpio.c
 ./sevetest30_UI.c
+./default_UI_icon_data.c
 ./sevetest30_SWEDA.c
 ./board_ctrl.c
 ./gt32l32s0140.c
 ./sevetest30_touch.c
 ./sevetest30_sound.c
-./BL5372.c
 ./lsm6ds3trc.c
 ./AHT21.c
 ./AGS10.c

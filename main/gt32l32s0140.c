@@ -68,7 +68,7 @@ esp_err_t fonts_chip_init()
         .mode = GT32L32S0140_SPI_MODE,
         .clock_speed_hz = FONT_CHIP_SPI_FREQ,
         .spics_io_num = -1,//随后在get_spi_pins设置
-        .queue_size = FONT_CHIP_SPI_QUEUE_SIZE,
+        .queue_size = 1,
     };
 
 
@@ -121,56 +121,6 @@ esp_err_t fonts_chip_init()
     return ret;
 }
 
-/// @brief 从字库读取12x12汉字字模,可以作为绘制函数的字模参数
-/// @param Unicode 汉字字模的Unicode编码
-/// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够GT32L32S0140_READ_CN_12X_BYTES
-void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest)
-{
-    const char* TAG = "fonts_read_zh_CN_12x";
-    esp_err_t ret = ESP_OK;
-
-    if (!fonts_chip_handle) {
-        return;
-    }
-
-    //获取对应GB2312编码
-    uint32_t GB2312_buf = 0;
-    GB2312_buf = UnicodeToGB2312(Unicode);
-
-    spi_transaction_t transaction;
-
-    //计算内部地址
-    if ((GB2312_buf >> 8) >= 0xA1 && (GB2312_buf >> 8) <= 0XA9 && (GB2312_buf & 0xFF) >= 0xA1)
-        transaction.addr = (((GB2312_buf >> 8) - 0xA1) * 94 + ((GB2312_buf & 0xFF) - 0xA1)) * 24 + GT32L32S0140_ZH_CN_12x_BASE_ADD;
-    else if ((GB2312_buf >> 8) >= 0xB0 && (GB2312_buf >> 8) <= 0xF7 && (GB2312_buf & 0xFF) >= 0xA1)
-        transaction.addr = (((GB2312_buf >> 8) - 0xB0) * 94 + ((GB2312_buf & 0xFF) - 0xA1) + 846) * 24 + GT32L32S0140_ZH_CN_12x_BASE_ADD;
-
-    transaction.length = FONT_CHIP_READ_ZH_CN_12X_BYTES * 8;
-    transaction.rxlength = 0;
-    transaction.cmd = GT32L32S0140_READ_CMD;
-    transaction.flags = 0;
-    transaction.rx_buffer = dest;
-    transaction.tx_buffer = NULL;
-
-    //获取CS引脚GPIO_NUM
-    spi_device_interface_config_t interface_config;
-    get_spi_pins_font_chip(NULL, &interface_config);
-
-    //通讯开始
-    gpio_set_level(interface_config.spics_io_num, 0);
-
-    //通讯传输
-    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
-    ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(GT32L32S0140_READ_TIMEOUT_MS));
-
-    //通讯结束
-    gpio_set_level(interface_config.spics_io_num, 1);
-
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
-    }
-}
-
 /// @brief 从字库读取6x12 ASCII字符字模,可以作为绘制函数的字模参数
 /// @param Unicode ASCII字符字模的Unicode编码
 /// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够GT32L32S0140_READ_ASCII_6X12_BYTES
@@ -212,6 +162,149 @@ void fonts_read_ASCII_6x12(uint32_t Unicode, uint8_t* dest) {
         ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
     }
 }
+
+/// @brief 从字库读取8x16 ASCII字符字模,可以作为绘制函数的字模参数
+/// @param Unicode ASCII字符字模的Unicode编码
+/// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够GT32L32S0140_READ_ASCII_8X16_BYTES
+void fonts_read_ASCII_8x16(uint32_t Unicode, uint8_t* dest) {
+    const char* TAG = "fonts_read_ASCII_8x16";
+    esp_err_t ret = ESP_OK;
+
+    if (!fonts_chip_handle) {
+        return;
+    }
+
+    spi_transaction_t transaction;
+
+    if ((Unicode >= 0x20) && (Unicode <= 0x7E))
+        transaction.addr = (Unicode - 0x20) * 16 + GT32L32S0140_ASCII_8X16_BASE_ADD;
+
+    transaction.length = FONT_CHIP_READ_ASCII_8X16_BYTES * 8;
+    transaction.rxlength = 0;
+    transaction.cmd = GT32L32S0140_READ_CMD;
+    transaction.flags = 0;
+    transaction.rx_buffer = dest;
+    transaction.tx_buffer = NULL;
+
+    //获取CS引脚GPIO_NUM
+    spi_device_interface_config_t interface_config;
+    get_spi_pins_font_chip(NULL, &interface_config);
+
+    //通讯开始
+    gpio_set_level(interface_config.spics_io_num, 0);
+
+    //通讯传输
+    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
+    ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(GT32L32S0140_READ_TIMEOUT_MS));
+
+    //通讯结束
+    gpio_set_level(interface_config.spics_io_num, 1);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    }
+}
+
+/// @brief 从字库读取12x12汉字字模,可以作为绘制函数的字模参数
+/// @param Unicode 汉字字模的Unicode编码
+/// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够GT32L32S0140_READ_CN_12X_BYTES
+void fonts_read_zh_CN_12x(uint32_t Unicode, uint8_t* dest)
+{
+    const char* TAG = "fonts_read_zh_CN_12x";
+    esp_err_t ret = ESP_OK;
+
+    if (!fonts_chip_handle) {
+        return;
+    }
+
+    //获取对应GB2312编码
+    uint32_t GB2312_buf = 0;
+    GB2312_buf = UnicodeToGB2312(Unicode);
+
+    spi_transaction_t transaction;
+
+    //计算内部地址
+    if ((GB2312_buf >> 8) >= 0xA1 && (GB2312_buf >> 8) <= 0XA9 && (GB2312_buf & 0xFF) >= 0xA1)
+        transaction.addr = (((GB2312_buf >> 8) - 0xA1) * 94 + ((GB2312_buf & 0xFF) - 0xA1)) * FONT_CHIP_READ_ZH_CN_12X_BYTES + GT32L32S0140_ZH_CN_12x_BASE_ADD;
+    else if ((GB2312_buf >> 8) >= 0xB0 && (GB2312_buf >> 8) <= 0xF7 && (GB2312_buf & 0xFF) >= 0xA1)
+        transaction.addr = (((GB2312_buf >> 8) - 0xB0) * 94 + ((GB2312_buf & 0xFF) - 0xA1) + 846) * FONT_CHIP_READ_ZH_CN_12X_BYTES + GT32L32S0140_ZH_CN_12x_BASE_ADD;
+
+    transaction.length = FONT_CHIP_READ_ZH_CN_12X_BYTES * 8;
+    transaction.rxlength = 0;
+    transaction.cmd = GT32L32S0140_READ_CMD;
+    transaction.flags = 0;
+    transaction.rx_buffer = dest;
+    transaction.tx_buffer = NULL;
+
+    //获取CS引脚GPIO_NUM
+    spi_device_interface_config_t interface_config;
+    get_spi_pins_font_chip(NULL, &interface_config);
+
+    //通讯开始
+    gpio_set_level(interface_config.spics_io_num, 0);
+
+    //通讯传输
+    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
+    ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(GT32L32S0140_READ_TIMEOUT_MS));
+
+    //通讯结束
+    gpio_set_level(interface_config.spics_io_num, 1);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    }
+}
+
+/// @brief 从字库读取16x16汉字字模,可以作为绘制函数的字模参数
+/// @param Unicode 汉字字模的Unicode编码
+/// @param dest 导入读取缓存位置,内部不会自动清理缓存,缓存必须足够GT32L32S0140_READ_CN_16X_BYTES
+void fonts_read_zh_CN_16x(uint32_t Unicode, uint8_t* dest)
+{
+    const char* TAG = "fonts_read_zh_CN_16x";
+    esp_err_t ret = ESP_OK;
+
+    if (!fonts_chip_handle) {
+        return;
+    }
+
+    //获取对应GB2312编码
+    uint32_t GB2312_buf = 0;
+    GB2312_buf = UnicodeToGB2312(Unicode);
+
+    spi_transaction_t transaction;
+
+    //计算内部地址
+    if ((GB2312_buf >> 8) >= 0xA1 && (GB2312_buf >> 8) <= 0XA9 && (GB2312_buf & 0xFF) >= 0xA1)
+        transaction.addr = (((GB2312_buf >> 8) - 0xA1) * 94 + ((GB2312_buf & 0xFF) - 0xA1)) * FONT_CHIP_READ_ZH_CN_16X_BYTES + GT32L32S0140_ZH_CN_16x_BASE_ADD;
+    else if ((GB2312_buf >> 8) >= 0xB0 && (GB2312_buf >> 8) <= 0xF7 && (GB2312_buf & 0xFF) >= 0xA1)
+        transaction.addr = (((GB2312_buf >> 8) - 0xB0) * 94 + ((GB2312_buf & 0xFF) - 0xA1) + 846) * FONT_CHIP_READ_ZH_CN_16X_BYTES + GT32L32S0140_ZH_CN_16x_BASE_ADD;
+
+    transaction.length = FONT_CHIP_READ_ZH_CN_16X_BYTES * 8;
+    transaction.rxlength = 0;
+    transaction.cmd = GT32L32S0140_READ_CMD;
+    transaction.flags = 0;
+    transaction.rx_buffer = dest;
+    transaction.tx_buffer = NULL;
+
+    //获取CS引脚GPIO_NUM
+    spi_device_interface_config_t interface_config;
+    get_spi_pins_font_chip(NULL, &interface_config);
+
+    //通讯开始
+    gpio_set_level(interface_config.spics_io_num, 0);
+
+    //通讯传输
+    ret |= spi_device_polling_start(fonts_chip_handle, &transaction, portMAX_DELAY);
+    ret |= spi_device_polling_end(fonts_chip_handle, pdMS_TO_TICKS(GT32L32S0140_READ_TIMEOUT_MS));
+
+    //通讯结束
+    gpio_set_level(interface_config.spics_io_num, 1);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "与字库芯片通讯时发现问题 描述： %s", esp_err_to_name(ret));
+    }
+}
+
 
 
 //标准C下字符串的数据基于UTF-8编码,由于UTF-8编码本是unicode编码的再编码

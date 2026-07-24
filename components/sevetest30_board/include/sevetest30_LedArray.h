@@ -32,7 +32,6 @@
 // bilibili: 701Enti
 
 #include <string.h>
-#include "led_strip_types.h"
 #include <sevetest30_UI.h>
 #include "esp_types.h"
 
@@ -41,7 +40,7 @@
 #endif 
 
 #define FIGURE_BREATH 4                    //数字的宽度 4x7
-
+#define FIGURE_HEIGHT 7                    //数字的高度 4x7
 
 
 #define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+sizeof(uint64_t)) // 矩形字模数据区位置,需要填入矩形的位置
@@ -54,11 +53,13 @@
 
 //屏幕刷新任务配置("ALL_ONCE" "ALL_MULTIPLE" "PART_ONCE" "PART_MULTIPLE")
 #define LEDARRAY_REFRESH_TASK_CORE           (1)//屏幕刷新任务运行核心,请设置完全闲置的核心，刷新任务将完全占有CPU
-#define LEDARRAY_REFRESH_TASK_PRIO           (1)//屏幕刷新任务优先级
+#define LEDARRAY_REFRESH_TASK_PRIO           (10)//屏幕刷新任务优先级
 #define LEDARRAY_REFRESH_TASK_STACK_SIZE     (1024 * 4)//屏幕刷新任务堆栈大小
 
-#define LEDARRAY_REFRESH_MUTEX_TAKE_TIMEOUT_MS 1000 //竞争刷新锁最大超时时间(单位ms) 
+#define LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS 100 //硬件刷新函数竞争刷新锁最大超时时间(单位ms) 
+#define LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS 1000 //硬件刷新资源管理函数竞争刷新锁最大超时时间(单位ms) 
 
+#define LEDARRAY_REFRESH_BCM_DELAY_NOP_NUM 1 // BCM调光算法 - 单位时延对应的NOP空指令个数
 
 typedef enum
 {
@@ -68,8 +69,7 @@ typedef enum
 
 #define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_AUTO_REFRESH_ALL_ONCE //初始化时设置的默认屏幕刷新模式
 
-
-
+extern xSemaphoreHandle refresh_Task_Mutex;//刷新锁，外部需要抢到并完成所有操作后释放以允许屏幕刷新
 
 //数字 0-9
 extern const uint8_t matrix_1[7];
@@ -108,12 +108,12 @@ esp_err_t direct_draw(int x, int y, const uint8_t* p);
 
 
 ///清除屏幕上的所有图案以及数据缓存
-esp_err_t clean_all_draw_buf();
+void clean_all_draw_buf();
 
 
-esp_err_t clean_draw_buf(int y);
+void clean_draw_buf(int y);
 
-esp_err_t progress_draw_buf(int y, uint8_t step, uint8_t* color);
+void progress_draw_buf(int y, uint8_t step, uint8_t* color);
 
 uint8_t *rectangle(int32_t breadth, int32_t height);
 
@@ -124,6 +124,10 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3]);
 void font_roll_print_12x(int x, int y, uint8_t color[3], cartoon_handle_t cartoon_handle, char* format, ...);
 
 void font_raw_print_12x(int x, int y, uint8_t color[3], char* format, ...);
+
+void font_roll_print_16x(int x, int y, uint8_t color[3], cartoon_handle_t cartoon_handle, char* format, ...);
+
+void font_raw_print_16x(int x, int y, uint8_t color[3], char* format, ...);
 
 esp_err_t ledarray_init();
 
