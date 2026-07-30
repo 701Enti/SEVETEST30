@@ -80,11 +80,6 @@ esp_err_t generate_GS_calibration_static_model(GS_calibration_static_model_t* st
 esp_err_t calculate_calibrated_GS_only_by_static_model(const GS_calibration_static_model_t* static_model, GS_magnetic_flux_density_data_t* mfd);
 
 
-void calibration_tools_init_PsP2P_DM_Producer();
-
-esp_err_t put_GS_calibration_static_model(GS_calibration_static_model_t* static_model);
-
-
 
 
 

@@ -55,7 +55,7 @@ uint8_t unit_led_height[FFT_VIEW_WIDTH_MAX] = {0};
 __attribute__((aligned(16))) float y_cf[FFT_N_SAMPLES * 2];
 
 void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle);
- void steganography_service(cartoon_handle_t handle, int idx);
+void steganography_service(cartoon_handle_t handle, int idx);
 
 /// @brief 帧参量渲染函数-x轴坐标,根据关键帧渲染得到所有帧的x轴坐标数据保存到param_list_buf
 /// @param plan 导入动画计划,如果是步数不定动画,需要外部预处理好关键帧的实际步位置
@@ -914,6 +914,12 @@ music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg, UBaseType_t
         return NULL;
     }
 
+    if (!current_sound_buf)
+    {
+        ESP_LOGE(TAG, "当前音频缓存为空,无法启动FFT_UI");
+        return NULL;
+    }
+
     memcpy(&(handle->cfg), UI_cfg, sizeof(music_FFT_UI_cfg_t));
     if (handle->cfg.dampen_multiples <= 0)
     {
@@ -1015,14 +1021,22 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle)
 
     while (handle->running_flag)
     {
-
         vTaskDelay(pdMS_TO_TICKS(10));
 
-        // 如果音频活动进行并且缓冲区溢出,正常读取,否则,不运算新的监视数据
-        if (!(sevetest30_current_sound_collecter_running_flag && current_sound_buf_overflow_flag))
+        if (current_sound_collecter_running_flag == false)
         {
+            // 如果音频活动未进行,仅清理屏幕缓存并等待
+            memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
+            memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
+            vTaskDelay(pdMS_TO_TICKS(500));
             continue;
         }
+        else{
+            if(current_sound_buf_overflow_flag == false){
+                // 如果音频活动进行中,且缓存未溢出,则等待缓存溢出
+                continue;
+            }
+        }     
 
         if (xSemaphoreTake(current_sound_buf_mutex, pdMS_TO_TICKS(FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS)) != pdTRUE)
         {

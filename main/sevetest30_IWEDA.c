@@ -31,6 +31,8 @@
 
 #include <sys/time.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -52,21 +54,19 @@
 #include "esp_netif.h"
 #include "esp_netif_sntp.h"
 
+#include "esp_timer.h"
+
 char http_output_buf[HTTP_BUF_MAX] = {0}; // 输出数据缓存
 char http_url_buf[HTTP_BUF_MAX] = {0};    // url缓存,留着调用时候可以用
 char *ip_address;                         // 公网IP
 
-char *sevetest30_asr_result_tex = NULL; // 语音识别结果
-char *ERNIE_Bot_4_chat_result = NULL;
-char *ERNIE_Bot_4_chat_user_content = NULL;
+char *sevetest30_asr_result_text = NULL; // 语音识别结果
 
 Real_time_weather *real_time_weather_data;
 ip_position *ip_position_data;
 
 esp_http_client_handle_t http_client_handle = NULL;
 esp_periph_handle_t se30_wifi_periph_handle = NULL;
-
-char baidu_ERNIE_Bot_access_token[ACCESSTOKEN_SIZE_MAX] = {0};
 
 void transform_ip_address();
 void transform_postcode();
@@ -257,7 +257,7 @@ esp_err_t init_time_data_sntp(uint32_t timeout_ms)
         return ESP_ERR_INVALID_STATE;
     }
 
-    esp_sntp_config_t sntp_cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG_MULTIPLE(3,ESP_SNTP_SERVER_LIST(CONFIG_NTP_SERVER_0, CONFIG_NTP_SERVER_1, CONFIG_NTP_SERVER_2));
+    esp_sntp_config_t sntp_cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG_MULTIPLE(3, ESP_SNTP_SERVER_LIST(CONFIG_NTP_SERVER_0, CONFIG_NTP_SERVER_1, CONFIG_NTP_SERVER_2));
     esp_err_t init_ret = esp_netif_sntp_init(&sntp_cfg);
     if (init_ret != ESP_OK)
     {
@@ -522,7 +522,7 @@ void gzip_decompress(void *input, void *output, int len)
 int json_line_unit_num_get(char *data, int len)
 {
 
-    // 此处的处理思路
+    // 此处的处理思路(以下数据仅为演示,不一定为真实响应数据)
     // 当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
     // 当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
@@ -568,7 +568,7 @@ int json_line_unit_num_get(char *data, int len)
 void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len)
 {
 
-    // 此处的处理思路(基于上面的json_line_unit_num_get函数思路)
+    // 此处的处理思路(以下数据仅为演示,不一定为真实响应数据)(基于上面的json_line_unit_num_get函数思路)
     // 当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
     // 当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
@@ -824,302 +824,520 @@ void transform_real_time_weather_data()
     // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
 }
 
-/// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存)
-/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
-void ERNIE_Bot_4_chat_transform(char *chat_response)
+/// @brief 解析GPT 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 result(自动申请内存)
+/// @param line_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
+/// @param result 收集结果的字符串地址
+void GPT_chat_transform_collect(char *line_response, char **result)
 {
-    static const char *TAG = "ERNIE_Bot_4_chat_transform";
-    if (!chat_response)
+    static const char *TAG = "GPT_chat_transform_collect";
+    if (!line_response)
     {
         ESP_LOGE(TAG, "传入了为空的输入数据");
         return;
     }
 
     // 如果缓存为空,申请缓存
-    if (!ERNIE_Bot_4_chat_result)
+    if (!*result)
     {
-        ERNIE_Bot_4_chat_result = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!ERNIE_Bot_4_chat_result)
+        *result = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+        while (!*result)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请ERNIE_Bot_4_chat_result资源发现问题 正在重试");
-            ERNIE_Bot_4_chat_result = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+            ESP_LOGE(TAG, "申请result资源发现问题 正在重试");
+            *result = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
         }
-        memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
+        memset(*result, 0, sizeof(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char)));
     }
 
     cJSON *root_data = NULL;
-    root_data = cJSON_Parse(chat_response);
-    cJSON *cjson_result = NULL;
-    cjson_result = cJSON_GetObjectItem(root_data, "result");
+    cJSON *cjson_choices = NULL;
+    cJSON *cjson_choices_item = NULL;
+    cJSON *cjson_delta = NULL;
+    cJSON *cjson_content = NULL;
 
-    if (!cjson_result)
-        ESP_LOGE(TAG, "交互出现问题,请重试");
+    root_data = cJSON_Parse(line_response);
+
+    if (root_data)
+        cjson_choices = cJSON_GetObjectItem(root_data, "choices");
+
+    if (cjson_choices)
+        cjson_choices_item = cJSON_GetArrayItem(cjson_choices, 0);
+
+    if (cjson_choices_item)
+        cjson_delta = cJSON_GetObjectItem(cjson_choices_item, "delta");
+
+    if (cjson_delta)
+        cjson_content = cJSON_GetObjectItem(cjson_delta, "content");
+
+    if (!cjson_content)
+    {
+
+        ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s", line_response);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
     else
-        strncat(ERNIE_Bot_4_chat_result, cjson_result->valuestring, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX - strlen(ERNIE_Bot_4_chat_result));
+    {
+        strncat(*result, cjson_content->valuestring, GPT_CHAT_RESPONSE_BUF_SIZE - strlen(*result) - 1);
+    }
 
-    cJSON_Delete(root_data);
+    if (root_data)
+    {
+        cJSON_Delete(root_data);
+    }
     return;
 }
 
-/// @brief 根据百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元) 获取聊天传输状态是否结束
-/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
-/// @return true 结束 / false 进行中(或者错误)
-int ERNIE_Bot_4_chat_over_status(char *chat_response)
+/// @brief [流式传输]根据GPT返回的数据(HTTP原始响应数据) 获取聊天传输状态是否结束
+/// @param http_response HTTP原始响应数据
+/// @return true 结束 / false 进行中
+bool GPT_stream_chat_over_status(char *http_response)
 {
-    static const char *TAG = "ERNIE_Bot_4_chat_over_status";
-    if (!chat_response)
+    static const char *TAG = "GPT_stream_chat_over_status";
+    if (!http_response)
     {
         ESP_LOGE(TAG, "传入了为空的输入数据");
         return false;
     }
 
-    cJSON *root_data = NULL;
-    root_data = cJSON_Parse(chat_response);
-    cJSON *cjson_is_end = NULL;
-    cjson_is_end = cJSON_GetObjectItem(root_data, "is_end");
+    char buf[10] = {0};
+    if (strlen(http_response) - strlen("[DONE]\n\n") >= 0)
+        strncpy(buf, http_response + strlen(http_response) - strlen("[DONE]\n\n"), sizeof(buf) - 1);
 
-    if (!cjson_is_end)
+    if (strcmp(buf, "[DONE]\n\n") == 0)
     {
-        cJSON_Delete(root_data);
-        return false;
+        return true;
     }
     else
     {
-        int ret = cjson_is_end->valueint;
-        cJSON_Delete(root_data);
-        return ret;
+        return false;
     }
 }
 
-/// @brief [使用流式传输模式]ERNIE-4.0聊天传输任务,使用POST请求
-/// @param flag 传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
-void ERNIE_Bot_4_chat_http_Task(bool *flag)
+/// @brief GPT聊天传输任务,使用POST请求
+/// @param chat_handle 传入聊天句柄
+void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
 {
+    static const char *TAG = "GPT_chat_http_Task";
+
     while (1)
     {
-        static const char *TAG = "ERNIE_Bot_4_chat";
+        esp_err_t err_flag = ESP_OK;
+        int64_t start_time = esp_timer_get_time();
 
-        // 设置URL
-        char *url_buf = NULL;
-        url_buf = (char *)malloc(1024 * sizeof(char));
-        while (!url_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请url_buf资源发现问题 正在重试");
-            url_buf = (char *)malloc(1024 * sizeof(char));
-        }
-        memset(url_buf, 0, sizeof(1024 * sizeof(char)));
-        strcat(url_buf, ERNIE_BOT_4_URL);
-        strcat(url_buf, baidu_ERNIE_Bot_access_token);
-
-        // 申请响应数据缓存
-        char *response_buf = NULL;
-        response_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!response_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
-            response_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        }
-        memset(response_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        strcpy(response_buf, "");
-
-        // 申请json_line格式解析缓存
-        char *json_buf = NULL;
-        json_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!json_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请json_buf资源发现问题 正在重试");
-            json_buf = (char *)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        }
-        memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-
-        // 清理交互结果缓存
-        if (ERNIE_Bot_4_chat_result)
-            memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
-
-        // 初始化http_client
+        ///初始化http_client
         esp_http_client_config_t http_config;
         memset(&http_config, 0, sizeof(http_config));
-        http_config.url = url_buf;             // 导入url
+        http_config.url = chat_handle->url;    // 导入url
         http_config.method = HTTP_METHOD_POST; // 使用POST请求
-        esp_http_client_handle_t client_handle = esp_http_client_init(&http_config);
+        chat_handle->client_handle = esp_http_client_init(&http_config);
 
         // 设置HTTP-HEADER
-        esp_http_client_set_header(client_handle, "Content-Type", "application/json");
-
-        // 准备HTTP-BODY
-        char *request_body_buf = NULL;
-        request_body_buf = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
-        while (!request_body_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
-            request_body_buf = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
-        }
-        memset(request_body_buf, 0, ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
-        snprintf(request_body_buf, ASR_RESULT_TEX_BUF_MAX + 2048,
-                 "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false,\"stream\":true}", ERNIE_Bot_4_chat_user_content);
-
-        esp_err_t err_flag = ESP_OK;
+        esp_http_client_set_header(chat_handle->client_handle, "Content-Type", "application/json");
+        esp_http_client_set_header(chat_handle->client_handle, "Authorization", chat_handle->auth_header_buf);
 
         // 设置超时时间
-        err_flag |= esp_http_client_set_timeout_ms(client_handle, ERNIE_BOT_4_CHAT_TIMEOUT_MS);
+        esp_http_client_set_timeout_ms(chat_handle->client_handle, chat_handle->timeout_ms);
 
         // 对服务器发送连接请求
-        err_flag |= esp_http_client_open(client_handle, strlen(request_body_buf));
+        err_flag = esp_http_client_open(chat_handle->client_handle, strlen(chat_handle->request_body_buf));
 
         if (err_flag != ESP_OK)
         {
-            ESP_LOGE(TAG, "配置连接时出现问题 -> %s", http_config.url);
-            goto TASK_OVER;
+            chat_handle->err = err_flag;
+            ESP_LOGE(TAG, "连接时出现问题 -> %s", chat_handle->url);
+
+            esp_http_client_cleanup(chat_handle->client_handle);            
+            chat_handle->task_handle = NULL;
+            chat_handle->is_completed = true;
+            chat_handle->client_handle = NULL;
+
+            vTaskDelete(NULL);
         }
 
         ESP_LOGW(TAG, "等待回答");
 
         // 写入请求体
-        esp_http_client_write(client_handle, request_body_buf, strlen(request_body_buf));
+        esp_http_client_write(chat_handle->client_handle, chat_handle->request_body_buf, strlen(chat_handle->request_body_buf));
 
         // 校验响应
-        if (http_check_response_content(client_handle) != ESP_OK)
+        if (http_check_response_content(chat_handle->client_handle) != ESP_OK)
         {
+            chat_handle->err = ESP_FAIL;
             ESP_LOGE(TAG, "校验响应时发现问题");
-            goto TASK_OVER;
+            esp_http_client_read_response(chat_handle->client_handle, chat_handle->response_buf, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+            ESP_LOGE(TAG, "响应体内容 -> %s", chat_handle->response_buf);
+
+            esp_http_client_close(chat_handle->client_handle);
+            esp_http_client_cleanup(chat_handle->client_handle);            
+            chat_handle->task_handle = NULL;
+            chat_handle->is_completed = true;
+            chat_handle->client_handle = NULL;
+
+            vTaskDelete(NULL);
         }
 
-        // 数据处理
-
+        int read_index = 0;   // response_buf读取索引
         int complete_num = 0; // 实时已经读取的单元个数,可以为0
         int right_num = 0;    // 实时合法的单元个数,可以为0
 
         // 根据单元总数,解析并拼接单元内容
-        while (true)
+        while (1)
         {
+
+            vTaskDelay(pdMS_TO_TICKS(100));
+
             // 获取合法单元个数
-            right_num = json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
+            right_num = json_line_unit_num_get(chat_handle->response_buf, GPT_CHAT_RESPONSE_BUF_SIZE);
 
             // 此前未读取任何响应数据,循环开始时right_num必然为0,第一次读取响应发生在下面的等待下
 
             // 如果有未读单元,执行读取
             if (complete_num < right_num)
             {
-                memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-                json_line_unit_copy(json_buf, response_buf, complete_num, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX); // 复制一个数据单元
-                ERNIE_Bot_4_chat_transform(json_buf);                                                         // 解析并拼接保存
+                memset(chat_handle->json_buf, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+                json_line_unit_copy(chat_handle->json_buf, chat_handle->response_buf, complete_num, GPT_CHAT_RESPONSE_BUF_SIZE); // 复制一个数据单元
+                GPT_chat_transform_collect(chat_handle->json_buf, &chat_handle->result);                                         // 解析并拼接保存
                 complete_num++;
             }
 
             //(right_num=0 complete_num=0)或者(读完最后一个单元)[已读个数 = 总个数],检验,如果数据没有完全读取完成,需要等待并读取更多下文
             if (complete_num == right_num)
             {
-                if (ERNIE_Bot_4_chat_over_status(json_buf) == false)
+                if (GPT_stream_chat_over_status(chat_handle->response_buf) == false)
                 {
-                    uint32_t count; // 等待一个单位延时的次数,count=[3]就是等待了[3ms]
-                    count = 0;
-                    while (count < ERNIE_BOT_4_CHAT_TIMEOUT_MS)
+                    while (1)
                     {
+                        if (GPT_CHAT_RESPONSE_BUF_SIZE - read_index <= 0)
+                        {
+                            chat_handle->err = ESP_ERR_NO_MEM;
+                            ESP_LOGE(TAG, "响应缓存内存空间不足 已读取内容 -> %s", chat_handle->response_buf);
 
-                        // 拼接新的响应内容,响应读取仅发生在这里,包含第一次读取
-                        // 如果有未读部分,读取速度是 1ms => 1字符 否则 1ms => 0字符(等待)
-                        if (strlen(response_buf) + 1 < ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX)
-                        {
-                            esp_http_client_read_response(client_handle, &response_buf[strlen(response_buf)], 1);
+                            esp_http_client_close(chat_handle->client_handle);
+                            esp_http_client_cleanup(chat_handle->client_handle);                            
+                            chat_handle->task_handle = NULL;
+                            chat_handle->is_completed = true;
+                            chat_handle->client_handle = NULL;
+
+                            vTaskDelete(NULL);
                         }
-                        else
-                        {
-                            ESP_LOGE(TAG, "响应缓存内存空间不足");
-                            goto TASK_OVER;
-                        }
+
+                        read_index += esp_http_client_read_response(chat_handle->client_handle, chat_handle->response_buf + read_index, GPT_CHAT_RESPONSE_BUF_SIZE - read_index);
 
                         // 如果有新的发现,退出等待
-                        if (json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX) > right_num)
+                        if (json_line_unit_num_get(chat_handle->response_buf, GPT_CHAT_RESPONSE_BUF_SIZE) > right_num)
                             break;
 
-                        vTaskDelay(pdMS_TO_TICKS(1));
-                        count++;
-
-                        if (count >= ERNIE_BOT_4_CHAT_TIMEOUT_MS)
+                        vTaskDelay(pdMS_TO_TICKS(1000));
+                        if ((esp_timer_get_time() - start_time) / 1000 >= chat_handle->timeout_ms)
                         {
-                            ESP_LOGE(TAG, "等待回复超时");
-                            goto TASK_OVER; // 等待超时,退出
+                            chat_handle->err = ESP_ERR_TIMEOUT;
+                            ESP_LOGE(TAG, "等待回复超时 已读取内容 -> %s", chat_handle->response_buf);
+
+                            esp_http_client_close(chat_handle->client_handle);
+                            esp_http_client_cleanup(chat_handle->client_handle);                            
+                            chat_handle->task_handle = NULL;
+                            chat_handle->is_completed = true;
+                            chat_handle->client_handle = NULL;
+
+                            vTaskDelete(NULL);
                         }
                     }
                 }
                 else
                 {
-                    if (ERNIE_Bot_4_chat_result)
+                    if (chat_handle->result)
                     {
-                        ESP_LOGI(TAG, "%s", ERNIE_Bot_4_chat_result);
+                        ESP_LOGI(TAG, "%s", chat_handle->result);
                         ESP_LOGI(TAG, "解析完成,共拼接%d个数据单元", complete_num);
+                        chat_handle->err = ESP_OK;
+
+                        esp_http_client_close(chat_handle->client_handle);
+                        esp_http_client_cleanup(chat_handle->client_handle);                        
+                        chat_handle->task_handle = NULL;
+                        chat_handle->is_completed = true;
+                        chat_handle->client_handle = NULL;
+                    
+                        vTaskDelete(NULL);
                     }
                     else
                     {
                         ESP_LOGE(TAG, "解析任务内部运行异常");
+                        chat_handle->err = ESP_ERR_INVALID_STATE;
+
+                        esp_http_client_close(chat_handle->client_handle);
+                        esp_http_client_cleanup(chat_handle->client_handle);
+                        chat_handle->task_handle = NULL;
+                        chat_handle->is_completed = true;
+                        chat_handle->client_handle = NULL;
+
+                        vTaskDelete(NULL);
                     }
-                    goto TASK_OVER;
                 }
             }
         }
-
-    TASK_OVER:
-
-        // 关闭连接清理缓存
-        esp_http_client_cleanup(client_handle);
-
-        // 释放内存
-        free(url_buf);
-        free(response_buf);
-        free(request_body_buf);
-        free(json_buf);
-        url_buf = NULL;
-        response_buf = NULL;
-        request_body_buf = NULL;
-        json_buf = NULL;
-
-        *flag = true;
-
-        vTaskDelete(NULL); // 终止任务
     }
 }
 
-/// @brief [使用流式传输模式]文心一言ERNIE-Bot 4.0文本交互
-/// @param user_content 用户内容
-/// @return 对话返回结果/NULL(错误)
-char *ERNIE_Bot_4_chat_tex_exchange(char *user_content)
+/// @brief [使用流式传输模式]GPT文本交互
+/// @param chat_handle GPT对话句柄
+/// @param task_stack 任务栈大小(单位字节)
+/// @param task_core 任务核心号
+/// @param task_prio 任务优先级
+/// @note 这是一个阻塞函数,直到GPT文本交互完成,才会返回
+/// @return
+/// [ESP_OK 成功]
+/// [ESP_FAIL HTTP访问错误]
+/// [ESP_ERR_HTTP_CONNECT HTTP连接错误]
+/// [ESP_ERR_INVALID_ARG 传入了为空的输入数据 / 空的用户内容]
+/// [ESP_ERR_INVALID_STATE 解析任务内部运行异常 / 网络未连接]
+/// [ESP_ERR_NO_MEM 内存不足]
+/// [ESP_ERR_TIMEOUT 等待回复超时]
+esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio)
 {
-    const char *TAG = "ERNIE_Bot_4_chat_tex_exchange";
+    const char *TAG = "GPT_chat_text_exchange";
 
-    if (!strcasecmp(user_content, ""))
+    if (chat_handle == NULL)
+    {
+        ESP_LOGE(TAG, "传入了为空的输入数据");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!strcasecmp(chat_handle->user_content, ""))
     {
         ESP_LOGE(TAG, "空的用户内容");
-        return NULL;
+        return ESP_ERR_INVALID_ARG;
     }
 
     if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE(TAG, "网络未连接");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    if (chat_handle->result)
+    {
+        free(chat_handle->result);
+        chat_handle->result = NULL;
+    }
+    memset(chat_handle->response_buf, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    memset(chat_handle->json_buf, 0, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+
+    chat_handle->is_completed = false;
+
+    xTaskCreatePinnedToCore(&GPT_chat_http_Task, "GPT_chat_http_Task", GPT_CHAT_TASK_STACK_SIZE, chat_handle, task_prio, &chat_handle->task_handle, GPT_CHAT_TASK_CORE);
+
+    while (!chat_handle->is_completed)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+
+    if (chat_handle->err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "GPT文本交互任务运行异常 错误:%s", esp_err_to_name(chat_handle->err));
+        return chat_handle->err;
+    }
+
+    return ESP_OK;
+}
+
+/// @brief 更新用户内容
+/// @param chat_handle GPT文本交互句柄
+/// @param user_content 新用户内容
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数
+/// @return ESP_ERR_INVALID_STATE 初始化未完成,request_body_buf为空
+esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle, char *user_content)
+{
+    const char *TAG = "GPT_chat_update_user_content";
+
+    if (chat_handle == NULL)
+    {
+        ESP_LOGE(TAG, "传入了为空的输入数据");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (!chat_handle->request_body_buf)
+    {
+        ESP_LOGE(TAG, "初始化未完成,request_body_buf为空");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    if (!user_content || !strcasecmp(user_content, ""))
+    {
+        ESP_LOGW(TAG, "缺少必填参数");
+    }
+
+    if (chat_handle->user_content)
+    {
+        free(chat_handle->user_content);
+        chat_handle->user_content = NULL;
+    }
+
+    chat_handle->user_content = strdup(user_content);
+
+    memset(chat_handle->request_body_buf, 0, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+    snprintf(chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+             "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}", chat_handle->model, chat_handle->user_content);
+
+    ESP_LOGW(TAG, "更新用户内容:%s", chat_handle->user_content);
+
+    return ESP_OK;
+}
+
+/// @brief 启动GPT对话
+/// @param url API地址(必填)
+/// @param access_key 访问密钥(必填)
+/// @param model 模型名称(必填)
+/// @param user_content 用户内容(选填，但是不能为空，可以为“”)
+/// @param timeout_ms 超时时间(必填)(单位ms)
+/// @return GPT对话句柄
+/// @note 会自动申请内存，所有参数均会拷贝克隆一份到GPT对话句柄中
+GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model, char *user_content, int timeout_ms)
+{
+    const char *TAG = "GPT_chat_start";
+
+    if (url == NULL || access_key == NULL || model == NULL || user_content == NULL)
+    {
+        ESP_LOGE(TAG, "传入了为NULL的输入数据");
         return NULL;
     }
 
-    ERNIE_Bot_4_chat_user_content = user_content;
-
-    if (baidu_ERNIE_Bot_access_token[1] == 0)
+    if (!strcasecmp(url, "") || !strcasecmp(access_key, "") || !strcasecmp(model, ""))
     {
-        ESP_LOGW(TAG, "即将初始化请求token");
-        if (baidu_get_AccessToken(CONFIG_BAIDU_ERNIE_BOT_ACCESS_KEY, CONFIG_BAIDU_ERNIE_BOT_SECRET_KEY, baidu_ERNIE_Bot_access_token))
-        {
-            ESP_LOGE(TAG, "获取请求token时发现问题");
-            vTaskDelay(pdMS_TO_TICKS(1000));
-        }
+        ESP_LOGE(TAG, "缺少必填参数");
+        return NULL;
     }
 
-    bool Task_comp_flag = false;
-    xTaskCreatePinnedToCore(&ERNIE_Bot_4_chat_http_Task, "ERNIE_Bot_4_chat_http_Task", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    return ERNIE_Bot_4_chat_result;
+    GPT_chat_handle_t chat_handle = (GPT_chat_handle_t)malloc(sizeof(GPT_chat_t));
+    if (!chat_handle)
+    {
+        ESP_LOGE(TAG, "申请GPT_chat_handle资源发现问题");
+        return NULL;
+    }
+    memset(chat_handle, 0, sizeof(GPT_chat_t));
+
+    chat_handle->url = strdup(url);
+    chat_handle->access_key = strdup(access_key);
+    chat_handle->model = strdup(model);
+
+    if (!chat_handle->url || !chat_handle->access_key || !chat_handle->model)
+    {
+        ESP_LOGE(TAG, "克隆字符串失败，请检查内存是否足够");
+        GPT_chat_stop(chat_handle);
+        return NULL;
+    }
+
+    chat_handle->is_completed = false;
+    chat_handle->timeout_ms = timeout_ms;
+    chat_handle->err = ESP_OK;
+
+    ESP_LOGW(TAG, "准备访问:%s", chat_handle->url);
+    ESP_LOGW(TAG, "使用模型:%s", chat_handle->model);
+    ESP_LOGW(TAG, "超时时间:%dms", chat_handle->timeout_ms);
+
+    // 申请响应数据缓存
+    chat_handle->response_buf = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    while (!chat_handle->response_buf)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
+        chat_handle->response_buf = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    }
+    memset(chat_handle->response_buf, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    strcpy(chat_handle->response_buf, "");
+
+    // 申请json_line格式解析缓存
+    chat_handle->json_buf = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    while (!chat_handle->json_buf)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        ESP_LOGE(TAG, "申请json_buf资源发现问题 正在重试");
+        chat_handle->json_buf = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    }
+    memset(chat_handle->json_buf, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+
+    // 准备Authorization头
+    const char *prefix = "Bearer ";
+    size_t auth_len = strlen(prefix) + strlen(chat_handle->access_key) + 1;
+    chat_handle->auth_header_buf = (char *)malloc(auth_len * sizeof(char));
+    while (!chat_handle->auth_header_buf)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        ESP_LOGE(TAG, "申请auth_header_buf资源发现问题 正在重试");
+        chat_handle->auth_header_buf = (char *)malloc(auth_len * sizeof(char));
+    }
+    memset(chat_handle->auth_header_buf, 0, auth_len * sizeof(char));
+    snprintf(chat_handle->auth_header_buf, auth_len, "%s%s", prefix, chat_handle->access_key);
+
+    // 准备HTTP-BODY
+    chat_handle->request_body_buf = (char *)malloc(GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+    while (!chat_handle->request_body_buf)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
+        chat_handle->request_body_buf = (char *)malloc(GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+    }
+    GPT_chat_update_user_content(chat_handle,user_content);
+
+    ESP_LOGW(TAG, "GPT文本交互开始准备已完成");
+
+    return chat_handle;
+}
+
+
+
+/// @brief 停止GPT文本交互
+/// @param chat_handle GPT文本交互句柄
+/// @note 如果你不确定用这个句柄调用的GPT_chat_text_exchange是否已经返回，就不要调用这个函数，这非常危险
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle)
+{
+    const char *TAG = "GPT_chat_stop";
+    if (chat_handle == NULL)
+    {
+        ESP_LOGE(TAG, "传入了为空的输入数据");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    ESP_LOGW(TAG, "GPT文本交互停止");
+
+    esp_http_client_close(chat_handle->client_handle);
+    esp_http_client_cleanup(chat_handle->client_handle);
+
+    chat_handle->is_completed = true;
+
+    free(chat_handle->auth_header_buf);
+    chat_handle->auth_header_buf = NULL;
+
+    free(chat_handle->request_body_buf);
+    chat_handle->request_body_buf = NULL;
+
+    free(chat_handle->response_buf);
+    chat_handle->response_buf = NULL;
+
+    free(chat_handle->json_buf);
+    chat_handle->json_buf = NULL;
+
+    free(chat_handle->url);
+    chat_handle->url = NULL;
+
+    free(chat_handle->access_key);
+    chat_handle->access_key = NULL;
+
+    free(chat_handle->model);
+    chat_handle->model = NULL;
+
+    free(chat_handle->user_content);
+    chat_handle->user_content = NULL;
+
+    free(chat_handle->result);
+    chat_handle->result = NULL;
+
+    free(chat_handle);
+    chat_handle = NULL;
+
+    return ESP_OK;
 }
 
 /// @brief 解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex
@@ -1143,27 +1361,28 @@ void asr_data_save_result(char *asr_response)
 
     cJSON *cjson_result = cJSON_GetObjectItem(root_data, "result");
     cJSON *cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
-    ESP_LOGI(TAG, "%s", cjson_result_root->valuestring);
+    ESP_LOGI(TAG, "响应数据: %s", asr_response);
+    ESP_LOGI(TAG, "识别结果: %s", cjson_result_root->valuestring);
 
-    if (!sevetest30_asr_result_tex)
+    if (!sevetest30_asr_result_text)
     {
     ASR_RESULT_TEX_MALLOC:
-        sevetest30_asr_result_tex = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        while (!sevetest30_asr_result_tex)
+        sevetest30_asr_result_text = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+        while (!sevetest30_asr_result_text)
         {
             vTaskDelay(pdMS_TO_TICKS(1000));
             ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
-            sevetest30_asr_result_tex = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+            sevetest30_asr_result_text = (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
         }
-        memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
+        memset(sevetest30_asr_result_text, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
     }
     else
     {
-        free(sevetest30_asr_result_tex);
-        sevetest30_asr_result_tex = NULL;
+        free(sevetest30_asr_result_text);
+        sevetest30_asr_result_text = NULL;
         goto ASR_RESULT_TEX_MALLOC;
     }
-    strncpy(sevetest30_asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
+    strncpy(sevetest30_asr_result_text, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
 
     cJSON_Delete(root_data);
     return;

@@ -113,7 +113,7 @@ esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl)
     board_ctrl_init_report[FONTS_CHIP_INIT] = fonts_chip_init();//字库芯片
     // board_ctrl_init_report[BL5372_CONFIG_INIT] = BL5372_config_init();//BL5372(离线RTC计时)
     // board_ctrl_init_report[AHT21_BEGIN] = AHT21_begin();//AHT21(温湿度传感器)
-    // board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)
+    board_ctrl_init_report[LSM6DS3TRC_INIT_OR_RESET] = lsm6ds3trc_init_or_reset();//LSM6DS3TRC(姿态传感器)
     // board_ctrl_init_report[VIBRA_MOTOR_INIT] = vibra_motor_init(get_vibra_motor_IN1_gpio(), get_vibra_motor_IN2_gpio());//震动马达
     board_ctrl_init_report[LEDARRAY_INIT] = ledarray_init();//LED阵列
 

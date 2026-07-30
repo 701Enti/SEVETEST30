@@ -45,7 +45,7 @@
 
 #define FFT_VIEW_WIDTH_MAX 128 //// FFT UI视口宽度最大值
 
-#define FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS 10 //FFT读取当前音频缓冲区锁竞争超时，0表示不等待锁，单位ms
+#define FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS 1000 //FFT读取当前音频缓冲区锁竞争超时，0表示不等待锁，单位ms
 
 
 //动画相关

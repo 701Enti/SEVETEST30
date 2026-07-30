@@ -18,13 +18,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
- // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
- // 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
- //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
- // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
- // github: https://github.com/701Enti
- // bilibili: 701Enti
+// 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+// 附加 1  github - zlib项目 链接 https://github.com/madler/zlib
+//      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
+// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+// github: https://github.com/701Enti
+// bilibili: 701Enti
 
 #ifndef _SEVETEST30_IWEDA_H_
 #define _SEVETEST30_IWEDA_H_
@@ -35,136 +35,157 @@
 #include "esp_err.h"
 #include "stdbool.h"
 
-#define WIFI_CONNECT_TIMEOUT_MS 30000//WIFI连接等待超时时间
+#define WIFI_CONNECT_TIMEOUT_MS 30000 // WIFI连接等待超时时间
 
-#define HTTP_BUF_MAX 2048 //http输出与URL数据缓存允许大小
-#define ZLIB_WINDOW_MAX 47 //zlib数据解压窗口允许大小
-#define PRE_CJSON_BUF_MAX 1024//JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
+#define HTTP_BUF_MAX 2048      // http输出与URL数据缓存允许大小
+#define ZLIB_WINDOW_MAX 47     // zlib数据解压窗口允许大小
+#define PRE_CJSON_BUF_MAX 1024 // JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 
-#define HTTP_TASK_CORE           (0)//http任务运行核心
-#define HTTP_TASK_PRIO           (1)//http任务优先级
+#define HTTP_TASK_CORE (0) // http任务运行核心
+#define HTTP_TASK_PRIO (1) // http任务优先级
 
 #define ASR_RESULT_TEX_BUF_MAX (4096)
 
 #define ACCESSTOKEN_SIZE_MAX (100)
-#define ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX 8192//聊天结果字符最大存储容量
-#define ERNIE_BOT_4_CHAT_TIMEOUT_MS      10000//聊天回复等待超时时间
 
+#define GPT_CHAT_RESPONSE_BUF_SIZE (128 * 1024)         // GPT聊天响应缓存大小
+#define GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE (16 * 1024) // GPT聊天请求体缓存大小
+#define GPT_CHAT_TASK_CORE (0)                          // GPT聊天任务运行核心
+#define GPT_CHAT_TASK_STACK_SIZE (16 * 1024)            // GPT聊天任务堆栈大小
 
-//各种API的URL，字符由%s替代
+// 各种API的URL，字符由%s替代
 
-//查询IP的API
+// 查询IP的API
 #define GET_IP_ADDRESS_API_URL "http://myip.ipip.net/s"
 
-//IP归属地查询API
+// IP归属地查询API
 #define IP_POSITION_API_URL "https://api.ip138.com/ip/?ip=%s&datatype=jsonp&callback=find"
 
-//邮政编码查询经纬度API
+// 邮政编码查询经纬度API
 #define TO_LNG_LAT_API_URL "https://quhua.ipchaxun.com/api/areas/data?zip=%s"
 
-
-//和风天气GeoAPI(地址ID搜索，使用相同的KEY)
+// 和风天气GeoAPI(地址ID搜索，使用相同的KEY)
 #define GEO_API_URL "https://geoapi.qweather.com/v2/city/lookup?location=%s,%s&key=%s"
 
-
-//和风天气实时天气API
+// 和风天气实时天气API
 #if CONFIG_WEATHER_API_VIP_URL
 #define WEATHER_API_URL "https://api.qweather.com/v7/weather/now?location=%s&key=%s"
 #else
 #define WEATHER_API_URL "https://devapi.qweather.com/v7/weather/now?location=%s&key=%s"
 #endif
 
+// 百度获取access_token API
 #define BAIDU_GET_ACCESS_TOKEN_URL "https://aip.baidubce.com/oauth/2.0/token?client_id=%s&client_secret=%s&grant_type=client_credentials"
 
-//百度文心一言 ERNIE-Bot 4.0 API
-#define ERNIE_BOT_4_URL "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=%s"
+// 百度文心一言 ERNIE-Bot API
+#define ERNIE_BOT_URL "https://qianfan.baidubce.com/v2/chat/completions"
 
+typedef struct GPT_chat_t
+{
+    bool is_completed;
+    int timeout_ms;
 
+    char *url;
+    char *access_key;
+    char *model;
+    char *user_content;
 
-//和风天气API-实时天气,顺序是在UI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
-typedef struct Real_time_weather {
+    char *result;
 
-    int icon;//天气状况代码，匹配合适的图案
-    int text;//天气文字描述例如多云
+    TaskHandle_t task_handle;
+    esp_err_t err;
+    esp_http_client_handle_t client_handle;
+    char *auth_header_buf;
+    char *request_body_buf;
+    char *response_buf;
+    char *json_buf;
+} GPT_chat_t;
 
-    int temp;//温度，摄氏度
-    int feelsLike;//体感温度，摄氏度
+typedef struct GPT_chat_t *GPT_chat_handle_t;
 
-    int vis;//能见度,KM
+// 和风天气API-实时天气,顺序是在UI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
+typedef struct Real_time_weather
+{
 
-    int humidity;//相对湿度，百分比
-    int precip;//当前每小时降水量，毫米
+    int icon; // 天气状况代码，匹配合适的图案
+    int text; // 天气文字描述例如多云
 
-    int windDir;//风向文字描述
-    int wind360;//360度风向
+    int temp;      // 温度，摄氏度
+    int feelsLike; // 体感温度，摄氏度
 
-    int windScale;//风力等级
-    int windSpeed;//风速
+    int vis; // 能见度,KM
 
-    int pressure;//大气压强
+    int humidity; // 相对湿度，百分比
+    int precip;   // 当前每小时降水量，毫米
 
-    int cloud;//云量，可能为空
+    int windDir; // 风向文字描述
+    int wind360; // 360度风向
 
-    int dew;//露点温度，可能为空（搜索了一下，可以理解是空气中水蒸气变为露珠时的温度,越低于环境温度，越不易液化结露，天气就越干燥）
+    int windScale; // 风力等级
+    int windSpeed; // 风速
 
-    int obsTime;//数据观测时间 
-}Real_time_weather;
-//IP归属地信息
+    int pressure; // 大气压强
+
+    int cloud; // 云量，可能为空
+
+    int dew; // 露点温度，可能为空（搜索了一下，可以理解是空气中水蒸气变为露珠时的温度,越低于环境温度，越不易液化结露，天气就越干燥）
+
+    int obsTime; // 数据观测时间
+} Real_time_weather;
+// IP归属地信息
 typedef struct ip_position
 {
-    char* postcode;//邮政编码
-    char* lng;//经度
-    char* lat;//纬度  
+    char *postcode; // 邮政编码
+    char *lng;      // 经度
+    char *lat;      // 纬度
 
-    char* country;//国家
-    char* adm1;//adm2的上一级行政区划 （省,若为直辖市则为直辖市名）
-    char* adm2;//name的上一级行政区划  (市)   
-    char* name; //(区、县)
+    char *country; // 国家
+    char *adm1;    // adm2的上一级行政区划 （省,若为直辖市则为直辖市名）
+    char *adm2;    // name的上一级行政区划  (市)
+    char *name;    //(区、县)
 
-    char* id;//城市数字ID号码,由于天气查询
-}ip_position;
+    char *id; // 城市数字ID号码,由于天气查询
+} ip_position;
 
-
-//有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
+// 有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
 
 extern char http_output_buf[HTTP_BUF_MAX]; // 输出数据缓存
-extern char http_url_buf[HTTP_BUF_MAX]; // url缓存,留着调用时候可以用
-extern char* ip_address;//公网IP
-extern char* sevetest30_asr_result_tex;//语音识别结果
+extern char http_url_buf[HTTP_BUF_MAX];    // url缓存,留着调用时候可以用
+extern char *ip_address;                   // 公网IP
+extern char *sevetest30_asr_result_text;   // 语音识别结果
 
-extern ip_position* ip_position_data;
-extern Real_time_weather* real_time_weather_data;
+extern ip_position *ip_position_data;
+extern Real_time_weather *real_time_weather_data;
 extern esp_periph_handle_t se30_wifi_periph_handle;
 
+// 内外部共享函数
 
-//内外部共享函数
+void gzip_decompress(void *input, void *output, int len);
 
-void gzip_decompress(void* input, void* output, int len);
+int json_line_unit_num_get(char *data, int len);
 
-int json_line_unit_num_get(char* data, int len);
+void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len);
 
-void json_line_unit_copy(char* dest, char* src, int unit_id, int max_len);
-
-int http_check_common_url(const char* url);
+int http_check_common_url(const char *url);
 
 int http_check_response_content(esp_http_client_handle_t client_handle);
 
 void http_init_get_request();
 
-void http_get_request_send(bool* flag);
+void http_get_request_send(bool *flag);
 
-void change_url_if_need_redirect(char** url);
+void change_url_if_need_redirect(char **url);
 
-//库定制函数
+// 库定制函数
 
-void asr_data_save_result(char* asr_response);
+void asr_data_save_result(char *asr_response);
 
-esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max);
+esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max);
 
-//外部自由调用功能函数
-esp_err_t wifi_init(esp_periph_config_t* periph_config);
+// 外部自由调用功能函数
+esp_err_t wifi_init(esp_periph_config_t *periph_config);
 
-esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg);
+esp_err_t wifi_connect(periph_wifi_cfg_t *wifi_cfg);
 
 esp_err_t init_time_data_sntp(uint32_t timeout_ms);
 
@@ -172,6 +193,12 @@ void refresh_position_data();
 
 void refresh_weather_data();
 
-char* ERNIE_Bot_4_chat_tex_exchange(char* user_content);
+GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model, char *user_content, int timeout_ms);
 
-esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken);
+esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle, char *user_content);
+
+esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio);
+
+esp_err_t GPT_chat_stop(GPT_chat_handle_t GPT_chat_handle);
+
+esp_err_t baidu_get_AccessToken(char *client_id, char *client_secret, char *AccessToken);

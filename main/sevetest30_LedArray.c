@@ -88,7 +88,6 @@ void refresh_ALL_ONCE_Task()
 	esp_task_wdt_add(NULL); // 将当前任务挂载到当前设置核心的任务看门狗
 	while (1)
 	{
-		esp_task_wdt_reset(); // 及时喂狗,防止当前核心重启
 		ledarray_show_frame();
 	}
 }
@@ -1023,7 +1022,7 @@ esp_err_t ledarray_init()
 		ESP_RETURN_ON_ERROR(spi_bus_add_device(LEDARRAY_SPI_ID, &interface_config, &ledarray_spi_handle), TAG, "添加SPI设备异常");
 
 		// 设置合适的灯板SPI相关引脚驱动能力,减少干扰并提升抗干扰能力
-		gpio_set_drive_capability(LEDARRAY_SPI_MOSI_IO, GPIO_DRIVE_CAP_0);
+		gpio_set_drive_capability(LEDARRAY_SPI_MOSI_IO, GPIO_DRIVE_CAP_3);
 		gpio_set_drive_capability(LEDARRAY_SPI_SCLK_IO, GPIO_DRIVE_CAP_3);
 
 		// 配置其他IO
@@ -1250,6 +1249,7 @@ esp_err_t ledarray_show_frame()
 					asm volatile("nop");
 				}
 
+				esp_task_wdt_reset(); // 及时喂狗,防止当前核心重启
 			}
 		}
 

@@ -61,26 +61,12 @@ config BAIDU_SPEECH_SECRET_KEY
 
 
 
-# GPT的API相关 - 百度文心一言 
-config BAIDU_ERNIE_BOT_ACCESS_KEY
-    string "Baidu ERNIE-Bot access key ID"
+# GPT聊天服务的API相关
+config GPT_CHAT_ACCESS_KEY
+    string "GPT Chat access key"
     default ""
     help
-        Baidu ERNIE-Bot Access key ID
-        
-config BAIDU_ERNIE_BOT_SECRET_KEY
-    string "Baidu ERNIE-Bot access secret"
-    default ""
-    help
-        Baidu ERNIE-Bot Access secret
-
-
-# GPT的API相关 - DeepSeek 
-config DEEPSEEK_ACCESS_KEY
-    string "DeepSeek access key"
-    default ""
-    help
-        DeepSeek access key
+        GPT Chat Access key
 
 
 
