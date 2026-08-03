@@ -48,10 +48,10 @@ config DNS_SERVER
 
 # 百度语音服务的API相关
 config BAIDU_SPEECH_ACCESS_KEY
-    string "Baidu speech access key ID"
+    string "Baidu speech access key"
     default ""
     help
-        Baidu speech Access key ID
+        Baidu speech Access key
 
 config BAIDU_SPEECH_SECRET_KEY
     string "Baidu speech access secret"
@@ -70,32 +70,43 @@ config GPT_CHAT_ACCESS_KEY
 
 
 
-config IP_138_TOKEN
-    string "ip138 position access token"
+config IP138_IP_LOOKUP_TOKEN
+    string "ip138 ip lookup access token"
     default ""
     help
         you could get a free token if you haven't had it , just click "https://user.ip138.com/ip/"
 
-  
-config WEATHER_API_KEY
-    string "weather server access keyID"
+  config QWEATHER_API_HOST
+    string "qweather server access host"
     default ""
     help
-        you could get a free keyID if you haven't had it , just click "https://dev.qweather.com/"
+        you could get one if you haven't had it , just click "https://dev.qweather.com/"
 
-choice WEATHER_API_URL
-        prompt "weather server access keyID"
-        default WEATHER_API_FREE_URL
-        help
-          Need replace the default host name "devapi.qweather.com" with "api.qweather.com" if you pay for a Qweather VIP keyID
-    
-    config WEATHER_API_FREE_URL
-        bool "free_url"
+config QWEATHER_API_JWT_PRIVATE_KEY_WITHOUT_HEADER_FOOTER
+    string "qweather server access private key without header and footer"
+    default ""
+    help
+        you need generate one and copy it without header and footer to this field.
 
-    config WEATHER_API_VIP_URL
-        bool "vip_url"
-    
-endchoice
+config QWEATHER_API_JWT_CREDENTIAL_ID
+    string "qweather server access credentialID"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://dev.qweather.com/"
+
+config QWEATHER_API_JWT_PROJECT_ID
+    string "qweather server access projectID"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://dev.qweather.com/"
+
+config AMAP_API_KEY
+    string "amap server access key"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://lbs.amap.com/"
+
+
 
 config HIGH_TEMP
     int "highest temperature"

@@ -53,10 +53,10 @@
 #include "calibration_tools.h"
 #include "math_tools.h"
 
+void test(void);
+
 void app_main(void)
 {
-
-  vTaskDelay(pdMS_TO_TICKS(1000));
 
   i2c_config_t device_i2c_config = {
       .mode = I2C_MODE_MASTER,
@@ -74,7 +74,7 @@ void app_main(void)
       .p_ext_io_value = &ext_io_value_data, // 存储IO电平信息的结构体的地址
       .amplifier_volume = 90,
       .amplifier_mute = true,
-      .amplifier_sd = true,
+      .amplifier_sd = false,
       .codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START,
       .codec_mode = AUDIO_HAL_CODEC_MODE_BOTH,
       .codec_adc_gain = MIC_GAIN_12DB,
@@ -100,37 +100,88 @@ void app_main(void)
   else
   {
     ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
-    // 关闭wifi省电模式
-    esp_wifi_set_ps(WIFI_PS_NONE);
+    // // 关闭wifi省电模式
+    // esp_wifi_set_ps(WIFI_PS_NONE);
     // 配置DNS服务器
     ip_addr_t dns_server;
     ipaddr_aton(CONFIG_DNS_SERVER, &dns_server);
     dns_setserver(0, &dns_server);
   }
 
-  /// 时间模块初始化
-  init_time_data_sntp(5000);
+  init_timezone();
+  init_time_data_sntp(20000);
   // sync_systemtime_to_ext_rtc();
   // sync_systemtime_from_ext_rtc();
-
-  // for (int q = 2; q < 6; q++) {
-  //   //logo显示
-  //   direct_draw(1, 3, sign_701, q);
-  //   // for (int i = 0; i < 6; i++) //启动自动刷新服务后,无需手动刷新
-  //   //   ledarray_set_and_write(i);
-  // }
-  // for (int q = 6; q > 1; q--) {
-  //   //logo显示
-  //   direct_draw(1, 3, sign_701, q);
-  //   // for (int i = 0; i < 6; i++) //启动自动刷新服务后,无需手动刷新
-  //   //   ledarray_set_and_write(i);
-  // }
 
   // 打开屏幕显示
   board_ctrl_t *b = board_status_get();
   b->p_ext_io_value->EN_LED_BOARD = 0;
   sevetest30_board_ctrl(b, BOARD_CTRL_EXT_IO);
 
+  test();
+
+  refresh_env_temp_hum_data(true);
+  refresh_env_TVOC_data(true);
+  refresh_position_data();
+  refresh_current_weather_data();
+
+  int UI_switch = 0;
+
+  ext_io_ctrl.auto_read_EN = true;
+
+  while (1)
+  {
+    refresh_systemtime_data();
+    vTaskDelay(pdMS_TO_TICKS(10));
+    if (ext_io_ctrl.auto_read_INT)
+    {
+      if (ext_io_level_service() == ESP_OK)
+      {
+        ext_io_ctrl.auto_read_INT = false;
+        // ESP_LOGW("main", "扩展GPIO自动读取中断触发成功");
+        if (ext_io_value_data.thumbwheel_CW == 0 && ext_io_value_data.thumbwheel_CCW == 1)
+        {
+          vibra_motor_start();
+          vTaskDelay(pdMS_TO_TICKS(50));
+          vibra_motor_stop();
+          UI_switch++;
+        }
+        else if (ext_io_value_data.thumbwheel_CW == 1 && ext_io_value_data.thumbwheel_CCW == 0)
+        {
+          vibra_motor_start();
+          vTaskDelay(pdMS_TO_TICKS(50));
+          vibra_motor_stop();
+          UI_switch--;
+        }
+      }
+    }
+    if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(100)) == pdTRUE)
+    {
+      clean_all_draw_buf();
+      switch (UI_switch)
+      {
+      case 0:
+        time_UI_h_m_s(1, 1);
+        break;
+      case 1:
+        weather_icon_temperature(1, 1);
+        break;
+      case 2:
+        time_UI_h_m(1, 1);
+        break;
+      case 3:
+        time_UI_s(1, 1);
+        break;
+      }
+      xSemaphoreGive(refresh_Task_Mutex);
+    }
+  }
+
+  return;
+}
+
+void test(void)
+{
   // // 基础屏幕测试,仅测试能否显示变化矩形(启动自动刷新服务后,无需手动刷新)
   // uint8_t color[3] = {255,0,0};
   // while (1)
@@ -161,24 +212,24 @@ void app_main(void)
   //     }
   // }
 
-  // ///屏幕动画测试+字库测试
-  // ///其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段
+  // /// 屏幕动画测试+字库测试+UI库动画API测试
+  // /// 其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段
   // uint8_t color[3] = {255, 255, 0};
   // while (1)
   // {
-  //     cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, false, 10);
-  //     if (cartoon1)
-  //     {
-  //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color, 1);
-  //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100, 1, color, 1);
-  //         uint32_t c1steg1 =
-  //             add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color, 1);
-  //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY, STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1, (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL, NULL);
+  //   cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, 10);
+  //   if (cartoon1)
+  //   {
+  //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color);
+  //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100, 1, color);
+  //     uint32_t c1steg1 =
+  //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR, CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color);
+  //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY, STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1, (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL);
 
-  //         font_roll_print_16x(1, 1, color, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
+  //     font_roll_print_16x(1, 1, color, cartoon1, "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying entire,trying all time!");
 
-  //         cartoon_delete(cartoon1);
-  //     }
+  //     cartoon_delete(cartoon1);
+  //   }
   // }
 
   // // 实时时间显示
@@ -188,10 +239,10 @@ void app_main(void)
   //   if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY) == pdTRUE)
   //   {
   //     clean_all_draw_buf();
-  //     time_UI_h_m_s(1, 1, 1);
+  //     time_UI_h_m_s(1, 1);
   //     xSemaphoreGive(refresh_Task_Mutex);
   //   }
-  //     vTaskDelay(pdMS_TO_TICKS(1000));
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
   // }
 
   // /// 歌词获取
@@ -279,28 +330,56 @@ void app_main(void)
   //   }
   // }
 
+  // // 通过AHT21获取环境温度和湿度数据
+  // refresh_env_temp_hum_data(true);
+  // if (env_temp_hum_data.valid)
+  // {
+  //   ESP_LOGI("main", "环境温度:%.2f ℃, 环境湿度:%.2f%%", env_temp_hum_data.temp, env_temp_hum_data.hum);
+  // }
+  // else
+  // {
+  //   ESP_LOGE("main", "环境温度或湿度数据无效");
+  // }
+
+  // // 通过AGS10获取环境TVOC数据
+  // ESP_LOGW("main", "等待预热中(每次完全掉电后上电需要预热,预计两分钟)...");
+  // vTaskDelay(pdMS_TO_TICKS(120000));
+  // while (1)
+  // {
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
+  //   refresh_env_TVOC_data(true);
+  //   if (env_TVOC_data.valid)
+  //   {
+  //     ESP_LOGI("main", "环境TVOC:%" PRIu32, env_TVOC_data.TVOC_value);
+  //   }
+  //   else
+  //   {
+  //     ESP_LOGE("main", "环境TVOC数据无效");
+  //   }
+  // }
+
   // bluetooth_connect();
 
-  music_FFT_UI_cfg_t FFT_UI_cfg = {
-      .x = 1,
-      .y = 1,
-      .change = 1,
-      .lr_switch = 0,
-      .color_visual_cfg = {
-          .value_max = 255,
-          .high = 4096,
-          .medium = (4096 - 0) / 2,
-          .low = 0,
-          .public_divisor = (4096 - 0) / 2,
-      },
-      .dampen_multiples = 20,
-      .data_max = 4096,
-      .data_min = -4096,
-      .x_multiples = 5,
-      .x_move = 2.8,
-      .width = LINE_LED_NUMBER,
-      .show_height_max = VERTICAL_LED_NUMBER,
-  };
+  // music_FFT_UI_cfg_t FFT_UI_cfg = {
+  //     .x = 1,
+  //     .y = 1,
+  //     .lr_switch = 0,
+  //     .color_visual_cfg = {
+  //         .value_max = 255,
+  //         .high = 4096,
+  //         .medium = (4096 - 0) / 2,
+  //         .low = 0,
+  //         .public_divisor = (4096 - 0) / 2,
+  //     },
+  //     .dampen_multiples = 50,
+  //     .data_max = 4096,
+  //     .data_min = 0,
+  //     .x_multiples = 5,
+  //     .x_move = 2.8,
+  //     .width = LINE_LED_NUMBER,
+  //     .height = VERTICAL_LED_NUMBER,
+  //     .show_height_max = VERTICAL_LED_NUMBER,
+  // };
 
   // // 网络音乐播放
   // // 官方测试音频 "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
@@ -314,7 +393,7 @@ void app_main(void)
   //   board_ctrl_t *b = board_status_get();
   //   b->amplifier_mute = false;
   //   b->amplifier_sd = true;
-  //   b->amplifier_volume = 80;
+  //   b->amplifier_volume = 60;
   //   sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
   //   music_uri_or_url_play(url1, 1);
@@ -322,8 +401,8 @@ void app_main(void)
   //   music_FFT_UI_handle_t handle = music_FFT_UI_start(&FFT_UI_cfg, 1);
   //   if (!handle)
   //   {
-  //       ESP_LOGE("main", "handle 为空,无法绘制任务");
-  //       return;
+  //     ESP_LOGE("main", "handle 为空,无法绘制任务");
+  //     return;
   //   }
 
   //   while (1)
@@ -335,32 +414,56 @@ void app_main(void)
   //       xSemaphoreGive(refresh_Task_Mutex);
   //     }
   //     vTaskDelay(pdMS_TO_TICKS(10));
-  //     if(!sevetest30_music_running_flag){
+  //     if (!sevetest30_music_running_flag)
+  //     {
   //       music_FFT_UI_stop(handle);
   //     }
   //   }
   // }
 
+  // // 震动马达-震动测试
+  //    while(1){
+  //    vibra_motor_start();
+  //    vTaskDelay(pdMS_TO_TICKS(500));
+  //    vibra_motor_stop();
+  //    vTaskDelay(pdMS_TO_TICKS(500));
+  //   }
+
+  // // 震动马达-震动测试+实时时间显示，模拟闹钟响铃
+  // while (1)
+  // {
+  //   refresh_systemtime_data();
+  //   if (xSemaphoreTake(refresh_Task_Mutex, portMAX_DELAY) == pdTRUE)
+  //   {
+  //     clean_all_draw_buf();
+  //     time_UI_h_m_s(1, 1);
+  //     xSemaphoreGive(refresh_Task_Mutex);
+  //   }
+  //   vibra_motor_start();
+  //   vTaskDelay(pdMS_TO_TICKS(500));
+  //   vibra_motor_stop();
+  //   vTaskDelay(pdMS_TO_TICKS(500));
+  // }
+
+  // // // 震动马达-触感反馈测试
+  // vTaskDelay(pdMS_TO_TICKS(1000));
+  // ext_io_ctrl.auto_read_EN = true;
+  // ext_io_ctrl.auto_read_INT = false;
   // while (1)
   // {
   //   if (ext_io_ctrl.auto_read_INT)
   //   {
   //     if (ext_io_level_service() == ESP_OK)
   //     {
-  //       ESP_LOGW("main", "扩展GPIO自动读取中断触发成功");
   //       ext_io_ctrl.auto_read_INT = false;
+  //       ESP_LOGW("main", "扩展GPIO自动读取中断触发成功");
+  //       vibra_motor_start();
+  //       vTaskDelay(pdMS_TO_TICKS(50));
+  //       vibra_motor_stop();
   //     }
   //   }
   //   vTaskDelay(pdMS_TO_TICKS(100));
   // }
-
-  // 震动马达
-  //    for(;;){
-  //    vibra_motor_start();
-  //    vTaskDelay(pdMS_TO_TICKS(500));
-  //    vibra_motor_stop();
-  //    vTaskDelay(pdMS_TO_TICKS(500));
-  //   }
 
   // // 获取当前连接wifi的信号强度(RSSI)
   // wifi_ap_record_t ap_info;
@@ -500,12 +603,4 @@ void app_main(void)
   //   memset(sevetest30_asr_result_text, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
   //   asr_service_begin(&asr_cfg, 1);
   // }
-
-  // refresh_position_data();
-  // refresh_weather_data();
-
-  // weather_UI_1(1, 1, 1);
-
-  // for (int i = 0; i < 6; i++)
-  // ledarray_set_and_write(i);
 }

@@ -41,7 +41,6 @@
 #include "cJSON.h"
 
 static const char* calibration_tools_TAG = __FILE__;
-static const char* name_of_PsP2P_DM_Producer = __FILE__;
 
 
 /// @brief 生成磁传感器静态校准模型

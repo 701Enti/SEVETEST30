@@ -91,8 +91,8 @@ typedef struct TCA6416A_level_t
     bool IMU_INT2;       // 输入,姿态传感器中断信号2
     bool IMU_INT1;       // 输入,姿态传感器中断信号1
     bool ALS_INT;        // 输入,环境光传感器-中断信号
-    bool thumbwheel_CCW; // 输入,拨轮开关-0表示逆时针转动 （CCW和CW同时0表示按下-PUSH）
-    bool thumbwheel_CW;  // 输入,拨轮开关-0表示顺时针转动 （CCW和CW同时0表示按下-PUSH）
+    bool thumbwheel_CW; // 输入,拨轮开关-0表示逆时针转动 （CCW和CW同时0表示按下-PUSH）
+    bool thumbwheel_CCW;  // 输入,拨轮开关-0表示顺时针转动 （CCW和CW同时0表示按下-PUSH）
     bool OTG_EN;         // 输出,OTG电源供应 1启动 启动后SE30充电活动将被硬件性禁止
     bool charge_SIGN;    // 输入,正在充电信号 0表示正在充电
     bool QC_TOUCH_R;     // 输入,右触摸信号,高电平表示触摸,无锁

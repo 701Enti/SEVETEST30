@@ -54,117 +54,38 @@ uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 
 /********************************全局数据刷新函数 数据保存至全局变量************************************/
 
-/// @brief 刷新缓存的ESP32S3内部系统时间，该函数需要频繁调用，以获取不断改变的内部系统时间，内部系统时间来源于ESP32S3内部RTC，掉电数据将丢失，需要NTP对时(网络对时的初始化函数在 sevetest30_IWEDA.h)
-/// @brief 数据保存至全局变量
+/// @brief 初始化本地时区，只在联网同步时间时调用一次
+void init_timezone()
+{
+    setenv("TZ", CONFIG_LOCAL_TZ, 1);
+    tzset();
+}
+
+
+/// @brief 刷新系统时间数据，保存至全局变量
 void refresh_systemtime_data()
 {
-  const char* TAG = "refresh_time_data";
-  // 使用标准C库函数来获取时间并对其进行操作
-  time_t time_sec; //时间戳缓存（从Epoch(1970-01-01 00:00:00 UTC)开始的秒数）
-  time(&time_sec); // 计算当前日历时间，并转换为标准time_t类型
-  struct tm time_info;
-  // 设定本地时区
-  setenv("TZ", CONFIG_LOCAL_TZ, 1);
-  tzset();
-  localtime_r(&time_sec, &time_info); // 通过时间戳time_sec读取本地时间到time_info
-  // 对时间数据格式化成常用表达
-  char time_buf[64] = { 0 };
-  strftime(time_buf, sizeof(time_buf), "%c", &time_info);
-  // 解析保存系统时间
-  char week_buf[10] = { 0 };
-  char month_buf[10] = { 0 };
-  // 数据截取
-  sscanf(time_buf, " %s %s %d %d:%d:%d %d", week_buf, month_buf, &systemtime_data.day,
-    &systemtime_data.hour, &systemtime_data.minute, &systemtime_data.second,
-    &systemtime_data.year);
-  // 由于星期和月份数据是字符串，转换成数字以便显示和分析，switch表达式不支持字符串，但是可以通过字母的各个对比确定
-  switch (week_buf[0])
-  {
-  case 'M':
-    systemtime_data.week = 1; // 星期一 Monday
-    break;
+    static const char* TAG = "refresh_time_data";
+    time_t time_sec = time(NULL);
+    struct tm time_info;
 
-  case 'T':
-    if (week_buf[1] == 'u')
-      systemtime_data.week = 2; // 星期二 Tuesday
-    if (week_buf[1] == 'h')
-      systemtime_data.week = 4; // 星期四 Thursday
-    break;
-
-  case 'W':
-    systemtime_data.week = 3; // 星期三 Wednesday
-    break;
-
-  case 'F':
-    systemtime_data.week = 5; // 星期五 Friday
-    break;
-
-  case 'S':
-    if (week_buf[1] == 'a')
-      systemtime_data.week = 6; // 星期六 Saturday
-
-    if (week_buf[1] == 'u')
-      systemtime_data.week = 7; // 星期日 Sunday
-    break;
-
-  default:
-    ESP_LOGE(TAG, "无法判断的数据 %s", week_buf);
-    systemtime_data.week = 0;
-    break;
-  }
-  switch (month_buf[0])
-  {
-  case 'J':
-    if (month_buf[1] == 'a')
-      systemtime_data.month = 1; // 一月 January
-    if (month_buf[1] == 'u')
+    // 读取本地时区时间
+    if (localtime_r(&time_sec, &time_info) == NULL)
     {
-      if (month_buf[2] == 'n')
-        systemtime_data.month = 6; // 六月 June
-      if (month_buf[2] == 'l')
-        systemtime_data.month = 7; // 七月 July
+        ESP_LOGE(TAG, "localtime_r get time failed");
+        return;
     }
-    break;
 
-  case 'M':
-    if (month_buf[2] == 'r')
-      systemtime_data.month = 3; // 三月 March
-    if (month_buf[2] == 'y')
-      systemtime_data.month = 5; // 五月 May
-    break;
+    // 直接映射数字，无字符串、无switch
+    systemtime_data.year  = time_info.tm_year + 1900;
+    systemtime_data.month = time_info.tm_mon + 1; // 0~11 → 1~12
+    systemtime_data.day   = time_info.tm_mday;
+    systemtime_data.hour  = time_info.tm_hour;
+    systemtime_data.minute= time_info.tm_min;
+    systemtime_data.second= time_info.tm_sec;
 
-  case 'A':
-    if (month_buf[1] == 'u')
-      systemtime_data.month = 8; // 八月 August
-    if (month_buf[1] == 'p')
-      systemtime_data.month = 4; // 四月 April
-    break;
-
-  case 'F':
-    systemtime_data.month = 2; // 二月 February
-    break;
-
-  case 'S':
-    systemtime_data.month = 9; // 九月 September
-    break;
-
-  case 'O':
-    systemtime_data.month = 10; // 十月 October
-    break;
-
-  case 'N':
-    systemtime_data.month = 11; // 十一月 November
-    break;
-
-  case 'D':
-    systemtime_data.month = 12; // 十二月 December
-    break;
-
-  default:
-    ESP_LOGE(TAG, "无法判断的数据 %s", month_buf);
-    systemtime_data.month = 0;
-    break;
-  }
+    // 0=周日，1=周一，2=周二 ... 6=周六，原生值直接存
+    systemtime_data.week  = time_info.tm_wday;
 }
 
 /// @brief 刷新缓存的电池数据，充电状态，该函数需要频繁调用

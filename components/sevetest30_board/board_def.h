@@ -141,7 +141,7 @@
 #define  AMP_VOL_MAX   100   //最大单位个数(最大音量值)  可以调整的最大单位个数,意味着音量有从0到AMP_VOL_MAX的那么多种选择
 
 // TCA6416A信号
-#define TCA6416A_IO_INT  GPIO_NUM_1
+#define TCA6416A_INT_IO  GPIO_NUM_1
 
 //姿态传感器 lsm6ds3trc 
 #define IMU_FIFO_DEFAULT_READ_NUM 3//默认FIFO周期读取个数(默认方式)

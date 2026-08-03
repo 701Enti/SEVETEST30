@@ -46,28 +46,33 @@ TCA6416A_level_t *P_ext_io_value_data = NULL; // 扩展IO电平信息，写入�
 // 中断参数传flag地址以保证flag值同步，该变量存储了这个地址，作为ISR参数
 uint32_t P_ext_io_auto_read_flag;
 
-static xQueueHandle tca6416a_int_queue = NULL;
+static xQueueHandle ext_io_int_queue = NULL;
 
-static void IRAM_ATTR tca6416a_int_isr_handler(void *arg)
+static void IRAM_ATTR ext_io_int_isr_handler(void *arg)
 {
   uint32_t P_auto_read_flag = (uint32_t)arg;
-  xQueueSendFromISR(tca6416a_int_queue, &P_auto_read_flag, NULL);
+  xQueueSendFromISR(ext_io_int_queue, &P_auto_read_flag, NULL);
 }
 
-static void tca6416a_int_task(void *arg)
+static void ext_io_int_task(void *arg)
 {
   bool flag_buf = true;
   uint32_t P_auto_read_flag;
   while (1)
   {
-    vTaskDelay(pdMS_TO_TICKS(500));
-    if (xQueueReceive(tca6416a_int_queue, &P_auto_read_flag, portMAX_DELAY))
+    vTaskDelay(pdMS_TO_TICKS(10));
+    if (xQueueReceive(ext_io_int_queue, &P_auto_read_flag, portMAX_DELAY))
     {
       // 将自动读取标志值的地址作为ISR参数进行传输
       flag_buf = *(bool *)P_auto_read_flag;
       if (flag_buf)
       {
-        ext_io_ctrl.auto_read_INT = true;
+        vTaskDelay(pdMS_TO_TICKS(10));
+        gpio_get_level(TCA6416A_INT_IO);
+        if (gpio_get_level(TCA6416A_INT_IO) == 0)
+        {
+          ext_io_ctrl.auto_read_INT = true;
+        }
       }
     }
   }
@@ -174,7 +179,7 @@ esp_err_t sevetest30_gpio_init(TCA6416A_mode_t *p_ext_mode, TCA6416A_level_t *p_
 
   // TCA6416A的INT信号GPIO
   gpio_config_t TCA6416A_int_config = {
-      .pin_bit_mask = 1ULL << TCA6416A_IO_INT,
+      .pin_bit_mask = 1ULL << TCA6416A_INT_IO,
       .mode = GPIO_MODE_INPUT,
       .pull_up_en = GPIO_PULLUP_DISABLE,
       .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -184,12 +189,12 @@ esp_err_t sevetest30_gpio_init(TCA6416A_mode_t *p_ext_mode, TCA6416A_level_t *p_
   ESP_RETURN_ON_ERROR(ret, TAG, "配置TCA6416A的INT信号GPIO时发现问题");
 
   // INT中断配置
-  tca6416a_int_queue = xQueueCreate(10, sizeof(uint32_t));                                                                       // 队列创建
-  xTaskCreatePinnedToCore(tca6416a_int_task, "tca6416a_int_task", 2048, NULL, EXT_IO_READ_EVT_PRIO, NULL, EXT_IO_READ_EVT_CORE); // 中断识别任务创建
+  ext_io_int_queue = xQueueCreate(10, sizeof(uint32_t));                                                                       // 队列创建
+  xTaskCreatePinnedToCore(ext_io_int_task, "ext_io_int_task", 2048, NULL, EXT_IO_READ_EVT_PRIO, NULL, EXT_IO_READ_EVT_CORE); // 中断识别任务创建
   ret = gpio_install_isr_service(EXT_IO_READ_INTR_FLAG);                                                                         // 安装GPIO ISR服务
   ESP_RETURN_ON_ERROR(ret, TAG, "安装TCA6416A的INT信号GPIO的ISR服务时发现问题");
   P_ext_io_auto_read_flag = &ext_io_ctrl.auto_read_EN;                                                    // 将自动读取标志值的地址作为ISR参数进行传输
-  ret = gpio_isr_handler_add(TCA6416A_IO_INT, tca6416a_int_isr_handler, (void *)P_ext_io_auto_read_flag); // 为选定的GPIO添加ISR句柄
+  ret = gpio_isr_handler_add(TCA6416A_INT_IO, ext_io_int_isr_handler, (void *)P_ext_io_auto_read_flag); // 为选定的GPIO添加ISR句柄
   ESP_RETURN_ON_ERROR(ret, TAG, "添加TCA6416A的INT信号GPIO的ISR句柄时发现问题");
 
   ret = ext_io_reset_to_default(p_ext_mode, p_ext_value); // 扩展gpio初始化

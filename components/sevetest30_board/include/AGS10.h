@@ -63,8 +63,8 @@
 typedef struct AGS10_result_t
 {
   bool  flag_crc;//启用CRC校验
-  bool  data_true;//数据有效(无效的话可能是预热中或数据读取失败或者CRC校验后发现问题)
-  uint32_t TVOC_data;//TVOC测量值
+  bool  valid;//数据有效(无效的话可能是预热中或数据读取失败或者CRC校验后发现问题)
+  uint32_t TVOC_value;//TVOC测量值
 }AGS10_result_t;
 
 

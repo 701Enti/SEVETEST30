@@ -63,6 +63,7 @@ typedef AGS10_result_t env_TVOC_data_t;
 extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
 extern env_temp_hum_data_t env_temp_hum_data;
+extern env_TVOC_data_t env_TVOC_data;
 
 extern uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM];
@@ -77,6 +78,7 @@ extern uint8_t IMU_XLy_H[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_XLz_L[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM];
 
+void init_timezone();
 
 void refresh_battery_data();
 void refresh_systemtime_data();

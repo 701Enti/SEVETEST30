@@ -40,7 +40,7 @@
 typedef struct AHT21_result_t
 {
   bool  flag_crc;//启用CRC校验
-  bool  data_true;//数据有效(无效的话可能是数据读取失败或者CRC校验后发现问题)
+  bool  valid;//数据有效(无效的话可能是数据读取失败或者CRC校验后发现问题)
   float temp;//温度,摄氏度
   float hum;//湿度,%RH
 }AHT21_result_t;

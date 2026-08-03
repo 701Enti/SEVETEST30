@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含一些sevetest30的  X轴线性振动马达启动以及振动马达事务合成API
+ // 包含一些sevetest30的按键控制和Z轴线性振动马达API,用于用户控制与触感反馈
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
  // bilibili: 701Enti
@@ -37,6 +37,8 @@
 #define VIBRA_MOTOR_MCPWM_DT_MODE MCPWM_ACTIVE_HIGH_COMPLIMENT_MODE //死区模式
 #define VIBRA_MOTOR_MCPWM_RED  1 //上升沿死区时间
 #define VIBRA_MOTOR_MCPWM_FED  1 //下降沿死区时间
+#define VIBRA_MOTOR_MCPWM_DEFAULT_FREQ 235 //默认频率
+
 
 
 esp_err_t vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio);

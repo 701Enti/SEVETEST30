@@ -78,9 +78,9 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode)
       data2 = *p << (i - 8) | data2; // 取出值进行运算
   }
 
-  ESP_LOGW(TAG, "准备进行TCA6416A引脚模式设置,准备写入:\nP00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
-           data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
-           data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  // ESP_LOGI(TAG, "准备进行TCA6416A引脚模式设置,准备写入:\nP00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
+  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
+  //          data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_MODE1, TCA6416A_data_buf[1] = data1;
@@ -114,9 +114,9 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode)
     return ret;
   }
 
-  ESP_LOGW(TAG, "TCA6416A引脚模式设置完成,当前寄存器回读:\nP00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
-           data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
-           data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  // ESP_LOGI(TAG, "TCA6416A引脚模式设置完成,当前寄存器回读:\nP00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
+  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
+  //          data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
 
   return ESP_OK;
 }
@@ -163,9 +163,9 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel, TCA6416A
       data2 = *p << (i - 8) | data2; // 取出值进行运算
   }
 
-  ESP_LOGW(TAG, "准备进行TCA6416A输出引脚电平设置,准备写入:\nP00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2 %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN %d][charge_SIGN %d][QC_TOUCH_R %d]",
-           data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
-           data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  // ESP_LOGI(TAG, "准备进行TCA6416A输出引脚电平设置,准备写入:\nP00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2 %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN %d][charge_SIGN %d][QC_TOUCH_R %d]",
+  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6) & 0x01, (data1 >> 7) & 0x01,
+  //          data2 & 0x01, (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
 
   // 装载并写入输出寄存器
   TCA6416A_data_buf[0] = TCA6416A_OUT1, TCA6416A_data_buf[1] = data1;
@@ -240,9 +240,9 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel, TCA6416A
     }
   }
 
-  ESP_LOGW(TAG, "TCA6416A引脚电平读写完成,当前寄存器回读:\nP00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2 %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN %d][charge_SIGN %d][QC_TOUCH_R %d]",
-           pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->EN_LED_BOARD, pTCA6416Alevel->HP_DETECT, pTCA6416Alevel->BAT_QSTRT, pTCA6416Alevel->BAT_ALRT, pTCA6416Alevel->EMF_DRDY, pTCA6416Alevel->amplifier_MUTE, pTCA6416Alevel->amplifier_SD,
-           pTCA6416Alevel->IMU_INT2, pTCA6416Alevel->IMU_INT1, pTCA6416Alevel->ALS_INT, pTCA6416Alevel->thumbwheel_CCW, pTCA6416Alevel->thumbwheel_CW, pTCA6416Alevel->OTG_EN, pTCA6416Alevel->charge_SIGN, pTCA6416Alevel->QC_TOUCH_R);
+  // ESP_LOGI(TAG, "TCA6416A引脚电平读写完成,当前寄存器回读:\nP00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2 %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN %d][charge_SIGN %d][QC_TOUCH_R %d]",
+  //          pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->EN_LED_BOARD, pTCA6416Alevel->HP_DETECT, pTCA6416Alevel->BAT_QSTRT, pTCA6416Alevel->BAT_ALRT, pTCA6416Alevel->EMF_DRDY, pTCA6416Alevel->amplifier_MUTE, pTCA6416Alevel->amplifier_SD,
+  //          pTCA6416Alevel->IMU_INT2, pTCA6416Alevel->IMU_INT1, pTCA6416Alevel->ALS_INT, pTCA6416Alevel->thumbwheel_CCW, pTCA6416Alevel->thumbwheel_CW, pTCA6416Alevel->OTG_EN, pTCA6416Alevel->charge_SIGN, pTCA6416Alevel->QC_TOUCH_R);
 
   return ESP_OK;
 }

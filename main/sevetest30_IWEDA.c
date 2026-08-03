@@ -56,23 +56,24 @@
 
 #include "esp_timer.h"
 
+#include "mbedtls/base64.h"
+#include "monocypher-ed25519.h"
+
 char http_output_buf[HTTP_BUF_MAX] = {0}; // 输出数据缓存
 char http_url_buf[HTTP_BUF_MAX] = {0};    // url缓存,留着调用时候可以用
 char *ip_address;                         // 公网IP
 
 char *sevetest30_asr_result_text = NULL; // 语音识别结果
 
-Real_time_weather *real_time_weather_data;
-ip_position *ip_position_data;
+current_weather_data_t current_weather_data;
+position_data_t position_data;
 
 esp_http_client_handle_t http_client_handle = NULL;
-esp_periph_handle_t se30_wifi_periph_handle = NULL;
+esp_periph_handle_t wifi_periph_handle = NULL;
 
-void transform_ip_address();
-void transform_postcode();
-void transform_lng_lat();
-void transform_locationID();
-void transform_real_time_weather_data();
+void http_init_get_request();
+void http_get_request_send(bool *flag);
+void change_url_if_need_redirect();
 
 /// @brief WIFI外设初始化
 /// @param periph_config 网络外设配置
@@ -113,16 +114,233 @@ esp_err_t wifi_connect(periph_wifi_cfg_t *wifi_cfg)
         return ESP_FAIL;
     }
 
-    if (se30_wifi_periph_handle)
+    if (wifi_periph_handle)
     {
         ESP_LOGE(TAG, "上次的WIFI句柄未有效删除,无法连接");
         return ESP_FAIL;
     }
 
-    se30_wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
+    wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
 
-    esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);                                      // 启动连接任务
-    return periph_wifi_wait_for_connected(se30_wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS)); // 请求连接
+    esp_periph_start(se30_periph_set_handle, wifi_periph_handle);                                      // 启动连接任务
+    return periph_wifi_wait_for_connected(wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS)); // 请求连接
+}
+
+/**
+ * @brief 将标准 Base64 字符串原地转换为 Base64URL 格式
+ * @param str 标准 Base64 字符串指针
+ */
+static void base64_to_base64url(char *str)
+{
+    if (str == NULL)
+    {
+        return;
+    }
+    for (; *str != '\0'; str++)
+    {
+        if (*str == '+')
+        {
+            *str = '-';
+        }
+        else if (*str == '/')
+        {
+            *str = '_';
+        }
+        else if (*str == '=')
+        {
+            *str = '\0';
+            break;
+        }
+    }
+}
+
+/// @brief 从Base64字符串中提取Ed25519种子
+/// @param b64_key Base64编码的Ed25519私钥字符串
+/// @param seed 提取到的Ed25519种子，大小为32字节
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG Base64解码失败
+/// @return ESP_ERR_NOT_FOUND 未找到Ed25519 seed段
+esp_err_t ed25519_b64_to_seed(const char *b64_key, uint8_t seed[32])
+{
+    uint8_t der[256];
+    size_t der_len = sizeof(der);
+    uint32_t offset;
+
+    // Base64解码失败
+    if (mbedtls_base64_decode(der, der_len, &der_len, (uint8_t *)b64_key, strlen(b64_key)) != 0)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // 仅在末尾34字节区间查找，减少误匹配
+    offset = (der_len >= 34) ? (der_len - 34) : 0;
+
+    while (offset + 34 <= der_len)
+    {
+        if (der[offset] == 0x04 && der[offset + 1] == 0x20)
+        {
+            // 向前20字节校验Ed25519专属OID 0x2b 0x65 0x70
+            uint32_t check_start = (offset > 20) ? (offset - 20) : 0;
+            for (uint32_t p = check_start; p < offset - 2; p++)
+            {
+                if (der[p] == 0x2b && der[p + 1] == 0x65 && der[p + 2] == 0x70)
+                {
+                    memcpy(seed, der + offset + 2, 32);
+                    return ESP_OK;
+                }
+            }
+        }
+        offset++;
+    }
+
+    // 未找到合法Ed25519 seed段
+    return ESP_ERR_NOT_FOUND;
+}
+
+/**
+ * @brief 生成 JWT Token(使用ED25519)(含"Bearer "前缀)
+ * @param kid 凭据 ID
+ * @param sub 项目 ID
+ * @param private_key_pem 私钥字符串 (去掉-----BEGIN/END-----、无换行空格的纯base64私钥串
+ * @return 生成的 JWT Token 字符串指针，失败返回 NULL
+ * @note 使用完生成的 JWT Token 后，需要手动调用 free() 函数释放内存
+ * @note 生成的 JWT Token 有效期为 1 天
+ */
+char *generate_ed25519_jwt_token(const char *kid, const char *sub, const char *private_key)
+{
+    static const char *TAG = "generate_ed25519_jwt_token";
+
+    // 检查参数
+    if (!kid || !sub || !private_key)
+    {
+        ESP_LOGE(TAG, "参数不能为空");
+        return NULL;
+    }
+
+    // 构造 JWT Header
+    char header[128];
+    // snprintf(header, sizeof(header), "{\"alg\":\"EdDSA\",\"typ\":\"JWT\",\"kid\":\"%s\"}", kid);
+    snprintf(header, sizeof(header), "{\"alg\":\"EdDSA\",\"kid\":\"%s\"}", kid);
+
+    // 构造 JWT Payload
+    time_t now = time(NULL);
+    char payload[128];
+    snprintf(payload, sizeof(payload), "{\"sub\":\"%s\",\"iat\":%ld,\"exp\":%ld}",
+             sub, (long)(now - 30), (long)(now + QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY));
+
+    // 对 Header 进行 Base64URL 编码
+    unsigned char b64_header[256];
+    size_t header_len = 0;
+    if (mbedtls_base64_encode(b64_header, sizeof(b64_header), &header_len,
+                              (unsigned char *)header, strlen(header)) != 0)
+    {
+        ESP_LOGE(TAG, "请求头 Base64 编码失败");
+        return NULL;
+    }
+    base64_to_base64url((char *)b64_header);
+
+    // 对 Payload 进行 Base64URL 编码
+    unsigned char b64_payload[256];
+    size_t payload_len = 0;
+    if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload), &payload_len,
+                              (unsigned char *)payload, strlen(payload)) != 0)
+    {
+        ESP_LOGE(TAG, "载荷 Base64 编码失败");
+        return NULL;
+    }
+    base64_to_base64url((char *)b64_payload);
+
+    // 拼接待签名消息
+    char message[512];
+    snprintf(message, sizeof(message), "%.*s.%.*s",
+             (int)header_len, b64_header, (int)payload_len, b64_payload);
+
+    // Base64私钥解码成DER二进制
+    uint8_t der_buf[256] = {0};
+    size_t der_len = sizeof(der_buf);
+    int mb_ret = mbedtls_base64_decode(der_buf, der_len, &der_len,
+                                       (const uint8_t *)private_key, strlen(private_key));
+    if (mb_ret != 0)
+    {
+        ESP_LOGE(TAG, "私钥Base64解码失败");
+        return NULL;
+    }
+
+    // 解析PKCS8提取ed25519种子
+    uint8_t seed[32] = {0};
+    esp_err_t ret = ed25519_b64_to_seed(private_key, seed);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "私钥解析失败 esp_err_t: %d", ret);
+        return NULL;
+    }
+
+    // 派生secret_key
+    uint8_t secret_key[64] = {0};
+    uint8_t public_key[32] = {0};
+
+    crypto_ed25519_key_pair(secret_key, public_key, seed);
+
+    // 执行Ed25519签名
+    unsigned char signature[64] = {0};
+    size_t sig_len = 64;
+    crypto_ed25519_sign(signature, secret_key, (uint8_t *)message, strlen(message));
+
+    // 对签名进行 Base64URL 编码
+    unsigned char b64_signature[128];
+    size_t sig_b64_len = 0;
+    if (mbedtls_base64_encode(b64_signature, sizeof(b64_signature), &sig_b64_len,
+                              signature, sig_len) != 0)
+    {
+        ESP_LOGE(TAG, "签名 Base64 编码失败");
+        return NULL;
+    }
+    base64_to_base64url((char *)b64_signature);
+
+    // 拼接最终 JWT Token,含"Bearer "前缀
+    char token[512] = {0};
+    snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s",
+             (int)header_len, b64_header,
+             (int)payload_len, b64_payload,
+             (int)sig_b64_len, b64_signature);
+
+    ESP_LOGI(TAG, "JWT 令牌生成成功 %s", token);
+    return strdup(token);
+}
+
+/// @brief 获取和风天气 JWT Token,含"Bearer "前缀
+/// @return JWT Token 字符串指针
+/// @note 自动管理，只要令牌有效期剩余一半，就刷新令牌，无需手动调用 free() 函数释放内存
+char *get_qweather_jwt_token()
+{
+    static const char *TAG = "get_qweather_jwt_token";
+    static char *token = NULL;
+    static time_t last_time = 0;
+    // 只要令牌有效期剩余一半，就刷新令牌
+    if (token != NULL && time(NULL) - last_time > QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY / 2)
+    {
+        free(token);
+        token = NULL;
+        last_time = time(NULL);
+    }
+    if (token == NULL)
+    {
+        token = generate_ed25519_jwt_token(CONFIG_QWEATHER_API_JWT_CREDENTIAL_ID, CONFIG_QWEATHER_API_JWT_PROJECT_ID, CONFIG_QWEATHER_API_JWT_PRIVATE_KEY_WITHOUT_HEADER_FOOTER);
+        if (token == NULL)
+        {
+            return NULL;
+        }
+        else
+        {
+            last_time = time(NULL);
+            return token;
+        }
+    }
+    else
+    {
+        ESP_LOGI(TAG, "使用已存在的JWT 令牌(生成时间：%ld)", (long)last_time);
+        return token;
+    }
 }
 
 /// @brief 百度API获取AccessToken,保存到char数组
@@ -140,18 +358,23 @@ esp_err_t baidu_get_AccessToken(char *client_id, char *client_secret, char *Acce
         return ESP_FAIL;
     }
 
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE(TAG, "网络未连接");
         return ESP_FAIL;
     }
 
     // 发送请求
-    bool Task_comp_flag = false;                                                                // 任务是否完成标识
+    bool Task_comp_flag = false; // 任务是否完成标识
+    if (!client_id || !client_secret)
+    {
+        ESP_LOGE(TAG, "client_id或client_secret为空");
+        return ESP_FAIL;
+    }
     snprintf(http_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
     http_init_get_request();
     esp_http_client_set_timeout_ms(http_client_handle, 10000);
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
 
@@ -162,81 +385,25 @@ esp_err_t baidu_get_AccessToken(char *client_id, char *client_secret, char *Acce
     {
         // 解析数据
         cJSON *root_data = NULL;
+        cJSON *cjson_AccessToken = NULL;
+
         root_data = cJSON_Parse(http_output_buf);
-        cJSON *cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
-
-        memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));                       // 清空之前的存储
-        snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring); // 复制AccessToken
-
-        cJSON_Delete(root_data);
+        if (root_data)
+        {
+            cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
+            if (cjson_AccessToken)
+            {
+                memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char)); // 清空之前的存储
+                if (cjson_AccessToken->valuestring)
+                {
+                    snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring); // 复制AccessToken
+                }
+            }
+            cJSON_Delete(root_data);
+        }
 
         return ESP_OK;
     }
-}
-
-// 封装好的网络信息API请求服务，包含信息解析，并存储到对应结构体或缓冲变量
-
-// 刷新位置数据
-void refresh_position_data()
-{
-
-    bool Task_comp_flag = false; // 任务是否完成标识
-
-    // 获取公网IP
-    Task_comp_flag = false;
-    sprintf(http_url_buf, GET_IP_ADDRESS_API_URL);
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE);
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_ip_address();
-
-    // 获取IP归属地邮政编码
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, IP_POSITION_API_URL, ip_address);
-    http_init_get_request();
-    esp_http_client_set_header(http_client_handle, "token", CONFIG_IP_138_TOKEN);
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_postcode();
-
-    // ip_position_data.postcode = "343100";//调试用,并将上面这块注释来避免调试时的花费
-
-    // 通过邮政编码获取经纬度以进行城市搜索
-    // 原因有三点
-    // 1.cilent库似乎没有URL中文解码，在URL装载时出现错误
-    // 2.IP138的API返回可能不包含"县""市"等字，如此处返回的是两个吉安，因为这里县和市的名字一样被认定为模糊搜索，通过GeoAPI返回的是市里下级的所有县
-    // 3.邮政编码大概率直接对应一个县或区，并且IP138API网页还可找到一个免费还不用鉴权的"行政区划"查询服务，会返回一个经纬度，这是GeoAPI支持的搜索关键词
-    //  免费还不用鉴权的行政区划查询服务，支持多种关键词搜索： https://quhua.ipchaxun.com/
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API_URL, ip_position_data->postcode); // 确定请求URL
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_lng_lat();
-
-    // 城市搜索，获取locationID
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data->lng, ip_position_data->lat, CONFIG_WEATHER_API_KEY);
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_locationID();
-}
-
-// 刷新天气数据
-void refresh_weather_data()
-{
-    bool Task_comp_flag = false;                                                                         // 任务是否完成标识
-    snprintf(http_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data->id, CONFIG_WEATHER_API_KEY); // 确定请求URL
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_real_time_weather_data();
 }
 
 /// @brief 初始化系统时间数据,sntp方式
@@ -251,7 +418,7 @@ void refresh_weather_data()
 esp_err_t init_time_data_sntp(uint32_t timeout_ms)
 {
     const char *TAG = "init_time_data_sntp";
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE(TAG, "网络未连接");
         return ESP_ERR_INVALID_STATE;
@@ -292,17 +459,21 @@ int http_check_response_content(esp_http_client_handle_t client_handle)
 {
     const char *TAG = "http_check_response_content";
 
-    esp_http_client_fetch_headers(client_handle);                //   接收消息头
-    int status = esp_http_client_get_status_code(client_handle); // 获取消息头中的响应状态信息
-    int len = esp_http_client_get_content_length(client_handle); // 获取消息头中的总数据大小信息
+    char url_buf[HTTP_BUF_MAX];
+    esp_http_client_get_url(client_handle, url_buf, HTTP_BUF_MAX);
+
+    esp_http_client_fetch_headers(client_handle);                                //   接收消息头
+    int status = esp_http_client_get_status_code(client_handle);                 // 获取消息头中的响应状态信息
+    int len = esp_http_client_get_content_length(client_handle);                 // 获取消息头中的总数据大小信息
+    esp_http_client_read_response(client_handle, http_output_buf, HTTP_BUF_MAX); // 接收消息体
 
     // 检查是否为临时重定向
     if (status == 302 || status == 307)
     {
         if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ,本次传输响应数据已分块", status);
+            ESP_LOGW(TAG, "[%s] 需要临时重定向，响应状态-> %d ,本次传输响应数据已分块", url_buf, status);
         else
-            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ，响应数据共 %d bytes", status, len);
+            ESP_LOGW(TAG, "[%s] 需要临时重定向，响应状态-> %d ，响应数据(共 %d bytes)-> %s", url_buf, status, len, http_output_buf);
 
         return status;
     }
@@ -310,18 +481,18 @@ int http_check_response_content(esp_http_client_handle_t client_handle)
     if (status != 200)
     {
         if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGE(TAG, "本次传输响应数据已分块 但是处于不正常的响应状态 -> %d 数据将不会保存", status);
+            ESP_LOGE(TAG, "[%s] 本次传输响应数据已分块 但是处于不正常的响应状态 -> %d 数据将不会保存", url_buf, status);
         else
-            ESP_LOGE(TAG, "不正常的响应状态 -> %d 共接收到 -> %d bytes 数据将不会保存", status, len);
+            ESP_LOGE(TAG, "[%s] 不正常的响应状态 -> %d 共接收到 -> %d bytes 数据将不会保存", url_buf, status, len);
 
         return status;
     }
     else
     {
         if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGI(TAG, "连接就绪，响应状态-> %d ,本次传输响应数据已分块", status);
+            ESP_LOGI(TAG, "[%s] 连接就绪，响应状态-> %d ,本次传输响应数据已分块", url_buf, status);
         else
-            ESP_LOGI(TAG, "连接就绪，响应状态-> %d ，响应数据共 %d bytes", status, len);
+            ESP_LOGI(TAG, "[%s] 连接就绪，响应状态-> %d ，响应数据共 %d bytes", url_buf, status, len);
 
         return ESP_OK;
     }
@@ -335,7 +506,7 @@ int http_check_common_url(const char *url)
     const char *TAG = "http_check_common_url";
     int ret = ESP_OK;
 
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE("http_check_common_url", "网络未连接");
         return ESP_FAIL;
@@ -377,7 +548,7 @@ void change_url_if_need_redirect(char **url)
     const char *TAG = "change_url_if_need_redirect";
 
     static char location_url_buf[HTTP_BUF_MAX] = {0}; // location_url缓存
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) == PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) == PERIPH_WIFI_CONNECTED)
     {
         sprintf(http_url_buf, *url);
         http_init_get_request();
@@ -406,10 +577,63 @@ void change_url_if_need_redirect(char **url)
     }
 }
 
+/**
+ * @brief 将 UTF-8 字符串进行 URL 编码
+ *
+ * @param src 源字符串指针
+ * @param dest 目标字符数组（存放编码后的结果）
+ * @param dest_len 目标数组的总大小
+ * @return esp_err_t ESP_OK 成功，ESP_ERR_NO_MEM 空间不足，ESP_ERR_INVALID_ARG 参数错误
+ */
+esp_err_t url_encode(const char *src, char *dest, size_t dest_len)
+{
+
+    if (src == NULL || dest == NULL || dest_len == 0)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    static const char *hex = "0123456789ABCDEF";
+    size_t i = 0; // 源字符串索引
+    size_t j = 0; // 目标字符串索引
+
+    while (src[i] != '\0')
+    {
+        unsigned char c = src[i];
+
+        // 判断是否是安全字符（字母、数字、- _ . ~）
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
+            // 检查空间：安全字符需要 1 个字节 + 1 个结束符
+            if (j + 2 > dest_len)
+            {
+                return ESP_ERR_NO_MEM;
+            }
+            dest[j++] = c;
+        }
+        else
+        {
+            // 检查空间：非安全字符需要 3 个字节(如 %E5) + 1 个结束符
+            if (j + 4 > dest_len)
+            {
+                return ESP_ERR_NO_MEM;
+            }
+            dest[j++] = '%';
+            dest[j++] = hex[c >> 4];
+            dest[j++] = hex[c & 0x0F];
+        }
+        i++;
+    }
+
+    dest[j] = '\0'; // 安全补上字符串结束符
+    return ESP_OK;
+}
+
 /// @brief 初始化GET请求
+/// @note 请提前将URL放入http_url_buf中,URL将被拷贝，即使之后http_url_buf被修改实际访问的URL也不会改变
 void http_init_get_request()
 {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE("http_init_get_request", "网络未连接");
         return;
@@ -420,16 +644,15 @@ void http_init_get_request()
     memset(&http_config, 0, sizeof(http_config)); // 对参数初始化为0
     http_config.buffer_size_tx = HTTP_BUF_MAX;    // 发送缓冲区大小
     http_config.buffer_size = HTTP_BUF_MAX;       // 接收缓冲区大小
-    http_config.url = &http_url_buf[0];           // 导入URL
+    http_config.url = http_url_buf;               // 导入URL
 
     // 配置传输任务，GET方式
     http_client_handle = esp_http_client_init(&http_config);         // 获取连接句柄，之后读取状态和响应都需要这个
     esp_http_client_set_method(http_client_handle, HTTP_METHOD_GET); // GET方式
 
     // 清除http_get_out_buf之前的残留数据
+    memset(http_output_buf, 0, HTTP_BUF_MAX);
     strcpy(http_output_buf, "");
-    // URL也清一下
-    strcpy(http_url_buf, "");
 }
 
 // 发送GET请求，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束），
@@ -470,9 +693,10 @@ void http_get_request_send(bool *flag)
     }
 }
 
-// 对gzip压缩后的响应，解压回原来的JSON格式，外部函数需要对传入参数有效性负责
-// 输入数据选择，输出数据缓冲区选择，输入数据最大允许长度
-// 对于 和风天气+ESP32 通过zlib解压gzip数据的思路可以参考这位大佬的博客，甚有帮助非常感谢：https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
+/// @brief 解压gzip压缩后的响应数据
+/// @param input 输入数据指针
+/// @param output 输出数据指针
+/// @param len 输入数据长度
 void gzip_decompress(void *input, void *output, int len)
 {
     const char *TAG = "zlib_gzip_decompress";
@@ -504,12 +728,12 @@ void gzip_decompress(void *input, void *output, int len)
             break;
         else if (flag != Z_OK)
         {
-            ESP_LOGE(TAG, "解压数据时出现问题，在 %lx -> %lx 时", stream_config.total_in, stream_config.total_out);
+            ESP_LOGE(TAG, "解压数据时出现问题，在 0x%lx -> 0x%lx 时", stream_config.total_in, stream_config.total_out);
             return;
         }
     }
 
-    ESP_LOGI(TAG, "数据解压完成 %lx -> %lx", stream_config.total_in, stream_config.total_out);
+    ESP_LOGI(TAG, "数据解压完成 0x%lx -> 0x%lx", stream_config.total_in, stream_config.total_out);
 
     // 最后一件事，在输出末尾添加结束标识以便识别
     ((char *)output)[stream_config.total_out] = '\0';
@@ -686,10 +910,12 @@ OK:
     strcat(ip_address, buf);
     ESP_LOGI(TAG, "解析完毕,获取到公网IP %s (总字符数 %d)", ip_address, i);
 }
-// 解析返回的IP归属地址邮政编码信息，保存到ip_position_data
-void transform_postcode()
+
+/// @brief 解析IP138返回的IP归属地址信息，保存到position_data
+/// @note API文档：https://www.ip138.com/api/
+void transform_ip_position_ip138()
 {
-    const char *TAG = "transform_postcode";
+    const char *TAG = "transform_ip_position_ip138";
 
     // 因为返回数据中被一个find（）扩住了，json解析不了，想办法缓存有用的数据再解析,注意其中特征 "find("的位置    ")"始终为结束字符
     // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
@@ -699,129 +925,563 @@ void transform_postcode()
     {
         json_buf[i - 5] = http_output_buf[i];
         i++;
+        if (i > strlen(http_output_buf))
+        {
+            ESP_LOGE(TAG, "邮政编码信息无法解析");
+            return;
+        }
     }
     http_output_buf[i] = '\0';
 
     // 提取完成开始json解析
     cJSON *root_data = NULL;
+    cJSON *cjson_data = NULL;
+    cJSON *cjson_country = NULL;
+    cJSON *cjson_adm1 = NULL;
+    cJSON *cjson_adm2 = NULL;
+    cJSON *cjson_name = NULL;
+
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_data = cJSON_GetObjectItem(root_data, "data");
 
-    cJSON *cjson_postcode = cJSON_GetArrayItem(cjson_data, 5);
-    ip_position_data->postcode = cjson_postcode->valuestring;
-
-    ESP_LOGI(TAG, "解析完毕,获取到IP归属地邮政编码 %s", cjson_postcode->valuestring);
-
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
+    if (root_data)
+    {
+        cjson_data = cJSON_GetObjectItem(root_data, "data");
+        if (cjson_data)
+        {
+            cjson_country = cJSON_GetArrayItem(cjson_data, 0);
+            cjson_adm1 = cJSON_GetArrayItem(cjson_data, 1);
+            cjson_adm2 = cJSON_GetArrayItem(cjson_data, 2);
+            cjson_name = cJSON_GetArrayItem(cjson_data, 3);
+            if (cjson_country && cjson_country->valuestring)
+            {
+                if (position_data.country != NULL)
+                {
+                    free(position_data.country);
+                    position_data.country = NULL;
+                }
+                position_data.country = strdup(cjson_country->valuestring);
+                ESP_LOGI(TAG, "获取到IP归属地国家 %s", position_data.country);
+            }
+            if (cjson_adm1 && cjson_adm1->valuestring)
+            {
+                if (position_data.adm1 != NULL)
+                {
+                    free(position_data.adm1);
+                    position_data.adm1 = NULL;
+                }
+                position_data.adm1 = strdup(cjson_adm1->valuestring);
+                ESP_LOGI(TAG, "获取到IP归属地adm1 %s", position_data.adm1);
+            }
+            if (cjson_adm2 && cjson_adm2->valuestring)
+            {
+                if (position_data.adm2 != NULL)
+                {
+                    free(position_data.adm2);
+                    position_data.adm2 = NULL;
+                }
+                position_data.adm2 = strdup(cjson_adm2->valuestring);
+                ESP_LOGI(TAG, "获取到IP归属地adm2 %s", position_data.adm2);
+            }
+            if (cjson_name && cjson_name->valuestring)
+            {
+                if (position_data.name != NULL)
+                {
+                    free(position_data.name);
+                    position_data.name = NULL;
+                }
+                position_data.name = strdup(cjson_name->valuestring);
+                ESP_LOGI(TAG, "获取到IP归属地name %s", position_data.name);
+            }
+        }
+        cJSON_Delete(root_data);
+    }
 }
-// 解析经纬度数据,保存到ip_position_data
-void transform_lng_lat()
+
+/// @brief 通过高德地图API-POI搜索，获取高德地图经纬度数据,保存到position_data
+/// @note API文档：https://lbs.amap.com/api/webservice/guide/api-advanced/search
+void transform_lng_lat_amap()
 {
-    const char *TAG = "transform_lng_lat";
+    const char *TAG = "transform_lng_lat_amap";
 
     cJSON *root_data = NULL;
+    cJSON *cjson_pois = NULL;
+    cJSON *cjson_pois_item = NULL;
+    cJSON *cjson_location = NULL;
+
     root_data = cJSON_Parse(http_output_buf);
 
-    cJSON *cjson_data = cJSON_GetObjectItem(root_data, "data");
-    cJSON *cjson_results = cJSON_GetObjectItem(cjson_data, "results");
-
-    cJSON *cjson_results_root = cJSON_GetArrayItem(cjson_results, 0);
-
-    cJSON *cjson_lng = cJSON_GetObjectItem(cjson_results_root, "lng");
-    cJSON *cjson_lat = cJSON_GetObjectItem(cjson_results_root, "lat");
-
-    ip_position_data->lng = cjson_lng->valuestring;
-    ip_position_data->lat = cjson_lat->valuestring;
-
-    ESP_LOGI(TAG, "获取到归属地 经度为%s 纬度为%s", ip_position_data->lng, ip_position_data->lat);
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
+    if (root_data)
+    {
+        cjson_pois = cJSON_GetObjectItem(root_data, "pois");
+        if (cjson_pois)
+        {
+            cjson_pois_item = cJSON_GetArrayItem(cjson_pois, 0);
+            if (cjson_pois_item)
+            {
+                cjson_location = cJSON_GetObjectItem(cjson_pois_item, "location");
+                if (cjson_location)
+                {
+                    if (cjson_location->valuestring)
+                    {
+                        if (position_data.longitude != NULL)
+                        {
+                            free(position_data.longitude);
+                            position_data.longitude = NULL;
+                        }
+                        if (position_data.latitude != NULL)
+                        {
+                            free(position_data.latitude);
+                            position_data.latitude = NULL;
+                        }
+                        char lon[32] = {0}; // 经度
+                        char lat[32] = {0}; // 纬度
+                        sscanf(cjson_location->valuestring, "%[^,],%s", lon, lat);
+                        position_data.longitude = strdup(lon);
+                        position_data.latitude = strdup(lat);
+                        ESP_LOGI(TAG, "获取到经度 %s,纬度 %s", position_data.longitude, position_data.latitude);
+                    }
+                }
+            }
+        }
+        cJSON_Delete(root_data);
+    }
 }
-// 解析locationID数据,保存到ip_position_data,同时会进一步完善ip_position_data数据
-void transform_locationID()
+
+/// @brief 使用和风天气GeoAPI-城市搜索，通过经纬度获取和风天气返回的locationID,保存到position_data,同时会进一步完善position_data数据
+/// @note API文档：https://dev.qweather.com/docs/api/geoapi/city-lookup/
+void transform_locationID_qweather()
 {
-    const char *TAG = "transform_locationID";
+    const char *TAG = "transform_locationID_qweather";
 
     char json_buf[PRE_CJSON_BUF_MAX] = {0};                   // 缓存JOSN数据
     gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
     cJSON *root_data = NULL;
+    cJSON *cjson_location = NULL;
+    cJSON *cjson_location_root = NULL;
+    cJSON *cjson_id = NULL;
+
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_location = cJSON_GetObjectItem(root_data, "location");
-    cJSON *cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
-
-    cJSON *cjson_name = cJSON_GetObjectItem(cjson_location_root, "name");
-    cJSON *cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
-    cJSON *cjson_adm2 = cJSON_GetObjectItem(cjson_location_root, "adm2");
-    cJSON *cjson_adm1 = cJSON_GetObjectItem(cjson_location_root, "adm1");
-    cJSON *cjson_country = cJSON_GetObjectItem(cjson_location_root, "country");
-
-    ip_position_data->country = cjson_country->valuestring;
-    ip_position_data->adm1 = cjson_adm1->valuestring;
-    ip_position_data->adm2 = cjson_adm2->valuestring;
-    ip_position_data->name = cjson_name->valuestring;
-    ip_position_data->id = cjson_id->valuestring;
-
-    ESP_LOGI(TAG, "获取到locationID %s", ip_position_data->id);
-    ESP_LOGI(TAG, "详细地址：%s - %s - %s  - %s ", ip_position_data->country, ip_position_data->adm1,
-             ip_position_data->adm2, ip_position_data->name);
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
+    if (root_data)
+    {
+        cjson_location = cJSON_GetObjectItem(root_data, "location");
+        if (cjson_location)
+        {
+            cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
+            if (cjson_location_root)
+            {
+                cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
+                if (cjson_id)
+                {
+                    if (cjson_id->valuestring)
+                    {
+                        if (position_data.qweather_location_id != NULL)
+                        {
+                            free(position_data.qweather_location_id);
+                            position_data.qweather_location_id = NULL;
+                        }
+                        position_data.qweather_location_id = strdup(cjson_id->valuestring);
+                        ESP_LOGI(TAG, "获取到详细地址 locationID %s", position_data.qweather_location_id);
+                    }
+                }
+            }
+        }
+        cJSON_Delete(root_data);
+    }
 }
-// 解析实时天气，保存到全局 real_time_weather_data
-void transform_real_time_weather_data()
+
+/// @brief 使用和风天气天气预报-实时天气，通过经纬度获取实时天气数据，保存到全局 current_weather_data
+/// @note API文档：https://dev.qweather.com/docs/api/weather/weather-current/
+void transform_current_weather_data_qweather()
 {
-    const char *TAG = "transform_real_time_weather_data";
+    const char *TAG = "transform_current_weather_data_qweather";
 
     char json_buf[PRE_CJSON_BUF_MAX] = {0};                   // 缓存JOSN数据
     gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
 
-    // JSON数据解析,当前仅需要 now 的数据 15个 全部解析
     cJSON *root_data = NULL;
+
+    cJSON *cjson_metadata = NULL;
+    cJSON *cjson_metadata_tag = NULL;
+    cJSON *cjson_metadata_attributions = NULL;
+
+    cJSON *cjson_condition = NULL;
+    cJSON *cjson_condition_text = NULL;
+    cJSON *cjson_condition_code = NULL;
+
+    cJSON *cjson_temperature = NULL;
+    cJSON *cjson_temperature_value = NULL;
+
+    cJSON *cjson_feelsLike = NULL;
+    cJSON *cjson_feelsLike_value = NULL;
+
+    cJSON *cjson_humidity = NULL;
+
+    cJSON *cjson_wind = NULL;
+    cJSON *cjson_wind_direction = NULL;
+    cJSON *cjson_wind_direction_degree = NULL;
+    cJSON *cjson_wind_direction_compass = NULL;
+    cJSON *cjson_wind_speed = NULL;
+    cJSON *cjson_wind_speed_value = NULL;
+    cJSON *cjson_wind_scale = NULL;
+
+    cJSON *cjson_windGust = NULL;
+    cJSON *cjson_windGust_value = NULL;
+
+    cJSON *cjson_precipitation = NULL;
+    cJSON *cjson_precipitation_amount = NULL;
+    cJSON *cjson_precipitation_amount_value = NULL;
+    cJSON *cjson_precipitation_intensity = NULL;
+    cJSON *cjson_precipitation_intensity_value = NULL;
+    cJSON *cjson_precipitation_type = NULL;
+
+    cJSON *cjson_pressure = NULL;
+    cJSON *cjson_pressure_value = NULL;
+
+    cJSON *cjson_visibility = NULL;
+    cJSON *cjson_visibility_value = NULL;
+
+    cJSON *cjson_dewPoint = NULL;
+    cJSON *cjson_dewPoint_value = NULL;
+
+    cJSON *cjson_cloudCover = NULL;
+    cJSON *cjson_uvIndex = NULL;
+
+    // 测试数据(包含所有字段，来自官方API文档 https://dev.qweather.com/docs/api/weather/weather-current/)
+    //  {
+    //    "metadata": {
+    //      "tag": "03ec2ded05fa80a43df2664dd9e4a8f48f7cc4f97c6a81dfd736ae17098aba14",
+    //      "attributions": [
+    //        "https://developer.qweather.com/attribution.html"
+    //      ]
+    //    },
+    //    "condition": {
+    //      "text": "少云",
+    //      "code": "102"
+    //    },
+    //    "temperature": {
+    //      "value": 31.71,
+    //      "unit": "°C"
+    //    },
+    //    "feelsLike": {
+    //      "value": 33.64,
+    //      "unit": "°C"
+    //    },
+    //    "humidity": 0.69,
+    //    "wind": {
+    //      "direction": {
+    //        "degree": 226,
+    //        "compass": "sw"
+    //      },
+    //      "speed": {
+    //        "value": 4.74,
+    //        "unit": "m/s"
+    //      },
+    //      "scale": 3
+    //    },
+    //    "windGust": {
+    //      "value": 7.07,
+    //      "unit": "m/s"
+    //    },
+    //    "precipitation": {
+    //      "amount": {
+    //        "value": 0,
+    //        "unit": "mm"
+    //      },
+    //      "intensity": {
+    //        "value": 0,
+    //        "unit": "mm/h"
+    //      },
+    //      "type": "none"
+    //    },
+    //    "pressure": {
+    //      "value": 1001.5,
+    //      "unit": "hPa"
+    //    },
+    //    "visibility": {
+    //      "value": 29020,
+    //      "unit": "m"
+    //    },
+    //    "dewPoint": {
+    //      "value": 25.36,
+    //      "unit": "°C"
+    //    },
+    //    "cloudCover": 0.05,
+    //    "uvIndex": 3
+    //  }
+    const char *test =
+        "{"
+        "\"metadata\": {"
+        "\"tag\": \"03ec2ded05fa80a43df2664dd9e4a8f48f7cc4f97c6a81dfd736ae17098aba14\","
+        "\"attributions\": ["
+        "\"https://developer.qweather.com/attribution.html\""
+        "]"
+        "},"
+        "\"condition\": {"
+        "\"text\": \"少云\","
+        "\"code\": \"102\""
+        "},"
+        "\"temperature\": {"
+        "\"value\": 31.71,"
+        "\"unit\": \"°C\""
+        "},"
+        "\"feelsLike\": {"
+        "\"value\": 33.64,"
+        "\"unit\": \"°C\""
+        "},"
+        "\"humidity\": 0.69,"
+        "\"wind\": {"
+        "\"direction\": {"
+        "\"degree\": 226,"
+        "\"compass\": \"sw\""
+        "},"
+        "\"speed\": {"
+        "\"value\": 4.74,"
+        "\"unit\": \"m/s\""
+        "},"
+        "\"scale\": 3"
+        "},"
+        "\"windGust\": {"
+        "\"value\": 7.07,"
+        "\"unit\": \"m/s\""
+        "},"
+        "\"precipitation\": {"
+        "\"amount\": {"
+        "\"value\": 0,"
+        "\"unit\": \"mm\""
+        "},"
+        "\"intensity\": {"
+        "\"value\": 0,"
+        "\"unit\": \"mm/h\""
+        "},"
+        "\"type\": \"none\""
+        "},"
+        "\"pressure\": {"
+        "\"value\": 1001.5,"
+        "\"unit\": \"hPa\""
+        "},"
+        "\"visibility\": {"
+        "\"value\": 29020,"
+        "\"unit\": \"m\""
+        "},"
+        "\"dewPoint\": {"
+        "\"value\": 25.36,"
+        "\"unit\": \"°C\""
+        "},"
+        "\"cloudCover\": 0.05,"
+        "\"uvIndex\": 3"
+        "}";
+
+    // root_data = cJSON_Parse(test);
     root_data = cJSON_Parse(json_buf);
-    cJSON *cjson_now = cJSON_GetObjectItem(root_data, "now"); // 选定参数为为 now
 
-    cJSON *cjson_obsTime = cJSON_GetObjectItem(cjson_now, "obsTime");     // 数据观测时间
-    cJSON *cjson_temp = cJSON_GetObjectItem(cjson_now, "temp");           // 温度，摄氏度
-    cJSON *cjson_feelsLike = cJSON_GetObjectItem(cjson_now, "feelsLike"); // 体感温度，摄氏度
-    cJSON *cjson_icon = cJSON_GetObjectItem(cjson_now, "icon");           // 天气状况代码
-    cJSON *cjson_text = cJSON_GetObjectItem(cjson_now, "text");           // 天气文字描述例如多云
-    cJSON *cjson_wind360 = cJSON_GetObjectItem(cjson_now, "wind360");     // 360度风向
-    cJSON *cjson_windDir = cJSON_GetObjectItem(cjson_now, "windDir");     // 风向文字描述
-    cJSON *cjson_windScale = cJSON_GetObjectItem(cjson_now, "windScale"); // 风力等级
-    cJSON *cjson_windSpeed = cJSON_GetObjectItem(cjson_now, "windSpeed"); // 风速
-    cJSON *cjson_humidity = cJSON_GetObjectItem(cjson_now, "humidity");   // 相对湿度，百分比
-    cJSON *cjson_precip = cJSON_GetObjectItem(cjson_now, "precip");       // 当前每小时降水量，毫米
-    cJSON *cjson_pressure = cJSON_GetObjectItem(cjson_now, "pressure");   // 大气压强
-    cJSON *cjson_vis = cJSON_GetObjectItem(cjson_now, "vis");             // 能见度,KM
-    cJSON *cjson_cloud = cJSON_GetObjectItem(cjson_now, "cloud");         // 云量，可能为空
-    cJSON *cjson_dew = cJSON_GetObjectItem(cjson_now, "dew");             // 露点温度，可能为空
-
-    // 存储到 real_time_weather_data
-
-    // 传来的是字符型，因为后续分析需要，转换成整型存储起来
-    // weather_UI_1
-    sscanf(cjson_temp->valuestring, "%d", &real_time_weather_data->temp);
-    sscanf(cjson_icon->valuestring, "%d", &real_time_weather_data->icon);
-    // weather_UI_2
-    sscanf(cjson_humidity->valuestring, "%d", &real_time_weather_data->humidity);
-
-    // real_time_weather_data.obsTime = cjson_obsTime->type;
-    // real_time_weather_data.feelsLike = cjson_feelsLike->type;
-    // real_time_weather_data.text = cjson_text->type;
-    // real_time_weather_data.wind360 = cjson_wind360->type;
-    // real_time_weather_data.windDir = cjson_windDir->type;
-    // real_time_weather_data.windScale = cjson_windScale->type;
-    // real_time_weather_data.windSpeed = cjson_windSpeed->type;
-
-    // real_time_weather_data.precip = cjson_precip->type;
-    // real_time_weather_data.pressure = cjson_pressure->type;
-    // real_time_weather_data.vis = cjson_vis->type;
-
-    // //可能为空
-    // real_time_weather_data.cloud = cjson_cloud->type;
-    // real_time_weather_data.dew = cjson_dew->type;
-
-    ESP_LOGI(TAG, "解析完毕,实时天气数据已保存到real_time_weather_data");
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
+    if (root_data)
+    {
+        cjson_metadata = cJSON_GetObjectItem(root_data, "metadata");
+        if (cjson_metadata)
+        {
+            cjson_metadata_tag = cJSON_GetObjectItem(cjson_metadata, "tag");
+            if (cjson_metadata_tag && cjson_metadata_tag->valuestring)
+            {
+                {
+                    if (current_weather_data.metadata_tag != NULL)
+                    {
+                        free(current_weather_data.metadata_tag);
+                        current_weather_data.metadata_tag = NULL;
+                    }
+                    current_weather_data.metadata_tag = strdup(cjson_metadata_tag->valuestring);
+                    ESP_LOGI(TAG, "获取到 metadata_tag %s", current_weather_data.metadata_tag);
+                }
+            }
+            cjson_metadata_attributions = cJSON_GetObjectItem(cjson_metadata, "attributions");
+            if (cjson_metadata_attributions)
+            {
+                if (current_weather_data.metadata_attributions_raw_json != NULL)
+                {
+                    free(current_weather_data.metadata_attributions_raw_json);
+                    current_weather_data.metadata_attributions_raw_json = NULL;
+                }
+                current_weather_data.metadata_attributions_raw_json = strdup(cJSON_PrintUnformatted(cjson_metadata_attributions));
+                ESP_LOGI(TAG, "获取到 metadata_attributions_raw_json %s", current_weather_data.metadata_attributions_raw_json);
+            }
+        }
+        cjson_condition = cJSON_GetObjectItem(root_data, "condition");
+        if (cjson_condition)
+        {
+            cjson_condition_text = cJSON_GetObjectItem(cjson_condition, "text");
+            if (cjson_condition_text && cjson_condition_text->valuestring)
+            {
+                if (current_weather_data.condition_text != NULL)
+                {
+                    free(current_weather_data.condition_text);
+                    current_weather_data.condition_text = NULL;
+                }
+                current_weather_data.condition_text = strdup(cjson_condition_text->valuestring);
+                ESP_LOGI(TAG, "获取到 condition_text %s", current_weather_data.condition_text);
+            }
+            cjson_condition_code = cJSON_GetObjectItem(cjson_condition, "code");
+            if (cjson_condition_code && cjson_condition_code->valuestring)
+            {
+                sscanf(cjson_condition_code->valuestring, "%d", &current_weather_data.condition_code);
+                ESP_LOGI(TAG, "获取到 condition_code %d", current_weather_data.condition_code);
+            }
+        }
+        cjson_temperature = cJSON_GetObjectItem(root_data, "temperature");
+        if (cjson_temperature)
+        {
+            cjson_temperature_value = cJSON_GetObjectItem(cjson_temperature, "value");
+            if (cjson_temperature_value && cjson_temperature_value->type == cJSON_Number)
+            {
+                current_weather_data.temperature = cjson_temperature_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 temperature %lf", current_weather_data.temperature);
+            }
+        }
+        cjson_feelsLike = cJSON_GetObjectItem(root_data, "feelsLike");
+        if (cjson_feelsLike)
+        {
+            cjson_feelsLike_value = cJSON_GetObjectItem(cjson_feelsLike, "value");
+            if (cjson_feelsLike_value && cjson_feelsLike_value->type == cJSON_Number)
+            {
+                current_weather_data.feelsLike = cjson_feelsLike_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 feelsLike %lf", current_weather_data.feelsLike);
+            }
+        }
+        cjson_humidity = cJSON_GetObjectItem(root_data, "humidity");
+        if (cjson_humidity && cjson_humidity->type == cJSON_Number)
+        {
+            current_weather_data.humidity = cjson_humidity->valuedouble;
+            ESP_LOGI(TAG, "获取到 humidity %lf", current_weather_data.humidity);
+        }
+        cjson_wind = cJSON_GetObjectItem(root_data, "wind");
+        if (cjson_wind)
+        {
+            cjson_wind_direction = cJSON_GetObjectItem(cjson_wind, "direction");
+            if (cjson_wind_direction)
+            {
+                cjson_wind_direction_degree = cJSON_GetObjectItem(cjson_wind_direction, "degree");
+                if (cjson_wind_direction_degree && cjson_wind_direction_degree->type == cJSON_Number)
+                {
+                    current_weather_data.wind_direction_degree = cjson_wind_direction_degree->valuedouble;
+                    ESP_LOGI(TAG, "获取到 wind_direction_degree %lf", current_weather_data.wind_direction_degree);
+                }
+                cjson_wind_direction_compass = cJSON_GetObjectItem(cjson_wind_direction, "compass");
+                if (cjson_wind_direction_compass && cjson_wind_direction_compass->valuestring)
+                {
+                    if (current_weather_data.wind_direction_compass != NULL)
+                    {
+                        free(current_weather_data.wind_direction_compass);
+                        current_weather_data.wind_direction_compass = NULL;
+                    }
+                    current_weather_data.wind_direction_compass = strdup(cjson_wind_direction_compass->valuestring);
+                    ESP_LOGI(TAG, "获取到 wind_direction_compass %s", current_weather_data.wind_direction_compass);
+                }
+            }
+            cjson_wind_speed = cJSON_GetObjectItem(cjson_wind, "speed");
+            if (cjson_wind_speed)
+            {
+                cjson_wind_speed_value = cJSON_GetObjectItem(cjson_wind_speed, "value");
+                if (cjson_wind_speed_value && cjson_wind_speed_value->type == cJSON_Number)
+                {
+                    current_weather_data.wind_speed = cjson_wind_speed_value->valuedouble;
+                    ESP_LOGI(TAG, "获取到 wind_speed %lf", current_weather_data.wind_speed);
+                }
+            }
+            cjson_wind_scale = cJSON_GetObjectItem(cjson_wind, "scale");
+            if (cjson_wind_scale && cjson_wind_scale->type == cJSON_Number)
+            {
+                current_weather_data.wind_scale = cjson_wind_scale->valuedouble;
+                ESP_LOGI(TAG, "获取到 wind_scale %lf", current_weather_data.wind_scale);
+            }
+        }
+        cjson_windGust = cJSON_GetObjectItem(root_data, "windGust");
+        if (cjson_windGust)
+        {
+            cjson_windGust_value = cJSON_GetObjectItem(cjson_windGust, "value");
+            if (cjson_windGust_value && cjson_windGust_value->type == cJSON_Number)
+            {
+                current_weather_data.windGust = cjson_windGust_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 windGust %lf", current_weather_data.windGust);
+            }
+        }
+        cjson_precipitation = cJSON_GetObjectItem(root_data, "precipitation");
+        if (cjson_precipitation)
+        {
+            cjson_precipitation_amount = cJSON_GetObjectItem(cjson_precipitation, "amount");
+            if (cjson_precipitation_amount)
+            {
+                cjson_precipitation_amount_value = cJSON_GetObjectItem(cjson_precipitation_amount, "value");
+                if (cjson_precipitation_amount_value && cjson_precipitation_amount_value->type == cJSON_Number)
+                {
+                    current_weather_data.precipitation_amount = cjson_precipitation_amount_value->valuedouble;
+                    ESP_LOGI(TAG, "获取到 precipitation_amount %lf", current_weather_data.precipitation_amount);
+                }
+            }
+            cjson_precipitation_intensity = cJSON_GetObjectItem(cjson_precipitation, "intensity");
+            if (cjson_precipitation_intensity)
+            {
+                cjson_precipitation_intensity_value = cJSON_GetObjectItem(cjson_precipitation_intensity, "value");
+                if (cjson_precipitation_intensity_value && cjson_precipitation_intensity_value->type == cJSON_Number)
+                {
+                    current_weather_data.precipitation_intensity = cjson_precipitation_intensity_value->valuedouble;
+                    ESP_LOGI(TAG, "获取到 precipitation_intensity %lf", current_weather_data.precipitation_intensity);
+                }
+            }
+            cjson_precipitation_type = cJSON_GetObjectItem(cjson_precipitation, "type");
+            if (cjson_precipitation_type && cjson_precipitation_type->valuestring != NULL)
+            {
+                if (current_weather_data.precipitation_type != NULL)
+                {
+                    free(current_weather_data.precipitation_type);
+                    current_weather_data.precipitation_type = NULL;
+                }
+                current_weather_data.precipitation_type = strdup(cjson_precipitation_type->valuestring);
+                ESP_LOGI(TAG, "获取到 precipitation_type %s", current_weather_data.precipitation_type);
+            }
+        }
+        cjson_pressure = cJSON_GetObjectItem(root_data, "pressure");
+        if (cjson_pressure)
+        {
+            cjson_pressure_value = cJSON_GetObjectItem(cjson_pressure, "value");
+            if (cjson_pressure_value && cjson_pressure_value->type == cJSON_Number)
+            {
+                current_weather_data.pressure = cjson_pressure_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 pressure %lf", current_weather_data.pressure);
+            }
+        }
+        cjson_visibility = cJSON_GetObjectItem(root_data, "visibility");
+        if (cjson_visibility)
+        {
+            cjson_visibility_value = cJSON_GetObjectItem(cjson_visibility, "value");
+            if (cjson_visibility_value && cjson_visibility_value->type == cJSON_Number)
+            {
+                current_weather_data.visibility = cjson_visibility_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 visibility %lf", current_weather_data.visibility);
+            }
+        }
+        cjson_dewPoint = cJSON_GetObjectItem(root_data, "dewPoint");
+        if (cjson_dewPoint)
+        {
+            cjson_dewPoint_value = cJSON_GetObjectItem(cjson_dewPoint, "value");
+            if (cjson_dewPoint_value && cjson_dewPoint_value->type == cJSON_Number)
+            {
+                current_weather_data.dewPoint = cjson_dewPoint_value->valuedouble;
+                ESP_LOGI(TAG, "获取到 dewPoint %lf", current_weather_data.dewPoint);
+            }
+        }
+        cjson_cloudCover = cJSON_GetObjectItem(root_data, "cloudCover");
+        if (cjson_cloudCover && cjson_cloudCover->type == cJSON_Number)
+        {
+            current_weather_data.cloudCover = cjson_cloudCover->valuedouble;
+            ESP_LOGI(TAG, "获取到 cloudCover %lf", current_weather_data.cloudCover);
+        }
+        cjson_uvIndex = cJSON_GetObjectItem(root_data, "uvIndex");
+        if (cjson_uvIndex && cjson_uvIndex->type == cJSON_Number)
+        {
+            current_weather_data.uvIndex = cjson_uvIndex->valuedouble;
+            ESP_LOGI(TAG, "获取到 uvIndex %lf", current_weather_data.uvIndex);
+        }
+        cJSON_Delete(root_data);
+    }
 }
 
 /// @brief 解析GPT 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 result(自动申请内存)
@@ -858,33 +1518,26 @@ void GPT_chat_transform_collect(char *line_response, char **result)
     root_data = cJSON_Parse(line_response);
 
     if (root_data)
+    {
         cjson_choices = cJSON_GetObjectItem(root_data, "choices");
-
-    if (cjson_choices)
-        cjson_choices_item = cJSON_GetArrayItem(cjson_choices, 0);
-
-    if (cjson_choices_item)
-        cjson_delta = cJSON_GetObjectItem(cjson_choices_item, "delta");
-
-    if (cjson_delta)
-        cjson_content = cJSON_GetObjectItem(cjson_delta, "content");
-
-    if (!cjson_content)
-    {
-
-        ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s", line_response);
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
-    else
-    {
-        strncat(*result, cjson_content->valuestring, GPT_CHAT_RESPONSE_BUF_SIZE - strlen(*result) - 1);
-    }
-
-    if (root_data)
-    {
+        if (cjson_choices)
+        {
+            cjson_choices_item = cJSON_GetArrayItem(cjson_choices, 0);
+            if (cjson_choices_item)
+            {
+                cjson_delta = cJSON_GetObjectItem(cjson_choices_item, "delta");
+                if (cjson_delta)
+                {
+                    cjson_content = cJSON_GetObjectItem(cjson_delta, "content");
+                    if (cjson_content && cjson_content->valuestring)
+                    {
+                        strncat(*result, cjson_content->valuestring, GPT_CHAT_RESPONSE_BUF_SIZE - strlen(*result) - 1);
+                    }
+                }
+            }
+        }
         cJSON_Delete(root_data);
     }
-    return;
 }
 
 /// @brief [流式传输]根据GPT返回的数据(HTTP原始响应数据) 获取聊天传输状态是否结束
@@ -924,7 +1577,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
         esp_err_t err_flag = ESP_OK;
         int64_t start_time = esp_timer_get_time();
 
-        ///初始化http_client
+        /// 初始化http_client
         esp_http_client_config_t http_config;
         memset(&http_config, 0, sizeof(http_config));
         http_config.url = chat_handle->url;    // 导入url
@@ -946,7 +1599,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
             chat_handle->err = err_flag;
             ESP_LOGE(TAG, "连接时出现问题 -> %s", chat_handle->url);
 
-            esp_http_client_cleanup(chat_handle->client_handle);            
+            esp_http_client_cleanup(chat_handle->client_handle);
             chat_handle->task_handle = NULL;
             chat_handle->is_completed = true;
             chat_handle->client_handle = NULL;
@@ -968,7 +1621,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
             ESP_LOGE(TAG, "响应体内容 -> %s", chat_handle->response_buf);
 
             esp_http_client_close(chat_handle->client_handle);
-            esp_http_client_cleanup(chat_handle->client_handle);            
+            esp_http_client_cleanup(chat_handle->client_handle);
             chat_handle->task_handle = NULL;
             chat_handle->is_completed = true;
             chat_handle->client_handle = NULL;
@@ -1013,7 +1666,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
                             ESP_LOGE(TAG, "响应缓存内存空间不足 已读取内容 -> %s", chat_handle->response_buf);
 
                             esp_http_client_close(chat_handle->client_handle);
-                            esp_http_client_cleanup(chat_handle->client_handle);                            
+                            esp_http_client_cleanup(chat_handle->client_handle);
                             chat_handle->task_handle = NULL;
                             chat_handle->is_completed = true;
                             chat_handle->client_handle = NULL;
@@ -1034,7 +1687,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
                             ESP_LOGE(TAG, "等待回复超时 已读取内容 -> %s", chat_handle->response_buf);
 
                             esp_http_client_close(chat_handle->client_handle);
-                            esp_http_client_cleanup(chat_handle->client_handle);                            
+                            esp_http_client_cleanup(chat_handle->client_handle);
                             chat_handle->task_handle = NULL;
                             chat_handle->is_completed = true;
                             chat_handle->client_handle = NULL;
@@ -1052,11 +1705,11 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle)
                         chat_handle->err = ESP_OK;
 
                         esp_http_client_close(chat_handle->client_handle);
-                        esp_http_client_cleanup(chat_handle->client_handle);                        
+                        esp_http_client_cleanup(chat_handle->client_handle);
                         chat_handle->task_handle = NULL;
                         chat_handle->is_completed = true;
                         chat_handle->client_handle = NULL;
-                    
+
                         vTaskDelete(NULL);
                     }
                     else
@@ -1108,7 +1761,7 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio)
         return ESP_ERR_INVALID_ARG;
     }
 
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
         ESP_LOGE(TAG, "网络未连接");
         return ESP_ERR_INVALID_STATE;
@@ -1277,14 +1930,12 @@ GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model, char 
         ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
         chat_handle->request_body_buf = (char *)malloc(GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
     }
-    GPT_chat_update_user_content(chat_handle,user_content);
+    GPT_chat_update_user_content(chat_handle, user_content);
 
     ESP_LOGW(TAG, "GPT文本交互开始准备已完成");
 
     return chat_handle;
 }
-
-
 
 /// @brief 停止GPT文本交互
 /// @param chat_handle GPT文本交互句柄
@@ -1351,8 +2002,15 @@ void asr_data_save_result(char *asr_response)
         return;
     }
     cJSON *root_data = NULL;
+    cJSON *cjson_err_msg = NULL;
     root_data = cJSON_Parse(asr_response);
-    cJSON *cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
+
+    cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
+    if (cjson_err_msg == NULL || cjson_err_msg->valuestring == NULL)
+    {
+        ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s", asr_response);
+        return;
+    }
     if (strcasecmp(cjson_err_msg->valuestring, "success."))
     {
         ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
@@ -1398,15 +2056,23 @@ esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max)
     bool Task_comp_flag = false;               // 任务是否完成标识
     snprintf(http_url_buf, HTTP_BUF_MAX, url); // 确定请求URL
     http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
     while (!Task_comp_flag)
         vTaskDelay(pdMS_TO_TICKS(200));
 
     // 开始json解析
     cJSON *root_data = NULL;
+    cJSON *cjson_lyric = NULL;
+
     root_data = cJSON_Parse(http_output_buf);
-    cJSON *cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
-    if (cjson_lyric)
+    if (root_data == NULL)
+    {
+        ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s", http_output_buf);
+        return ESP_FAIL;
+    }
+
+    cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
+    if (cjson_lyric && cjson_lyric->valuestring)
     {
         if (strlen(cjson_lyric->valuestring) < len_max)
         {
@@ -1427,4 +2093,101 @@ esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max)
         cJSON_Delete(root_data);
         return ESP_FAIL;
     }
+}
+
+// 封装好的网络信息API请求服务，包含信息解析，并存储到对应结构体或缓冲变量
+
+// 刷新位置数据
+void refresh_position_data()
+{
+    const char *TAG = "refresh_position_data";
+
+    bool Task_comp_flag = false; // 任务是否完成标识
+
+    // 获取公网IP
+    Task_comp_flag = false;
+    sprintf(http_url_buf, GET_IP_ADDRESS_API_URL);
+    http_init_get_request();
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE);
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    transform_ip_address();
+
+    // 获取IP归属地
+    Task_comp_flag = false;
+    if (!ip_address)
+    {
+        ESP_LOGE(TAG, "公网IP为空");
+        return;
+    }
+    snprintf(http_url_buf, HTTP_BUF_MAX, IP138_IP_POSITION_API_URL, ip_address);
+    http_init_get_request();
+    esp_http_client_set_header(http_client_handle, "token", CONFIG_IP138_IP_LOOKUP_TOKEN);
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    transform_ip_position_ip138();
+
+    // 通过IP归属地信息获取经纬度
+    Task_comp_flag = false;
+    char keywords[512] = {0};
+    char keywords_encoded[512 * 3] = {0};
+    strcpy(keywords, "");
+    if (position_data.country)
+        strcat(keywords, position_data.country);
+    if (position_data.adm1)
+        strcat(keywords, position_data.adm1);
+    if (position_data.adm2)
+        strcat(keywords, position_data.adm2);
+    if (position_data.name)
+        strcat(keywords, position_data.name);
+
+    url_encode(keywords, keywords_encoded, sizeof(keywords_encoded));
+    snprintf(http_url_buf, HTTP_BUF_MAX, AMAP_SEARCH_POI_API_URL, keywords_encoded, 1, 1, CONFIG_AMAP_API_KEY); // 确定请求URL
+    http_init_get_request();
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    transform_lng_lat_amap();
+
+    // 通过和风天气GeoAPI进行城市搜索，根据经纬度获取location数据
+    Task_comp_flag = false;
+    if (position_data.longitude == NULL || position_data.latitude == NULL)
+    {
+        ESP_LOGE(TAG, "经纬度为空");
+        return;
+    }
+    snprintf(http_url_buf, HTTP_BUF_MAX, QWEATHER_GEO_CITY_LOOKUP_API_URL, CONFIG_QWEATHER_API_HOST, position_data.longitude, position_data.latitude);
+    http_init_get_request();
+    esp_http_client_set_header(http_client_handle, "Authorization", get_qweather_jwt_token());
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    transform_locationID_qweather();
+}
+
+// 刷新天气数据
+void refresh_current_weather_data()
+{
+    const char *TAG = "refresh_current_weather_data";
+
+    if (position_data.longitude == NULL || position_data.latitude == NULL)
+    {
+        ESP_LOGE(TAG, "经纬度为空");
+        return;
+    }
+
+    double lng = 0; // 经度
+    double lat = 0; // 纬度
+    sscanf(position_data.longitude, "%lf", &lng);
+    sscanf(position_data.latitude, "%lf", &lat);
+
+    bool Task_comp_flag = false;                                                                                // 任务是否完成标识
+    snprintf(http_url_buf, HTTP_BUF_MAX, QWEATHER_CURRENT_WEATHER_API_URL, CONFIG_QWEATHER_API_HOST, lat, lng); // 确定请求URL
+    http_init_get_request();
+    esp_http_client_set_header(http_client_handle, "Authorization", get_qweather_jwt_token());
+    xTaskCreatePinnedToCore(http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
+    while (!Task_comp_flag)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    transform_current_weather_data_qweather();
 }

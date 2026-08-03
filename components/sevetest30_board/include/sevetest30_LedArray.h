@@ -42,6 +42,11 @@
 #define FIGURE_BREATH 4                    //数字的宽度 4x7
 #define FIGURE_HEIGHT 7                    //数字的高度 4x7
 
+#define WEATHER_ICON_BREATH 9                    //天气图标的宽度 9x9
+#define WEATHER_ICON_HEIGHT 9                   //天气图标的高度 9x9
+
+
+
 
 #define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE+sizeof(uint64_t)) // 矩形字模数据区位置,需要填入矩形的位置
 #define RECTANGLE_SIZE_MAX 1024//矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形，这里设定其为整个显示面板大小，假设希望最大大小是 12x25,25是矩形横向长度，计算25/8约为4（不足1就进1），得到12x4=48

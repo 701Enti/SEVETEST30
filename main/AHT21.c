@@ -39,11 +39,11 @@ esp_err_t AHT21_begin() {
     const char* TAG = "AHT21_begin";
     //校验状态字    
     if ((AHT21_get_status() & 0x18) == 0x18) {
-        ESP_LOGI(TAG, "传感器可以正常运行");
+        ESP_LOGI(TAG, "温湿度传感器AHT21可以正常运行");
         return ESP_OK;
     }
     else {
-        ESP_LOGE(TAG, "传感器需要关键的初始化操作");
+        ESP_LOGE(TAG, "温湿度传感器AHT21需要关键的初始化操作");
         return ESP_ERR_INVALID_STATE;
     }
 }
@@ -149,7 +149,7 @@ void AHT21_get_result(AHT21_result_t* dest) {
             ESP_LOGI(TAG, "温度 %f\u2103     湿度 %f%%RH", dest->temp, dest->hum);
 
             //数据有效标记
-            dest->data_true = true;
+            dest->valid = true;
         }
     }
     return;

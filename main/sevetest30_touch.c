@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- // 包含一些sevetest30的  X轴线性振动马达启动以及振动马达事务合成API
+ // 包含一些sevetest30的按键控制和Z轴线性振动马达API,用于用户控制与触感反馈
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
  // bilibili: 701Enti
@@ -41,7 +41,7 @@ esp_err_t vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio) {
     mcpwm_config.cmpr_b = 50.0;
     mcpwm_config.duty_mode = MCPWM_DUTY_MODE_0;
     mcpwm_config.counter_mode = MCPWM_UP_COUNTER;
-    mcpwm_config.frequency = 230;
+    mcpwm_config.frequency = VIBRA_MOTOR_MCPWM_DEFAULT_FREQ;
 
     esp_err_t ret = ESP_OK;
 
@@ -63,6 +63,8 @@ esp_err_t vibra_motor_init(gpio_num_t in1_gpio, gpio_num_t in2_gpio) {
 
     vibra_motor_stop();
 
+    ESP_LOGI(TAG, "线性振动马达初始化完成");
+
     return ESP_OK;
 }
 
@@ -74,10 +76,16 @@ void vibra_motor_set_frequency(uint32_t frequency) {
 
 /// @brief 启动线性振动马达
 void vibra_motor_start() {
-    mcpwm_start(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER);
+    const char* TAG = "vibra_motor_start";
+    if(mcpwm_start(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER) != ESP_OK){
+        ESP_LOGE(TAG, "启动线性振动马达时发现问题");
+    }
 }
 
 /// @brief 暂停线性振动马达
 void vibra_motor_stop() {
-    mcpwm_stop(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER);
+    const char* TAG = "vibra_motor_stop";
+    if(mcpwm_stop(VIBRA_MOTOR_MCPWM_UNIT, VIBRA_MOTOR_MCPWM_TIMER) != ESP_OK){
+        ESP_LOGE(TAG, "暂停线性振动马达时发现问题");
+    }
 }

@@ -88,7 +88,10 @@ void refresh_ALL_ONCE_Task()
 	esp_task_wdt_add(NULL); // 将当前任务挂载到当前设置核心的任务看门狗
 	while (1)
 	{
-		ledarray_show_frame();
+		if (esp_task_wdt_reset() == ESP_OK)
+		{
+			ledarray_show_frame();
+		}
 	}
 }
 
@@ -124,8 +127,9 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode)
 /// @brief 生成一个矩形字模(需要释放)
 /// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
 /// @param height  矩形纵向长度(1-VERTICAL_LED_NUMBER)
-/// @return NULL 错误 / 返回值 rectangle_data 为矩形数据地址 [matrix_size(rectangle_data) 为 总数据大小(uint64_t)(单位:Byte)] [RECTANGLE_MATRIX(rectangle_data) 为 矩形字模]
+/// @return NULL 错误 / 返回值为矩形数据地址(令为rectangle_data)  [matrix_size(rectangle_data) 为 总数据大小(uint64_t)(单位:Byte)] [RECTANGLE_MATRIX(rectangle_data) 为 矩形字模]
 /// @return 例 返回值为p separation_draw(x,y,b,RECTANGLE_MATRIX(p),matrix_size(p),color); free(p);
+/// @note 生成的矩形字模需要手动释放内存,否则会导致内存泄漏
 uint8_t *rectangle(int32_t breadth, int32_t height)
 {
 	if (breadth < 0 || height < 0)
@@ -1174,99 +1178,87 @@ esp_err_t ledarray_show_frame()
 		return ESP_ERR_INVALID_STATE;
 	}
 
-	if (spi_device_acquire_bus(ledarray_spi_handle, portMAX_DELAY) == ESP_OK)
+	int bcm_bit_plane_idx = 0;										   // BCM调光算法 - 场索引
+	BaseType_t bcm_delay_nop_num = LEDARRAY_REFRESH_BCM_DELAY_NOP_NUM; // BCM调光算法 - 单位时延对应的NOP空指令个数
+	const int bcm_weight[8] = {1, 2, 4, 8, 16, 32, 64, 128};		   // BCM调光算法 - 位权
+
+	spi_transaction_t trans_tx = {
+		.length = LINE_LED_NUMBER * 3,
+		.tx_buffer = ledarray_tx_buf,
+	};
+
+	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) != pdTRUE)
 	{
-		int bcm_bit_plane_idx = 0;										   // BCM调光算法 - 场索引
-		BaseType_t bcm_delay_nop_num = LEDARRAY_REFRESH_BCM_DELAY_NOP_NUM; // BCM调光算法 - 单位时延对应的NOP空指令个数
-		const int bcm_weight[8] = {1, 2, 4, 8, 16, 32, 64, 128};		   // BCM调光算法 - 位权
-
-		spi_transaction_t trans_tx = {
-			.length = LINE_LED_NUMBER * 3,
-			.tx_buffer = ledarray_tx_buf,
-		};
-
-		if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) != pdTRUE)
-		{
-			// ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
-			return ESP_FAIL;
-		}
-
-		for (bcm_bit_plane_idx = 0; bcm_bit_plane_idx < 8; bcm_bit_plane_idx++)
-		{
-			for (int n = 0; n < VERTICAL_LED_NUMBER; n++)
-			{
-
-				// 计算行数据
-				memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
-				for (int m = 0; m < LINE_LED_NUMBER; m++)
-				{
-					// 级联中，越靠后的芯片数据越先发送,16bits先发高八位,再发低八位,每个字节的位号与引脚对应，如 D0(低八位) -> OUT0,D1(低八位) -> OUT1,D0(高八位)->OUT8,D1(高八位)->OUT9
-					ledarray_tx_buf[0 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_blue_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
-					ledarray_tx_buf[1 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_red_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
-					ledarray_tx_buf[2 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_green_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
-				}
-
-				// 确保灭灯
-				gpio_set_level(LEDARRAY_OE_IO, 1);
-
-				// 发送行数据
-				spi_device_polling_transmit(ledarray_spi_handle, &trans_tx);
-
-				// 锁存行数据
-				gpio_set_level(LEDARRAY_LE_IO, 1);
-				gpio_set_level(LEDARRAY_LE_IO, 0);
-
-				// 选定ICND2013,仅需要在需要切换时改变电平
-				if (n == 0)
-				{
-					gpio_set_level(LEDARRAY_CSE_IO, 0); // 控制第一个ICND2013,对应y=1-8
-				}
-				if (n == VERTICAL_LED_NUMBER / 2)
-				{
-					gpio_set_level(LEDARRAY_CSE_IO, 1); // 控制第二个ICND2013,对应y=9-16
-				}
-
-				// 切换到下一行
-				uint32_t s = 0;
-				if (n >= 0 && n < VERTICAL_LED_NUMBER / 2)
-				{
-					s = n;
-				}
-				else
-				{
-					s = n - VERTICAL_LED_NUMBER / 2;
-				}
-				gpio_set_level(LEDARRAY_CSA0_IO, (s >> 0) & 0x01);
-				gpio_set_level(LEDARRAY_CSA1_IO, (s >> 1) & 0x01);
-				gpio_set_level(LEDARRAY_CSA2_IO, (s >> 2) & 0x01);
-
-				// 点亮当前行
-				gpio_set_level(LEDARRAY_OE_IO, 0);
-
-				// 按BCM场数确定当前时延
-				for (int d = 0; d < bcm_weight[bcm_bit_plane_idx] * bcm_delay_nop_num; d++)
-				{
-					asm volatile("nop");
-				}
-
-				esp_task_wdt_reset(); // 及时喂狗,防止当前核心重启
-			}
-		}
-
-		// 最后一行灭灯消隐
-		gpio_set_level(LEDARRAY_OE_IO, 1);
-
-		xSemaphoreGive(refresh_Task_Mutex);
-
-		spi_device_release_bus(ledarray_spi_handle);
-
-		return ESP_OK;
-	}
-	else
-	{
-		ESP_LOGE(TAG, "SPI总线忙,无法占用SPI以安全写入灯板阵列");
+		// ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
 		return ESP_FAIL;
 	}
+
+	for (bcm_bit_plane_idx = 0; bcm_bit_plane_idx < 8; bcm_bit_plane_idx++)
+	{
+		for (int n = 0; n < VERTICAL_LED_NUMBER; n++)
+		{
+
+			// 计算行数据
+			memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
+			for (int m = 0; m < LINE_LED_NUMBER; m++)
+			{
+				// 级联中，越靠后的芯片数据越先发送,16bits先发高八位,再发低八位,每个字节的位号与引脚对应，如 D0(低八位) -> OUT0,D1(低八位) -> OUT1,D0(高八位)->OUT8,D1(高八位)->OUT9
+				ledarray_tx_buf[0 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_blue_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
+				ledarray_tx_buf[1 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_red_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
+				ledarray_tx_buf[2 * LINE_LED_NUMBER / 8 + (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |= ((ledarray_green_layer_buf[n * LINE_LED_NUMBER + m] >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
+			}
+
+			// 确保灭灯
+			gpio_set_level(LEDARRAY_OE_IO, 1);
+
+			// 发送行数据
+			spi_device_polling_transmit(ledarray_spi_handle, &trans_tx);
+
+			// 锁存行数据
+			gpio_set_level(LEDARRAY_LE_IO, 1);
+			gpio_set_level(LEDARRAY_LE_IO, 0);
+
+			// 选定ICND2013,仅需要在需要切换时改变电平
+			if (n == 0)
+			{
+				gpio_set_level(LEDARRAY_CSE_IO, 0); // 控制第一个ICND2013,对应y=1-8
+			}
+			if (n == VERTICAL_LED_NUMBER / 2)
+			{
+				gpio_set_level(LEDARRAY_CSE_IO, 1); // 控制第二个ICND2013,对应y=9-16
+			}
+
+			// 切换到下一行
+			uint32_t s = 0;
+			if (n >= 0 && n < VERTICAL_LED_NUMBER / 2)
+			{
+				s = n;
+			}
+			else
+			{
+				s = n - VERTICAL_LED_NUMBER / 2;
+			}
+			gpio_set_level(LEDARRAY_CSA0_IO, (s >> 0) & 0x01);
+			gpio_set_level(LEDARRAY_CSA1_IO, (s >> 1) & 0x01);
+			gpio_set_level(LEDARRAY_CSA2_IO, (s >> 2) & 0x01);
+
+			// 点亮当前行
+			gpio_set_level(LEDARRAY_OE_IO, 0);
+
+			// 按BCM场数确定当前时延
+			for (int d = 0; d < bcm_weight[bcm_bit_plane_idx] * bcm_delay_nop_num; d++)
+			{
+				asm volatile("nop");
+			}
+		}
+	}
+
+	// 最后一行灭灯消隐
+	gpio_set_level(LEDARRAY_OE_IO, 1);
+
+	xSemaphoreGive(refresh_Task_Mutex);
+
+	return ESP_OK;
 }
 
 /// @brief 颜色数据导入

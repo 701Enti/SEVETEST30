@@ -323,7 +323,7 @@ void music_uri_or_url_play(const char *uri_or_url, UBaseType_t priority)
   }
   else
   {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
       ESP_LOGE(TAG, "网络未连接");
       return;
@@ -409,7 +409,7 @@ void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority)
   }
   else
   {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
       ESP_LOGE(TAG, "网络未连接");
       return;
@@ -477,7 +477,7 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority)
   }
   else
   {
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED)
     {
       ESP_LOGE(TAG, "网络未连接");
       return;

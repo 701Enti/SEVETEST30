@@ -195,10 +195,6 @@ void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t *objec
         {
             *(object->py) = handle->ctrl_param_list[*(object->pstep)].y;
         }
-        if (handle->cartoon_plan.change_en)
-        {
-            *(object->pchange) = handle->ctrl_param_list[*(object->pstep)].change;
-        }
         if (handle->cartoon_plan.color_en)
         {
             (object->pcolor)[0] = handle->ctrl_param_list[*(object->pstep)].color[0];
@@ -225,12 +221,18 @@ void _PRE_RENDER_ctrl_hook(cartoon_handle_t handle, cartoon_ctrl_object_t *objec
 /// @param en_x 打开x轴数据的渲染开关
 /// @param en_y 打开y轴数据的渲染开关
 /// @param en_color 打开颜色数据的渲染开关
-/// @param en_change 打开亮度数据的渲染开关
-/// @param key_frame_max 最大关键帧个数
+/// @param key_frame_max 最大关键帧个数，必须大于0
 /// @return 动画的全局句柄
-cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, bool en_color, bool en_change, int key_frame_max)
+cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, bool en_color, int key_frame_max)
 {
     const char *TAG = "cartoon_new";
+
+    if (key_frame_max <= 0)
+    {
+        ESP_LOGE(TAG, "输入参数key_frame_max必须大于0");
+        return NULL;
+    }
+
     // 申请动画支持缓存
     cartoon_support_t *support = NULL;
     support = (cartoon_support_t *)malloc(sizeof(cartoon_support_t));
@@ -245,12 +247,11 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
     switch (run_mode)
     {
     case CARTOON_RUN_MODE_PRE_RENDER:
-        support->create_callback = _PRE_RENDER_create_callback;
-        support->ctrl_hook = _PRE_RENDER_ctrl_hook;
+        support->create_callback = (cartoon_create_callback_func_t)_PRE_RENDER_create_callback;
+        support->ctrl_hook = (cartoon_ctrl_hook_func_t)_PRE_RENDER_ctrl_hook;
         break;
-    case CARTOON_RUN_MODE_REAL_TIME_RENDER:
-
-        break;
+        // case CARTOON_RUN_MODE_REAL_TIME_RENDER:
+        //     break;
 
     default:
         ESP_LOGE(TAG, "无法识别的运行类型");
@@ -277,8 +278,6 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
     support->cartoon_plan.x_en = en_x;
     support->cartoon_plan.y_en = en_y;
     support->cartoon_plan.color_en = en_color;
-    support->cartoon_plan.change_en = en_change;
-
     return (cartoon_handle_t)support;
 }
 
@@ -314,7 +313,7 @@ void cartoon_delete(cartoon_handle_t handle)
 /// @param color 颜色
 /// @param change 亮度0-100
 /// @return 这次添加完成的关键帧的角标位置
-uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3], uint8_t change)
+uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3])
 {
     const char *TAG = "add_new_key_frame";
     if (handle)
@@ -330,7 +329,6 @@ uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint3
             handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[1] = color[1];
             handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].color[2] = color[2];
         }
-        handle->cartoon_plan.key_frame_database[handle->cartoon_plan.total_key_frame].change = change;
         handle->cartoon_plan.total_key_frame++;          // 自增总关键帧数,这将使得下次调用该函数操作的是下一关键帧
         return handle->cartoon_plan.total_key_frame - 1; // 这次添加完成的关键帧的角标位置
     }
@@ -418,16 +416,17 @@ void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high, u
     }
 }
 
-// 显示了天气图标(9x9)+温度   起始坐标xy  亮度值0-100%   为0不会任何进行显示操作 始终返回UI主题颜色指针
-void weather_UI_1(int16_t x, int16_t y, uint8_t change)
+/// @brief 显示天气图标(9x9)+温度
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void weather_icon_temperature(int16_t x, int16_t y)
 {
+    const char *TAG = "weather_icon_temperature";
     weather_change_flag = 0;
-    ESP_LOGI("WEATHER_UI_1", "天气代码%d", real_time_weather_data->icon);
-    ESP_LOGI("WEATHER_UI_1", "室外温度%d", real_time_weather_data->temp);
 
     // 对于天气代码相关问题请参考和风天气 天气代码列表 以下case常量都可以找到对应天气
     // 天气图标
-    switch (real_time_weather_data->icon)
+    switch (current_weather_data.condition_code)
     {
 
         // 正在进行的
@@ -769,36 +768,34 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
     }
 
     // 温度显示
-    int temp_buf = abs(real_time_weather_data->temp); // 因为这里温度只能识别到数字元素，用abs取一下绝对值
+    int temp_buf = abs((int)round(current_weather_data.temperature)); // 因为这里温度只能识别到数字，并且只显示整数部分，四舍五入为整数后取一下绝对值
     if (temp_buf >= 100)
     {
-        ESP_LOGE("WEATHER_UI_1", "不合理的温度绝对值 %d", temp_buf);
+        ESP_LOGE(TAG, "不合理的温度绝对值 %d", temp_buf);
         return; // 如果绝对值大于99显示都是问题了，大可能是传错了，退出
     }
 
     uint8_t color[3] = {0};
-    temp_to_color(real_time_weather_data->temp, 255, &color[0], &color[1], &color[2]); // 数据可以通过颜色可视化
+    temp_to_color(current_weather_data.temperature, 255, &color[0], &color[1], &color[2]); // 数据可以通过颜色可视化
 
-    if (change != 0)
+    // 取出每位上的数
+    int8_t tens = temp_buf / 10;         // 十位
+    int8_t uints = temp_buf - tens * 10; // 个位
+
+    // 确定要不要带负号
+    int minus_breath = 2;
+    if (current_weather_data.temperature < 0)
     {
-        // 确定要不要带负号，以及负号位置，它由数字位数决定
-        if (real_time_weather_data->temp < 0)
-        {
-            uint8_t *p = rectangle(2, 1);
-            if (temp_buf >= 10)
-                separation_draw(x - 1 + LINE_LED_NUMBER - 3 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color);
-            else
-                separation_draw(x - 1 + LINE_LED_NUMBER - 2 * FIGURE_BREATH, y - 1 + VERTICAL_LED_NUMBER / 2 + 1, 2, RECTANGLE_MATRIX(p), *p, color);
-        }
-
-        // 取出每位上的数
-        int8_t tens = temp_buf / 10;         // 十位
-        int8_t uints = temp_buf - tens * 10; // 个位
-
-        // 显示温度数字
-        print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, uints, color); // 数字字模的尺寸为4x7
-        if (tens > 0)
-            print_number(x - 1 + LINE_LED_NUMBER - FIGURE_BREATH * 2 - 1, y - 1 + (VERTICAL_LED_NUMBER - 7) / 2 + 2, tens, color); // 显示一个为0的十位显然没有意义的
+        uint8_t *p = rectangle(minus_breath, 1);
+        separation_draw(x + WEATHER_ICON_BREATH + 1, y + 5, minus_breath, RECTANGLE_MATRIX(p), *p, color);
+        free(p);
+        print_number(x + WEATHER_ICON_BREATH + 1 + minus_breath + 1, y + 2, tens, color);
+        print_number(x + WEATHER_ICON_BREATH + 1 + minus_breath + 1 + FIGURE_BREATH + 1, y + 2, uints, color);
+    }
+    else
+    {
+        print_number(x + WEATHER_ICON_BREATH + 1, y + 2, tens, color);
+        print_number(x + WEATHER_ICON_BREATH + 1 + FIGURE_BREATH + 1, y + 2, uints, color);
     }
 }
 
@@ -806,7 +803,7 @@ void weather_UI_1(int16_t x, int16_t y, uint8_t change)
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m(int16_t x, int16_t y, uint8_t change)
+void time_UI_h_m(int16_t x, int16_t y)
 {
     static uint8_t color[3] = {0};
     static int8_t minute_buf = 80;
@@ -820,25 +817,22 @@ void time_UI_h_m(int16_t x, int16_t y, uint8_t change)
         minute_buf = systemtime_data.minute;
     }
 
-    if (change != 0)
-    {
-        int8_t hour_tens = systemtime_data.hour / 10;              // 十位
-        int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
-        print_number(x + LINE_LED_NUMBER / 4 * 0 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
-        print_number(x + LINE_LED_NUMBER / 4 * 1 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
+    int8_t hour_tens = systemtime_data.hour / 10;              // 十位
+    int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
+    print_number(x + LINE_LED_NUMBER / 4 * 0 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
+    print_number(x + LINE_LED_NUMBER / 4 * 1 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
 
-        int8_t minute_tens = systemtime_data.minute / 10;                // 十位
-        int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
-        print_number(x + LINE_LED_NUMBER / 4 * 2 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
-        print_number(x + LINE_LED_NUMBER / 4 * 3 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
-    }
+    int8_t minute_tens = systemtime_data.minute / 10;                // 十位
+    int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
+    print_number(x + LINE_LED_NUMBER / 4 * 2 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
+    print_number(x + LINE_LED_NUMBER / 4 * 3 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
 }
 
 /// @brief 显示了当前系统时间  秒
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_s(int16_t x, int16_t y, uint8_t change)
+void time_UI_s(int16_t x, int16_t y)
 {
     static uint8_t color[3] = {0};
     static int8_t second_buf = 80;
@@ -852,23 +846,19 @@ void time_UI_s(int16_t x, int16_t y, uint8_t change)
         second_buf = systemtime_data.second;
     }
 
-    if (change != 0)
-    {
-        int8_t second_tens = systemtime_data.second / 10;                                                                               // 十位
-        int8_t second_uints = systemtime_data.second - second_tens * 10;                                                                // 个位
-        print_number(x + LINE_LED_NUMBER / 2 - FIGURE_BREATH - 1, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color); // 数字字模的尺寸为4x7
-        print_number(x + LINE_LED_NUMBER / 2 + 1, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
-    }
+    int8_t second_tens = systemtime_data.second / 10;                                                                               // 十位
+    int8_t second_uints = systemtime_data.second - second_tens * 10;                                                                // 个位
+    print_number(x + LINE_LED_NUMBER / 2 - FIGURE_BREATH - 1, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color); // 数字字模的尺寸为4x7
+    print_number(x + LINE_LED_NUMBER / 2 + 1, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
 }
 
 /// @brief 显示了当前系统时间  时 分 秒
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m_s(int16_t x, int16_t y, uint8_t change)
+void time_UI_h_m_s(int16_t x, int16_t y)
 {
     static uint8_t color[3] = {0};
-    static int8_t minute_buf = 80;
     static int8_t second_buf = 80;
 
     if (second_buf != systemtime_data.second)
@@ -880,23 +870,20 @@ void time_UI_h_m_s(int16_t x, int16_t y, uint8_t change)
         second_buf = systemtime_data.second;
     }
 
-    if (change != 0)
-    {
-        int8_t hour_tens = systemtime_data.hour / 10;              // 十位
-        int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
-        print_number(x + LINE_LED_NUMBER / 6 * 0 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
-        print_number(x + LINE_LED_NUMBER / 6 * 1 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
+    int8_t hour_tens = systemtime_data.hour / 10;              // 十位
+    int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
+    print_number(x + LINE_LED_NUMBER / 6 * 0 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
+    print_number(x + LINE_LED_NUMBER / 6 * 1 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
 
-        int8_t minute_tens = systemtime_data.minute / 10;                // 十位
-        int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
-        print_number(x + LINE_LED_NUMBER / 6 * 2 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
-        print_number(x + LINE_LED_NUMBER / 6 * 3 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
+    int8_t minute_tens = systemtime_data.minute / 10;                // 十位
+    int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
+    print_number(x + LINE_LED_NUMBER / 6 * 2 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
+    print_number(x + LINE_LED_NUMBER / 6 * 3 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
 
-        int8_t second_tens = systemtime_data.second / 10;                                                                                                           // 十位
-        int8_t second_uints = systemtime_data.second - second_tens * 10;                                                                                            // 个位
-        print_number(x + LINE_LED_NUMBER / 6 * 4 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color); // 数字字模的尺寸为4x7
-        print_number(x + LINE_LED_NUMBER / 6 * 5 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
-    }
+    int8_t second_tens = systemtime_data.second / 10;                                                                                                           // 十位
+    int8_t second_uints = systemtime_data.second - second_tens * 10;                                                                                            // 个位
+    print_number(x + LINE_LED_NUMBER / 6 * 4 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color); // 数字字模的尺寸为4x7
+    print_number(x + LINE_LED_NUMBER / 6 * 5 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2, y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
 }
 
 /// @brief 启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现
@@ -939,7 +926,7 @@ music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg, UBaseType_t
 
     handle->running_flag = true;
 
-    xTaskCreatePinnedToCore(&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, handle, priority, NULL, FFT_UI_TASK_CORE);
+    xTaskCreatePinnedToCore((TaskFunction_t)&music_FFT_UI_refresh_Task, "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE, handle, priority, NULL, FFT_UI_TASK_CORE);
 
     return handle;
 }
@@ -1031,12 +1018,14 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle)
             vTaskDelay(pdMS_TO_TICKS(500));
             continue;
         }
-        else{
-            if(current_sound_buf_overflow_flag == false){
+        else
+        {
+            if (current_sound_buf_overflow_flag == false)
+            {
                 // 如果音频活动进行中,且缓存未溢出,则等待缓存溢出
                 continue;
             }
-        }     
+        }
 
         if (xSemaphoreTake(current_sound_buf_mutex, pdMS_TO_TICKS(FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS)) != pdTRUE)
         {
@@ -1209,38 +1198,9 @@ void music_FFT_UI_draw(music_FFT_UI_handle_t handle)
             color_buf[0] = unit_led_color[j * 3 + 0];
             color_buf[1] = unit_led_color[j * 3 + 1];
             color_buf[2] = unit_led_color[j * 3 + 2];
-            separation_draw(x + j, y, 1, RECTANGLE_MATRIX(p), *p, color_buf);
+            separation_draw(x + j, y + handle->cfg.height - unit_led_height[j], 1, RECTANGLE_MATRIX(p), *p, color_buf);
             free(p);
             p = NULL;
-        }
-    }
-}
-
-/// @brief 主界面，所有UI页面的上层级
-void main_UI_1()
-{
-    board_ctrl_t *board_ctrl = NULL;
-    board_ctrl = board_status_get();
-    if (board_ctrl)
-    {
-        if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0 && board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
-        {
-            board_ctrl->amplifier_mute = !board_ctrl->amplifier_mute;
-            vTaskDelay(pdMS_TO_TICKS(500));
-            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
-        }
-        else if (board_ctrl->p_ext_io_value->thumbwheel_CW == 0)
-        {
-            if (board_ctrl->amplifier_volume < 100)
-                board_ctrl->amplifier_volume++;
-            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
-        }
-        else if (board_ctrl->p_ext_io_value->thumbwheel_CCW == 0)
-        {
-
-            if (board_ctrl->amplifier_volume > 0)
-                board_ctrl->amplifier_volume--;
-            sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_AMPLIFIER);
         }
     }
 }

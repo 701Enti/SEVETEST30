@@ -132,7 +132,7 @@ void AGS10_TVOC_result_get(AGS10_result_t* dest) {
             return;
         }
         else {
-            dest->TVOC_data = (read_buf[1] << 16) | (read_buf[2] << 8) | read_buf[3];
+            dest->TVOC_value = (read_buf[1] << 16) | (read_buf[2] << 8) | read_buf[3];
         }
 
         //CRC校验
@@ -143,10 +143,10 @@ void AGS10_TVOC_result_get(AGS10_result_t* dest) {
             }
         }
 
-        ESP_LOGI(TAG, "%d ppb", (int)dest->TVOC_data);
+        ESP_LOGI(TAG, "%d ppb", (int)dest->TVOC_value);
 
         //数据有效标记
-        dest->data_true = true;
+        dest->valid = true;
         return;
     }
 

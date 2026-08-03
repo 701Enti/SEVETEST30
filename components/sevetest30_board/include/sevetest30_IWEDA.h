@@ -58,21 +58,16 @@
 // 查询IP的API
 #define GET_IP_ADDRESS_API_URL "http://myip.ipip.net/s"
 
-// IP归属地查询API
-#define IP_POSITION_API_URL "https://api.ip138.com/ip/?ip=%s&datatype=jsonp&callback=find"
+// IP138 IP归属地查询API
+#define IP138_IP_POSITION_API_URL "https://api.ip138.com/ipdata/?ip=%s&datatype=jsonp&callback=find"
 
-// 邮政编码查询经纬度API
-#define TO_LNG_LAT_API_URL "https://quhua.ipchaxun.com/api/areas/data?zip=%s"
+// 高德地图 搜索POI API
+#define AMAP_SEARCH_POI_API_URL "https://restapi.amap.com/v3/place/text?keywords=%s&offset=%d&page=%d&key=%s"
 
-// 和风天气GeoAPI(地址ID搜索，使用相同的KEY)
-#define GEO_API_URL "https://geoapi.qweather.com/v2/city/lookup?location=%s,%s&key=%s"
-
-// 和风天气实时天气API
-#if CONFIG_WEATHER_API_VIP_URL
-#define WEATHER_API_URL "https://api.qweather.com/v7/weather/now?location=%s&key=%s"
-#else
-#define WEATHER_API_URL "https://devapi.qweather.com/v7/weather/now?location=%s&key=%s"
-#endif
+// 和风天气
+#define QWEATHER_GEO_CITY_LOOKUP_API_URL "https://%s/geo/v2/city/lookup?location=%s,%s" // GeoAPI-城市搜索
+#define QWEATHER_CURRENT_WEATHER_API_URL "https://%s/weather/v1/current/%.2f/%.2f"      // 实时天气API
+#define QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY 86400 / 2                                   // JWT令牌有效期，单位秒，这里设为12小时
 
 // 百度获取access_token API
 #define BAIDU_GET_ACCESS_TOKEN_URL "https://aip.baidubce.com/oauth/2.0/token?client_id=%s&client_secret=%s&grant_type=client_credentials"
@@ -104,48 +99,56 @@ typedef struct GPT_chat_t
 typedef struct GPT_chat_t *GPT_chat_handle_t;
 
 // 和风天气API-实时天气,顺序是在UI页面的展示顺序，靠近的数据表示他们应该显示在同一个页面
-typedef struct Real_time_weather
+typedef struct current_weather_data_t
 {
 
-    int icon; // 天气状况代码，匹配合适的图案
-    int text; // 天气文字描述例如多云
+    //数值单位见https://dev.qweather.com/docs/resource/unit/
 
-    int temp;      // 温度，摄氏度
-    int feelsLike; // 体感温度，摄氏度
+    char* metadata_tag;//数据唯一标识
+    char* metadata_attributions_raw_json;//(array对象，以原始json格式字符串保存)数据归因信息或声明，必须与当前数据共同显示
 
-    int vis; // 能见度,KM
+    char *condition_text;  // 天气现象的本地化描述
+    int condition_code; // 天气现象代码
 
-    int humidity; // 相对湿度，百分比
-    int precip;   // 当前每小时降水量，毫米
+    double temperature; // 温度
+    double feelsLike;   // 体感温度
 
-    int windDir; // 风向文字描述
-    int wind360; // 360度风向
+    double humidity; // 相对湿度，取值范围 [0, 1]
 
-    int windScale; // 风力等级
-    int windSpeed; // 风速
+    double wind_direction_degree;  // 风向，取值范围 [0, 359]
+    char *wind_direction_compass; // 风向的描述，可选值: n, nne, ne, ene, e, ese, se, sse, s, ssw, sw, wsw, w, wnw, nw, nnw, none, vrb
+    double wind_speed;             // 风速
+    double wind_scale;             // 蒲福风级
+    double windGust;               // 阵风风速
 
-    int pressure; // 大气压强
+    double precipitation_amount;    // 累计一小时降水量
+    double precipitation_intensity; // 降水强度
+    char *precipitation_type;      // 降水类型代码
 
-    int cloud; // 云量，可能为空
+    double pressure; // 海平面气压
 
-    int dew; // 露点温度，可能为空（搜索了一下，可以理解是空气中水蒸气变为露珠时的温度,越低于环境温度，越不易液化结露，天气就越干燥）
+    double visibility; // 能见度
 
-    int obsTime; // 数据观测时间
-} Real_time_weather;
+    double dewPoint; // 露点温度
+
+    double cloudCover; // 云量，取值范围 [0, 1]
+
+    double uvIndex; // 紫外线指数，取值范围 [0, 15]
+
+} current_weather_data_t;
 // IP归属地信息
-typedef struct ip_position
+typedef struct ip_position_t
 {
-    char *postcode; // 邮政编码
-    char *lng;      // 经度
-    char *lat;      // 纬度
+    char *longitude; // 经度
+    char *latitude;  // 纬度
 
     char *country; // 国家
     char *adm1;    // adm2的上一级行政区划 （省,若为直辖市则为直辖市名）
     char *adm2;    // name的上一级行政区划  (市)
     char *name;    //(区、县)
 
-    char *id; // 城市数字ID号码,由于天气查询
-} ip_position;
+    char *qweather_location_id; // 和风天气城市数字ID号码
+} position_data_t;
 
 // 有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取以下公共变量，主要为了方便FreeRTOS的任务支持
 
@@ -154,9 +157,9 @@ extern char http_url_buf[HTTP_BUF_MAX];    // url缓存,留着调用时候可以
 extern char *ip_address;                   // 公网IP
 extern char *sevetest30_asr_result_text;   // 语音识别结果
 
-extern ip_position *ip_position_data;
-extern Real_time_weather *real_time_weather_data;
-extern esp_periph_handle_t se30_wifi_periph_handle;
+extern position_data_t ip_position_data;
+extern current_weather_data_t current_weather_data;
+extern esp_periph_handle_t wifi_periph_handle;
 
 // 内外部共享函数
 
@@ -169,10 +172,6 @@ void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len);
 int http_check_common_url(const char *url);
 
 int http_check_response_content(esp_http_client_handle_t client_handle);
-
-void http_init_get_request();
-
-void http_get_request_send(bool *flag);
 
 void change_url_if_need_redirect(char **url);
 
@@ -191,7 +190,7 @@ esp_err_t init_time_data_sntp(uint32_t timeout_ms);
 
 void refresh_position_data();
 
-void refresh_weather_data();
+void refresh_current_weather_data();
 
 GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model, char *user_content, int timeout_ms);
 
