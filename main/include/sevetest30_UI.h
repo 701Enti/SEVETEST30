@@ -28,13 +28,10 @@
 
 #pragma once
 
-#include <string.h>
 #include <stdbool.h>
 #include <esp_err.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include <driver/i2s.h>
-#include "board_ctrl.h"
+#include "freertos/task.h"
 
 // FFT相关
 #define FFT_UI_TASK_CORE (0)              // FFT UI绘制任务核心

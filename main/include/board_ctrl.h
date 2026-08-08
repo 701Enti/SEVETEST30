@@ -32,32 +32,37 @@
 
 #pragma once
 
-#include "esp_types.h"
-#include <string.h>
-#include "board_def.h"
 #include "audio_hal.h"
 #include "esxxx_common.h"
-#include "sevetest30_gpio.h"
-#include "driver/i2c.h"
+#include "esp_peripherals.h"
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
-#include "esp_peripherals.h"
-// #include "BL5372.h"
+#include "TCA6416A.h"
 
+//音频功放音量数字电位器-音量控制 
+#define  AMP_VOL_DP_ADD    0x3E  //I2C地址
+#define  AMP_VOL_DP_FREQ_HZ (100*1000) //I2C通讯频率(单位HZ)
+#define  AMP_VOL_DP_TIMEOUT_MS 1000 //通讯超时时间(单位ms)
+#define  AMP_VOL_DP_COMMAND 0x00 //操作命令,在寄存器设置的8位数据之前发送
 
 extern esp_periph_set_handle_t se30_periph_set_handle;
 
 
 typedef enum
 {
-   AUDIO_BOARD_INIT = 0,//初始化音频面板(包括了I2C的初始化和注册)
-   SEVETEST30_GPIO_INIT,//初始化GPIO服务(包括扩展GPIO)
+   LEDARRAY_INIT = 0,//LED阵列
    FONTS_CHIP_INIT,//字库芯片
-   BL5372_CONFIG_INIT,//BL5372(离线RTC计时)
-   AHT21_BEGIN,//AHT21(温湿度传感器)
-   LSM6DS3TRC_INIT_OR_RESET,//LSM6DS3TRC(姿态传感器)
+   TCA6416A_INIT,//初始化TCA6416A扩展IO芯片
+   SEVETEST30_GPIO_INIT,//初始化GPIO服务(包括扩展GPIO)
+
+   AMP_VOL_DP_INIT,//初始化音频功放音量数字电位器
+   AHT20_INIT,//AHT20(温湿度传感器)
+   AGS10_INIT,//AGS10(空气质量传感器)
+   LSM6DS3TRC_INIT,//LSM6DS3TRC(姿态传感器)
+   HSCDTD008A_INIT,//HSCDTD008A(地磁场传感器)
    VIBRA_MOTOR_INIT,//震动马达
-   LEDARRAY_INIT,//LED阵列
+   BOARD_CTRL_CONFIG,//配置所有设备到指定模式
+   
    INIT_STEP_NUMBER //(初始化步骤数量)
 } init_step_id_t;
 
@@ -65,8 +70,6 @@ typedef enum
 typedef enum
 {
    BOARD_CTRL_ALL = 1,//对结构体存储的参数全部生效,包括没有在结构体初始化后修改值的存储参数
-
-   BOARD_CTRL_DEVICE_I2C,//设备I2C通讯相关(设备I2C端口号在board_def.h指定)
 
    BOARD_CTRL_AMPLIFIER,//音频功率放大器相关
 
@@ -82,9 +85,6 @@ typedef enum
 //控制配置数据类型
 typedef struct board_ctrl_t
 {
-
-   i2c_config_t* p_i2c_device_config;   //设备I2C配置信息的地址,如果使用BOARD_CTRL_ALL,I2C配置在所有控制事务最前发生
-
    TCA6416A_mode_t* p_ext_io_mode;   // 存储IO模式信息的结构体的地址，数据是保持的
    TCA6416A_level_t* p_ext_io_value; // 存储IO电平信息的结构体的地址，数据是保持的
 
@@ -102,10 +102,12 @@ typedef struct board_ctrl_t
 
 
 esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl);
-void sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select);
+esp_err_t sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t* board_ctrl);
 esp_err_t device_i2c_init();
 
+esp_err_t get_spi_pins_font_chip(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config);
+esp_err_t get_spi_pins_ledarray(spi_bus_config_t* spi_config, spi_device_interface_config_t* spi_device_interface_config);
 
 
 /// @brief 外部函数获取控制数据缓存

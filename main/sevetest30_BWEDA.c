@@ -820,8 +820,8 @@ static void MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event, esp_g
         board_ctrl = board_status_get();
         if (board_ctrl)
         {
-            esp_ble_gatts_set_attr_value(media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE], sizeof(uint8_t), &(board_ctrl->amplifier_volume));
-            esp_ble_gatts_set_attr_value(media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE], sizeof(uint8_t), &(board_ctrl->amplifier_mute));
+            esp_ble_gatts_set_attr_value(media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE], sizeof(uint8_t), (uint8_t*)&(board_ctrl->amplifier_volume));
+            esp_ble_gatts_set_attr_value(media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE], sizeof(uint8_t), (uint8_t*)&(board_ctrl->amplifier_mute));
         }
     }
     break;

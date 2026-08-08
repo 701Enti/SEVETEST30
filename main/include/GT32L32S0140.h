@@ -27,9 +27,6 @@
 
 #pragma once
 #include "esp_err.h"
-#include "board_ctrl.h"
-
-//SPI通讯 GPIO SPI_ID 时钟频率 在board.def中设置
 
 #define GT32L32S0140_SPI_MODE  0//SPI通讯模式
 

@@ -26,18 +26,14 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#ifndef _SEVETEST30_SWEDA_H_
-#define _SEVETEST30_SWEDA_H_
-#endif
 
-#include <stdio.h>
+#pragma once
+
+
 #include <stdbool.h>
-#include "board_def.h"
-#include "AHT21.h"
+#include "AHT20.h"
 #include "AGS10.h"
-#include "lsm6ds3trc.h"
-// #include "BL5372.h"
-
+#include "LSM6DS3TRC.h"
 
 
 typedef struct systemtime_t {
@@ -56,7 +52,7 @@ typedef struct battery_data_t {
 }battery_data_t;
 
 
-typedef AHT21_result_t env_temp_hum_data_t;
+typedef AHT20_result_t env_temp_hum_data_t;
 typedef AGS10_result_t env_TVOC_data_t;
 
 
@@ -82,12 +78,8 @@ void init_timezone();
 
 void refresh_battery_data();
 void refresh_systemtime_data();
-void refresh_env_temp_hum_data(bool crc_flag);
+void refresh_env_temp_hum_data();
 void refresh_env_TVOC_data(bool crc_flag);
 
 
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);
-
-// void start_ext_rtc_alarm(BL5372_alarm_select_t alarm, systemtime_t* time, BL5372_alarm_cycle_plan_t* cycle_plan);
-// void sync_systemtime_to_ext_rtc();
-// void sync_systemtime_from_ext_rtc();

@@ -26,7 +26,6 @@
 
 #pragma once
 
-#include "freertos/FreeRTOS.h"
 #include "hscdtd008a.h"
 #include "stdbool.h"
 #include "esp_err.h"

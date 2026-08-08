@@ -37,7 +37,6 @@
 #include <math.h>
 #include "matrix_fp64.h"
 
-
 static const char* math_tools_TAG = __FILE__;
 
 /// @brief 通用矩阵转置

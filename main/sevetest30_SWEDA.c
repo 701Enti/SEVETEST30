@@ -28,11 +28,11 @@
  // bilibili: 701Enti
 
 #include "sevetest30_SWEDA.h"
-#include "esp_sntp.h"
 #include "esp_log.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
-#include "sevetest30_gpio.h"
+#include "time.h"
+#include "sevetest30_config.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 systemtime_t systemtime_data = { 0 };
 battery_data_t battery_data = { 0 };
@@ -54,7 +54,7 @@ uint8_t IMU_XLz_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 
 /********************************全局数据刷新函数 数据保存至全局变量************************************/
 
-/// @brief 初始化本地时区，只在联网同步时间时调用一次
+/// @brief 初始化本地时区
 void init_timezone()
 {
     setenv("TZ", CONFIG_LOCAL_TZ, 1);
@@ -99,11 +99,10 @@ void refresh_battery_data()
 
 /// @brief 刷新当前环境的温度湿度数据,使用硬件传感器
 /// @param crc_flag 启用CRC校验
-void refresh_env_temp_hum_data(bool crc_flag) {
-  AHT21_trigger();
-  vTaskDelay(pdMS_TO_TICKS(AHT21_DEFAULT_MEASURE_DELAY));
-  env_temp_hum_data.flag_crc = crc_flag;
-  AHT21_get_result(&env_temp_hum_data);
+void refresh_env_temp_hum_data() {
+  AHT20_trigger();
+  vTaskDelay(pdMS_TO_TICKS(AHT20_DEFAULT_MEASURE_DELAY));
+  AHT20_get_result(&env_temp_hum_data);
 }
 
 /// @brief 刷新当前环境的空气质量数据,使用硬件传感器
@@ -125,10 +124,10 @@ esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, i
     IMU_reg_mapping_t default_database[IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM] = IMU_DEFAULT_FIFO_MAPPING_DATABASE(IMU_Gx_L, IMU_Gx_H, IMU_Gy_L, IMU_Gy_H, IMU_Gz_L, IMU_Gz_H, IMU_XLx_L, IMU_XLx_H, IMU_XLy_L, IMU_XLy_H, IMU_XLz_L, IMU_XLz_H);
     map_num = IMU_DEFAULT_FIFO_MAPPING_DATABASE_MAP_NUM;
     read_num = IMU_FIFO_DEFAULT_READ_NUM;
-    return lsm6ds3trc_FIFO_map(default_database, map_num, read_num);
+    return LSM6DS3TRC_FIFO_map(default_database, map_num, read_num);
   }
   else
-    return lsm6ds3trc_FIFO_map(FIFO_database, map_num, read_num);
+    return LSM6DS3TRC_FIFO_map(FIFO_database, map_num, read_num);
 }
 
 

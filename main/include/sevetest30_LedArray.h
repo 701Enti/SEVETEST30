@@ -31,13 +31,9 @@
 // github: https://github.com/701Enti
 // bilibili: 701Enti
 
-#include <string.h>
-#include <sevetest30_UI.h>
-#include "esp_types.h"
+#pragma once
 
-#ifndef _SEVETEST30_LEDARRAY_H_
-#define _SEVETEST30_LEDARRAY_H_
-#endif 
+#include <sevetest30_UI.h>
 
 #define FIGURE_BREATH 4                    //数字的宽度 4x7
 #define FIGURE_HEIGHT 7                    //数字的高度 4x7
@@ -74,7 +70,7 @@ typedef enum
 
 #define LEDARRAY_REFRESH_INIT_MODE LEDARRAY_AUTO_REFRESH_ALL_ONCE //初始化时设置的默认屏幕刷新模式
 
-extern xSemaphoreHandle refresh_Task_Mutex;//刷新锁，外部需要抢到并完成所有操作后释放以允许屏幕刷新
+extern xSemaphoreHandle refresh_ledarray_task_mutex;//刷新锁，外部需要抢到并完成所有操作后释放以允许屏幕刷新
 
 //数字 0-9
 extern const uint8_t matrix_1[7];

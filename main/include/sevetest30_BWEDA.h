@@ -31,9 +31,7 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#ifndef _SEVETEST30_BWEDA_H_
-#define _SEVETEST30_BWEDA_H_
-#endif
+#pragma once
 
 #include <esp_err.h>
 

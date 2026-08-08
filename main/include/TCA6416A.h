@@ -32,15 +32,22 @@
 // github: https://github.com/701Enti
 // bilibili: 701Enti
 
-// #ifndef _TCA6416A_H_
-// #define _TCA6416A_H_
-// #endif
-
 #pragma once
 
-#include <string.h>
 #include <stdbool.h>
 #include "esp_err.h"
+#include "sevetest30_config.h"
+
+
+#define TCA6416A_ADDR_PIN_LEVEL (SEVETEST30_TCA6416A_ADDR_PIN_LEVEL) //TCA6416A的ADDR引脚电平 0 / 1，用于设置主机地址
+#define TCA6416A_DEVICE_ADD     (0x20 | (TCA6416A_ADDR_PIN_LEVEL))//TCA6416A通讯地址
+#define TCA6416A_I2C_PORT    (DEVICE_I2C_PORT)//TCA6416A通讯端口
+#define TCA6416A_I2C_FREQ_HZ 10*1000 //TCA6416A通讯频率
+#define TCA6416A_I2C_TIMEOUT_MS 1000 //TCA6416A通讯超时时间(单位ms)
+
+#define TCA6416A_DEFAULT_CONFIG_MODE SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE //TCA6416A的默认配置模式，0=输出模式 1=输入模式
+#define TCA6416A_DEFAULT_CONFIG_VALUE SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE //TCA6416A的默认引脚电平值，0=低电平 1=高电平
+
 
 // 两个输入值寄存器，只读有效
 #define TCA6416A_IN1 0x00
@@ -98,13 +105,10 @@ typedef struct TCA6416A_level_t
     bool QC_TOUCH_R;     // 输入,右触摸信号,高电平表示触摸,无锁
 } TCA6416A_level_t;
 
+esp_err_t TCA6416A_init();
+
 esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode);
 
 esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Avalue,TCA6416A_mode_t *pTCA6416Amode);
 
 esp_err_t TCA6416A_gpio_global_inversion_set(bool inversion);
-
-#define TCA6416A_DEFAULT_CONFIG_MODE SEVETEST30_TCA6416A_DEFAULT_CONFIG_MODE
-#define TCA6416A_DEFAULT_CONFIG_VALUE SEVETEST30_TCA6416A_DEFAULT_CONFIG_VALUE
-
-#define TCA6416A_ADDR_LEVEL SEVETEST30_TCA6416A_ADDR_LEVEL

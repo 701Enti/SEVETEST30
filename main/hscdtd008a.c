@@ -24,32 +24,73 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#include "hscdtd008a.h"
+#include "HSCDTD008A.h"
+#include "esp_err.h"
 #include "esp_log.h"
-#include "board_def.h"
-#include "driver/i2c.h"
 #include "esp_check.h"
 #include <math.h>
+#include "driver/i2c_master.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+
+
+static i2c_master_dev_handle_t HSCDTD008A_dev_handle = NULL;
+
+/// @brief 初始化HSCDTD008A
+/// @return [ESP_OK 成功] 
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
+/// @return [ESP_ERR_NOT_ALLOWED] 已初始化，不能重复初始化 /
+/// 获取i2c总线句柄失败，总线未初始化
+/// @return [ESP_ERR_NO_MEM 内存不足]
+esp_err_t HSCDTD008A_init() {
+  const static char *TAG = "HSCDTD008A_init";
+  if (HSCDTD008A_dev_handle != NULL) {
+    ESP_LOGE(TAG, "HSCDTD008A已初始化,不能重复初始化");
+    return ESP_ERR_NOT_ALLOWED;
+  }
+  i2c_master_bus_handle_t shared_bus;
+  esp_err_t ret = i2c_master_get_bus_handle(HSCDTD008A_I2C_PORT, &shared_bus);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "获取i2c总线句柄失败,总线未初始化");
+    return ESP_ERR_NOT_ALLOWED;
+  }
+  i2c_device_config_t dev_cfg = {
+      .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+      .device_address = HSCDTD008A_DEVICE_ADD,
+      .scl_speed_hz = HSCDTD008A_I2C_FREQ_HZ,
+  };
+  ret = i2c_master_bus_add_device(shared_bus, &dev_cfg, &HSCDTD008A_dev_handle);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "添加i2c设备失败,描述:%s", esp_err_to_name(ret));
+    return ret;
+  }
+  else {
+    ESP_LOGI(TAG, "HSCDTD008A初始化成功");
+  }
+  return ret;
+}
 
 /// @brief 获取HSCDTD008A当前模式
 /// @param mode 读取当前模式并保存到mode
 /// @return [ESP_OK 读取完成并保存到mode]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG mode为NULL / 无法进行读取,通信参数错误] 
-/// @return [ESP_FAIL 无法进行读取,发送命令时发现问题,未应答] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行读取,I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 无法进行读取,操作超时,因为总线忙]
-esp_err_t hscdtd008a_mode_get(GS_mode_t* mode) {
-    const char* TAG = "hscdtd008a_mode_get";
+esp_err_t HSCDTD008A_mode_get(GS_mode_t* mode) {
+    const char* TAG = "HSCDTD008A_mode_get";
     if (!mode) {
         ESP_LOGE(TAG, "输入了无法处理的空指针");
-        return ESP_ERR_INVALID_ARG;
+        return ESP_ERR_NOT_ALLOWED;
     }
 
     uint8_t control1_address = CONTROL_1;
     uint8_t control1_data = 0;
 
     //读取模式数据(读取CTRL1的PC位,mode本身就完全等于PC)
-    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &control1_address, 1, &control1_data, 1, portMAX_DELAY);
+    esp_err_t ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &control1_address, 1, &control1_data, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法进行读取, 读取模式数据 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     *mode = (GS_mode_t)((control1_data >> 7) & 0x01);
@@ -60,28 +101,28 @@ esp_err_t hscdtd008a_mode_get(GS_mode_t* mode) {
 /// @brief 设置HSCDTD008A当前模式
 /// @param mode 设置当前模式为mode
 /// @return [ESP_OK 设置完成]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG 无法进行设置,通信参数错误] 
-/// @return [ESP_FAIL 无法进行设置,发送命令时发现问题,未应答] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行设置,I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 无法进行设置,操作超时,因为总线忙]
-esp_err_t hscdtd008a_mode_set(GS_mode_t  mode) {
-    const char* TAG = "hscdtd008a_mode_set";
+esp_err_t HSCDTD008A_mode_set(GS_mode_t  mode) {
+    const char* TAG = "HSCDTD008A_mode_set";
     esp_err_t ret = ESP_OK;
 
     //缓存设置前数据,在设置前数据基础上修改,避免对非需要位改动
     uint8_t control1_address = CONTROL_1;
     uint8_t control1_data = 0;
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &control1_address, 1, &control1_data, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &control1_address, 1, &control1_data, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法设置,缓存 设置前数据 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     //设置HSCDTD008A当前模式(写入CTRL1的PC位,mode本身就完全等于PC)
     uint8_t control1_buf[2] = { CONTROL_1,(control1_data & 0x7F) | (mode << 7) };
-    ret = i2c_master_write_to_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, control1_buf, 2, portMAX_DELAY);
+    ret = i2c_master_transmit(HSCDTD008A_dev_handle, control1_buf, 2, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法设置,发现通信问题 描述 %s", esp_err_to_name(ret));
     if (mode == GS_MODE_ACTIVE) {
         ESP_LOGI(TAG, "切换到 [ACTIVE_MODE] ,活跃,无限制读写,可以开始测量,可切换state选择测量方式");
         GS_state_t state;
-        if (hscdtd008a_state_get(&state) == ESP_OK) {
+        if (HSCDTD008A_state_get(&state) == ESP_OK) {
             if (state == GS_STATE_NORMAL)ESP_LOGI(TAG, "--------当前测量状态 [NORMAL_STATE] ,传感器会自动根据配置触发测量");
             if (state == GS_STATE_FORCE)ESP_LOGI(TAG, "--------当前测量状态 [FORCE_STATE] ,需要手动触发测量");
         }
@@ -95,12 +136,12 @@ esp_err_t hscdtd008a_mode_set(GS_mode_t  mode) {
 /// @brief 获取HSCDTD008A状态的设置(不一定是当前状态,因为它指的是ACTIVE_MODE下的状态设置)
 /// @param state 读取状态的设置并保存到state
 /// @return [ESP_OK 读取完成并保存到state]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG state为NULL / 无法进行读取,通信参数错误] 
-/// @return [ESP_FAIL 无法进行读取,发送命令时发现问题,未应答] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行读取,I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 无法进行读取,操作超时,因为总线忙]
-esp_err_t hscdtd008a_state_get(GS_state_t* state) {
-    const char* TAG = "hscdtd008a_state_get";
+esp_err_t HSCDTD008A_state_get(GS_state_t* state) {
+    const char* TAG = "HSCDTD008A_state_get";
     if (!state) {
         ESP_LOGE(TAG, "输入了无法处理的空指针");
         return ESP_ERR_INVALID_ARG;
@@ -110,7 +151,7 @@ esp_err_t hscdtd008a_state_get(GS_state_t* state) {
     uint8_t control1_data = 0;
 
     //读取状态数据(读取CTRL1的FS位,state本身就完全等于FS)
-    esp_err_t ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &control1_address, 1, &control1_data, 1, portMAX_DELAY);
+    esp_err_t ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &control1_address, 1, &control1_data, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法进行读取, 读取状态数据 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     *state = (GS_state_t)((control1_data >> 1) & 0x01);
@@ -121,23 +162,23 @@ esp_err_t hscdtd008a_state_get(GS_state_t* state) {
 /// @brief 设置HSCDTD008A测量状态(不一定是当前状态,因为它指的是ACTIVE_MODE下的状态设置)
 /// @param state 设置ACTIVE_MODE下的状态为state
 /// @return [ESP_OK 设置完成]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG 无法进行设置,通信参数错误] 
-/// @return [ESP_FAIL 无法进行设置,发送命令时发现问题,未应答] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行设置,I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 无法进行设置,操作超时,因为总线忙]
-esp_err_t hscdtd008a_state_set(GS_state_t  state) {
-    const char* TAG = "hscdtd008a_state_set";
+esp_err_t HSCDTD008A_state_set(GS_state_t  state) {
+    const char* TAG = "HSCDTD008A_state_set";
     esp_err_t ret = ESP_OK;
 
     //缓存设置前数据,在设置前数据基础上修改,避免对非需要位改动
     uint8_t control1_address = CONTROL_1;
     uint8_t control1_data = 0;
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &control1_address, 1, &control1_data, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &control1_address, 1, &control1_data, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法设置,缓存 设置前数据 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     //设置HSCDTD008A当前模式(写入CTRL1的FS位,state本身就完全等于FS)
     uint8_t control1_buf[2] = { CONTROL_1,(control1_data & 0xFD) | (state << 1) };
-    ret = i2c_master_write_to_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, control1_buf, 2, portMAX_DELAY);
+    ret = i2c_master_transmit(HSCDTD008A_dev_handle, control1_buf, 2, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法设置,发现通信问题 描述 %s", esp_err_to_name(ret));
     if (state == GS_STATE_NORMAL)ESP_LOGI(TAG, "设置测量状态 [NORMAL_STATE] ,传感器会自动根据配置触发测量");
     if (state == GS_STATE_FORCE)ESP_LOGI(TAG, "设置测量状态 [FORCE_STATE] ,需要手动触发测量");
@@ -146,12 +187,14 @@ esp_err_t hscdtd008a_state_set(GS_state_t  state) {
 
 /// @brief HSCDTD008A自我检测
 /// @return [ESP_OK 自检通过]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG 无法进行自检,参数错误] 
-/// @return [ESP_FAIL 无法进行自检,发送命令时发现问题,未应答 / 自检不通过] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行自检,I2C driver 未安装或没有运行在主机模式 / 因为在非ACTIVE_MODE,无法启动自检] 
+/// @return [ESP_FAIL 自检不通过] 
+/// @return [ESP_ERR_NOT_ALLOWED 因为在非ACTIVE_MODE,无法启动自检] 
 /// @return [ESP_ERR_TIMEOUT 无法进行自检,操作超时,因为总线忙]
-esp_err_t hscdtd008a_selftest() {
-    const char* TAG = "hscdtd008a_selftest";
+esp_err_t HSCDTD008A_selftest() {
+    const char* TAG = "HSCDTD008A_selftest";
     esp_err_t ret = ESP_OK;
     uint8_t control3_buf[2] = { CONTROL_3,0x10 };
     uint8_t response_register_address = SELFTEST_RESPONSE;
@@ -161,30 +204,30 @@ esp_err_t hscdtd008a_selftest() {
 
     //查看当前模式是否为ACTIVE_MODE(在非ACTIVE_MODE无法启动自检)
     GS_mode_t mode = GS_MODE_STAND_BY;
-    ret = hscdtd008a_mode_get(&mode);
+    ret = HSCDTD008A_mode_get(&mode);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法自检, 查看当前模式 时发现通信问题 描述 %s", esp_err_to_name(ret));
     if (mode != GS_MODE_ACTIVE) {
-        ret = ESP_ERR_INVALID_STATE;
+        ret = ESP_ERR_NOT_ALLOWED;
     }
-    ESP_RETURN_ON_ERROR(ret, TAG, "无法自检,因为在 非ACTIVE_MODE 而无法启动自检 描述 %s [请执行以切换: hscdtd008a_mode_set(GS_MODE_ACTIVE);]", esp_err_to_name(ret));
+    ESP_RETURN_ON_ERROR(ret, TAG, "无法自检,因为在 非ACTIVE_MODE 而无法启动自检 描述 %s [请执行以切换: HSCDTD008A_mode_set(GS_MODE_ACTIVE);]", esp_err_to_name(ret));
 
 
     //查看自检前结果(读取SELFTEST_RESPONSE)
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &response_register_address, 1, &response_0, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &response_register_address, 1, &response_0, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法自检, 查看自检前结果 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     //启动自检(写入CONTROL3)
-    ret = i2c_master_write_to_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, control3_buf, 2, portMAX_DELAY);
+    ret = i2c_master_transmit(HSCDTD008A_dev_handle, control3_buf, 2, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法自检, 启动自检 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
     //查看自检结果(读取SELFTEST_RESPONSE)
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &response_register_address, 1, &response_1, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &response_register_address, 1, &response_1, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法自检, 查看自检结果 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     //确保自检完成(再次读取SELFTEST_RESPONSE)
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &response_register_address, 1, &response_2, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &response_register_address, 1, &response_2, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "无法自检, 确保自检完成 时发现通信问题 描述 %s", esp_err_to_name(ret));
 
     if (response_0 != 0X55 || response_1 != 0xAA || response_2 != 0X55) {
@@ -201,12 +244,12 @@ esp_err_t hscdtd008a_selftest() {
 /// @note 还会读取CTRL4.RS作为量程标识,写入data,不仅仅读取OUTPUT_*_*寄存器
 /// @param data 读取输出数据,并按照GS_output_data_t格式,保存到data
 /// @return [ESP_OK 读取完成并保存到data]  
+/// @return [ESP_ERR_INVALID_STATE]
+/// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_INVALID_ARG data为NULL / 无法进行获取,通信参数错误] 
-/// @return [ESP_FAIL 无法进行获取,发送命令时发现问题,未应答] 
-/// @return [ESP_ERR_INVALID_STATE 无法进行获取,I2C driver 未安装或没有运行在主机模式] 
 /// @return [ESP_ERR_TIMEOUT 无法进行获取,操作超时,因为总线忙]
-esp_err_t hscdtd008a_output_data_get(GS_output_data_t* data) {
-    const char* TAG = "hscdtd008a_output_data_get";
+esp_err_t HSCDTD008A_output_data_get(GS_output_data_t* data) {
+    const char* TAG = "HSCDTD008A_output_data_get";
     if (!data) {
         ESP_LOGE(TAG, "输入了无法处理的空指针");
         return ESP_ERR_INVALID_ARG;
@@ -217,7 +260,7 @@ esp_err_t hscdtd008a_output_data_get(GS_output_data_t* data) {
     //读取CTRL4.RS,从而获取量程标识
     uint8_t control4_address = CONTROL_4;
     uint8_t control4_data = 0;
-    ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &control4_address, 1, &control4_data, 1, portMAX_DELAY);
+    ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &control4_address, 1, &control4_data, 1, HSCDTD008A_I2C_TIMEOUT_MS);
     ESP_RETURN_ON_ERROR(ret, TAG, "读取CTRL4.RS作为量程标识时发现通信问题 描述%s", esp_err_to_name(ret));
     data->range = (GS_range_of_output_t)((control4_data >> 4) & 0x01);
 
@@ -233,7 +276,7 @@ esp_err_t hscdtd008a_output_data_get(GS_output_data_t* data) {
         OUTPUT_Z_MSB
     };
     for (int idx = 0;idx < 6;idx++) {
-        ret = i2c_master_write_read_device(DEVICE_I2C_PORT, HSCDTD008A_DEVICE_ADDRESS, &address[idx], 1, &output[idx], 1, portMAX_DELAY);
+        ret = i2c_master_transmit_receive(HSCDTD008A_dev_handle, &address[idx], 1, &output[idx], 1, HSCDTD008A_I2C_TIMEOUT_MS);
         ESP_RETURN_ON_ERROR(ret, TAG, "读取OUTPUT_*_*寄存器时发现通信问题 描述%s", esp_err_to_name(ret));
     }
 

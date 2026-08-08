@@ -35,7 +35,6 @@
 #include "sevetest30_LedArray.h"
 #include "hal/gpio_types.h"
 #include "sevetest30_UI.h"
-#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <stdarg.h>
 #include <math.h>
@@ -47,10 +46,14 @@
 #include "esp_log.h"
 #include "gt32l32s0140.h"
 #include "esp_check.h"
-#include "esp_rom_sys.h"
 #include "esp_task_wdt.h"
-#include "board.h"
 #include "driver/gpio.h"
+
+#include "driver/spi_master.h"
+
+#include "board_ctrl.h"
+
+#include "sevetest30_config.h"
 
 // 一个图像可看作不同颜色的像素组合，而每个像素颜色可用红绿蓝三元色的深度（亮度）表示
 // 因此，我们可以将一个图像分离成三个单色图层，每个图层的每个像素的值表示该像素在该图层的亮度，这里用uint8_t表示(0-255)
@@ -61,7 +64,7 @@ uint8_t *ledarray_blue_layer_buf = NULL;
 
 uint8_t *ledarray_tx_buf = NULL; // 数据发送缓存
 
-spi_device_handle_t *ledarray_spi_handle = NULL;
+spi_device_handle_t ledarray_spi_handle = NULL;
 
 bool is_initialized = false;
 
@@ -79,7 +82,7 @@ const uint8_t matrix_9[7] = {0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0};
 
 /******************************自动屏幕刷新服务 [绘制函数本身不会刷新屏幕,需要手动或自动运行屏幕刷新,才会在屏幕上点亮] *****************************/
 ledarray_auto_refresh_mode_t refresh_mode_buf = LEDARRAY_AUTO_REFRESH_DISABLE;
-SemaphoreHandle_t refresh_Task_Mutex = NULL;
+SemaphoreHandle_t refresh_ledarray_task_mutex = NULL;
 
 /// @brief [单次全刷任务 - ALL_ONCE]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
 void refresh_ALL_ONCE_Task()
@@ -639,7 +642,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 	// 第2种方式 - 运行sevetest30_UI提供的动画支持服务
 	if (cartoon_handle)
 	{
-		cartoon_handle->create_callback(cartoon_handle,
+		cartoon_handle->create_callback((uintptr_t)cartoon_handle,
 										ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER); // 生成动画
 		// 创建控制对象
 		int32_t cx = x;										// 需要控制的x轴坐标数据,hook函数只写
@@ -654,7 +657,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 		for (step = 0; step < ASCII_num * 6 + (total_unit - ASCII_num) * 12 + LINE_LED_NUMBER; step++)
 		{
 			// 调用钩子函数调整控制对象
-			cartoon_handle->ctrl_hook(cartoon_handle, &object);
+			cartoon_handle->ctrl_hook((uintptr_t)cartoon_handle, &object);
 			for (idx = 0; idx < total_unit; idx++)
 			{
 				x_buf = (x - 1) + (cx - 1) + LINE_LED_NUMBER + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1 cx-1为绝对偏移坐标)
@@ -892,7 +895,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 	// 第2种方式 - 运行sevetest30_UI提供的动画支持服务
 	if (cartoon_handle)
 	{
-		cartoon_handle->create_callback(cartoon_handle,
+		cartoon_handle->create_callback((uintptr_t)cartoon_handle,
 										ASCII_num * 8 + (total_unit - ASCII_num) * 16 + LINE_LED_NUMBER); // 生成动画
 		// 创建控制对象
 		int32_t cx = x;										// 需要控制的x轴坐标数据,hook函数只写
@@ -907,7 +910,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 		for (step = 0; step < ASCII_num * 8 + (total_unit - ASCII_num) * 16 + LINE_LED_NUMBER; step++)
 		{
 			// 调用钩子函数调整控制对象
-			cartoon_handle->ctrl_hook(cartoon_handle, &object);
+			cartoon_handle->ctrl_hook((uintptr_t)cartoon_handle, &object);
 			for (idx = 0; idx < total_unit; idx++)
 			{
 				x_buf = (x - 1) + (cx - 1) + LINE_LED_NUMBER + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1 cx-1为绝对偏移坐标)
@@ -943,7 +946,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3], cartoon_handle_t cartoo
 
 /// @brief  初始化灯板阵列
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL 创建refresh_Task_Mutex互斥量时发现问题 / 无法获取refresh_Task_Mutex互斥量 / refresh_Task_Mutex互斥量已经被意外创建]
+/// @return [ESP_FAIL 创建refresh_ledarray_task_mutex互斥量时发现问题 / 无法获取refresh_ledarray_task_mutex互斥量 / refresh_ledarray_task_mutex互斥量已经被意外创建]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 / RMT控制器之前已经安装,请调用对应rmt_driver_uninstall释放需要的资源]
 /// @return [ESP_ERR_INVALID_ARG 参数错误]
 /// @return [ESP_ERR_NO_MEM 内存不足]
@@ -959,23 +962,23 @@ esp_err_t ledarray_init()
 	else
 	{
 		is_initialized = true;
-		if (refresh_Task_Mutex == NULL)
+		if (refresh_ledarray_task_mutex == NULL)
 		{
-			refresh_Task_Mutex = xSemaphoreCreateMutex();
-			if (!refresh_Task_Mutex)
+			refresh_ledarray_task_mutex = xSemaphoreCreateMutex();
+			if (!refresh_ledarray_task_mutex)
 			{
-				ESP_LOGE(TAG, "创建refresh_Task_Mutex互斥量时发现问题");
+				ESP_LOGE(TAG, "创建refresh_ledarray_task_mutex互斥量时发现问题");
 				return ESP_FAIL;
 			}
 		}
 		else
 		{
-			ESP_LOGE(TAG, "refresh_Task_Mutex互斥量已经被意外创建");
+			ESP_LOGE(TAG, "refresh_ledarray_task_mutex互斥量已经被意外创建");
 			return ESP_FAIL;
 		}
 	}
 
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS)) == pdTRUE)
+	if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS)) == pdTRUE)
 	{
 
 		// 申请显示数据内存空间
@@ -1079,7 +1082,7 @@ esp_err_t ledarray_init()
 		gpio_set_drive_capability(LEDARRAY_CSA1_IO, GPIO_DRIVE_CAP_3);
 		gpio_set_drive_capability(LEDARRAY_CSA2_IO, GPIO_DRIVE_CAP_3);
 
-		xSemaphoreGive(refresh_Task_Mutex);
+		xSemaphoreGive(refresh_ledarray_task_mutex);
 
 		// 设置自动刷新模式为默认模式
 		ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
@@ -1097,14 +1100,14 @@ esp_err_t ledarray_init()
 	}
 	else
 	{
-		ESP_LOGE(TAG, "LED阵列初始化时发现问题,无法获取refresh_Task_Mutex互斥量");
+		ESP_LOGE(TAG, "LED阵列初始化时发现问题,无法获取refresh_ledarray_task_mutex互斥量");
 		return ESP_FAIL;
 	}
 }
 
 /// @brief  灯板阵列反初始化操作
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL 释放资源失败 / refresh_Task_Mutex互斥量异常]
+/// @return [ESP_FAIL 释放资源失败 / refresh_ledarray_task_mutex互斥量异常]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
 /// @return [ESP_ERR_INVALID_ARG ledarray_gpio_num_list中存在错误的GPIO号码]
 esp_err_t ledarray_deinit()
@@ -1121,22 +1124,22 @@ esp_err_t ledarray_deinit()
 	ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 
 	// 安全终止工作并删除互斥量
-	BaseType_t ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
+	BaseType_t ret = xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
 	if (ret != pdTRUE)
 	{
-		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清理");
+		ESP_LOGE(TAG, "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全清理");
 		return ESP_FAIL;
 	}
 
 	is_initialized = false;
 
-	xSemaphoreGive(refresh_Task_Mutex);
+	xSemaphoreGive(refresh_ledarray_task_mutex);
 	vTaskDelay(100);
 
-	ret = xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
+	ret = xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
 	if (ret != pdTRUE)
 	{
-		ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全清理");
+		ESP_LOGE(TAG, "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全清理");
 		return ESP_FAIL;
 	}
 
@@ -1152,13 +1155,11 @@ esp_err_t ledarray_deinit()
 	free(ledarray_tx_buf);
 	ledarray_tx_buf = NULL;
 
-	spi_device_release_bus(ledarray_spi_handle);
-
 	spi_bus_remove_device(ledarray_spi_handle);
 
 	spi_bus_free(LEDARRAY_SPI_ID);
 
-	vSemaphoreDelete(refresh_Task_Mutex);
+	vSemaphoreDelete(refresh_ledarray_task_mutex);
 
 	ESP_LOGW(TAG, " %d X %d LED阵列反初始化操作完成,所有资源已释放 当前自动刷新服务模式 %d", LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_AUTO_REFRESH_DISABLE);
 	return ESP_OK;
@@ -1166,7 +1167,7 @@ esp_err_t ledarray_deinit()
 
 /// @brief 灯板阵列显示一帧画面(闪烁一帧)
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL refresh_Task_Mutex互斥量异常]
+/// @return [ESP_FAIL refresh_ledarray_task_mutex互斥量异常]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
 esp_err_t ledarray_show_frame()
 {
@@ -1187,9 +1188,9 @@ esp_err_t ledarray_show_frame()
 		.tx_buffer = ledarray_tx_buf,
 	};
 
-	if (xSemaphoreTake(refresh_Task_Mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) != pdTRUE)
+	if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) != pdTRUE)
 	{
-		// ESP_LOGE(TAG, "refresh_Task_Mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
+		// ESP_LOGE(TAG, "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
 		return ESP_FAIL;
 	}
 
@@ -1256,7 +1257,7 @@ esp_err_t ledarray_show_frame()
 	// 最后一行灭灯消隐
 	gpio_set_level(LEDARRAY_OE_IO, 1);
 
-	xSemaphoreGive(refresh_Task_Mutex);
+	xSemaphoreGive(refresh_ledarray_task_mutex);
 
 	return ESP_OK;
 }

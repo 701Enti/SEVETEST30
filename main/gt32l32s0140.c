@@ -25,11 +25,14 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#include "gt32l32s0140.h"
-#include "board.h"
+#include "GT32L32S0140.h"
 #include "driver/gpio.h"
-#include "esp_intr_alloc.h"
 #include "esp_log.h"
+#include "driver/spi_master.h"
+#include "sevetest30_config.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "board_ctrl.h"
 
 spi_device_handle_t fonts_chip_handle = NULL;
 

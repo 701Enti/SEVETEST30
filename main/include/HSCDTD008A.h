@@ -27,9 +27,13 @@
 #pragma once
 
 #include "esp_err.h"
+#include "sevetest30_config.h"
 
-// I2C相关配置宏定义在board_def.h下
-#define HSCDTD008A_DEVICE_ADDRESS 0x0C //设备地址
+#define HSCDTD008A_DEVICE_ADD 0x0C //设备地址   
+#define HSCDTD008A_I2C_PORT    (DEVICE_I2C_PORT)//HSCDTD008A通讯端口
+#define HSCDTD008A_I2C_FREQ_HZ 10*1000 //通讯频率
+#define HSCDTD008A_I2C_TIMEOUT_MS 1000 //通讯超时时间(单位ms)
+
 #define HSCDTD008A_1LSB_MAGNETIC_FLUX_DENSITY 0.15 //输出数据的一个LSB代表的磁感应强度(单位: uT)
 
 //寄存器地址库
@@ -121,17 +125,17 @@ typedef struct GS_angle_data_t
 }GS_angle_data_t;
 
 
+esp_err_t HSCDTD008A_init();
 
+esp_err_t HSCDTD008A_selftest();
 
-esp_err_t hscdtd008a_selftest();
+esp_err_t HSCDTD008A_mode_get(GS_mode_t* mode);
+esp_err_t HSCDTD008A_mode_set(GS_mode_t  mode);
 
-esp_err_t hscdtd008a_mode_get(GS_mode_t* mode);
-esp_err_t hscdtd008a_mode_set(GS_mode_t  mode);
+esp_err_t HSCDTD008A_state_get(GS_state_t* state);
+esp_err_t HSCDTD008A_state_set(GS_state_t  state);
 
-esp_err_t hscdtd008a_state_get(GS_state_t* state);
-esp_err_t hscdtd008a_state_set(GS_state_t  state);
-
-esp_err_t hscdtd008a_output_data_get(GS_output_data_t* data);
+esp_err_t HSCDTD008A_output_data_get(GS_output_data_t* data);
 
 esp_err_t to_magnetic_flux_density_data(GS_output_data_t* src, GS_magnetic_flux_density_data_t* dest);
 esp_err_t to_angle_data(GS_unit_of_angle_data_t unit, GS_magnetic_flux_density_data_t* src, GS_angle_data_t* dest);

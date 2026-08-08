@@ -24,13 +24,12 @@
 // 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
 // github: https://github.com/701Enti
 // bilibili: 701Enti
+
 #pragma once
 
 #include "stdbool.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "audio_event_iface.h"
-#include "ringbuf.h"
 #include "audio_element.h"
 #include "esp_vad.h"
 

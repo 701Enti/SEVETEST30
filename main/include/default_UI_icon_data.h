@@ -80,3 +80,5 @@ extern const unsigned char weather_icon_515[251];
 extern const unsigned char weather_icon_900[251];
 extern const unsigned char weather_icon_901[251];
 extern const unsigned char weather_icon_999[251];
+
+int get_weather_icon_data(unsigned char icon_data[251], int index_id);

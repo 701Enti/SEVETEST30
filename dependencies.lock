@@ -10,7 +10,7 @@ dependencies:
       type: service
     version: 0.5.3
   espressif/dl_fft:
-    component_hash: 2f319e72f3ab6f673c83849d6a14b68c21165d4dce24e12af7c13714ba35a6e0
+    component_hash: a955ca29581de2177ddf25759273bd83f082b3c805e735fe6ee105858643989b
     dependencies:
     - name: idf
       require: private
@@ -18,7 +18,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 0.5.0
+    version: 0.6.0
   espressif/esp-dsp:
     component_hash: 619639efc18cfa361a9e423739b9b0ffc14991effc6c027f955c2f2c3bf1754b
     dependencies:
@@ -44,7 +44,7 @@ dependencies:
       type: service
     version: 1.2.0
   espressif/esp_websocket_client:
-    component_hash: ac62982fcf9b266409c2299d2b6b1844122105b35163a3b7f8d0adaa9f7eb989
+    component_hash: dc00233af846f3a744ada283a300e0d586040aadc3ee67361645ecdce4523672
     dependencies:
     - name: idf
       require: private
@@ -52,7 +52,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.5.0
+    version: 1.8.0
   espressif/jsmn:
     component_hash: d80350c41bbaa827c98a25b6072df00884e72f54885996fab4a4f0aebce6b6c3
     dependencies:
@@ -64,7 +64,7 @@ dependencies:
       type: service
     version: 1.1.0
   espressif/nghttp:
-    component_hash: 32e513409ddce0000990ec74b0711f535462726236d72578cd70498e6bd66dc3
+    component_hash: e0429dc6ecf6fdfab077a52c3eb5846c1c4a4a6d969633e8d1227b438b78530a
     dependencies:
     - name: idf
       require: private
@@ -72,9 +72,9 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.65.0
+    version: 1.69.0
   espressif/zlib:
-    component_hash: d901723af51f13fc8e5824f39f32239c847956e8fd951a05266588dc5cfbb9ae
+    component_hash: 64ea2fd6754c5a05951f1ddb312ac835cd782e68cb5bd9dfcd1c3a107c8fbfbc
     dependencies:
     - name: idf
       require: private
@@ -82,11 +82,11 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.3.1
+    version: 1.3.2
   idf:
     source:
       type: idf
-    version: 5.2.7
+    version: 5.5.5
 direct_dependencies:
 - espressif/dl_fft
 - espressif/esp-dsp
@@ -96,6 +96,6 @@ direct_dependencies:
 - espressif/nghttp
 - espressif/zlib
 - idf
-manifest_hash: 2d2fa19e01c9054d896f818c33e34045e40161c723fac97451abdb0091553e41
+manifest_hash: 11970a16037abbe97acbb917ed1eaf85f224270143736ef7648c96be188cccc7
 target: esp32s3
 version: 2.0.0

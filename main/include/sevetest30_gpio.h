@@ -24,11 +24,9 @@
  // github: https://github.com/701Enti
  // bilibili: 701Enti
 
-#include "TCA6416A.h"
-#ifndef _SEVETEST30_GPIO_H_
-#define _SEVETEST30_GPIO_H_
-#endif 
+#pragma once
 
+#include "TCA6416A.h"
 
 #define EXT_IO_READ_INTR_FLAG         (ESP_INTR_FLAG_LEVEL3)
 #define EXT_IO_READ_EVT_CORE           (0)

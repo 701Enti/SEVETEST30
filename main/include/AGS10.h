@@ -52,13 +52,14 @@
 
 #pragma once
 
-#include "esp_types.h"
-#include "board_def.h"
+#include "esp_err.h"
+#include "stdbool.h"
+#include "sevetest30_config.h"
 
-#define AGS10_DEVICE_ADD     (0x1A)//AGS10通讯地址
+#define AGS10_DEVICE_ADD     0x1A//AGS10通讯地址
 #define AGS10_I2C_PORT    (DEVICE_I2C_PORT)//AGS10通讯端口
-#define AGS10_I2C_FREQ_HZ (10*1000) //AGS10通讯频率,由于AGS10对通讯要求,引入频率临时变更支持
-
+#define AGS10_I2C_FREQ_HZ 10*1000 //AGS10通讯频率
+#define AGS10_I2C_TIMEOUT_MS 1000 //AGS10通讯超时时间(单位ms)
 
 typedef struct AGS10_result_t
 {
@@ -67,7 +68,7 @@ typedef struct AGS10_result_t
   uint32_t TVOC_value;//TVOC测量值
 }AGS10_result_t;
 
-
+esp_err_t AGS10_init();
 
 void AGS10_TVOC_result_get(AGS10_result_t* dest);
 

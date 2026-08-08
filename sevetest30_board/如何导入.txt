@@ -1,0 +1,79 @@
+(记得导入后在menuconfig设置audio_board为SEVETEST30_BOARD)
+(注意：不是选择Custom audio board)
+1.复制整个sevetest30_board目录到adf目录下的audio_board文件夹中
+
+2.追加内容到audio_board文件夹中的Kconfig.probuild
+原来(接近末尾部分)：
+config ESP32_P4_FUNCTION_EV_SUB_BOARD
+    bool "ESP32-P4-FUNCTION-EV-SUB-BOARD"
+
+
+endchoice
+
+
+
+添加：
+config SEVETEST30_BOARD
+    bool "SEVETEST30_BOARD"
+
+
+
+
+变成：
+config ESP32_P4_FUNCTION_EV_SUB_BOARD
+    bool "ESP32-P4-FUNCTION-EV-SUB-BOARD"
+config SEVETEST30_BOARD
+    bool "SEVETEST30_BOARD"
+
+endchoice
+
+
+
+3.追加内容到audio_board文件夹中的CMakeLists.txt
+原来(接近末尾部分)：
+if (CONFIG_ESP32_P4_FUNCTION_EV_SUB_BOARD)
+message(STATUS "Current board name is " CONFIG_ESP32_P4_FUNCTION_EV_SUB_BOARD)
+list(APPEND COMPONENT_ADD_INCLUDEDIRS ./esp32_p4_function_ev_sub_board)
+set(COMPONENT_SRCS
+./esp32_p4_function_ev_sub_board/board.c
+./esp32_p4_function_ev_sub_board/board_pins_config.c
+)
+endif()
+
+register_component()
+
+
+
+添加：
+if (CONFIG_SEVETEST30_BOARD)
+message(STATUS "Current board name is " CONFIG_SEVETEST30_BOARD)
+list(APPEND COMPONENT_ADD_INCLUDEDIRS ./sevetest30_board)
+set(COMPONENT_SRCS
+./sevetest30_board/board.c
+./sevetest30_board/board_pins_config.c
+)
+endif()
+
+
+
+
+变成：
+if (CONFIG_ESP32_P4_FUNCTION_EV_SUB_BOARD)
+message(STATUS "Current board name is " CONFIG_ESP32_P4_FUNCTION_EV_SUB_BOARD)
+list(APPEND COMPONENT_ADD_INCLUDEDIRS ./esp32_p4_function_ev_sub_board)
+set(COMPONENT_SRCS
+./esp32_p4_function_ev_sub_board/board.c
+./esp32_p4_function_ev_sub_board/board_pins_config.c
+)
+endif()
+
+if (CONFIG_SEVETEST30_BOARD)
+message(STATUS "Current board name is " CONFIG_SEVETEST30_BOARD)
+list(APPEND COMPONENT_ADD_INCLUDEDIRS ./sevetest30_board)
+set(COMPONENT_SRCS
+./sevetest30_board/board.c
+./sevetest30_board/board_pins_config.c
+)
+endif()
+
+register_component()
