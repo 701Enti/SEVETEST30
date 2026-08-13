@@ -28,7 +28,7 @@
  // 敬告：蓝牙配置操作使用了ESP-IDF官方例程并进行修改，非常感谢
  // SIG官方提供的包含外观特征值 UUID 等定义的文档链接(2.6.2节-外观特征值 3.4.2节-UUID) https://www.bluetooth.com/specifications/assigned-numbers/
  // github: https://github.com/701Enti
- // bilibili: 701Enti
+
 
 #include "sevetest30_BWEDA.h"
 #include "board_def.h"

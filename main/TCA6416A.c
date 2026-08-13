@@ -42,7 +42,7 @@
 //       P00 P01 P02 P03 以此类推
 //         同时成员变量名是上级程序识别操作引脚的关键，如果需要使用其上级程序而不仅仅是TCA6416A库函数，结构体成员变量名不应该随意修改，对当前硬件的更新必须修改上层代码
 // github: https://github.com/701Enti
-// bilibili: 701Enti
+
 
 #include "TCA6416A.h"
 #include "driver/i2c_master.h"

@@ -23,7 +23,6 @@
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 计算方法来自高通字库 https://www.hmi.gaotongfont.cn/ 非常感谢
  // github: https://github.com/701Enti
- // bilibili: 701Enti
 
 #pragma once
 #include "esp_err.h"

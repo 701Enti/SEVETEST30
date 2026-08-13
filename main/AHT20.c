@@ -28,7 +28,8 @@
 // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
 // AHT20的CRC校验计算支持,来自奥松电子官方的实例程序,非常感谢
 // github: https://github.com/701Enti
-// bilibili: 701Enti
+
+
 
 #include "AHT20.h"
 #include "driver/i2c_master.h"

@@ -24,7 +24,6 @@
  //       该文件对于硬件的配置针对sevetest30,使用前请参考兼容性问题
  //       文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行,库中有仅为字库SPI通讯提供的SPI配置函数
  // github: https://github.com/701Enti
- // bilibili: 701Enti
 
 
 #pragma once

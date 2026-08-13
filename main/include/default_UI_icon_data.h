@@ -22,9 +22,18 @@
 // 默认图标库
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #pragma once
+
+extern const unsigned char gImage_like[1544];
+extern const unsigned char gImage_happy[1544];
+extern const unsigned char gImage_angry[1544];
+extern const unsigned char gImage_disgusting[1544];
+extern const unsigned char gImage_fearful[1544];
+extern const unsigned char gImage_sad[1544];
+extern const unsigned char gImage_normal[1544];
+
+
 
 extern const unsigned char weather_icon_100[251];
 extern const unsigned char weather_icon_101[251];

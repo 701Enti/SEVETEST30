@@ -28,7 +28,6 @@
 // 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
 // AGS10推荐I2C最高通讯频率为15kHz,而大部分器件目前使用100kHz,所以在库函数内提供临时频率变更支持,目前已经在AGS10_TVOC_result_get()应用,之后库中追加的API也应该调用频率变更支持
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #include "AGS10.h"
 #include "driver/i2c_master.h"

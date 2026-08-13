@@ -30,7 +30,7 @@
 //         同时成员变量名是上级程序识别操作引脚的关键，如果需要使用其上级程序而不仅仅是TCA6416A库函数，结构体成员变量名不应该随意修改，对当前硬件的更新必须修改上层代码
 //       5.TCA6416A库不包含TCA6416A的INT和RESET引脚相关操作或实现,项目在sevetest30_gpio.c实现
 // github: https://github.com/701Enti
-// bilibili: 701Enti
+
 
 #pragma once
 

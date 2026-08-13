@@ -22,7 +22,8 @@
  // 包含各种SE30对地磁传感器HSCDTD008A的访问与控制
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
- // bilibili: 701Enti
+
+
 
 #include "HSCDTD008A.h"
 #include "esp_err.h"

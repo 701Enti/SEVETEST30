@@ -26,17 +26,17 @@
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #include "sevetest30_IWEDA.h"
+#include "esp_http_client.h"
 #include "sevetest30_sound.h"
 #include "zlib.h"
 #include "zutil.h"
-
-
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -255,21 +255,28 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 构造 JWT Header
   char header[128];
-  // snprintf(header, sizeof(header),
-  // "{\"alg\":\"EdDSA\",\"typ\":\"JWT\",\"kid\":\"%s\"}", kid);
-  snprintf(header, sizeof(header), "{\"alg\":\"EdDSA\",\"kid\":\"%s\"}", kid);
+  int header_len = snprintf(header, sizeof(header),
+                            "{\"alg\":\"EdDSA\",\"kid\":\"%s\"}", kid);
+  if (header_len >= sizeof(header)) {
+    ESP_LOGE(TAG, "header内存不足");
+    return NULL;
+  }
 
   // 构造 JWT Payload
   time_t now = time(NULL);
   char payload[128];
-  snprintf(payload, sizeof(payload), "{\"sub\":\"%s\",\"iat\":%ld,\"exp\":%ld}",
-           sub, (long)(now - 30),
-           (long)(now + QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY));
+  int payload_len = snprintf(
+      payload, sizeof(payload), "{\"sub\":\"%s\",\"iat\":%ld,\"exp\":%ld}", sub,
+      (long)(now - 30), (long)(now + QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY));
+  if (payload_len >= sizeof(payload)) {
+    ESP_LOGE(TAG, "payload内存不足");
+    return NULL;
+  }
 
   // 对 Header 进行 Base64URL 编码
   unsigned char b64_header[256];
-  size_t header_len = 0;
-  if (mbedtls_base64_encode(b64_header, sizeof(b64_header), &header_len,
+  size_t header_write_len = 0;
+  if (mbedtls_base64_encode(b64_header, sizeof(b64_header), &header_write_len,
                             (unsigned char *)header, strlen(header)) != 0) {
     ESP_LOGE(TAG, "请求头 Base64 编码失败");
     return NULL;
@@ -278,8 +285,8 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 对 Payload 进行 Base64URL 编码
   unsigned char b64_payload[256];
-  size_t payload_len = 0;
-  if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload), &payload_len,
+  size_t payload_write_len = 0;
+  if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload), &payload_write_len,
                             (unsigned char *)payload, strlen(payload)) != 0) {
     ESP_LOGE(TAG, "载荷 Base64 编码失败");
     return NULL;
@@ -288,21 +295,27 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 拼接待签名消息
   char message[512];
-  snprintf(message, sizeof(message), "%.*s.%.*s", (int)header_len, b64_header,
-           (int)payload_len, b64_payload);
+  int message_len =
+      snprintf(message, sizeof(message), "%.*s.%.*s", (int)header_write_len,
+               b64_header, (int)payload_write_len, b64_payload);
+  if (message_len >= sizeof(message)) {
+    ESP_LOGE(TAG, "message内存不足");
+    return NULL;
+  }
 
   // Base64私钥解码成DER二进制
   uint8_t der_buf[256] = {0};
-  size_t der_len = sizeof(der_buf);
+  size_t der_size = sizeof(der_buf);
+  size_t der_write_len = 0;
   int mb_ret =
-      mbedtls_base64_decode(der_buf, der_len, &der_len,
+      mbedtls_base64_decode(der_buf, der_size, &der_write_len,
                             (const uint8_t *)private_key, strlen(private_key));
   if (mb_ret != 0) {
     ESP_LOGE(TAG, "私钥Base64解码失败");
     return NULL;
   }
 
-  // 解析PKCS8提取ed25519种子
+  // 提取ed25519种子
   uint8_t seed[32] = {0};
   esp_err_t ret = ed25519_b64_to_seed(private_key, seed);
   if (ret != ESP_OK) {
@@ -334,9 +347,13 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 拼接最终 JWT Token,含"Bearer "前缀
   char token[512] = {0};
-  snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s", (int)header_len,
-           b64_header, (int)payload_len, b64_payload, (int)sig_b64_len,
-           b64_signature);
+  int token_len = snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s",
+                           (int)header_write_len, b64_header, (int)payload_write_len,
+                           b64_payload, (int)sig_b64_len, b64_signature);
+  if (token_len >= sizeof(token)) {
+    ESP_LOGE(TAG, "token内存不足");
+    return NULL;
+  }
 
   ESP_LOGI(TAG, "JWT 令牌生成成功 %s", token);
   return strdup(token);
@@ -374,44 +391,45 @@ char *get_qweather_jwt_token() {
   }
 }
 
-/// @brief 百度API获取AccessToken,保存到char数组
-/// @param client_id client_id 字符串
-/// @param client_secret client_secret 字符串
-/// @param AccessToken char数组地址
-/// @return ESP_FAIL / ESP_OK
-esp_err_t baidu_api_get_access_token(char *client_id, char *client_secret,
-                                     char *AccessToken) {
-  const char *TAG = "baidu_api_get_access_token";
+/// @brief 生成百度API的AccessToken
+/// @param api_key API Key 字符串
+/// @param secret_key Secret Key 字符串
+/// @return 生成的 AccessToken 字符串指针，失败返回 NULL
+/// @note 使用完生成的 AccessToken 后，需要手动调用 free() 函数释放内存
+char *generate_baidu_api_access_token(char *api_key, char *secret_key) {
+  const char *TAG = "generate_baidu_api_access_token";
 
-  if (!AccessToken) {
-    ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
-    return ESP_FAIL;
-  }
-
-  if (!client_id || !client_secret) {
-    ESP_LOGE(TAG, "client_id或client_secret为空");
-    return ESP_FAIL;
+  if (!api_key || !secret_key) {
+    ESP_LOGE(TAG, "api_key或secret_key为空");
+    return NULL;
   }
 
   if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
     ESP_LOGE(TAG, "网络未连接");
-    return ESP_FAIL;
+    return NULL;
   }
+
+  char *AccessToken = NULL;
 
   IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
                                                  IWEDA_DEFAULT_URL_BUF_SIZE);
   if (!iweda_handle) {
     ESP_LOGE(TAG, "iweda_handle创建失败");
-    return ESP_FAIL;
+    return NULL;
   }
 
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           BAIDU_GET_ACCESS_TOKEN_URL, client_id,
-           client_secret); // 确定请求URL
+  int url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                         BAIDU_GET_ACCESS_TOKEN_URL, api_key, secret_key);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return NULL;
+  }
+
   iweda_init_http_get_request(iweda_handle);
   esp_http_client_set_timeout_ms(iweda_handle->http_client_handle, 10000);
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -419,7 +437,7 @@ esp_err_t baidu_api_get_access_token(char *client_id, char *client_secret,
   // 检查是否得到请求响应的结果
   if (!strcasecmp(iweda_handle->output_buf, "")) {
     delete_iweda_handle(iweda_handle);
-    return ESP_FAIL;
+    return NULL;
   } else {
     // 解析数据
     cJSON *root_data = NULL;
@@ -429,18 +447,48 @@ esp_err_t baidu_api_get_access_token(char *client_id, char *client_secret,
     if (root_data) {
       cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
       if (cjson_AccessToken) {
-        memset(AccessToken, 0,
-               BAIDU_API_ACCESSTOKEN_SIZE_MAX * sizeof(char)); // 清空之前的存储
         if (cjson_AccessToken->valuestring) {
-          snprintf(AccessToken, BAIDU_API_ACCESSTOKEN_SIZE_MAX, "%s",
-                   cjson_AccessToken->valuestring); // 复制AccessToken
+          AccessToken = strdup(cjson_AccessToken->valuestring);
         }
       }
       cJSON_Delete(root_data);
     }
 
     delete_iweda_handle(iweda_handle);
-    return ESP_OK;
+    ESP_LOGI(TAG, "生成百度API的AccessToken成功 %s", AccessToken);
+    return AccessToken;
+  }
+}
+
+/// @brief 获取百度API的AccessToken
+/// @return 生成的 AccessToken 字符串指针，失败返回NULL
+/// @note 自动管理，无需手动调用 free()
+/// 函数释放内存
+char *get_baidu_api_access_token() {
+  const char *TAG = "get_baidu_api_access_token";
+
+  static char *AccessToken = NULL;
+  static time_t last_time = 0;
+
+  if (AccessToken != NULL &&
+      time(NULL) - last_time > BAIDU_API_ACCESSTOKEN_REFRESH_TIME) {
+    free(AccessToken);
+    AccessToken = NULL;
+    last_time = time(NULL);
+  }
+
+  if (AccessToken == NULL) {
+    AccessToken = generate_baidu_api_access_token(
+        CONFIG_BAIDU_API_ACCESS_API_KEY, CONFIG_BAIDU_API_ACCESS_SECRET_KEY);
+    if (AccessToken == NULL) {
+      return NULL;
+    } else {
+      last_time = time(NULL);
+      return AccessToken;
+    }
+  } else {
+    ESP_LOGI(TAG, "使用已存在的AccessToken(生成时间：%ld)", (long)last_time);
+    return AccessToken;
   }
 }
 
@@ -607,9 +655,13 @@ void iweda_change_url_if_need_redirect(IWEDA_handle_t iweda_handle) {
         esp_http_client_get_header(iweda_handle->http_client_handle, "Location",
                                    &location);
         if (location != NULL) {
-          snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s",
-                   location);
-          ESP_LOGW(TAG, "重定向到 %s", iweda_handle->url_buf);
+          if (strlen(location) >= iweda_handle->url_buf_size) {
+            ESP_LOGE(TAG, "url_buf内存不足");
+          } else {
+            snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s",
+                     location);
+            ESP_LOGW(TAG, "重定向到 %s", iweda_handle->url_buf);
+          }
         } else {
           ESP_LOGE(TAG,
                    "尝试获取重定向信息时发现问题,需要重定向但无法完成更改");
@@ -669,11 +721,15 @@ esp_err_t url_encode(const char *src, char *dest, size_t dest_len) {
 /// @param iweda_handle IWEDA句柄
 void iweda_init_http_get_request(IWEDA_handle_t iweda_handle) {
 
-  if (!iweda_handle)
+  const char *TAG = "iweda_init_http_get_request";
+
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
     return;
+  }
 
   if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-    ESP_LOGE("iweda_init_http_get_request", "网络未连接");
+    ESP_LOGE(TAG, "网络未连接");
     return;
   }
 
@@ -1603,11 +1659,13 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
     int64_t start_time = esp_timer_get_time();
 
     /// 初始化http_client
-    esp_http_client_config_t http_config;
-    memset(&http_config, 0, sizeof(http_config));
-    http_config.url = chat_handle->url;    // 导入url
-    http_config.method = HTTP_METHOD_POST; // 使用POST请求
-    chat_handle->client_handle = esp_http_client_init(&http_config);
+    esp_http_client_config_t config;
+    memset(&config, 0, sizeof(config));
+    config.url = chat_handle->url;    // 导入url
+    config.method = HTTP_METHOD_POST; // 使用POST请求
+    chat_handle->client_handle = esp_http_client_init(&config);
+
+    ESP_LOGI(TAG, "初始化完成,开始配置...");
 
     // 设置HTTP-HEADER
     esp_http_client_set_header(chat_handle->client_handle, "Content-Type",
@@ -1618,6 +1676,8 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
     // 设置超时时间
     esp_http_client_set_timeout_ms(chat_handle->client_handle,
                                    chat_handle->timeout_ms);
+
+    ESP_LOGI(TAG, "配置完成,尝试建立连接...");
 
     // 对服务器发送连接请求
     err_flag = esp_http_client_open(chat_handle->client_handle,
@@ -1635,17 +1695,17 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
       vTaskDelete(NULL);
     }
 
-    ESP_LOGW(TAG, "等待回答");
+    ESP_LOGI(TAG, "连接已建立,写入请求体...");
 
     // 写入请求体
     esp_http_client_write(chat_handle->client_handle,
                           chat_handle->request_body_buf,
                           strlen(chat_handle->request_body_buf));
 
-    // 校验响应
-    esp_http_client_fetch_headers(chat_handle->client_handle); //   接收消息头
-    int status = esp_http_client_get_status_code(
-        chat_handle->client_handle); // 获取消息头中的响应状态信息
+    ESP_LOGI(TAG, "连接写入请求体完成,等待响应...");
+
+    esp_http_client_fetch_headers(chat_handle->client_handle);
+    int status = esp_http_client_get_status_code(chat_handle->client_handle);
     if (status != 200) {
       chat_handle->err = ESP_FAIL;
       ESP_LOGE(TAG, "校验响应时发现问题 状态码 -> %d", status);
@@ -1814,8 +1874,12 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
                           chat_handle, task_prio, &chat_handle->task_handle,
                           GPT_CHAT_TASK_CORE);
 
+  int64_t start_time = esp_timer_get_time();
   while (!chat_handle->is_completed) {
-    vTaskDelay(pdMS_TO_TICKS(100));
+    int64_t current_time = esp_timer_get_time();
+    ESP_LOGW(TAG, "等待GPT回复...(已等待%" PRId64 "ms)",
+             (current_time - start_time) / 1000);
+    vTaskDelay(pdMS_TO_TICKS(5000));
   }
 
   if (chat_handle->err != ESP_OK) {
@@ -1833,6 +1897,7 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
 /// @return ESP_OK 成功
 /// @return ESP_ERR_INVALID_ARG 传入了无效的参数
 /// @return ESP_ERR_INVALID_STATE 初始化未完成,request_body_buf为空
+/// @return ESP_ERR_NO_MEM 内存不足
 esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
                                        char *user_content) {
   const char *TAG = "GPT_chat_update_user_content";
@@ -1860,10 +1925,15 @@ esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
 
   memset(chat_handle->request_body_buf, 0,
          GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
-  snprintf(chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
-           "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
-           "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
-           chat_handle->model, chat_handle->user_content);
+  int request_body_len = snprintf(
+      chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+      "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
+      "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+      chat_handle->model, chat_handle->user_content);
+  if (request_body_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {
+    ESP_LOGE(TAG, "request_body_buf内存不足");
+    return ESP_ERR_NO_MEM;
+  }
 
   ESP_LOGW(TAG, "更新用户内容:%s", chat_handle->user_content);
 
@@ -1985,10 +2055,10 @@ esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle) {
     return ESP_ERR_INVALID_ARG;
   }
 
-  ESP_LOGW(TAG, "GPT文本交互停止");
-
-  esp_http_client_close(chat_handle->client_handle);
-  esp_http_client_cleanup(chat_handle->client_handle);
+  if (chat_handle->client_handle != NULL) {
+    esp_http_client_close(chat_handle->client_handle);
+    esp_http_client_cleanup(chat_handle->client_handle);
+  }
 
   chat_handle->is_completed = true;
 
@@ -2021,6 +2091,8 @@ esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle) {
 
   free(chat_handle);
   chat_handle = NULL;
+
+  ESP_LOGW(TAG, "GPT文本交互停止");
 
   return ESP_OK;
 }
@@ -2083,8 +2155,9 @@ void asr_data_save_result(char *asr_response) {
 /// @return ESP_OK 成功
 /// @return ESP_ERR_INVALID_STATE iweda_handle创建失败
 /// @return ESP_FAIL 交互出现问题 / 解析失败
-esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max) {
-  const char *TAG = "get_music_lyric_by_url";
+/// @return ESP_ERR_NO_MEM 内存不足
+esp_err_t fetch_music_lyric_by_url(char *url, char *dest, int len_max) {
+  const char *TAG = "fetch_music_lyric_by_url";
 
   IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
                                                  IWEDA_DEFAULT_URL_BUF_SIZE);
@@ -2093,11 +2166,16 @@ esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max) {
     return ESP_ERR_INVALID_STATE;
   }
 
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s",
-           url); // 确定请求URL
+  int url_len =
+      snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s", url);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    return ESP_ERR_NO_MEM;
+  }
+
   iweda_init_http_get_request(iweda_handle);
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -2153,11 +2231,18 @@ void refresh_position_data() {
   }
 
   // 获取公网IP
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+  int url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
            GET_IP_ADDRESS_API_URL);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+
   iweda_init_http_get_request(iweda_handle);
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE);
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
   transform_ip_address(iweda_handle);
@@ -2168,13 +2253,18 @@ void refresh_position_data() {
     delete_iweda_handle(iweda_handle);
     return;
   }
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
            IP138_IP_POSITION_API_URL, ip_address);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
   iweda_init_http_get_request(iweda_handle);
   esp_http_client_set_header(iweda_handle->http_client_handle, "token",
                              CONFIG_IP138_IP_LOOKUP_TOKEN);
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -2194,12 +2284,17 @@ void refresh_position_data() {
     strcat(keywords, position_data.name);
 
   url_encode(keywords, keywords_encoded, sizeof(keywords_encoded));
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
            AMAP_SEARCH_POI_API_URL, keywords_encoded, 1, 1,
-           CONFIG_AMAP_API_KEY); // 确定请求URL
+           CONFIG_AMAP_API_KEY);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
   iweda_init_http_get_request(iweda_handle);
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -2211,14 +2306,19 @@ void refresh_position_data() {
     delete_iweda_handle(iweda_handle);
     return;
   }
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
            QWEATHER_GEO_CITY_LOOKUP_API_URL, CONFIG_QWEATHER_API_HOST,
            position_data.longitude, position_data.latitude);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
   iweda_init_http_get_request(iweda_handle);
   esp_http_client_set_header(iweda_handle->http_client_handle, "Authorization",
                              get_qweather_jwt_token());
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -2256,14 +2356,18 @@ void refresh_current_weather_data() {
   sscanf(position_data.longitude, "%lf", &lng);
   sscanf(position_data.latitude, "%lf", &lat);
 
-  snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           QWEATHER_CURRENT_WEATHER_API_URL, CONFIG_QWEATHER_API_HOST, lat,
-           lng); // 确定请求URL
+  int url_buf_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                             QWEATHER_CURRENT_WEATHER_API_URL,
+                             CONFIG_QWEATHER_API_HOST, lat, lng);
+  if (url_buf_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return;
+  }
   iweda_init_http_get_request(iweda_handle);
   esp_http_client_set_header(iweda_handle->http_client_handle, "Authorization",
                              get_qweather_jwt_token());
-  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG, 8192,
-                          iweda_handle, HTTP_TASK_PRIO, NULL,
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
                           HTTP_TASK_CORE); // 启动http传输任务,GET方式
   while (!iweda_handle->is_completed)
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -2271,4 +2375,153 @@ void refresh_current_weather_data() {
 
   delete_iweda_handle(iweda_handle);
   return;
+}
+
+///@brief 获取文本情感标签
+/// @param text 文本内容
+/// @param emotion_label 情感标签缓存///
+/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
+/// @param label_buf_size 情感标签缓存大小
+/// @param timeout_ms 超时时间,单位毫秒
+/// @return esp_err_t 错误码
+/// @note ESP_OK 成功
+/// @note ESP_ERR_INVALID_ARG 参数错误
+/// @note ESP_ERR_NO_MEM 内存不足
+/// @note ESP_FAIL 请求失败
+/// @note ESP_ERR_INVALID_STATE JSON解析失败
+esp_err_t fetch_text_emotion(const char *text, char *emotion_label,
+                             int label_buf_size, int timeout_ms) {
+  const char *TAG = "fetch_text_emotion";
+  if (text == NULL || emotion_label == NULL) {
+    ESP_LOGE(TAG, "存在为NULL的参数");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  char response_buf[2048] = {0};
+  char url_buf[2048] = {0};
+  int url_buf_len =
+      snprintf(url_buf, sizeof(url_buf), BAIDU_NLP_EMOTION_API_URL,
+               get_baidu_api_access_token());
+  if (url_buf_len >= sizeof(url_buf)) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  int request_body_size = 1024 * sizeof(char) + strlen(text);
+  char *request_body = malloc(request_body_size);
+  if (!request_body) {
+    ESP_LOGE(TAG, "申请body_buf失败");
+    return ESP_ERR_NO_MEM;
+  }
+  int request_body_len =
+      snprintf(request_body, request_body_size,
+               "{\"scene\":\"talk\",\"text\": \"%s\"}", text);
+  if (request_body_len >= request_body_size) {
+    ESP_LOGE(TAG, "request_body大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  esp_http_client_config_t config = {0};
+  config.url = url_buf;
+  config.method = HTTP_METHOD_POST;
+  esp_http_client_handle_t client_handle = esp_http_client_init(&config);
+  if (!client_handle) {
+    ESP_LOGE(TAG, "esp_http_client_init失败");
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+  esp_http_client_set_header(client_handle, "Content-Type", "application/json");
+  esp_http_client_set_timeout_ms(client_handle, timeout_ms);
+
+  esp_err_t err = esp_http_client_open(client_handle,request_body_len);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  err =  esp_http_client_write(client_handle, request_body, request_body_len);  
+  if (err == -1) {
+    ESP_LOGE(TAG, "esp_http_client_write失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  esp_http_client_fetch_headers(client_handle);
+  esp_http_client_read_response(client_handle, response_buf,
+                                sizeof(response_buf));
+  ESP_LOGI(TAG, "响应体内容 -> %s", response_buf);
+
+  int status = esp_http_client_get_status_code(client_handle);
+  if (status != 200) {
+    ESP_LOGE(TAG, "校验响应时发现问题 状态码 -> %d", status);
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  cJSON *root_data = NULL;
+  cJSON *cjson_items = NULL;
+  cJSON *cjson_items_item = NULL;
+  cJSON *cjson_subitems = NULL;
+  cJSON *cjson_subitems_item = NULL;
+  cJSON *cjson_label = NULL;
+
+  root_data = cJSON_Parse(response_buf);
+  if (root_data) {
+    cjson_items = cJSON_GetObjectItem(root_data, "items");
+    if (cjson_items) {
+      cjson_items_item = cJSON_GetArrayItem(cjson_items, 0);
+      if (cjson_items_item) {
+        cjson_subitems = cJSON_GetObjectItem(cjson_items_item, "subitems");
+        if (cjson_subitems) {
+          cjson_subitems_item = cJSON_GetArrayItem(cjson_subitems, 0);
+          if (cjson_subitems_item) {
+            cjson_label = cJSON_GetObjectItem(cjson_subitems_item, "label");
+            if (cjson_label && cjson_label->valuestring &&
+                cjson_label->valuestring[0] != '\0') {
+              int label_len = snprintf(emotion_label, label_buf_size, "%s",
+                                       cjson_label->valuestring);
+              if (label_len >= label_buf_size) {
+                ESP_LOGE(TAG, "label_buf_size不足");
+                return ESP_ERR_NO_MEM;
+              }
+              ESP_LOGI(TAG, "获取到情绪标签 -> %s", emotion_label);
+            } else {
+              ESP_LOGE(TAG, "获取情绪标签字段异常");
+            }
+          } else {
+            ESP_LOGI(TAG, "无特别情绪,设置为normal");
+            int label_len = snprintf(emotion_label, label_buf_size, "normal");
+            if (label_len >= label_buf_size) {
+              ESP_LOGE(TAG, "emotion_label内存不足");
+              return ESP_ERR_NO_MEM;
+            }
+          }
+          cJSON_Delete(root_data);
+          esp_http_client_close(client_handle);
+          esp_http_client_cleanup(client_handle);
+          free(request_body);
+          request_body = NULL;
+          return ESP_OK;
+        }
+      }
+    }
+    cJSON_Delete(root_data);
+  }
+
+  esp_http_client_close(client_handle);
+  esp_http_client_cleanup(client_handle);
+  ESP_LOGE(TAG, "JSON解析失败");
+  free(request_body);
+  request_body = NULL;
+  return ESP_ERR_INVALID_STATE;
 }

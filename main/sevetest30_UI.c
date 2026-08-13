@@ -31,7 +31,6 @@
 // 但注意,图案向上移动y轴坐标是减少的,向下是增加的
 // 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #include "sevetest30_config.h"
 #include <audio_mem.h>
@@ -436,10 +435,49 @@ void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high,
   }
 }
 
+/// @brief 显示表情
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+/// @param emotion_label
+/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
+void facial_expression_show(int x, int y, char *emotion_label) {
+  const char *TAG = "facial_expression_show";
+
+  if (emotion_label == NULL) {
+    ESP_LOGE(TAG, "lable为NULL");
+    return;
+  }
+
+  if (strcmp(emotion_label, "normal") == 0) {
+    ESP_LOGI(TAG, "显示正常表情");
+    direct_draw(x, y, gImage_normal);
+  } else if (strcmp(emotion_label, "happy") == 0) {
+    ESP_LOGI(TAG, "显示愉快表情");
+    direct_draw(x, y, gImage_happy);
+  } else if (strcmp(emotion_label, "like") == 0) {
+    ESP_LOGI(TAG, "显示喜爱表情");
+    direct_draw(x, y, gImage_like);
+  } else if (strcmp(emotion_label, "angry") == 0) {
+    ESP_LOGI(TAG, "显示愤怒表情");
+    direct_draw(x, y, gImage_angry);
+  } else if (strcmp(emotion_label, "disgusting") == 0) {
+    ESP_LOGI(TAG, "显示厌恶表情");
+    direct_draw(x, y, gImage_disgusting);
+  } else if (strcmp(emotion_label, "fearful") == 0) {
+    ESP_LOGI(TAG, "显示恐惧表情");
+    direct_draw(x, y, gImage_fearful);
+  } else if (strcmp(emotion_label, "sad") == 0) {
+    ESP_LOGI(TAG, "显示悲伤表情");
+    direct_draw(x, y, gImage_sad);
+  } else {
+    ESP_LOGI(TAG, "无法识别表情标签 %s", emotion_label);
+  }
+}
+
 /// @brief 显示天气图标(9x9)+温度
 /// @param x 起始坐标x
 /// @param y 起始坐标y
-void weather_icon_temperature(int16_t x, int16_t y) {
+void weather_icon_temperature(int x, int y) {
   const char *TAG = "weather_icon_temperature";
   weather_change_flag = 0;
 
@@ -454,12 +492,11 @@ void weather_icon_temperature(int16_t x, int16_t y) {
   } else {
     weather_change_flag = ret;
     direct_draw(x + ((LINE_LED_NUMBER / 2) - WEATHER_ICON_BREATH) / 2,
-                y + (VERTICAL_LED_NUMBER - WEATHER_ICON_HEIGHT) / 2,
-                icon_data);
+                y + (VERTICAL_LED_NUMBER - WEATHER_ICON_HEIGHT) / 2, icon_data);
   }
 
   // 测试
-    current_weather_data.temperature = -7;
+  current_weather_data.temperature = -7;
 
   // 温度显示
   int temp_buf = abs((int)round(
@@ -484,19 +521,22 @@ void weather_icon_temperature(int16_t x, int16_t y) {
   if (current_weather_data.temperature < 0) {
     uint8_t *p = rectangle(minus_breath, minus_height);
     separation_draw(x + (LINE_LED_NUMBER / 2) + 1,
-                    y + 1 + (VERTICAL_LED_NUMBER - minus_height) / 2, minus_breath,
-                    RECTANGLE_MATRIX(p), *p, color);
+                    y + 1 + (VERTICAL_LED_NUMBER - minus_height) / 2,
+                    minus_breath, RECTANGLE_MATRIX(p), *p, color);
     free(p);
     print_number(x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens, color);
-    print_number(x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1 +
-                     FIGURE_BREATH + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints, color);
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
+                 color);
+    print_number(
+        x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1 + FIGURE_BREATH + 1,
+        y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints, color);
   } else {
     print_number(x + (LINE_LED_NUMBER / 2) + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens, color);
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
+                 color);
     print_number(x + (LINE_LED_NUMBER / 2) + 1 + FIGURE_BREATH + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints, color);
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints,
+                 color);
   }
 }
 
@@ -504,7 +544,7 @@ void weather_icon_temperature(int16_t x, int16_t y) {
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m(int16_t x, int16_t y) {
+void time_UI_h_m(int x, int y) {
   static uint8_t color[3] = {0};
   static int8_t minute_buf = 80;
 
@@ -539,7 +579,7 @@ void time_UI_h_m(int16_t x, int16_t y) {
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_s(int16_t x, int16_t y) {
+void time_UI_s(int x, int y) {
   static uint8_t color[3] = {0};
   static int8_t second_buf = 80;
 
@@ -565,7 +605,7 @@ void time_UI_s(int16_t x, int16_t y) {
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m_s(int16_t x, int16_t y) {
+void time_UI_h_m_s(int x, int y) {
   static uint8_t color[3] = {0};
   static int8_t second_buf = 80;
 

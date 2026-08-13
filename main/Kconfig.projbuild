@@ -46,18 +46,18 @@ config DNS_SERVER
     help
         the dns server address
 
-# 百度语音服务的API相关
-config BAIDU_SPEECH_ACCESS_KEY
-    string "Baidu speech access key"
+# 百度服务的API相关
+config BAIDU_API_ACCESS_API_KEY
+    string "Baidu API API Key"
     default ""
     help
-        Baidu speech Access key
+        Baidu API API Key
 
-config BAIDU_SPEECH_SECRET_KEY
-    string "Baidu speech access secret"
+config BAIDU_API_ACCESS_SECRET_KEY
+    string "Baidu API Secret Key"
     default ""
     help
-        Baidu speech Access secret
+        Baidu API Secret Key
 
 
 

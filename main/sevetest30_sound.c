@@ -28,7 +28,6 @@
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // 敬告：参考了官方提供的pipeline_baidu_speech_mp3例程,非常感谢ESPRESSIF
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #include "sevetest30_sound.h"
 #include "esp_resample.h"
@@ -104,7 +103,7 @@ audio_event_iface_handle_t common_mp3_evt = NULL;
 TTS_cfg_t tts_cfg = {0};
 ASR_cfg_t asr_cfg = {0};
 
-char *baidu_access_token = NULL;
+char *baaidu_api_access_token = NULL;
 
 void element_cfg_data_reset();
 esp_err_t audio_element_all_init(const char *link_tag[], int link_num);
@@ -307,22 +306,33 @@ static const char b64_table[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /**
- * @brief 纯原生Base64编码，输出无任何\r\n、空格
+ * @brief 纯原生Base64编码，输出无任何\r，\n，'\0'
  * @param src 输入二进制数据
  * @param src_len 输入字节长度
- * @param dst 输出字符串缓冲区，末尾自动补'\0'
+ * @param dst 输出字符串缓冲区，末尾不会补'\0'
  * @param dst_buf_len dst缓冲区总字节数
  * @return 成功返回有效base64字符长度（不含末尾'\0'）；失败返回-1
  */
-int base64_encode(const uint8_t *src, size_t src_len, char *dst,
-                  size_t dst_buf_len) {
-  size_t i = 0;
-  size_t dst_idx = 0;
-  // 计算理论输出base64字符数（不含结束符）
-  size_t encode_len = ((src_len + 2) / 3) * 4;
+int base64_encode(const uint8_t *src, int src_len, char *dst, int dst_buf_len) {
+  const char *TAG = "base64_encode";
 
-  // 缓冲区空间不足判断，预留1字节给字符串结束符
-  if (encode_len + 1 > dst_buf_len) {
+  if (src == NULL || dst == NULL) {
+    ESP_LOGE(TAG, "src或dst为NULL");
+    return -1;
+  }
+
+  if (src_len <= 0 || dst_buf_len <= 0) {
+    ESP_LOGE(TAG, "src_len或dst_buf_len小于等于0");
+    return -1;
+  }
+
+  int i = 0;
+  int dst_idx = 0;
+  // 计算理论输出base64字符数（不含结束符）
+  int encode_len = ((src_len + 2) / 3) * 4;
+
+  // 缓冲区空间不足判断
+  if (encode_len > dst_buf_len) {
     return -1;
   }
 
@@ -350,9 +360,7 @@ int base64_encode(const uint8_t *src, size_t src_len, char *dst,
     dst[dst_idx++] = '=';
   }
 
-  // 字符串结束标记，无任何换行、回车
-  dst[dst_idx] = '\0';
-  return (int)encode_len;
+  return encode_len;
 }
 
 /// @brief uri/url音乐播放
@@ -401,10 +409,22 @@ void music_uri_or_url_play(const char *uri_or_url, UBaseType_t priority) {
 /// @brief TTS任务设置的hook
 int _TTS_hook(http_stream_event_msg_t *msg) {
   const char *TAG = "_TTS_hook";
-  static char request_data[4096];
+  char *request_data = NULL;
 
-  // 如果事件属性不是请求前调用，跳出
+  if (msg->event_id == HTTP_STREAM_FINISH_REQUEST) {
+    free(request_data);
+    request_data = NULL;
+    return 0;
+  }
+
   if (msg->event_id != HTTP_STREAM_PRE_REQUEST) {
+    return 0;
+  }
+
+  int request_data_size = 1024 + sizeof(char) * strlen(tts_cfg.tex);
+  request_data = (char *)malloc(request_data_size);
+  if (request_data == NULL) {
+    ESP_LOGE(TAG, "申请内存request_data失败");
     return 0;
   }
 
@@ -412,31 +432,29 @@ int _TTS_hook(http_stream_event_msg_t *msg) {
   esp_http_client_handle_t http_client =
       (esp_http_client_handle_t)msg->http_client;
 
-  // 获取token
-  while (!baidu_access_token) {
-    baidu_api_get_access_token(CONFIG_BAIDU_SPEECH_ACCESS_KEY,
-                               CONFIG_BAIDU_SPEECH_SECRET_KEY,
-                               baidu_access_token);
-    if (!baidu_access_token) {
-      ESP_LOGE("_TTS_get_token_handle", "获取token时发现问题");
-      vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-  }
-
   // 设定语音合成配置
   uint8_t mac[6] = {0};
   esp_efuse_mac_get_default(mac);
 
   int data_len = snprintf(
-      request_data, 4096,
+      request_data, request_data_size,
       "lan=zh&ctp=1&tok=%s&cuid=%02x:%02x:%02x:%02x:%02x:%02x&vol=%d&spd=%d&"
       "pit=%d&per=%d&aue=3&audio_ctrl={\"sampling_rate\":%d}&&tex=%s",
-      baidu_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
+      baaidu_api_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
       tts_cfg.vol, tts_cfg.spd, tts_cfg.pit, tts_cfg.per, tts_cfg.sampling_rate,
       tts_cfg.tex);
+  if (data_len >= request_data_size) {
+    ESP_LOGE(TAG, "request_data大小不足");
+    return 0;
+  }
 
-  esp_http_client_set_post_field(http_client, request_data, data_len);
-  esp_http_client_set_method(http_client, HTTP_METHOD_POST);
+  if (esp_http_client_set_method(http_client, HTTP_METHOD_POST) != ESP_OK) {
+    ESP_LOGE(TAG, "设置HTTP方法失败");
+  }
+  if (esp_http_client_set_post_field(http_client, request_data, data_len) !=
+      ESP_OK) {
+    ESP_LOGE(TAG, "设置HTTP请求体失败");
+  }
 
   return 0;
 }
@@ -490,6 +508,12 @@ void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority) {
 
   is_filter_auto_sync_src_info_from_mp3 = true;
 
+  baaidu_api_access_token = get_baidu_api_access_token();
+  if (baaidu_api_access_token == NULL) {
+    ESP_LOGE(TAG, "获取百度API的AccessToken失败");
+    return;
+  }
+
   const char *link_tag[5] = {"http", "mp3", "filter", "current_sound_collecter",
                              "i2s"};
   if (audio_element_all_init(link_tag, 5) != ESP_OK) {
@@ -527,17 +551,6 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
     sevetest30_asr_running_flag = true;
   }
 
-  // 获取token
-  while (!baidu_access_token) {
-    baidu_api_get_access_token(CONFIG_BAIDU_SPEECH_ACCESS_KEY,
-                               CONFIG_BAIDU_SPEECH_SECRET_KEY,
-                               baidu_access_token);
-    if (!baidu_access_token) {
-      ESP_LOGE(TAG, "获取token时发现问题");
-      vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-  }
-
   element_cfg_data_reset();
 
   i2s_cfg.chan_cfg.id = CODEC_ADC_I2S_PORT;
@@ -556,6 +569,12 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
   rsp_cfg.dest_rate = cfg->sampling_rate;
 
   memcpy(&asr_cfg, cfg, sizeof(ASR_cfg_t));
+
+  baaidu_api_access_token = get_baidu_api_access_token();
+  if (baaidu_api_access_token == NULL) {
+    ESP_LOGE(TAG, "获取百度API的AccessToken失败");
+    return;
+  }
 
   const char *link_tag[4] = {"i2s", "current_sound_collecter", "filter", "raw"};
 
@@ -745,8 +764,6 @@ void common_mp3_running_event() {
 void common_asr_running_event() {
   const char *TAG = "common_asr_running_event";
 
-  // 准备POST请求
-
   // 获取设备MAC地址
   uint8_t mac[6] = {0};
   esp_efuse_mac_get_default(mac);
@@ -754,48 +771,28 @@ void common_asr_running_event() {
   // 初始化http_client
   esp_http_client_config_t http_config;
   memset(&http_config, 0, sizeof(http_config));
-  if (asr_cfg.dev_pid == ASR_PID_CM_NEAR_PRO)
-    http_config.url = BAIDU_ASR_PRO_URL; // 导入url
-  else
+  if (asr_cfg.dev_pid == ASR_PID_CM_NEAR_PRO) {
+    http_config.url = BAIDU_ASR_PRO_URL;
+  } else {
     http_config.url = BAIDU_ASR_URL;
+  }
   http_config.method = HTTP_METHOD_POST; // 使用POST请求
   esp_http_client_handle_t client_handle = esp_http_client_init(&http_config);
 
-  // 设置HTTP-HEADER
   esp_http_client_set_header(client_handle, "Content-Type", "application/json");
 
-  // 准备HTTP-BODY
-  char *request_body_buf =
-      NULL; // 请求体空间 = 最大音频数据大小（PCM转换为base64会增大1/3） +
-            // 其他附加数据大小
-  request_body_buf =
-      (char *)malloc(asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                         sizeof(char) * asr_cfg.record_save_times_max / 3 * 4 +
-                     2048 * sizeof(char));
+  int request_body_size = asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate /
+                              1000 * sizeof(char) *
+                              asr_cfg.record_save_times_max / 3 * 4 +
+                          2048 * sizeof(char);
+  char *request_body_buf = NULL;
+  request_body_buf = (char *)malloc(request_body_size);
   while (!request_body_buf && sevetest30_asr_running_flag) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
-    request_body_buf = (char *)malloc(
-        asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 * sizeof(char) *
-            asr_cfg.record_save_times_max / 3 * 4 +
-        2048 * sizeof(char));
+    request_body_buf = (char *)malloc(request_body_size);
   }
-  memset(request_body_buf, 0,
-         asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                 sizeof(char) * asr_cfg.record_save_times_max / 3 * 4 +
-             2048 * sizeof(char));
-
-  // {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":" -
-  // - - - -    ","len":%d}
-  snprintf(
-      request_body_buf,
-      asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-              asr_cfg.record_save_times_max / 3 * 4 +
-          2048,
-      "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\",\"cuid\":"
-      "\"%02x:%02x:%02x:%02x:%02x:%02x\",\"dev_pid\":%d,\"speech\":\"",
-      asr_cfg.sampling_rate, baidu_access_token, mac[0], mac[1], mac[2], mac[3],
-      mac[4], mac[5], asr_cfg.dev_pid);
+  memset(request_body_buf, 0, request_body_size);
 
   int record_save_times = 0; // 录制并保存音频数据的次数（防溢出）
   int asr_len = 0;           // 实际原始音频数据长度，作为ASR时的len参数
@@ -809,204 +806,157 @@ void common_asr_running_event() {
       asr_cfg.vad_min_speech_ms, asr_cfg.vad_min_noise_ms);
   vad_state_t vad_state = VAD_SILENCE;
 
+  int vad_buf_size =
+      asr_cfg.vad_one_frame_ms * asr_cfg.sampling_rate / 1000 * sizeof(int16_t);
   int16_t *vad_buf = NULL;
-  vad_buf = (int16_t *)malloc(asr_cfg.vad_one_frame_ms * asr_cfg.sampling_rate /
-                              1000 * sizeof(int16_t));
+  vad_buf = (int16_t *)malloc(vad_buf_size);
   while (!vad_buf && sevetest30_asr_running_flag) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_LOGE(TAG, "申请vad_buf资源发现问题 正在重试");
-    vad_buf = (int16_t *)malloc(asr_cfg.vad_one_frame_ms *
-                                asr_cfg.sampling_rate / 1000 * sizeof(int16_t));
+    vad_buf = (int16_t *)malloc(vad_buf_size);
   }
 
   // 申请识别数据帧缓存
+  int asr_data_buf_size =
+      asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 * sizeof(char);
   char *asr_data_buf = NULL;
-  asr_data_buf = (char *)malloc(asr_cfg.asr_one_frame_ms *
-                                asr_cfg.sampling_rate / 1000 * sizeof(char));
+  asr_data_buf = (char *)malloc(asr_data_buf_size);
   while (!asr_data_buf && sevetest30_asr_running_flag) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_LOGE(TAG, "申请asr_data_buf资源发现问题 正在重试");
-    asr_data_buf = (char *)malloc(asr_cfg.asr_one_frame_ms *
-                                  asr_cfg.sampling_rate / 1000 * sizeof(char));
+    asr_data_buf = (char *)malloc(asr_data_buf_size);
   }
-
-  // 申请请求体拼接内容缓存
-  char *body_end_buf = NULL;
-  body_end_buf = (char *)malloc(50 * sizeof(char));
-  while (!body_end_buf && sevetest30_asr_running_flag) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请body_end_buf资源发现问题 正在重试");
-    body_end_buf = (char *)malloc(50 * sizeof(char));
-  }
-  memset(body_end_buf, 0, 50 * sizeof(char));
 
   // 申请响应数据缓存
+  int response_buf_size = ASR_HTTP_RESPONSE_BUF_MAX * sizeof(char);
   char *response_buf = NULL;
-  response_buf = (char *)malloc(ASR_HTTP_RESPONSE_BUF_MAX * sizeof(char));
+  response_buf = (char *)malloc(response_buf_size);
   while (!response_buf && sevetest30_asr_running_flag) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
-    response_buf = (char *)malloc(ASR_HTTP_RESPONSE_BUF_MAX * sizeof(char));
+    response_buf = (char *)malloc(response_buf_size);
   }
-  memset(response_buf, 0, ASR_HTTP_RESPONSE_BUF_MAX * sizeof(char));
+  memset(response_buf, 0, response_buf_size);
 
   ESP_LOGW(TAG, "正在监听麦克风阵列");
+
+RESTART:
+  // {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":"
+  // -
+  // - - - -    ","len":%d}
+  memset(request_body_buf, 0, request_body_size);
+  int request_body_len =
+      snprintf(request_body_buf, request_body_size,
+               "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\","
+               "\"cuid\":"
+               "\"%02x:%02x:%02x:%02x:%02x:%02x\",\"dev_pid\":%d,\"speech\":\"",
+               asr_cfg.sampling_rate, baaidu_api_access_token, mac[0], mac[1],
+               mac[2], mac[3], mac[4], mac[5], asr_cfg.dev_pid);
+  if (request_body_len >= request_body_size) {
+    ESP_LOGE(TAG, "request_body内存不足");
+    sevetest30_asr_running_flag = false;
+  }
+
   // 进入任务主循环
   while (sevetest30_asr_running_flag) {
-  RESTART:
+
     vTaskDelay(pdMS_TO_TICKS(10)); // 为idle提供的必须延时
 
     // 读取raw数据并输入VAD
-    memset(vad_buf, 0,
-           asr_cfg.vad_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-               sizeof(int16_t));
+    memset(vad_buf, 0, vad_buf_size);
     while (sevetest30_asr_running_flag) {
       int read_index = 0;
-      read_index +=
-          raw_stream_read(raw, ((char *)vad_buf) + read_index,
-                          asr_cfg.vad_one_frame_ms * asr_cfg.sampling_rate /
-                                  1000 * sizeof(int16_t) -
-                              read_index);
-      if (asr_cfg.vad_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                  sizeof(int16_t) -
-              read_index <=
-          0) {
+      read_index += raw_stream_read(raw, ((char *)vad_buf) + read_index,
+                                    vad_buf_size - read_index);
+      if (vad_buf_size - read_index <= 0) {
         break;
       }
       vTaskDelay(pdMS_TO_TICKS(10));
     }
+
     vad_state = vad_process_with_trigger(vad_handle, vad_buf);
 
     if (vad_state == VAD_SPEECH) {
-      ESP_LOGI(TAG, "语音活动进行中");
-
+      ESP_LOGI(TAG, "语音活动进行中 request_body_len %.2f KB",
+               (float)request_body_len / 1000);
       vad_stop_counter = 0; // 语音活动继续而不停止
       vad_keep_counter++;   // 语音保持时间增加，直到发送阈值
-
-      // 读取识别数据帧
-      raw_stream_read(raw, asr_data_buf,
-                      asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                          sizeof(char));
-
-      // 保存到请求体
-      int out_size = base64_encode(
-          (uint8_t *)asr_data_buf,
-          asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-              sizeof(char),
-          request_body_buf + strlen(request_body_buf),
-          asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-              sizeof(char) * asr_cfg.record_save_times_max / 3 * 4);
+      memset(asr_data_buf, 0, asr_data_buf_size);
+      raw_stream_read(raw, asr_data_buf, asr_data_buf_size);
+      int out_size = base64_encode((uint8_t *)asr_data_buf, asr_data_buf_size,
+                                   request_body_buf + request_body_len,
+                                   request_body_size - request_body_len);
+      request_body_len += out_size;
+      if (request_body_size - request_body_len <= 0) {
+        ESP_LOGE(TAG, "request_body设置的缓存过小");
+        sevetest30_asr_running_flag = false;
+      }
       if (out_size < 0) {
         ESP_LOGE(TAG, "base64_encode 编码异常");
-        continue;
+        sevetest30_asr_running_flag = false;
       }
-
-      asr_len += asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                 sizeof(char);
+      asr_len += asr_data_buf_size;
       record_save_times++;
-    }
-
-    if (vad_state == VAD_SILENCE) {
+    } else if (vad_state == VAD_SILENCE) {
       vad_stop_counter++; // 语音活动有停止的趋势
 
       // 如果停顿时间超时 语音活动结束
       if (vad_stop_counter >= asr_cfg.stop_threshold) {
         vad_stop_counter = 0; // 复位
+
         // 如果录制的语音达到发送阈值
         if (vad_keep_counter >= asr_cfg.send_threshold) {
         POST_SEND:
-
           vad_keep_counter = 0; // 复位
 
           // 完善请求体
           //  {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":"
           //  - - - - -    ","len":%d}
-          snprintf(body_end_buf, 50, "\",\"len\":%d}", asr_len);
-          strcat(request_body_buf, body_end_buf);
+          request_body_len += snprintf(request_body_buf + request_body_len,
+                                       request_body_size - request_body_len,
+                                       "\",\"len\":%d}", asr_len);
+          if (request_body_len >= request_body_size) {
+            ESP_LOGE(TAG, "request_body内存不足");
+            sevetest30_asr_running_flag = false;
+          }
 
-          // 对服务器发送请求
-          esp_err_t err_flag = ESP_OK;
+          esp_err_t err = ESP_OK;
+          err |= esp_http_client_set_timeout_ms(client_handle, ASR_TIMEOUT_MS);
+          err |= esp_http_client_open(client_handle, request_body_len);
 
-          err_flag |=
-              esp_http_client_set_timeout_ms(client_handle, ASR_TIMEOUT_MS);
-
-          err_flag |=
-              esp_http_client_open(client_handle, strlen(request_body_buf));
-
-          if (err_flag != ESP_OK) {
+          if (err != ESP_OK) {
             ESP_LOGE(TAG, "配置连接时出现问题 -> %s", http_config.url);
             esp_http_client_close(client_handle); // 关闭连接
-            // 重置数据
+            esp_http_client_close(client_handle); // 关闭连接
             record_save_times = 0;
             asr_len = 0;
-            memset(request_body_buf, 0,
-                   asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                           sizeof(char) * asr_cfg.record_save_times_max / 3 *
-                           4 +
-                       2048 * sizeof(char));
-            sprintf(
-                request_body_buf,
-                "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%"
-                "s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
-                asr_cfg.sampling_rate, baidu_access_token, mac[0], mac[1],
-                mac[2], mac[3], mac[4], mac[5]);
-            esp_http_client_close(client_handle); // 关闭连接
             goto RESTART;
           }
 
           ESP_LOGW(TAG, "等待识别完成");
           esp_http_client_write(client_handle, request_body_buf,
-                                strlen(request_body_buf));
-
-          esp_http_client_fetch_headers(client_handle); //   接收消息头
-          int status = esp_http_client_get_status_code(
-              client_handle); // 获取消息头中的响应状态信息
+                                request_body_len);
+          esp_http_client_fetch_headers(client_handle);
+          int status = esp_http_client_get_status_code(client_handle);
 
           if (status != 200) {
             ESP_LOGE(TAG, "识别出现问题，请提高音量降低语速并重试");
-            // 重置数据
+            esp_http_client_close(client_handle); // 关闭连接
             record_save_times = 0;
             asr_len = 0;
-            memset(request_body_buf, 0,
-                   asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                           sizeof(char) * asr_cfg.record_save_times_max / 3 *
-                           4 +
-                       2048 * sizeof(char));
-            sprintf(
-                request_body_buf,
-                "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%"
-                "s\",\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
-                asr_cfg.sampling_rate, baidu_access_token, mac[0], mac[1],
-                mac[2], mac[3], mac[4], mac[5]);
-            esp_http_client_close(client_handle); // 关闭连接
             goto RESTART;
           }
 
           esp_http_client_read_response(client_handle, response_buf,
                                         ASR_HTTP_RESPONSE_BUF_MAX);
-
           asr_data_save_result(response_buf);
-
           esp_http_client_close(client_handle); // 关闭连接
-
-          // 重置数据
           record_save_times = 0;
           asr_len = 0;
-          memset(request_body_buf, 0,
-                 asr_cfg.asr_one_frame_ms * asr_cfg.sampling_rate / 1000 *
-                         sizeof(char) * asr_cfg.record_save_times_max / 3 * 4 +
-                     2048 * sizeof(char));
-          // {"format":"pcm","rate":%d,"channel":1,"token":"%s","cuid":"%d","speech":"
-          // - - - - -    ","len":%d}
-          sprintf(
-              request_body_buf,
-              "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\","
-              "\"cuid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"speech\":\"",
-              asr_cfg.sampling_rate, baidu_access_token, mac[0], mac[1], mac[2],
-              mac[3], mac[4], mac[5]);
         }
       }
     }
+
     // 数据大小达到最大 强制发送
     if (record_save_times >= asr_cfg.record_save_times_max) {
       ESP_LOGW(TAG, "语音数据大小达到最大值");
@@ -1026,12 +976,10 @@ void common_asr_running_event() {
   // 释放数据缓存
   free(vad_buf);
   free(asr_data_buf);
-  free(body_end_buf);
   free(response_buf);
   free(request_body_buf);
   vad_buf = NULL;
   asr_data_buf = NULL;
-  body_end_buf = NULL;
   response_buf = NULL;
   request_body_buf = NULL;
 
@@ -1230,8 +1178,8 @@ void http_i2s_mp3_music_start(TaskFunction_t running_event,
   audio_pipeline_run(pipeline);
   // 事件监听任务启动
   xTaskCreatePinnedToCore(running_event, "http_i2s_mp3_music_run",
-                          MUSIC_PLAY_EVT_TASK_STACK_SIZE, NULL, priority, NULL,
-                          MUSIC_PLAY_EVT_TASK_CORE);
+                          MUSIC_EVT_TASK_STACK_SIZE, NULL, priority, NULL,
+                          MUSIC_EVT_TASK_CORE);
 }
 
 void i2s_filter_raw_start(TaskFunction_t running_event, UBaseType_t priority) {

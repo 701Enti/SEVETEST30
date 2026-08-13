@@ -24,7 +24,7 @@
  // 部分矩阵运算,使用由esp-dsp项目中的一些运算函数修改而来的double版本函数构成的matrix_f64库,非常感谢原作者,具体声明见本项目README和相关源文件声明
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
- // bilibili: 701Enti
+
 
 #include "math_tools_fp64.h"
 #include "esp_err.h"

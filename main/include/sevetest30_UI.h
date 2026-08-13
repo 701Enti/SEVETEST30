@@ -24,7 +24,7 @@
 // 敬告：该库自动调用 IWEDA库 SWEDA库 BWEDA库 读取数据，无需任何干涉，因此需要依赖一些库获取缓存变量，图像数据将只在文件函数内生效来节省内存，不会声明
 // 显示UI根据sevetest30实际定制，特别是图像坐标，如果需要改变屏幕大小，建议自行设计修改
 // github: https://github.com/701Enti
-// bilibili: 701Enti
+
 
 #pragma once
 
@@ -209,13 +209,11 @@ cartoon_handle_t cartoon_new(cartoon_run_mode_t run_mode, bool en_x, bool en_y, 
 void cartoon_delete(cartoon_handle_t handle);
 uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr, uint32_t pct, int32_t step, int32_t x, int32_t y, uint8_t color[3]);
 
-void weather_icon_temperature(int16_t x, int16_t y);
-
-void time_UI_h_m(int16_t x, int16_t y);
-
-void time_UI_s(int16_t x, int16_t y);
-
-void time_UI_h_m_s(int16_t x, int16_t y);
+void facial_expression_show(int x, int y, char *lable);
+void weather_icon_temperature(int x, int y);
+void time_UI_h_m(int x, int y);
+void time_UI_s(int x, int y);
+void time_UI_h_m_s(int x, int y);
 
 void music_FFT_UI_draw(music_FFT_UI_handle_t handle);
 

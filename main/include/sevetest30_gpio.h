@@ -22,7 +22,8 @@
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // 敬告：文件本体只针对sevetest30的硬件设计，该库代码中的配置是否合理会影响到设备能否正常运行，请谨慎修改
  // github: https://github.com/701Enti
- // bilibili: 701Enti
+
+
 
 #pragma once
 

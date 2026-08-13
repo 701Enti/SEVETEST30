@@ -25,7 +25,7 @@
  //       FIFO读出数据可能存在无效样本,需要自行过滤,(过滤大于等于0x7FF0样本)
  // 您可以在ST官网获取LSM6DS3TR-C的相关手册包含程序实现思路 https://www.st.com/zh/mems-and-sensors/lsm6ds3tr-c.html
  // github: https://github.com/701Enti
- // bilibili: 701Enti
+
  // [默认配置涵盖]  设置加速度计和陀螺仪的ORD（为了获得中断输出,不得设置加速度计到掉电模式)
  //                设置XL_HM_MODE位
  //                开启BDU和DRDY_MASK 

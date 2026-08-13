@@ -28,7 +28,6 @@
 //      2  和风天气API开发文档：   https://dev.qweather.com/docs/api
 // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
 // github: https://github.com/701Enti
-// bilibili: 701Enti
 
 #pragma once
 
@@ -40,7 +39,7 @@
 #define WIFI_CONNECT_TIMEOUT_MS 30000 // WIFI连接等待超时时间
 
 // zlib数据解压窗口允许大小
-#define ZLIB_WINDOW_MAX 47 
+#define ZLIB_WINDOW_MAX 47
 
 // JSON数据转换函数内，如果额外附加对JSON数据的预处理（解压或删改）,其缓冲的数组下标允许大小
 #define PRE_CJSON_BUF_MAX 1024
@@ -48,19 +47,19 @@
 #define HTTP_TASK_CORE 0 // http任务运行核心
 #define HTTP_TASK_PRIO 1 // http任务优先级
 
-#define IWEDA_DEFAULT_URL_BUF_SIZE 256     // 默认URL缓存大小
+#define IWEDA_DEFAULT_URL_BUF_SIZE 2048    // 默认URL缓存大小
 #define IWEDA_DEFAULT_OUTPUT_BUF_SIZE 2048 // 默认输出缓存大小
 
-//ASR语音识别结果缓存大小
+// ASR语音识别结果缓存大小
 #define ASR_RESULT_TEX_BUF_MAX 4096
 
-//百度API access_token缓存大小
-#define BAIDU_API_ACCESSTOKEN_SIZE_MAX 100
+#define BAIDU_API_ACCESSTOKEN_SIZE_MAX 100 // 百度API access_token缓存大小
+#define BAIDU_API_ACCESSTOKEN_REFRESH_TIME 86400 / 2 // 12小时刷新一次
 
-#define GPT_CHAT_RESPONSE_BUF_SIZE 128 * 1024         // GPT聊天响应缓存大小
+#define GPT_CHAT_RESPONSE_BUF_SIZE 128 * 1024          // GPT聊天响应缓存大小
 #define GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE 16 * 1024 // GPT聊天请求体缓存大小
 #define GPT_CHAT_TASK_CORE 0                          // GPT聊天任务运行核心
-#define GPT_CHAT_TASK_STACK_SIZE 16 * 1024            // GPT聊天任务堆栈大小
+#define GPT_CHAT_TASK_STACK_SIZE 4 * 1024             // GPT聊天任务堆栈大小
 
 // 各种API的URL，字符由%s替代
 
@@ -88,6 +87,10 @@
 #define BAIDU_GET_ACCESS_TOKEN_URL                                             \
   "https://aip.baidubce.com/oauth/2.0/"                                        \
   "token?client_id=%s&client_secret=%s&grant_type=client_credentials"
+
+// 百度API-对话情绪识别
+#define BAIDU_NLP_EMOTION_API_URL                                              \
+  "https://aip.baidubce.com/rpc/2.0/nlp/v1/emotion?access_token=%s"
 
 // 百度文心一言 ERNIE-Bot API
 #define ERNIE_BOT_URL "https://qianfan.baidubce.com/v2/chat/completions"
@@ -203,9 +206,12 @@ int json_line_unit_num_get(char *data, int len);
 void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len);
 void asr_data_save_result(char *asr_response);
 
-esp_err_t get_music_lyric_by_url(char *url, char *dest, int len_max);
 void refresh_position_data();
 void refresh_current_weather_data();
+
+esp_err_t fetch_music_lyric_by_url(char *url, char *dest, int len_max);
+esp_err_t fetch_text_emotion(const char *text, char *emotion_lable,
+                             int lable_buf_size, int timeout_ms);
 
 GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model,
                                  char *user_content, int timeout_ms);
@@ -217,5 +223,4 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio);
 
 esp_err_t GPT_chat_stop(GPT_chat_handle_t GPT_chat_handle);
 
-esp_err_t baidu_api_get_access_token(char *client_id, char *client_secret,
-                                     char *AccessToken);
+char *get_baidu_api_access_token();
