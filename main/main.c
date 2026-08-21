@@ -551,7 +551,7 @@ void test(void) {
   asr_cfg.record_save_times_max = 10;
   asr_cfg.vad_mode = VAD_MODE_3;
   asr_cfg.vad_one_frame_ms = 30;
-  asr_cfg.vad_min_speech_ms = 250;
+  asr_cfg.vad_min_speech_ms = 150;
   asr_cfg.vad_min_noise_ms = 50;
   asr_service_begin(&asr_cfg, 1);
 
