@@ -663,7 +663,7 @@ music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg,
     return NULL;
   }
 
-  if (!current_sound_buf) {
+  if (!collecter_handle->collecter_buf) {
     ESP_LOGE(TAG, "当前音频缓存为空,无法启动FFT_UI");
     return NULL;
   }
@@ -765,20 +765,21 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle) {
   while (handle->running_flag) {
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    if (current_sound_collecter_running_flag == false) {
+    if (collecter_handle->collecter_running_flag == false) {
       // 如果音频活动未进行,仅清理屏幕缓存并等待
       memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
       memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     } else {
-      if (current_sound_buf_overflow_flag == false) {
+      if (collecter_handle->collecter_buf_overflow_flag ==
+          false) {
         // 如果音频活动进行中,且缓存未溢出,则等待缓存溢出
         continue;
       }
     }
 
-    if (xSemaphoreTake(current_sound_buf_mutex,
+    if (xSemaphoreTake(collecter_handle->collecter_buf_mutex,
                        pdMS_TO_TICKS(FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS)) !=
         pdTRUE) {
       continue;
@@ -794,36 +795,44 @@ void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle) {
       read_len_in_bytes = N * sizeof(int16_t);
     }
 
-    if (current_sound_info.bits == 16) {
+    if (collecter_handle->collecter_element_info.bits == 16) {
       for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
         sample_buf[i] =
-            ((int16_t *)(current_sound_buf))[i * 2 + handle->cfg.lr_switch];
+            ((int16_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch];
       }
-    } else if (current_sound_info.bits == 24) {
+    } else if (collecter_handle->collecter_element_info.bits ==
+               24) {
       for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
         sample_buf[i] =
-            ((int32_t *)(current_sound_buf))[i * 2 + handle->cfg.lr_switch] /
+            ((int32_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
             0x7FFFFF * INT16_MAX;
       }
-    } else if (current_sound_info.bits == 32) {
+    } else if (collecter_handle->collecter_element_info.bits ==
+               32) {
       for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
         sample_buf[i] =
-            ((int32_t *)(current_sound_buf))[i * 2 + handle->cfg.lr_switch] /
+            ((int32_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
             INT32_MAX * INT16_MAX;
       }
-    } else if (current_sound_info.bits == 8) {
+    } else if (collecter_handle->collecter_element_info.bits ==
+               8) {
       for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
         sample_buf[i] =
-            ((int8_t *)(current_sound_buf))[i * 2 + handle->cfg.lr_switch] /
+            ((int8_t *)(collecter_handle
+                            ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
             INT8_MAX * INT16_MAX;
       }
     } else {
-      ESP_LOGW(TAG, "不支持的音频位深度 %d", current_sound_info.bits);
+      ESP_LOGW(TAG, "不支持的音频位深度 %d",
+               collecter_handle->collecter_element_info.bits);
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
 
-    xSemaphoreGive(current_sound_buf_mutex);
+    xSemaphoreGive(collecter_handle->collecter_buf_mutex);
 
     for (int i = 0; i < N; i++) {
       src_data[i] = (float)(sample_buf[i]) / handle->cfg.dampen_multiples;

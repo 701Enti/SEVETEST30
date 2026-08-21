@@ -39,8 +39,8 @@ ext_io_ctrl_t ext_io_ctrl = {
     .auto_read_INT = false, // true表示INT中断信号触发,外部调用读取函数成功读取后需自行复位到true
 };
 
-TCA6416A_mode_t *P_ext_io_mode_data = NULL;   // 扩展IO输入输出模式
-TCA6416A_level_t *P_ext_io_value_data = NULL; // 扩展IO电平信息，写入和回读通用
+static TCA6416A_mode_t *P_ext_io_mode_data = NULL;   // 扩展IO输入输出模式
+static TCA6416A_level_t *P_ext_io_value_data = NULL; // 扩展IO电平信息，写入和回读通用
 
 // 中断参数传flag地址以保证flag值同步，该变量存储了这个地址，作为ISR参数
 uint32_t P_ext_io_auto_read_flag;

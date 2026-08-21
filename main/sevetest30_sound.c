@@ -74,36 +74,50 @@
 #include "esp_http_client.h"
 
 #include "esp_timer.h"
+#include <ctype.h>
 
 bool volatile sevetest30_music_running_flag = false;
 bool volatile sevetest30_asr_running_flag = false;
 int volatile running_i2s_port = 0;
 
 //// 音频元素句柄
-audio_pipeline_handle_t pipeline = NULL;
-audio_element_handle_t http = NULL;
-audio_element_handle_t i2s = NULL;
-audio_element_handle_t mp3 = NULL;
-audio_element_handle_t filter = NULL;
-audio_element_handle_t raw = NULL;
+static audio_pipeline_handle_t pipeline = NULL;
+static audio_element_handle_t http = NULL;
+static audio_element_handle_t i2s = NULL;
+static audio_element_handle_t mp3 = NULL;
+static audio_element_handle_t filter = NULL;
+static audio_element_handle_t raw = NULL;
 
 // 音频句柄
 //  音频元素配置
-audio_pipeline_cfg_t pipeline_cfg;
-http_stream_cfg_t http_cfg;
-i2s_stream_cfg_t i2s_cfg;
-mp3_decoder_cfg_t mp3_cfg;
-rsp_filter_cfg_t rsp_cfg;
-raw_stream_cfg_t raw_cfg;
+static audio_pipeline_cfg_t pipeline_cfg;
+static http_stream_cfg_t http_cfg;
+static i2s_stream_cfg_t i2s_cfg;
+static mp3_decoder_cfg_t mp3_cfg;
+static rsp_filter_cfg_t rsp_cfg;
+static raw_stream_cfg_t raw_cfg;
 
 // 事件监听
-audio_event_iface_handle_t common_mp3_evt = NULL;
+static audio_event_iface_handle_t common_mp3_evt = NULL;
 
 // 服务定义
-TTS_cfg_t tts_cfg = {0};
-ASR_cfg_t asr_cfg = {0};
+static TTS_cfg_t tts_cfg = {0};
+static ASR_cfg_t asr_cfg = {0};
 
-char *baaidu_api_access_token = NULL;
+static char *baidu_api_access_token = NULL;
+
+// 是否自动根据MP3信息同步filter源信息
+static bool volatile is_filter_auto_sync_src_info_from_mp3 = false;
+
+// 是否自动根据MP3信息同步I2S源信息
+static bool volatile is_i2s_auto_sync_src_info_from_mp3 = false;
+
+// 记录当前I2S总线音频数据，使用自定义element -
+// current_sound_collecter嵌入pipeline读取 格式为ADF的标准PCM,直接反映音频波形
+
+current_sound_collecter_t current_sound_collecter = {0};
+current_sound_collecter_handle_t collecter_handle =
+    &current_sound_collecter;
 
 void element_cfg_data_reset();
 esp_err_t audio_element_all_init(const char *link_tag[], int link_num);
@@ -113,36 +127,7 @@ void http_i2s_mp3_music_start(TaskFunction_t running_event,
                               UBaseType_t priority);
 void i2s_filter_raw_start(TaskFunction_t running_event, UBaseType_t priority);
 
-int _TTS_hook(http_stream_event_msg_t *msg);
-
-bool volatile is_filter_auto_sync_src_info_from_mp3 =
-    false; // 是否自动根据MP3信息同步filter源信息
-bool volatile is_i2s_auto_sync_src_info_from_mp3 =
-    false; // 是否自动根据MP3信息同步I2S源信息
-
-// 记录当前I2S总线音频数据，使用自定义element -
-// current_sound_collecter嵌入pipeline读取 格式为ADF的标准PCM,直接反映音频波形
-bool volatile current_sound_collecter_running_flag = false;
-bool volatile current_sound_buf_overflow_flag =
-    false; // 当前缓冲区是否溢出标志位
-bool volatile is_current_sound_info_auto_sync_from_mp3 =
-    false; // 是否自动根据MP3信息同步当前音频信息
-bool volatile is_current_sound_info_locked_sample_rates =
-    false; // 是否锁定当前音频采样率
-bool volatile is_current_sound_info_locked_channels =
-    false; // 是否锁定当前音频声道数
-bool volatile is_current_sound_info_locked_bits = false; // 是否锁定当前音频位深
-xSemaphoreHandle current_sound_buf_mutex =
-    NULL; // 当前音频缓冲区互斥锁，外部需要竞争并拿到锁再访问
-char *current_sound_buf = NULL; // 当前音频缓冲区，外部需要竞争并拿到锁再访问
-audio_element_handle_t current_sound_collecter =
-    NULL; // 自定义element - current_sound_collecter
-audio_element_info_t current_sound_info = {
-    0};              // 当前音频信息，包含采样率,声道数,位深,比特率等
-int write_index = 0; // 写指针索引
-uint32_t current_sound_buf_drop_in_bytes = 0; // 当前缓冲区实时断流字节数
-int64_t current_sound_buf_overflow_time =
-    0; // 当前缓冲区溢出时的系统时间，单位us
+int _short_TTS_hook(http_stream_event_msg_t *msg);
 
 static int _current_sound_collecter_process(audio_element_handle_t self,
                                             char *in_buffer, int in_len) {
@@ -151,60 +136,76 @@ static int _current_sound_collecter_process(audio_element_handle_t self,
   int read_size = audio_element_input(self, in_buffer, in_len);
 
   if (read_size <= 0) {
-    current_sound_collecter_running_flag = false;
+    collecter_handle->collecter_running_flag = false;
     return read_size;
   }
 
   if (read_size > 0) {
-    if (current_sound_collecter_running_flag == false) {
+    if (collecter_handle->collecter_running_flag == false) {
       audio_element_report_info(self);
-      current_sound_collecter_running_flag = true;
+      collecter_handle->collecter_running_flag = true;
     }
-    if (xSemaphoreTake(current_sound_buf_mutex,
+    if (xSemaphoreTake(collecter_handle->collecter_buf_mutex,
                        pdMS_TO_TICKS(CURRENT_SOUND_BUF_WRITE_WAIT_TIME_MS)) ==
         pdTRUE) {
-      if (current_sound_info.sample_rates > 0 &&
-          current_sound_info.channels > 0 && current_sound_info.bits > 0) {
+      if (collecter_handle->collecter_element_info.sample_rates >
+              0 &&
+          collecter_handle->collecter_element_info.channels > 0 &&
+          collecter_handle->collecter_element_info.bits > 0) {
         // 确定要写入的字节数
         int bytes_to_write = read_size;
 
-        if (bytes_to_write + write_index >= CURRENT_SOUND_BUF_SIZE) {
-          bytes_to_write = CURRENT_SOUND_BUF_SIZE - write_index;
+        if (bytes_to_write +
+                collecter_handle->collecter_write_index >=
+            CURRENT_SOUND_BUF_SIZE) {
+          bytes_to_write =
+              CURRENT_SOUND_BUF_SIZE -
+              collecter_handle->collecter_write_index;
           if (bytes_to_write > 0) {
             // 缓冲区将会溢出，记录时间
-            current_sound_buf_overflow_time = esp_timer_get_time();
+            collecter_handle->collecter_buf_overflow_time =
+                esp_timer_get_time();
           }
           if (bytes_to_write == 0) {
             // 缓冲区已经溢出，到达指定时间清理缓冲区
-            current_sound_buf_overflow_flag = true;
-            if ((esp_timer_get_time() - current_sound_buf_overflow_time) /
+            collecter_handle->collecter_buf_overflow_flag = true;
+            if ((esp_timer_get_time() -
+                 collecter_handle->collecter_buf_overflow_time) /
                     1000 >
                 CURRENT_SOUND_BUF_OVERFLOW_CLEAR_TIME_MS) {
-              write_index = 0;
-              current_sound_buf_drop_in_bytes = 0;
-              memset(current_sound_buf, 0,
+              collecter_handle->collecter_write_index = 0;
+              collecter_handle->collecter_buf_drop_in_bytes = 0;
+              memset(collecter_handle->collecter_buf, 0,
                      CURRENT_SOUND_BUF_SIZE * sizeof(char));
-              current_sound_buf_overflow_flag = false;
+              collecter_handle->collecter_buf_overflow_flag =
+                  false;
               bytes_to_write = read_size;
-              if (bytes_to_write + write_index >= CURRENT_SOUND_BUF_SIZE) {
+              if (bytes_to_write +
+                      collecter_handle->collecter_write_index >=
+                  CURRENT_SOUND_BUF_SIZE) {
                 vTaskDelay(pdMS_TO_TICKS(500));
                 ESP_LOGW(
                     TAG,
                     "当前音频读取缓冲区 CURRENT_SOUND_BUF_SIZE 大小设置过低");
-                bytes_to_write = CURRENT_SOUND_BUF_SIZE - write_index;
+                bytes_to_write =
+                    CURRENT_SOUND_BUF_SIZE -
+                    collecter_handle->collecter_write_index;
               }
             }
           }
         }
 
         // 写入缓冲区
-        memcpy(current_sound_buf + write_index, in_buffer, bytes_to_write);
-        write_index += bytes_to_write;
+        memcpy(collecter_handle->collecter_buf +
+                   collecter_handle->collecter_write_index,
+               in_buffer, bytes_to_write);
+        collecter_handle->collecter_write_index += bytes_to_write;
 
-        current_sound_buf_drop_in_bytes = read_size - bytes_to_write;
+        collecter_handle->collecter_buf_drop_in_bytes =
+            read_size - bytes_to_write;
       }
 
-      xSemaphoreGive(current_sound_buf_mutex);
+      xSemaphoreGive(collecter_handle->collecter_buf_mutex);
     }
   }
 
@@ -222,39 +223,43 @@ static esp_err_t _current_sound_collecter_close(audio_element_handle_t self) {
 }
 
 static esp_err_t _current_sound_collecter_destroy(audio_element_handle_t self) {
-  is_current_sound_info_auto_sync_from_mp3 = false;
-  current_sound_collecter_running_flag = false;
-  current_sound_buf_overflow_flag = false;
-  memset(&current_sound_info, 0, sizeof(audio_element_info_t));
-  write_index = 0;
-  current_sound_buf_drop_in_bytes = 0;
-  current_sound_buf_overflow_time = 0;
+  collecter_handle->is_collecter_info_auto_sync_from_mp3 = false;
+  collecter_handle->collecter_running_flag = false;
+  collecter_handle->collecter_buf_overflow_flag = false;
+  memset(&collecter_handle->collecter_element_info, 0,
+         sizeof(audio_element_info_t));
+  collecter_handle->collecter_write_index = 0;
+  collecter_handle->collecter_buf_drop_in_bytes = 0;
+  collecter_handle->collecter_buf_overflow_time = 0;
   return ESP_OK;
 }
 
 audio_element_handle_t current_sound_collecter_init() {
-  if (current_sound_buf_mutex == NULL) {
-    current_sound_buf_mutex = xSemaphoreCreateMutex(); // 仅在第一次初始化创建
+  if (collecter_handle->collecter_buf_mutex == NULL) {
+    collecter_handle->collecter_buf_mutex =
+        xSemaphoreCreateMutex(); // 仅在第一次初始化创建
   }
 
-  if (current_sound_buf == NULL) {
-    current_sound_buf =
+  if (collecter_handle->collecter_buf == NULL) {
+    collecter_handle->collecter_buf =
         malloc(CURRENT_SOUND_BUF_SIZE * sizeof(char)); // 仅在第一次初始化申请
-    if (!current_sound_buf)
+    if (!collecter_handle->collecter_buf)
       return NULL;
   }
-  memset(current_sound_buf, 0, CURRENT_SOUND_BUF_SIZE * sizeof(char));
+  memset(collecter_handle->collecter_buf, 0,
+         CURRENT_SOUND_BUF_SIZE * sizeof(char));
 
-  is_current_sound_info_auto_sync_from_mp3 = false;
-  is_current_sound_info_locked_sample_rates = false;
-  is_current_sound_info_locked_channels = false;
-  is_current_sound_info_locked_bits = false;
-  current_sound_collecter_running_flag = false;
-  current_sound_buf_overflow_flag = false;
-  memset(&current_sound_info, 0, sizeof(audio_element_info_t));
-  write_index = 0;
-  current_sound_buf_drop_in_bytes = 0;
-  current_sound_buf_overflow_time = 0;
+  collecter_handle->is_collecter_info_auto_sync_from_mp3 = false;
+  collecter_handle->is_collecter_info_locked_sample_rates = false;
+  collecter_handle->is_collecter_info_locked_channels = false;
+  collecter_handle->is_collecter_info_locked_bits = false;
+  collecter_handle->collecter_running_flag = false;
+  collecter_handle->collecter_buf_overflow_flag = false;
+  memset(&collecter_handle->collecter_element_info, 0,
+         sizeof(audio_element_info_t));
+  collecter_handle->collecter_write_index = 0;
+  collecter_handle->collecter_buf_drop_in_bytes = 0;
+  collecter_handle->collecter_buf_overflow_time = 0;
 
   audio_element_cfg_t cfg = DEFAULT_AUDIO_ELEMENT_CONFIG();
   cfg.tag = "current_sound_collecter";
@@ -269,35 +274,41 @@ audio_element_handle_t current_sound_collecter_init() {
 void current_sound_collecter_music_info_sync(int sample_rates, int channels,
                                              int bits) {
   const char *TAG = "current_sound_collecter_music_info_sync";
-  audio_element_getinfo(current_sound_collecter, &current_sound_info);
+  audio_element_getinfo(
+      collecter_handle->collecter_element,
+      &collecter_handle->collecter_element_info);
 
   ESP_LOGW(TAG, "准备同步音频信息，采样率=%d, 位深=%d, 声道数=%d", sample_rates,
            bits, channels);
 
-  if (is_current_sound_info_locked_sample_rates) {
+  if (collecter_handle->is_collecter_info_locked_sample_rates) {
     ESP_LOGW(TAG, "采样率已锁定，将保持不变");
   } else {
-    current_sound_info.sample_rates = sample_rates;
+    collecter_handle->collecter_element_info.sample_rates =
+        sample_rates;
   }
 
-  if (is_current_sound_info_locked_channels) {
+  if (collecter_handle->is_collecter_info_locked_channels) {
     ESP_LOGW(TAG, "声道数已锁定，将保持不变");
   } else {
-    current_sound_info.channels = channels;
+    collecter_handle->collecter_element_info.channels = channels;
   }
 
-  if (is_current_sound_info_locked_bits) {
+  if (collecter_handle->is_collecter_info_locked_bits) {
     ESP_LOGW(TAG, "位深已锁定，将保持不变");
   } else {
-    current_sound_info.bits = bits;
+    collecter_handle->collecter_element_info.bits = bits;
   }
 
-  if (audio_element_setinfo(current_sound_collecter, &current_sound_info) !=
+  if (audio_element_setinfo(
+          collecter_handle->collecter_element,
+          &(collecter_handle->collecter_element_info)) !=
       ESP_OK) {
     ESP_LOGE(TAG, "同步音频信息失败");
     return;
   } else {
     ESP_LOGW(TAG, "同步音频信息成功");
+    collecter_handle->is_collecter_info_auto_sync_from_mp3 = true;
     return;
   }
 }
@@ -378,7 +389,7 @@ void music_uri_or_url_play(const char *uri_or_url, UBaseType_t priority) {
       ESP_LOGE(TAG, "网络未连接");
       return;
     }
-    sevetest30_music_running_flag = true;
+
     common_mp3_evt = audio_calloc(
         1,
         sizeof(
@@ -394,22 +405,22 @@ void music_uri_or_url_play(const char *uri_or_url, UBaseType_t priority) {
 
   if (audio_element_all_init(link_tag, 4) != ESP_OK) {
     ESP_LOGE(TAG, "初始化音频元素时发现问题,任务无法启动");
-    sevetest30_music_running_flag = false;
     return;
   }
 
   audio_pipeline_link(pipeline, link_tag, 4);
   audio_element_set_uri(http, uri_or_url);
 
-  is_current_sound_info_auto_sync_from_mp3 = true;
+  collecter_handle->is_collecter_info_auto_sync_from_mp3 = true;
 
+  sevetest30_music_running_flag = true;
   http_i2s_mp3_music_start(&common_mp3_running_event, priority);
 }
 
-/// @brief TTS任务设置的hook
-int _TTS_hook(http_stream_event_msg_t *msg) {
-  const char *TAG = "_TTS_hook";
-  char *request_data = NULL;
+/// @brief 短文本语音合成TTS任务设置的hook
+int _short_TTS_hook(http_stream_event_msg_t *msg) {
+  const char *TAG = "_short_TTS_hook";
+  static char *request_data = NULL;
 
   if (msg->event_id == HTTP_STREAM_FINISH_REQUEST) {
     free(request_data);
@@ -421,49 +432,78 @@ int _TTS_hook(http_stream_event_msg_t *msg) {
     return 0;
   }
 
-  int request_data_size = 1024 + sizeof(char) * strlen(tts_cfg.tex);
-  request_data = (char *)malloc(request_data_size);
-  if (request_data == NULL) {
-    ESP_LOGE(TAG, "申请内存request_data失败");
-    return 0;
-  }
-
-  // 从消息中获取句柄
   esp_http_client_handle_t http_client =
       (esp_http_client_handle_t)msg->http_client;
 
-  // 设定语音合成配置
+  // URL编码后文本缓冲区，URL编码最大膨胀3倍
+  size_t encoded_text_buf_size = strlen(tts_cfg.tex) * 3 + 1;
+  char *encoded_text_buf = (char *)malloc(encoded_text_buf_size);
+  if (encoded_text_buf == NULL) {
+    ESP_LOGE(TAG, "申请编码文本缓冲区失败");
+    return 0;
+  }
+  memset(encoded_text_buf, 0, encoded_text_buf_size);
+
+  esp_err_t ret =
+      url_encode(tts_cfg.tex, encoded_text_buf, encoded_text_buf_size, true);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "文本URL编码失败, ret=%s", esp_err_to_name(ret));
+    free(encoded_text_buf);
+    encoded_text_buf = NULL;
+    return 0;
+  }
+
+  int request_data_size = 2048 + strlen(encoded_text_buf);
+  request_data = (char *)malloc(request_data_size);
+  if (request_data == NULL) {
+    ESP_LOGE(TAG, "申请request_data内存失败");
+    free(encoded_text_buf);
+    encoded_text_buf = NULL;
+    return 0;
+  }
+  memset(request_data, 0, request_data_size);
+
   uint8_t mac[6] = {0};
   esp_efuse_mac_get_default(mac);
 
   int data_len = snprintf(
       request_data, request_data_size,
       "lan=zh&ctp=1&tok=%s&cuid=%02x:%02x:%02x:%02x:%02x:%02x&vol=%d&spd=%d&"
-      "pit=%d&per=%d&aue=3&audio_ctrl={\"sampling_rate\":%d}&&tex=%s",
-      baaidu_api_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
-      tts_cfg.vol, tts_cfg.spd, tts_cfg.pit, tts_cfg.per, tts_cfg.sampling_rate,
-      tts_cfg.tex);
-  if (data_len >= request_data_size) {
+      "pit=%d&per=%d&aue=3&tex=%s",
+      baidu_api_access_token, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
+      tts_cfg.vol, tts_cfg.spd, tts_cfg.pit, tts_cfg.per, encoded_text_buf);
+
+  free(encoded_text_buf);
+  encoded_text_buf = NULL;
+
+  if ((size_t)data_len >= request_data_size) {
     ESP_LOGE(TAG, "request_data大小不足");
     return 0;
   }
 
-  if (esp_http_client_set_method(http_client, HTTP_METHOD_POST) != ESP_OK) {
-    ESP_LOGE(TAG, "设置HTTP方法失败");
-  }
-  if (esp_http_client_set_post_field(http_client, request_data, data_len) !=
-      ESP_OK) {
-    ESP_LOGE(TAG, "设置HTTP请求体失败");
-  }
+  esp_http_client_set_method(http_client, HTTP_METHOD_POST);
+  esp_http_client_set_post_field(http_client, request_data, data_len);
+  esp_http_client_set_header(http_client, "Content-Type",
+                             "application/x-www-form-urlencoded");
 
   return 0;
 }
 
-/// @brief 请求TTS服务并播放
+/// @brief 请求TTS服务并播放-短文本语音合成
 /// @param tts_cfg  tts配置
 /// @param priority 任务优先级
-void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority) {
-  const char *TAG = "tts_service_play";
+void tts_service_play_short(TTS_cfg_t *cfg, UBaseType_t priority) {
+  const char *TAG = "tts_service_play_short";
+
+  if (cfg == NULL) {
+    ESP_LOGE(TAG, "cfg为NULL");
+    return;
+  }
+
+  if (cfg->tex == NULL) {
+    ESP_LOGE(TAG, "cfg->tex为NULL");
+    return;
+  }
 
   // common_mp3_evt不为空说明还有音频事件运行中，进行等待再继续
   if (common_mp3_evt != NULL) {
@@ -474,11 +514,17 @@ void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority) {
       ESP_LOGE(TAG, "网络未连接");
       return;
     }
-    sevetest30_music_running_flag = true;
     common_mp3_evt = audio_calloc(
         1,
         sizeof(
             audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
+  }
+
+  // 检查文本长度是否超过最大允许strlen()数值
+  if (strlen(cfg->tex) > BAIDU_SHORT_TTS_TEXT_STRLEN_MAX) {
+    ESP_LOGE(TAG, "文本长度超过最大允许strlen()数值 %d,无法启动TTS",
+             BAIDU_SHORT_TTS_TEXT_STRLEN_MAX);
+    return;
   }
 
   element_cfg_data_reset();
@@ -491,25 +537,19 @@ void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority) {
   rsp_cfg.mode = RESAMPLE_DECODE_MODE;
 
   rsp_cfg.src_ch = 1;
-  rsp_cfg.src_rate = cfg->sampling_rate;
-  rsp_cfg.src_bits = cfg->sampling_bits;
+  rsp_cfg.src_rate = cfg->short_tts_rate;
+  rsp_cfg.src_bits = cfg->short_tts_bits;
 
   rsp_cfg.dest_ch = 2;
   rsp_cfg.dest_rate = cfg->output_rate;
   rsp_cfg.dest_bits = cfg->output_bits;
 
-  http_cfg.event_handle = _TTS_hook;
+  http_cfg.event_handle = _short_TTS_hook;
 
-  tts_cfg.tex = cfg->tex;
-  tts_cfg.spd = cfg->spd;
-  tts_cfg.pit = cfg->pit;
-  tts_cfg.vol = cfg->vol;
-  tts_cfg.per = cfg->per;
+  memcpy(&tts_cfg, cfg, sizeof(TTS_cfg_t));
 
-  is_filter_auto_sync_src_info_from_mp3 = true;
-
-  baaidu_api_access_token = get_baidu_api_access_token();
-  if (baaidu_api_access_token == NULL) {
+  baidu_api_access_token = get_baidu_api_access_token();
+  if (baidu_api_access_token == NULL) {
     ESP_LOGE(TAG, "获取百度API的AccessToken失败");
     return;
   }
@@ -518,18 +558,97 @@ void tts_service_play(TTS_cfg_t *cfg, UBaseType_t priority) {
                              "i2s"};
   if (audio_element_all_init(link_tag, 5) != ESP_OK) {
     ESP_LOGE(TAG, "准备音频元素时发现问题");
-    sevetest30_music_running_flag = false;
     return;
   }
 
   audio_pipeline_link(pipeline, link_tag, 5);
-  audio_element_set_uri(http, BAIDU_TTS_ENDPOINT);
+  audio_element_set_uri(http, BAIDU_SHORT_TTS_ENDPOINT);
 
   current_sound_collecter_music_info_sync(cfg->output_rate, 2,
                                           cfg->output_bits);
 
   is_filter_auto_sync_src_info_from_mp3 = true;
 
+  sevetest30_music_running_flag = true;
+  http_i2s_mp3_music_start(&common_mp3_running_event, priority);
+}
+
+/// @brief 请求TTS服务并播放-长文本语音合成
+/// @param cfg  tts配置
+/// @param priority 任务优先级
+/// @param timeout_ms 超时时间,单位毫秒
+void tts_service_play_long(TTS_cfg_t *cfg, UBaseType_t priority,
+                           int timeout_ms) {
+  const char *TAG = "tts_service_play_long";
+
+  if (cfg == NULL) {
+    ESP_LOGE(TAG, "cfg为NULL");
+    return;
+  }
+
+  if (cfg->tex == NULL) {
+    ESP_LOGE(TAG, "cfg->tex为NULL");
+    return;
+  }
+
+  // common_mp3_evt不为空说明还有音频事件运行中，进行等待再继续
+  if (common_mp3_evt != NULL) {
+    ESP_LOGE(TAG, "播放繁忙中，无法准备新播放任务");
+    return;
+  } else {
+    if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+      ESP_LOGE(TAG, "网络未连接");
+      return;
+    }
+    common_mp3_evt = audio_calloc(
+        1,
+        sizeof(
+            audio_event_iface_handle_t)); // 立即申请内存使得common_mp3_evt不为空来锁住其他任务
+  }
+
+  char speech_url[2048] = {0};
+  if (fetch_long_tts_speech_url(speech_url, sizeof(speech_url), cfg,
+                                timeout_ms) != ESP_OK) {
+    ESP_LOGE(TAG, "获取语音URL失败,无法启动");
+    return;
+  }
+
+  element_cfg_data_reset();
+
+  i2s_cfg.chan_cfg.id = CODEC_DAC_I2S_PORT;
+  i2s_cfg.type = AUDIO_STREAM_WRITER;
+
+  running_i2s_port = i2s_cfg.chan_cfg.id;
+
+  rsp_cfg.mode = RESAMPLE_DECODE_MODE;
+
+  rsp_cfg.src_ch = 1;
+  rsp_cfg.src_rate = cfg->short_tts_rate;
+  rsp_cfg.src_bits = cfg->short_tts_bits;
+
+  rsp_cfg.dest_ch = 2;
+  rsp_cfg.dest_rate = cfg->output_rate;
+  rsp_cfg.dest_bits = cfg->output_bits;
+
+  memcpy(&tts_cfg, cfg, sizeof(TTS_cfg_t));
+
+  const char *link_tag[5] = {"http", "mp3", "filter", "current_sound_collecter",
+                             "i2s"};
+  if (audio_element_all_init(link_tag, 5) != ESP_OK) {
+    ESP_LOGE(TAG, "准备音频元素时发现问题");
+    return;
+  }
+
+  audio_pipeline_link(pipeline, link_tag, 5);
+
+  audio_element_set_uri(http, speech_url);
+
+  current_sound_collecter_music_info_sync(cfg->output_rate, 2,
+                                          cfg->output_bits);
+
+  is_filter_auto_sync_src_info_from_mp3 = true;
+
+  sevetest30_music_running_flag = true;
   http_i2s_mp3_music_start(&common_mp3_running_event, priority);
 }
 
@@ -570,8 +689,8 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
 
   memcpy(&asr_cfg, cfg, sizeof(ASR_cfg_t));
 
-  baaidu_api_access_token = get_baidu_api_access_token();
-  if (baaidu_api_access_token == NULL) {
+  baidu_api_access_token = get_baidu_api_access_token();
+  if (baidu_api_access_token == NULL) {
     ESP_LOGE(TAG, "获取百度API的AccessToken失败");
     return;
   }
@@ -630,9 +749,10 @@ void common_mp3_running_event() {
       ESP_LOGW(TAG, "收到来自mp3_decoder音频, 采样率=%d, 位深=%d, 声道数=%d",
                music_info.sample_rates, music_info.bits, music_info.channels);
 
-      if (is_current_sound_info_auto_sync_from_mp3) {
-        ESP_LOGW(TAG,
-                 "is_current_sound_info_auto_sync_from_mp3-自动同步为开启状态");
+      if (collecter_handle
+              ->is_collecter_info_auto_sync_from_mp3) {
+        ESP_LOGW(TAG, "is_current_sound_collecter_info_auto_sync_from_mp3-"
+                      "自动同步为开启状态");
         current_sound_collecter_music_info_sync(
             music_info.sample_rates, music_info.channels, music_info.bits);
         ESP_LOGW(TAG, "音频信息已同步到current_sound_collecter");
@@ -665,10 +785,12 @@ void common_mp3_running_event() {
     }
 
     if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT &&
-        msg.source == (void *)current_sound_collecter &&
+        msg.source ==
+            (void *)(collecter_handle->collecter_element) &&
         msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
       audio_element_info_t music_info = {0};
-      audio_element_getinfo(current_sound_collecter, &music_info);
+      audio_element_getinfo(collecter_handle->collecter_element,
+                            &music_info);
 
       ESP_LOGI(
           TAG,
@@ -725,8 +847,9 @@ void common_mp3_running_event() {
   if (filter != NULL) {
     audio_pipeline_unregister(pipeline, filter);
   }
-  if (current_sound_collecter != NULL) {
-    audio_pipeline_unregister(pipeline, current_sound_collecter);
+  if (collecter_handle->collecter_element != NULL) {
+    audio_pipeline_unregister(
+        pipeline, collecter_handle->collecter_element);
   }
   audio_pipeline_unregister(pipeline, i2s);
 
@@ -736,8 +859,8 @@ void common_mp3_running_event() {
   if (filter != NULL) {
     audio_element_deinit(filter);
   }
-  if (current_sound_collecter != NULL) {
-    audio_element_deinit(current_sound_collecter);
+  if (collecter_handle->collecter_element != NULL) {
+    audio_element_deinit(collecter_handle->collecter_element);
   }
   audio_element_deinit(i2s);
 
@@ -747,8 +870,8 @@ void common_mp3_running_event() {
   if (filter != NULL) {
     filter = NULL;
   }
-  if (current_sound_collecter != NULL) {
-    current_sound_collecter = NULL;
+  if (collecter_handle->collecter_element != NULL) {
+    collecter_handle->collecter_element = NULL;
   }
   i2s = NULL;
 
@@ -850,7 +973,7 @@ RESTART:
                "{\"format\":\"pcm\",\"rate\":%d,\"channel\":1,\"token\":\"%s\","
                "\"cuid\":"
                "\"%02x:%02x:%02x:%02x:%02x:%02x\",\"dev_pid\":%d,\"speech\":\"",
-               asr_cfg.sampling_rate, baaidu_api_access_token, mac[0], mac[1],
+               asr_cfg.sampling_rate, baidu_api_access_token, mac[0], mac[1],
                mac[2], mac[3], mac[4], mac[5], asr_cfg.dev_pid);
   if (request_body_len >= request_body_size) {
     ESP_LOGE(TAG, "request_body内存不足");
@@ -882,7 +1005,15 @@ RESTART:
       vad_stop_counter = 0; // 语音活动继续而不停止
       vad_keep_counter++;   // 语音保持时间增加，直到发送阈值
       memset(asr_data_buf, 0, asr_data_buf_size);
-      raw_stream_read(raw, asr_data_buf, asr_data_buf_size);
+
+      if (asr_data_buf_size > vad_buf_size) {
+        memcpy(asr_data_buf, vad_buf, vad_buf_size);
+        raw_stream_read(raw, asr_data_buf + vad_buf_size,
+                        asr_data_buf_size - vad_buf_size);
+      } else {
+        memcpy(asr_data_buf, vad_buf, asr_data_buf_size);
+      }
+
       int out_size = base64_encode((uint8_t *)asr_data_buf, asr_data_buf_size,
                                    request_body_buf + request_body_len,
                                    request_body_size - request_body_len);
@@ -941,18 +1072,16 @@ RESTART:
 
           if (status != 200) {
             ESP_LOGE(TAG, "识别出现问题，请提高音量降低语速并重试");
-            esp_http_client_close(client_handle); // 关闭连接
-            record_save_times = 0;
-            asr_len = 0;
-            goto RESTART;
+          } else {
+            esp_http_client_read_response(client_handle, response_buf,
+                                          ASR_HTTP_RESPONSE_BUF_MAX);
+            asr_data_save_result(response_buf);
           }
 
-          esp_http_client_read_response(client_handle, response_buf,
-                                        ASR_HTTP_RESPONSE_BUF_MAX);
-          asr_data_save_result(response_buf);
-          esp_http_client_close(client_handle); // 关闭连接
+          esp_http_client_close(client_handle);
           record_save_times = 0;
           asr_len = 0;
+          goto RESTART;
         }
       }
     }
@@ -990,24 +1119,25 @@ RESTART:
 
   audio_pipeline_unregister(pipeline, i2s);
   audio_pipeline_unregister(pipeline, filter);
-  if (current_sound_collecter != NULL) {
-    audio_pipeline_unregister(pipeline, current_sound_collecter);
+  if (collecter_handle->collecter_element != NULL) {
+    audio_pipeline_unregister(
+        pipeline, collecter_handle->collecter_element);
   }
   audio_pipeline_unregister(pipeline, raw);
 
   audio_pipeline_deinit(pipeline);
   audio_element_deinit(i2s);
   audio_element_deinit(filter);
-  if (current_sound_collecter != NULL) {
-    audio_element_deinit(current_sound_collecter);
+  if (collecter_handle->collecter_element != NULL) {
+    audio_element_deinit(collecter_handle->collecter_element);
   }
   audio_element_deinit(raw);
 
   pipeline = NULL;
   i2s = NULL;
   filter = NULL;
-  if (current_sound_collecter != NULL) {
-    current_sound_collecter = NULL;
+  if (collecter_handle->collecter_element != NULL) {
+    collecter_handle->collecter_element = NULL;
   }
   raw = NULL;
 
@@ -1072,14 +1202,16 @@ esp_err_t audio_element_all_init(const char *link_tag[], int link_num) {
 
   for (int i = 0; i < link_num; i++) {
     if (!strcmp(link_tag[i], "current_sound_collecter")) {
-      if (current_sound_collecter == NULL) {
-        current_sound_collecter = current_sound_collecter_init();
-        if (!current_sound_collecter) {
+      if (collecter_handle->collecter_element == NULL) {
+        collecter_handle->collecter_element =
+            current_sound_collecter_init();
+        if (!(collecter_handle->collecter_element)) {
           ESP_LOGE(TAG, "current_sound_collecter元素初始化失败");
           return ESP_FAIL;
         } else {
-          audio_pipeline_register(pipeline, current_sound_collecter,
-                                  "current_sound_collecter");
+          audio_pipeline_register(
+              pipeline, collecter_handle->collecter_element,
+              "current_sound_collecter");
         }
       } else {
         ESP_LOGE(TAG, "current_sound_collecter元素不为NULL,资源未释放");

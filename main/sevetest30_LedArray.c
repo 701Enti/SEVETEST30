@@ -70,15 +70,15 @@
 // 因此，我们可以将一个图像分离成三个单色图层，每个图层的每个像素的值表示该像素在该图层的亮度，这里用uint8_t表示(0-255)
 // 所以这里申请三块连续的uint8_t内存空间，每块大小为 LINE_LED_NUMBER *
 // VERTICAL_LED_NUMBER * sizeof(uint8_t)
-uint8_t *ledarray_green_layer_buf = NULL;
-uint8_t *ledarray_red_layer_buf = NULL;
-uint8_t *ledarray_blue_layer_buf = NULL;
+static uint8_t *ledarray_green_layer_buf = NULL;
+static uint8_t *ledarray_red_layer_buf = NULL;
+static uint8_t *ledarray_blue_layer_buf = NULL;
 
-uint8_t *ledarray_tx_buf = NULL; // 数据发送缓存
+static uint8_t *ledarray_tx_buf = NULL; // 数据发送缓存
 
-spi_device_handle_t ledarray_spi_handle = NULL;
+static spi_device_handle_t ledarray_spi_handle = NULL;
 
-bool is_initialized = false;
+static bool is_initialized = false;
 
 // 数字 0-9
 const uint8_t matrix_0[7] = {0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0};
@@ -291,7 +291,6 @@ esp_err_t direct_draw(int x, int y, const uint8_t *p) {
   }
 
   uint64_t Dx = 0, Dy = 0;              // xy的增加量
-  int sx = 0;                           // 临时存储选定的横坐标
   uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
 
   // 获取图案长宽数据
@@ -316,15 +315,16 @@ esp_err_t direct_draw(int x, int y, const uint8_t *p) {
     color[1] = *pT2;
     color[2] = *pT3;
 
-    sx = x + Dx - 1;
-    color_input(sx, y + Dy, color);
+    color_input(x + Dx, y + Dy, color);
 
     if (Dx == breadth - 1) {
       Dx = 0; // 横向写入最后一个像素完毕，回车
       Dy++;   // 横向写入最后一个像素完毕，回车
       length--;
-    } else
+    } else {
       Dx++;
+    }
+
     p += 0x03; // 地址被动偏移
   }
   return ESP_OK;

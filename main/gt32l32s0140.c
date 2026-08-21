@@ -33,7 +33,7 @@
 #include "freertos/task.h"
 #include "board_ctrl.h"
 
-spi_device_handle_t fonts_chip_handle = NULL;
+static spi_device_handle_t fonts_chip_handle = NULL;
 
 
 /// @brief 字库芯片GT32L32S0140基本初始化工作
