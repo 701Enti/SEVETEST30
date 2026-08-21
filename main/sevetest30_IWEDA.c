@@ -32,7 +32,9 @@
 #include "sevetest30_sound.h"
 #include "zlib.h"
 #include "zutil.h"
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
@@ -179,7 +181,7 @@ esp_err_t wifi_connect(periph_wifi_cfg_t *wifi_cfg) {
  * @brief 将标准 Base64 字符串原地转换为 Base64URL 格式
  * @param str 标准 Base64 字符串指针
  */
-static void base64_to_base64url(char *str) {
+void base64_to_base64url(char *str) {
   if (str == NULL) {
     return;
   }
@@ -249,7 +251,7 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 检查参数
   if (!kid || !sub || !private_key) {
-    ESP_LOGE(TAG, "参数不能为空");
+    ESP_LOGE(TAG, "参数不能为NULL");
     return NULL;
   }
 
@@ -286,8 +288,9 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
   // 对 Payload 进行 Base64URL 编码
   unsigned char b64_payload[256];
   size_t payload_write_len = 0;
-  if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload), &payload_write_len,
-                            (unsigned char *)payload, strlen(payload)) != 0) {
+  if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload),
+                            &payload_write_len, (unsigned char *)payload,
+                            strlen(payload)) != 0) {
     ESP_LOGE(TAG, "载荷 Base64 编码失败");
     return NULL;
   }
@@ -347,9 +350,10 @@ char *generate_ed25519_jwt_token(const char *kid, const char *sub,
 
   // 拼接最终 JWT Token,含"Bearer "前缀
   char token[512] = {0};
-  int token_len = snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s",
-                           (int)header_write_len, b64_header, (int)payload_write_len,
-                           b64_payload, (int)sig_b64_len, b64_signature);
+  int token_len =
+      snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s",
+               (int)header_write_len, b64_header, (int)payload_write_len,
+               b64_payload, (int)sig_b64_len, b64_signature);
   if (token_len >= sizeof(token)) {
     ESP_LOGE(TAG, "token内存不足");
     return NULL;
@@ -400,7 +404,7 @@ char *generate_baidu_api_access_token(char *api_key, char *secret_key) {
   const char *TAG = "generate_baidu_api_access_token";
 
   if (!api_key || !secret_key) {
-    ESP_LOGE(TAG, "api_key或secret_key为空");
+    ESP_LOGE(TAG, "api_key或secret_key为NULL");
     return NULL;
   }
 
@@ -678,11 +682,13 @@ void iweda_change_url_if_need_redirect(IWEDA_handle_t iweda_handle) {
  * @param src 源字符串指针
  * @param dest 目标字符数组（存放编码后的结果）
  * @param dest_len 目标数组的总大小
+ * @param use_plus_for_space
+ * true:空格编码为'+'(表单post)；false:空格编码为%20(标准URI)
  * @return esp_err_t ESP_OK 成功，ESP_ERR_NO_MEM 空间不足，ESP_ERR_INVALID_ARG
  * 参数错误
  */
-esp_err_t url_encode(const char *src, char *dest, size_t dest_len) {
-
+esp_err_t url_encode(const char *src, char *dest, size_t dest_len,
+                     bool use_plus_for_space) {
   if (src == NULL || dest == NULL || dest_len == 0) {
     return ESP_ERR_INVALID_ARG;
   }
@@ -692,10 +698,22 @@ esp_err_t url_encode(const char *src, char *dest, size_t dest_len) {
   size_t j = 0; // 目标字符串索引
 
   while (src[i] != '\0') {
-    unsigned char c = src[i];
+    unsigned char c = (unsigned char)src[i];
 
+    if (c == ' ') {
+      if (j + 2 > dest_len) {
+        return ESP_ERR_NO_MEM;
+      }
+      if (use_plus_for_space) {
+        dest[j++] = '+';
+      } else {
+        dest[j++] = '%';
+        dest[j++] = hex[(c >> 4) & 0x0F];
+        dest[j++] = hex[c & 0x0F];
+      }
+    }
     // 判断是否是安全字符（字母、数字、- _ . ~）
-    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+    else if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
       // 检查空间：安全字符需要 1 个字节 + 1 个结束符
       if (j + 2 > dest_len) {
         return ESP_ERR_NO_MEM;
@@ -715,6 +733,55 @@ esp_err_t url_encode(const char *src, char *dest, size_t dest_len) {
 
   dest[j] = '\0'; // 安全补上字符串结束符
   return ESP_OK;
+}
+
+/// @brief 构建安全的JSON报文
+/// @param src 源字符串指针,内部不会更改/free
+/// @return NULL(构建失败)
+/// @return char* 安全的JSON字符串指针,内部申请内存,需要手动释放内存
+/// @note src == NULL或strlen(src) == 0 时,返回NULL
+/// @note
+/// 不会对"进行转义,{"model":"ernie-4.5-turbo-128k"}->{"model":"ernie-4.5-turbo-128k"}
+/// @note 连续的\"会被替换为"
+char *build_safe_json_string(const char *src) {
+  if (src == NULL || strlen(src) == 0) {
+    return NULL;
+  }
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) {
+    return NULL;
+  }
+  cJSON_AddStringToObject(root, "src", src);
+  char *json_str = cJSON_PrintUnformatted(root);
+  cJSON_Delete(root);
+
+  if (json_str != NULL && strlen(json_str) > 0) {
+    char *out_buf = strchr(json_str, ':') + 2;
+    out_buf[strlen(out_buf) - 2] = '\0';
+
+    char *out = strdup(out_buf);
+    if (out != NULL && strlen(out) > 0) {
+      int j = 0;
+      for (int i = 0; i < strlen(out_buf); i++) {
+        if (out_buf[i] == '\\') {
+          if (out_buf[i + 1] == '"') {
+            continue;
+          }
+        }
+        out[j] = out_buf[i];
+        j++;
+      }
+      out[j] = '\0';
+    }
+    out_buf = NULL;
+
+    free(json_str);
+    json_str = NULL;
+
+    return out;
+  }
+
+  return NULL;
 }
 
 /// @brief 初始化GET请求
@@ -1584,11 +1651,11 @@ void transform_current_weather_data_qweather(IWEDA_handle_t iweda_handle) {
 void GPT_chat_transform_collect(char *line_response, char **result) {
   static const char *TAG = "GPT_chat_transform_collect";
   if (!line_response) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return;
   }
 
-  // 如果缓存为空,申请缓存
+  // 如果缓存为NULL,申请缓存
   if (!*result) {
     *result = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
     while (!*result) {
@@ -1633,7 +1700,7 @@ void GPT_chat_transform_collect(char *line_response, char **result) {
 bool GPT_stream_chat_over_status(char *http_response) {
   static const char *TAG = "GPT_stream_chat_over_status";
   if (!http_response) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return false;
   }
 
@@ -1826,6 +1893,125 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
   }
 }
 
+/// @brief 启用多轮对话
+/// @param chat_handle GPT文本交互句柄
+/// @param context_json_max_len 交互上下文最大长度(单位字节)
+/// @param context_json_expire_ms 交互上下文过期时间(单位毫秒)
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+/// @note 本函数仅设置配置参数,不会触碰非配置内容
+/// @note 这不意味着启动会立即占用最大长度对应内存,而是根据需要动态申请
+esp_err_t GPT_chat_enable_multi_round_chat(GPT_chat_handle_t chat_handle,
+                                           int context_json_max_len,
+                                           int context_json_expire_ms) {
+  const char *TAG = "GPT_chat_enable_multi_round_chat";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  chat_handle->context.is_enable_multi_round_chat = true;
+  chat_handle->context.context_json_max_len = context_json_max_len;
+  chat_handle->context.context_json_expire_ms = context_json_expire_ms;
+  return ESP_OK;
+}
+
+esp_err_t GPT_chat_update_context_json(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_update_context_json";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  if (chat_handle->result == NULL || chat_handle->user_content == NULL) {
+    ESP_LOGE(TAG, "chat_handle->result 或 chat_handle->user_content 为NULL");
+    return ESP_ERR_INVALID_STATE;
+  }
+  if (!strcasecmp(chat_handle->user_content, "")) {
+    ESP_LOGW(TAG, "chat_handle->user_content无内容");
+    return ESP_ERR_INVALID_STATE;
+  }
+  if (!strcasecmp(chat_handle->result, "")) {
+    ESP_LOGW(TAG, "chat_handle->result无内容");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  int old_context_json_len = (chat_handle->context.context_json == NULL)
+                                 ? 0
+                                 : strlen(chat_handle->context.context_json);
+  int add_len = snprintf(NULL, 0,
+                         "{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+                         "\"assistant\",\"content\":\"%s\"},",
+                         chat_handle->user_content, chat_handle->result);
+
+  if (old_context_json_len + add_len >
+      chat_handle->context.context_json_max_len) {
+    if (chat_handle->context.context_json != NULL) {
+      ESP_LOGW(TAG, "追加后长度超过最大长度,正常释放上下文缓存,"
+                    "本次交互内容不会保存到context_json");
+      free(chat_handle->context.context_json);
+      chat_handle->context.context_json = NULL;
+      chat_handle->context.context_json_update_time = 0;
+      return ESP_OK;
+    } else {
+      ESP_LOGE(TAG, "context_json_max_len过小,第一轮对话上下文都无法保存");
+      return ESP_ERR_NOT_SUPPORTED;
+    }
+  }
+
+  int new_context_json_buf_size =
+      (old_context_json_len + add_len + 1) * sizeof(char);
+  char *new_context_json_buf = malloc(new_context_json_buf_size);
+  if (new_context_json_buf == NULL) {
+    ESP_LOGE(TAG, "内存分配失败");
+    return ESP_ERR_NO_MEM;
+  }
+  memset(new_context_json_buf, 0, new_context_json_buf_size);
+
+  char *old_context_json_buf = chat_handle->context.context_json;
+  chat_handle->context.context_json = NULL;
+
+  if (old_context_json_buf != NULL) {
+    snprintf(new_context_json_buf, new_context_json_buf_size,
+             "%s{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+             "\"assistant\",\"content\":\"%s\"},",
+             old_context_json_buf, chat_handle->user_content,
+             chat_handle->result);
+    free(old_context_json_buf);
+    old_context_json_buf = NULL;
+  } else {
+    snprintf(new_context_json_buf, new_context_json_buf_size,
+             "{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+             "\"assistant\",\"content\":\"%s\"},",
+             chat_handle->user_content, chat_handle->result);
+  }
+
+  chat_handle->context.context_json = new_context_json_buf;
+  chat_handle->context.context_json_update_time = esp_timer_get_time();
+
+  return ESP_OK;
+}
+
+/// @brief 关闭多轮对话
+/// @param chat_handle GPT文本交互句柄
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+/// @note 本函数会尝试释放多轮对话相关资源，初始化所有相关参数
+esp_err_t GPT_chat_disable_multi_round_chat(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_disable_multi_round_chat";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  chat_handle->context.is_enable_multi_round_chat = false;
+  chat_handle->context.context_json_max_len = 0;
+  chat_handle->context.context_json_expire_ms = 0;
+  chat_handle->context.context_json_update_time = 0;
+  if (chat_handle->context.context_json != NULL) {
+    free(chat_handle->context.context_json);
+    chat_handle->context.context_json = NULL;
+  }
+  return ESP_OK;
+}
+
 /// @brief [使用流式传输模式]GPT文本交互
 /// @param chat_handle GPT对话句柄
 /// @param task_stack 任务栈大小(单位字节)
@@ -1836,7 +2022,7 @@ void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
 /// [ESP_OK 成功]
 /// [ESP_FAIL HTTP访问错误]
 /// [ESP_ERR_HTTP_CONNECT HTTP连接错误]
-/// [ESP_ERR_INVALID_ARG 传入了为空的输入数据 / 空的用户内容]
+/// [ESP_ERR_INVALID_ARG 传入了为NULL的输入数据 / 空的用户内容]
 /// [ESP_ERR_INVALID_STATE 解析任务内部运行异常 / 网络未连接]
 /// [ESP_ERR_NO_MEM 内存不足]
 /// [ESP_ERR_TIMEOUT 等待回复超时]
@@ -1844,7 +2030,7 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
   const char *TAG = "GPT_chat_text_exchange";
 
   if (chat_handle == NULL) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return ESP_ERR_INVALID_ARG;
   }
 
@@ -1888,6 +2074,9 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
     return chat_handle->err;
   }
 
+  if (chat_handle->context.is_enable_multi_round_chat) {
+    GPT_chat_update_context_json(chat_handle);
+  }
   return ESP_OK;
 }
 
@@ -1896,23 +2085,23 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
 /// @param user_content 新用户内容
 /// @return ESP_OK 成功
 /// @return ESP_ERR_INVALID_ARG 传入了无效的参数
-/// @return ESP_ERR_INVALID_STATE 初始化未完成,request_body_buf为空
+/// @return ESP_ERR_INVALID_STATE 初始化未完成,request_body_buf为NULL
 /// @return ESP_ERR_NO_MEM 内存不足
 esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
                                        char *user_content) {
   const char *TAG = "GPT_chat_update_user_content";
 
-  if (chat_handle == NULL) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+  if (chat_handle == NULL || user_content == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return ESP_ERR_INVALID_ARG;
   }
 
   if (!chat_handle->request_body_buf) {
-    ESP_LOGE(TAG, "初始化未完成,request_body_buf为空");
+    ESP_LOGE(TAG, "初始化未完成,request_body_buf为NULL");
     return ESP_ERR_INVALID_STATE;
   }
 
-  if (!user_content || !strcasecmp(user_content, "")) {
+  if (!strcasecmp(user_content, "")) {
     ESP_LOGW(TAG, "缺少必填参数");
   }
 
@@ -1925,15 +2114,70 @@ esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
 
   memset(chat_handle->request_body_buf, 0,
          GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
-  int request_body_len = snprintf(
-      chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
-      "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
-      "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
-      chat_handle->model, chat_handle->user_content);
+
+  int request_body_len = 0;
+
+  if (chat_handle->context.is_enable_multi_round_chat) {
+    ESP_LOGW(TAG, "多轮对话已启用");
+    if (chat_handle->context.context_json != NULL) {
+      if ((esp_timer_get_time() -
+           chat_handle->context.context_json_update_time) /
+                  1000 >=
+              chat_handle->context.context_json_expire_ms ||
+          strlen(chat_handle->context.context_json) >
+              chat_handle->context.context_json_max_len) {
+        // context_json过期/超过最大长度
+        free(chat_handle->context.context_json);
+        chat_handle->context.context_json = NULL;
+        chat_handle->context.context_json_update_time = 0;
+      }
+    }
+    if (chat_handle->context.context_json != NULL) {
+      request_body_len = snprintf(
+          chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+          "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[%s{"
+          "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+          chat_handle->model, chat_handle->context.context_json,
+          chat_handle->user_content);
+    } else {
+      request_body_len = snprintf(
+          chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+          "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
+          "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+          chat_handle->model, chat_handle->user_content);
+    }
+  } else {
+    ESP_LOGW(TAG, "多轮对话未启用");
+    request_body_len = snprintf(
+        chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
+        "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+        chat_handle->model, chat_handle->user_content);
+  }
+
   if (request_body_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {
     ESP_LOGE(TAG, "request_body_buf内存不足");
     return ESP_ERR_NO_MEM;
   }
+
+  char *safe_json = build_safe_json_string(chat_handle->request_body_buf);
+  if (safe_json == NULL) {
+    ESP_LOGE(TAG, "构建安全的JSON报文失败");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  int request_body_buf_len = snprintf(NULL, 0, "%s", safe_json);
+  if (request_body_buf_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {
+    ESP_LOGE(TAG, "安全的JSON报文大小超过request_body_buf大小");
+    free(safe_json);
+    safe_json = NULL;
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  snprintf(chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+           "%s", safe_json);
+  free(safe_json);
+  safe_json = NULL;
 
   ESP_LOGW(TAG, "更新用户内容:%s", chat_handle->user_content);
 
@@ -1944,7 +2188,7 @@ esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
 /// @param url API地址(必填)
 /// @param access_key 访问密钥(必填)
 /// @param model 模型名称(必填)
-/// @param user_content 用户内容(选填，但是不能为空，可以为“”)
+/// @param user_content 用户内容(选填，但是不能为NULL，可以为“”)
 /// @param timeout_ms 超时时间(必填)(单位ms)
 /// @return GPT对话句柄
 /// @note 会自动申请内存，所有参数均会拷贝克隆一份到GPT对话句柄中
@@ -2051,7 +2295,7 @@ GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model,
 esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle) {
   const char *TAG = "GPT_chat_stop";
   if (chat_handle == NULL) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return ESP_ERR_INVALID_ARG;
   }
 
@@ -2102,7 +2346,7 @@ esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle) {
 void asr_data_save_result(char *asr_response) {
   static const char *TAG = "asr_data_get_result";
   if (asr_response == NULL) {
-    ESP_LOGE(TAG, "传入了为空的输入数据");
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return;
   }
   cJSON *root_data = NULL;
@@ -2232,7 +2476,7 @@ void refresh_position_data() {
 
   // 获取公网IP
   int url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           GET_IP_ADDRESS_API_URL);
+                         GET_IP_ADDRESS_API_URL);
   if (url_len >= iweda_handle->url_buf_size) {
     ESP_LOGE(TAG, "url_buf内存不足");
     delete_iweda_handle(iweda_handle);
@@ -2249,12 +2493,12 @@ void refresh_position_data() {
 
   // 获取IP归属地
   if (!ip_address) {
-    ESP_LOGE(TAG, "公网IP为空");
+    ESP_LOGE(TAG, "公网IP为NULL");
     delete_iweda_handle(iweda_handle);
     return;
   }
   url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           IP138_IP_POSITION_API_URL, ip_address);
+                     IP138_IP_POSITION_API_URL, ip_address);
   if (url_len >= iweda_handle->url_buf_size) {
     ESP_LOGE(TAG, "url_buf内存不足");
     delete_iweda_handle(iweda_handle);
@@ -2283,10 +2527,10 @@ void refresh_position_data() {
   if (position_data.name)
     strcat(keywords, position_data.name);
 
-  url_encode(keywords, keywords_encoded, sizeof(keywords_encoded));
+  url_encode(keywords, keywords_encoded, sizeof(keywords_encoded), false);
   url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           AMAP_SEARCH_POI_API_URL, keywords_encoded, 1, 1,
-           CONFIG_AMAP_API_KEY);
+                     AMAP_SEARCH_POI_API_URL, keywords_encoded, 1, 1,
+                     CONFIG_AMAP_API_KEY);
   if (url_len >= iweda_handle->url_buf_size) {
     ESP_LOGE(TAG, "url_buf内存不足");
     delete_iweda_handle(iweda_handle);
@@ -2302,13 +2546,13 @@ void refresh_position_data() {
 
   // 通过和风天气GeoAPI进行城市搜索，根据经纬度获取location数据
   if (position_data.longitude == NULL || position_data.latitude == NULL) {
-    ESP_LOGE(TAG, "经纬度为空");
+    ESP_LOGE(TAG, "经纬度为NULL");
     delete_iweda_handle(iweda_handle);
     return;
   }
   url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
-           QWEATHER_GEO_CITY_LOOKUP_API_URL, CONFIG_QWEATHER_API_HOST,
-           position_data.longitude, position_data.latitude);
+                     QWEATHER_GEO_CITY_LOOKUP_API_URL, CONFIG_QWEATHER_API_HOST,
+                     position_data.longitude, position_data.latitude);
   if (url_len >= iweda_handle->url_buf_size) {
     ESP_LOGE(TAG, "url_buf内存不足");
     delete_iweda_handle(iweda_handle);
@@ -2340,7 +2584,7 @@ void refresh_current_weather_data() {
   }
 
   if (position_data.longitude == NULL || position_data.latitude == NULL) {
-    ESP_LOGE(TAG, "经纬度为空");
+    ESP_LOGE(TAG, "经纬度为NULL");
     return;
   }
 
@@ -2434,7 +2678,7 @@ esp_err_t fetch_text_emotion(const char *text, char *emotion_label,
   esp_http_client_set_header(client_handle, "Content-Type", "application/json");
   esp_http_client_set_timeout_ms(client_handle, timeout_ms);
 
-  esp_err_t err = esp_http_client_open(client_handle,request_body_len);
+  esp_err_t err = esp_http_client_open(client_handle, request_body_len);
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
     esp_http_client_cleanup(client_handle);
@@ -2443,7 +2687,7 @@ esp_err_t fetch_text_emotion(const char *text, char *emotion_label,
     return ESP_FAIL;
   }
 
-  err =  esp_http_client_write(client_handle, request_body, request_body_len);  
+  err = esp_http_client_write(client_handle, request_body, request_body_len);
   if (err == -1) {
     ESP_LOGE(TAG, "esp_http_client_write失败");
     esp_http_client_close(client_handle);
@@ -2524,4 +2768,249 @@ esp_err_t fetch_text_emotion(const char *text, char *emotion_label,
   free(request_body);
   request_body = NULL;
   return ESP_ERR_INVALID_STATE;
+}
+
+/// @brief 获取长文本语音合成结果语音URL
+/// @param speech_url 语音URL缓冲区
+/// @param speech_url_size 语音URL缓冲区大小
+/// @param cfg tts配置
+/// @param timeout_ms 超时时间
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 参数错误
+/// @return ESP_ERR_NO_MEM 内存不足
+/// @return ESP_FAIL 失败
+esp_err_t fetch_long_tts_speech_url(char *speech_url, int speech_url_size,
+                                    TTS_cfg_t *cfg, int timeout_ms) {
+  const char *TAG = "fetch_long_tts_speech_url";
+
+  if (!speech_url || !cfg || !cfg->tex || speech_url_size <= 0) {
+    ESP_LOGE(TAG, "参数错误");
+    return ESP_ERR_INVALID_ARG;
+  }
+  memset(speech_url, 0, speech_url_size);
+
+  int request_body_size = strlen(cfg->tex) + 2048;
+  char *request_body = malloc(request_body_size);
+  if (!request_body) {
+    ESP_LOGE(TAG, "申请内存request_body失败");
+    return ESP_ERR_NO_MEM;
+  }
+  memset(request_body, 0, request_body_size);
+
+  int request_body_len = 0;
+  if (cfg->long_tts_rate == LONG_TTS_SAMPLING_RATE_16K) {
+    request_body_len = snprintf(
+        request_body, request_body_size,
+        "{\"text\": [\"%s\"],\"format\": \"mp3-16k\",\"voice\": %d,\"lang\": "
+        "\"zh\",\"speed\": %d,\"pitch\": %d,\"volume\": %d}",
+        cfg->tex, cfg->per, cfg->spd, cfg->pit, cfg->vol);
+  } else if (cfg->long_tts_rate == LONG_TTS_SAMPLING_RATE_48K) {
+    request_body_len = snprintf(
+        request_body, request_body_size,
+        "{\"text\": [\"%s\"],\"format\": \"mp3-48k\",\"voice\": %d,\"lang\": "
+        "\"zh\",\"speed\": %d,\"pitch\": %d,\"volume\": %d}",
+        cfg->tex, cfg->per, cfg->spd, cfg->pit, cfg->vol);
+  } else {
+    ESP_LOGE(TAG, "cfg->long_tts_rate参数错误");
+    free(request_body);
+    request_body = NULL;
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (request_body_len >= request_body_size) {
+    ESP_LOGE(TAG, "request_body_size不足");
+    free(request_body);
+    request_body = NULL;
+    return ESP_ERR_NO_MEM;
+  }
+
+  char response_buf[2048] = {0};
+  char url_buf[2048] = {0};
+  int url_buf_len =
+      snprintf(url_buf, sizeof(url_buf), BAIDU_LONG_TTS_CREATE_URL,
+               get_baidu_api_access_token());
+  if (url_buf_len >= sizeof(url_buf)) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  esp_http_client_config_t config = {0};
+  config.url = url_buf;
+  config.method = HTTP_METHOD_POST;
+  esp_http_client_handle_t client_handle = esp_http_client_init(&config);
+  if (!client_handle) {
+    ESP_LOGE(TAG, "esp_http_client_init失败");
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+  esp_http_client_set_header(client_handle, "Content-Type", "application/json");
+  esp_http_client_set_timeout_ms(client_handle, timeout_ms);
+
+  esp_err_t err = esp_http_client_open(client_handle, request_body_len);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  err = esp_http_client_write(client_handle, request_body, request_body_len);
+  if (err == -1) {
+    ESP_LOGE(TAG, "esp_http_client_write失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  esp_http_client_fetch_headers(client_handle);
+  esp_http_client_read_response(client_handle, response_buf,
+                                sizeof(response_buf));
+  ESP_LOGI(TAG, "申请创建云端语音合成任务完成,响应体内容 -> %s", response_buf);
+
+  char task_id_buf[1024] = {0};
+
+  if (response_buf[0]) {
+    cJSON *root_data = NULL;
+    cJSON *cjson_task_id = NULL;
+    root_data = cJSON_Parse(response_buf);
+    if (root_data) {
+      cjson_task_id = cJSON_GetObjectItem(root_data, "task_id");
+      if (cjson_task_id && cjson_task_id->valuestring) {
+        if (snprintf(NULL, 0, "%s", cjson_task_id->valuestring) >=
+            sizeof(task_id_buf)) {
+          ESP_LOGE(TAG, "task_id_buf大小不足");
+        } else {
+          snprintf(task_id_buf, sizeof(task_id_buf), "%s",
+                   cjson_task_id->valuestring);
+        }
+      }
+      cJSON_Delete(root_data);
+    }
+  }
+
+  if (!task_id_buf[0]) {
+    ESP_LOGE(TAG, "task_id获取失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  } else {
+    ESP_LOGI(TAG, "task_id -> %s", task_id_buf);
+    esp_http_client_close(client_handle);
+
+    url_buf_len =
+        snprintf(url_buf, sizeof(url_buf), BAIDU_LONG_TTS_TASK_LOOKUP_URL,
+                 get_baidu_api_access_token());
+    request_body_len = snprintf(request_body, request_body_size,
+                                "{\"task_ids\": [\"%s\"]}", task_id_buf);
+
+    if (url_buf_len >= sizeof(url_buf)) {
+      ESP_LOGE(TAG, "url_buf大小不足");
+      free(request_body);
+      request_body = NULL;
+      return ESP_ERR_NO_MEM;
+    }
+    if (request_body_len >= request_body_size) {
+      ESP_LOGE(TAG, "request_body_size不足");
+      free(request_body);
+      request_body = NULL;
+      return ESP_ERR_NO_MEM;
+    }
+
+    esp_http_client_set_url(client_handle, url_buf);
+  }
+
+  int64_t start_time = esp_timer_get_time();
+  while (1) {
+    int64_t current_time = esp_timer_get_time();
+    if (current_time - start_time >= timeout_ms * 1000) {
+      ESP_LOGE(TAG, "等待云端语音合成任务完成超时");
+      break;
+    }
+
+    if (esp_http_client_open(client_handle, request_body_len) != ESP_OK) {
+      ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+      break;
+    }
+    if (esp_http_client_write(client_handle, request_body, request_body_len) ==
+        -1) {
+      ESP_LOGE(TAG, "esp_http_client_write失败");
+      esp_http_client_close(client_handle);
+      break;
+    }
+
+    esp_http_client_fetch_headers(client_handle);
+    esp_http_client_read_response(client_handle, response_buf,
+                                  sizeof(response_buf));
+    esp_http_client_close(client_handle);
+
+    ESP_LOGI(TAG,
+             "正在轮询云端语音合成任务状态,已等待%" PRId64
+             "ms,本次轮询响应体内容 -> %s",
+             (current_time - start_time) / 1000, response_buf);
+    if (response_buf[0]) {
+      cJSON *root_data = NULL;
+      cJSON *cjson_tasks_info = NULL;
+      cJSON *cjson_tasks_info_item = NULL;
+      cJSON *cjson_task_status = NULL;
+      cJSON *cjson_task_result = NULL;
+      cJSON *cjson_speech_url = NULL;
+      root_data = cJSON_Parse(response_buf);
+      if (root_data) {
+        cjson_tasks_info = cJSON_GetObjectItem(root_data, "tasks_info");
+        if (cjson_tasks_info) {
+          cjson_tasks_info_item = cJSON_GetArrayItem(cjson_tasks_info, 0);
+          if (cjson_tasks_info_item) {
+            cjson_task_status =
+                cJSON_GetObjectItem(cjson_tasks_info_item, "task_status");
+            if (cjson_task_status && cjson_task_status->valuestring) {
+              if (strcmp(cjson_task_status->valuestring, "Success") == 0) {
+                ESP_LOGI(TAG, "云端语音合成任务完成");
+                cjson_task_result =
+                    cJSON_GetObjectItem(cjson_tasks_info_item, "task_result");
+                if (cjson_task_result) {
+                  cjson_speech_url =
+                      cJSON_GetObjectItem(cjson_task_result, "speech_url");
+                  if (cjson_speech_url && cjson_speech_url->valuestring) {
+                    ESP_LOGI(TAG, "speech_url -> %s",
+                             cjson_speech_url->valuestring);
+                    int speech_url_len =
+                        snprintf(NULL, 0, "%s", cjson_speech_url->valuestring);
+                    if (speech_url_len >= speech_url_size) {
+                      ESP_LOGE(TAG,
+                               "speech_url大小不足,speech_url_size = "
+                               "%d,speech_url_len = %d",
+                               speech_url_size, speech_url_len);
+                    } else {
+                      snprintf(speech_url, speech_url_size, "%s",
+                               cjson_speech_url->valuestring);
+                      cJSON_Delete(root_data);
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        cJSON_Delete(root_data);
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+  esp_http_client_cleanup(client_handle);
+  free(request_body);
+  request_body = NULL;
+
+  if (!speech_url[0]) {
+    ESP_LOGE(TAG, "speech_url获取失败");
+    return ESP_FAIL;
+  } else {
+    return ESP_OK;
+  }
 }

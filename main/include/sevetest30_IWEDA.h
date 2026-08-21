@@ -34,7 +34,9 @@
 #include "esp_err.h"
 #include "esp_http_client.h"
 #include "periph_wifi.h"
+#include "sevetest30_sound.h"
 #include "stdbool.h"
+#include <stdint.h>
 
 #define WIFI_CONNECT_TIMEOUT_MS 30000 // WIFI连接等待超时时间
 
@@ -53,10 +55,16 @@
 // ASR语音识别结果缓存大小
 #define ASR_RESULT_TEX_BUF_MAX 4096
 
+// 百度长文本语音合成API
+#define BAIDU_LONG_TTS_CREATE_URL                                              \
+  "https://aip.baidubce.com/rpc/2.0/tts/v1/create?access_token=%s"
+#define BAIDU_LONG_TTS_TASK_LOOKUP_URL                                         \
+  "https://aip.baidubce.com/rpc/2.0/tts/v1/query?access_token=%s"
+
 #define BAIDU_API_ACCESSTOKEN_SIZE_MAX 100 // 百度API access_token缓存大小
 #define BAIDU_API_ACCESSTOKEN_REFRESH_TIME 86400 / 2 // 12小时刷新一次
 
-#define GPT_CHAT_RESPONSE_BUF_SIZE 128 * 1024          // GPT聊天响应缓存大小
+#define GPT_CHAT_RESPONSE_BUF_SIZE 128 * 1024         // GPT聊天响应缓存大小
 #define GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE 16 * 1024 // GPT聊天请求体缓存大小
 #define GPT_CHAT_TASK_CORE 0                          // GPT聊天任务运行核心
 #define GPT_CHAT_TASK_STACK_SIZE 4 * 1024             // GPT聊天任务堆栈大小
@@ -106,24 +114,77 @@ typedef struct IWEDA_t {
 
 typedef struct IWEDA_t *IWEDA_handle_t;
 
+  // 启用多轮对话时
+  // context_json
+  // 示例内容（字符串片段，注意开头允许直接是对象，对象之间用逗号分隔）
+  // {"role": "system","content": "You are a helpful assistant."},
+  // {"role": "user","content": "你好"},
+  // {"role": "assistant","content": "你好啊"},
+  // {"role": "user","content": "xxx"},
+  // {"role": "assistant","content": "xxxxx"},
+  //
+  // 模块职责：维护一段消息JSON片段字符串；仅支持过期校验、尾部追加完整一轮(user+assistant)、整体释放。
+  // 【重要约束】本模块不会做任何JSON序列化/反序列化，不解析内部结构，不支持头部/中间插入、修改、删除。
+  // system消息、自定义头部内容，全部由上层调用者负责在对话任务开始前手动写入/更新context_json。
+  //
+  // 以下为本模块自身行为
+  //
+  // 1.【对话任务进行前-更新用户内容时】
+  //    步骤1:如果context_json不为NULL,检查 context_json 是否过期，或已达到上下文最大字节长度
+  //         满足任意条件：仅释放旧的context_json内存,设置context_json为NULL,设置context_json_update_time为0
+  //    步骤2:如果context_json不为NULL,将 context_json直接拼接到API请求体的messages数组内部
+  //
+  // 2.【对话任务进行时（发API请求）】
+  //    正常按API请求体缓存发送请求,不涉及本模块内容
+  //
+  // 3.【一次完整交互结束后（运行完全正常且已拿到完整回复）】
+  //    输入待追加片段：{"role":"user","content":"xxx"},{"role":"assistant","content":"xxxxx"},
+  //    注意，含末尾","
+  //    a) 预估：旧字符串长度(如果context_json为NULL,则长度为0) + 待追加片段长度 是否超过 context_json_max_len
+  //       -
+  //       若会超限：仅释放旧的context_json内存,设置context_json为NULL,设置context_json_update_time为0,本轮交互不写入历史。
+  //       -
+  //       若不会超限：分配一块大小为预估长度的新内存，
+  //                 如果context_json不为NULL：拷贝原有context_json内容，并在尾部追加新消息片段,释放旧的context_json内存
+  //                 如果context_json为NULL：仅追加新消息片段
+  //                 将context_json指向新分配的内存
+  //                 更新context_json_update_time
+  //
+  // 4. system、自定义头部消息说明：
+  //    如果需要加入system或其他自定义role消息，上层调用方必须在每次对话任务发起前，
+  //    手动构造合法的JSON片段赋值给
+  //    context_json。本模块不感知system，不负责维护system。
+  //
+  // 异常兜底：任意异常发生时(仅限上下文相关异常)立即调用关闭函数退化为单轮对话模式，对话交换不受其他影响
+
+  typedef struct GPT_chat_context_t {
+    bool is_enable_multi_round_chat;  // 启用多轮对话
+    int context_json_max_len;         // 交互上下文最大长度
+    int context_json_expire_ms;       // 交互上下文过期时间,单位毫秒    
+    int64_t context_json_update_time; // 交互上下文更新时间,距离开机的微秒时间    
+    char *context_json;               // 交互上下文(获得result后更新)
+  } GPT_chat_context_t;
+
 typedef struct GPT_chat_t {
-  bool is_completed;
-  int timeout_ms;
+  bool is_completed; // 本轮交互完成标识
+  int timeout_ms;    // 超时时间,单位毫秒
 
-  char *url;
-  char *access_key;
-  char *model;
-  char *user_content;
+  char *url;        // API地址
+  char *access_key; // API密钥
+  char *model;      // 模型名称
 
-  char *result;
+  char *user_content; // 本轮交互用户输入
+  char *result;       // 本轮交互模型输出
 
-  TaskHandle_t task_handle;
-  esp_err_t err;
-  esp_http_client_handle_t client_handle;
-  char *auth_header_buf;
-  char *request_body_buf;
-  char *response_buf;
-  char *json_buf;
+  GPT_chat_context_t context;
+
+  TaskHandle_t task_handle;               // 本轮交互任务句柄
+  esp_err_t err;                          // 本轮交互错误码
+  esp_http_client_handle_t client_handle; // 本轮交互http客户端句柄
+  char *auth_header_buf;                  // 本轮交互http认证头缓存
+  char *request_body_buf;                 // 本轮交互http请求体缓存
+  char *response_buf;                     // 本轮交互http响应缓存
+  char *json_buf;                         // 本轮交互json数据缓存
 } GPT_chat_t;
 
 typedef struct GPT_chat_t *GPT_chat_handle_t;
@@ -206,15 +267,30 @@ int json_line_unit_num_get(char *data, int len);
 void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len);
 void asr_data_save_result(char *asr_response);
 
+esp_err_t url_encode(const char *src, char *dest, size_t dest_len,
+                     bool use_plus_for_space);
+void base64_to_base64url(char *str);
+char *build_safe_json_string(const char* src);
+
+
+
 void refresh_position_data();
 void refresh_current_weather_data();
 
 esp_err_t fetch_music_lyric_by_url(char *url, char *dest, int len_max);
 esp_err_t fetch_text_emotion(const char *text, char *emotion_lable,
                              int lable_buf_size, int timeout_ms);
+esp_err_t fetch_long_tts_speech_url(char *speech_url, int speech_url_size,
+                                    TTS_cfg_t *cfg, int timeout_ms);
 
 GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model,
                                  char *user_content, int timeout_ms);
+
+esp_err_t GPT_chat_enable_multi_round_chat(GPT_chat_handle_t chat_handle,
+                                           int context_json_max_len,
+                                           int context_json_expire_ms);
+
+esp_err_t GPT_chat_disable_multi_round_chat(GPT_chat_handle_t chat_handle);                           
 
 esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
                                        char *user_content);

@@ -248,7 +248,7 @@ void test(void) {
   // }
 
   // /// 歌词获取
-  // char lrc[5000] = {'\0'};
+  // char lrc[5000] = {0};
   // fetch_music_lyric_by_url("",lrc,5000);
   // ESP_LOGE("main", "%s",lrc);
 
@@ -513,7 +513,7 @@ void test(void) {
 
   // TTS_cfg_t tts_cfg =
   // TTS_DEFAULT_CONFIG("你好，我是SEVETEST30，你可以和我聊天", 0);
-  // tts_service_play(&tts_cfg, 1); // 启动TTS服务
+  // tts_service_play_short(&tts_cfg, 1); // 启动TTS服务
 
   // music_FFT_UI_handle_t FFT_UI_handle = music_FFT_UI_start(&FFT_UI_cfg, 1);
   // if (!FFT_UI_handle)
@@ -548,10 +548,10 @@ void test(void) {
   asr_cfg.asr_one_frame_ms = 1000;
   asr_cfg.stop_threshold = 1;
   asr_cfg.send_threshold = 1;
-  asr_cfg.record_save_times_max = 20;
+  asr_cfg.record_save_times_max = 10;
   asr_cfg.vad_mode = VAD_MODE_3;
   asr_cfg.vad_one_frame_ms = 30;
-  asr_cfg.vad_min_speech_ms = 500;
+  asr_cfg.vad_min_speech_ms = 250;
   asr_cfg.vad_min_noise_ms = 50;
   asr_service_begin(&asr_cfg, 1);
 
@@ -560,6 +560,14 @@ void test(void) {
                      "ernie-4.5-turbo-128k", "", 60000);
   if (GPT_chat_handle == NULL) {
     ESP_LOGE("main", "GPT_chat_handle 为空,无法绘制任务");
+    return;
+  }
+
+  // 启用多轮对话
+  if (GPT_chat_enable_multi_round_chat(GPT_chat_handle, 8192, 10 * 60 * 1000) !=
+      ESP_OK) {
+    GPT_chat_stop(GPT_chat_handle);
+    ESP_LOGE("main", "GPT_chat_enable_multi_round_chat 失败\n");
     return;
   }
 
@@ -575,8 +583,8 @@ void test(void) {
     while (1) {
       vTaskDelay(pdMS_TO_TICKS(500));
       if (sevetest30_asr_result_text) {
-        if (sevetest30_asr_result_text[0] != '\0') {
-          sevetest30_asr_running_flag = false;// 获取到样本,强制终止ASR服务
+        if (sevetest30_asr_result_text[0] != 0) {
+          sevetest30_asr_running_flag = false; // 获取到样本,强制终止ASR服务
           break;
         }
       }
@@ -597,33 +605,45 @@ void test(void) {
 
     // 如果正常回复,TTS语音播放
     if (GPT_chat_handle->result) {
-      if (GPT_chat_handle->result[0] != '\0') {
+      if (GPT_chat_handle->result[0] != 0) {
         board_ctrl_t *b = board_status_get();
         b->amplifier_mute = false;
         b->amplifier_sd = true;
         b->amplifier_volume = 60;
         sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
-        TTS_cfg_t tts_cfg = TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
-        // 启动TTS服务
-        tts_service_play(&tts_cfg, 1);
+        if (GPT_chat_handle->result != NULL) {
+          
+          // 启动TTS服务
+          if (strlen(GPT_chat_handle->result) > BAIDU_SHORT_TTS_TEXT_STRLEN_MAX){
+            TTS_cfg_t tts_cfg =
+              LONG_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
+            tts_service_play_long(&tts_cfg, 1, 120000);
+          }
+          else{
+            TTS_cfg_t tts_cfg =
+              SHORT_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
+            tts_service_play_short(&tts_cfg, 1);
+          }
 
-        // 显示表情
-        char emotion_lable[512] = {'\0'};
-        fetch_text_emotion(GPT_chat_handle->result, emotion_lable,
-                           sizeof(emotion_lable), 10000);
-        ESP_LOGI("main", "情绪标签:%s", emotion_lable);
+          // 显示表情
+          char emotion_lable[512] = {0};
+          if (fetch_text_emotion(GPT_chat_handle->result, emotion_lable,
+                                 sizeof(emotion_lable), 10000) == ESP_OK) {
+            ESP_LOGI("main", "情绪标签:%s", emotion_lable);
+            if (xSemaphoreTake(refresh_ledarray_task_mutex,
+                               pdMS_TO_TICKS(100)) == pdTRUE) {
+              clean_all_draw_buf();
+              facial_expression_show(1, 1, emotion_lable);
+              xSemaphoreGive(refresh_ledarray_task_mutex);
+            }
+          }
 
-        if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
-            pdTRUE) {
-          clean_all_draw_buf();
-          facial_expression_show(1, 1, emotion_lable);
-          xSemaphoreGive(refresh_ledarray_task_mutex);
+          while (sevetest30_music_running_flag) {
+            vTaskDelay(pdMS_TO_TICKS(500));
+          }
         }
 
-        while (sevetest30_music_running_flag) {
-          vTaskDelay(pdMS_TO_TICKS(500));
-        }
       }
     }
 
