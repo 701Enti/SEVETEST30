@@ -58,6 +58,8 @@ typedef enum
    AMP_VOL_DP_INIT,//初始化音频功放音量数字电位器
    AHT20_INIT,//AHT20(温湿度传感器)
    AGS10_INIT,//AGS10(空气质量传感器)
+   OPT3001_INIT,//OPT3001(环境光传感器)
+   MAX17048_INIT,//MAX17048(电池状态传感器)
    LSM6DS3TRC_INIT,//LSM6DS3TRC(姿态传感器)
    HSCDTD008A_INIT,//HSCDTD008A(地磁场传感器)
    VIBRA_MOTOR_INIT,//震动马达

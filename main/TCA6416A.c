@@ -43,7 +43,6 @@
 //         同时成员变量名是上级程序识别操作引脚的关键，如果需要使用其上级程序而不仅仅是TCA6416A库函数，结构体成员变量名不应该随意修改，对当前硬件的更新必须修改上层代码
 // github: https://github.com/701Enti
 
-
 #include "TCA6416A.h"
 #include "driver/i2c_master.h"
 #include "esp_log.h"
@@ -51,7 +50,7 @@
 static i2c_master_dev_handle_t TCA6416A_dev_handle = NULL;
 
 /// @brief 初始化TCA6416A
-/// @return [ESP_OK 成功] 
+/// @return [ESP_OK 成功]
 /// @return [ESP_ERR_INVALID_STATE]
 /// 设备状态异常，请检查设备通讯地址是否正确，设备是否正常连接
 /// @return [ESP_ERR_NOT_ALLOWED] 已初始化，不能重复初始化 /
@@ -78,8 +77,7 @@ esp_err_t TCA6416A_init() {
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "添加i2c设备失败,描述:%s", esp_err_to_name(ret));
     return ret;
-  }
-  else {
+  } else {
     ESP_LOGI(TAG, "TCA6416A初始化成功");
   }
   return ret;
@@ -116,28 +114,30 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode) {
       data2 = *p << (i - 8) | data2; // 取出值进行运算
   }
 
-  // ESP_LOGI(TAG, "准备进行TCA6416A引脚模式设置,准备写入:\nP00-P07: [P00 %d]
-  // [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17:
-  // [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
-  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >>
-  //          3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6)
-  //          & 0x01, (data1 >> 7) & 0x01, data2 & 0x01, (data2 >> 1) & 0x01,
-  //          (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01,
-  //          (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  // ESP_LOGI(TAG,
+  //          "准备进行TCA6416A引脚模式设置,准备写入:\n"
+  //          "P00-P07: [P00 %d][P01 %d] [P02 %d] [P03 %d] "
+  //          "[P04 %d] [P05 %d] [P06 %d] [P07 %d]\n"
+  //          "P10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] "
+  //          "[P14 %d] [P15 %d] [P16 %d] [P17 %d]",
+  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01,
+  //          (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01,
+  //          (data1 >> 6) & 0x01, (data1 >> 7) & 0x01, data2 & 0x01,
+  //          (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01,
+  //          (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01,
+  //          (data2 >> 7) & 0x01);
 
   // 装载并写入
   TCA6416A_data_buf[0] = TCA6416A_MODE1, TCA6416A_data_buf[1] = data1;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_MODE2, TCA6416A_data_buf[1] = data2;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
@@ -145,32 +145,34 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode) {
 
   // 回读
   TCA6416A_data_buf[0] = TCA6416A_MODE1;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data1,
-                                     sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data1,
+                                    sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_MODE2;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data2,
-                                     sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data2,
+                                    sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
 
-  // ESP_LOGI(TAG, "TCA6416A引脚模式设置完成,当前寄存器回读:\nP00-P07: [P00 %d]
-  // [P01 %d] [P02 %d] [P03 %d] [P04 %d] [P05 %d] [P06 %d] [P07 %d]\nP10-P17:
-  // [P10 %d] [P11 %d] [P12 %d] [P13 %d] [P14 %d] [P15 %d] [P16 %d] [P17 %d]",
-  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >>
-  //          3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6)
-  //          & 0x01, (data1 >> 7) & 0x01, data2 & 0x01, (data2 >> 1) & 0x01,
-  //          (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01,
-  //          (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  ESP_LOGI(TAG,
+           "TCA6416A引脚模式设置完成,当前寄存器回读:\n"
+           "P00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] "
+           "[P04 %d] [P05 %d] [P06 %d] [P07 %d]\n"
+           "P10-P17:[P10 %d] [P11 %d] [P12 %d] [P13 %d] "
+           "[P14 %d] [P15 %d] [P16 %d] [P17 %d]",
+           data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01,
+           (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01,
+           (data1 >> 6) & 0x01, (data1 >> 7) & 0x01, data2 & 0x01,
+           (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01,
+           (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01,
+           (data2 >> 7) & 0x01);
 
   return ESP_OK;
 }
@@ -211,30 +213,32 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
       data2 = *p << (i - 8) | data2; // 取出值进行运算
   }
 
-  // ESP_LOGI(TAG, "准备进行TCA6416A输出引脚电平设置,准备写入:\nP00-P07:
-  // [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT
-  // %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2
-  // %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN
-  // %d][charge_SIGN %d][QC_TOUCH_R %d]",
-  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01, (data1 >>
-  //          3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01, (data1 >> 6)
-  //          & 0x01, (data1 >> 7) & 0x01, data2 & 0x01, (data2 >> 1) & 0x01,
-  //          (data2 >> 2) & 0x01, (data2 >> 3) & 0x01, (data2 >> 4) & 0x01,
-  //          (data2 >> 5) & 0x01, (data2 >> 6) & 0x01, (data2 >> 7) & 0x01);
+  // ESP_LOGI(TAG,
+  //          "准备进行TCA6416A输出引脚电平设置,准备写入:\n"
+  //          "P00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d]"
+  //          "[BAT_QSTRT %d][BAT_ALRT%d][EMF_DRDY %d]"
+  //          "[amplifier_MUTE %d][amplifier_SD %d]\n"
+  //          "P10-P17: [IMU_INT2%d][IMU_INT1 %d][ALS_INT %d]"
+  //          "[thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN%d]"
+  //          "[charge_SIGN %d][QC_TOUCH_R %d]",
+  //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01,
+  //          (data1 >> 3) & 0x01, (data1 >> 4) & 0x01, (data1 >> 5) & 0x01,
+  //          (data1 >> 6) & 0x01, (data1 >> 7) & 0x01, data2 & 0x01,
+  //          (data2 >> 1) & 0x01, (data2 >> 2) & 0x01, (data2 >> 3) & 0x01,
+  //          (data2 >> 4) & 0x01, (data2 >> 5) & 0x01, (data2 >> 6) & 0x01,
+  //          (data2 >> 7) & 0x01);
 
   // 装载并写入输出寄存器
   TCA6416A_data_buf[0] = TCA6416A_OUT1, TCA6416A_data_buf[1] = data1;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_OUT2, TCA6416A_data_buf[1] = data2;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
@@ -242,19 +246,17 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
 
   // 读取输入寄存器
   TCA6416A_data_buf[0] = TCA6416A_IN1;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data1,
-                                     sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data1,
+                                    sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_IN2;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data2,
-                                     sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data2,
+                                    sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
@@ -272,19 +274,17 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
 
   // 读取输出寄存器
   TCA6416A_data_buf[0] = TCA6416A_OUT1;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data1,
-                                     sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data1,
+                                    sizeof(data1), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_OUT2;
-  ret = i2c_master_transmit_receive(TCA6416A_dev_handle,
-                                     &TCA6416A_data_buf[0],
-                                     sizeof(TCA6416A_data_buf[0]), &data2,
-                                     sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
+  ret = i2c_master_transmit_receive(TCA6416A_dev_handle, &TCA6416A_data_buf[0],
+                                    sizeof(TCA6416A_data_buf[0]), &data2,
+                                    sizeof(data2), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
@@ -304,19 +304,23 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
     }
   }
 
-  // ESP_LOGI(TAG, "TCA6416A引脚电平读写完成,当前寄存器回读:\nP00-P07:
-  // [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d][BAT_QSTRT %d][BAT_ALRT
-  // %d][EMF_DRDY %d][amplifier_MUTE %d][amplifier_SD %d]\nP10-P17: [IMU_INT2
-  // %d][IMU_INT1 %d][ALS_INT %d][thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN
-  // %d][charge_SIGN %d][QC_TOUCH_R %d]",
-  //          pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->EN_LED_BOARD,
-  //          pTCA6416Alevel->HP_DETECT, pTCA6416Alevel->BAT_QSTRT,
-  //          pTCA6416Alevel->BAT_ALRT, pTCA6416Alevel->EMF_DRDY,
-  //          pTCA6416Alevel->amplifier_MUTE, pTCA6416Alevel->amplifier_SD,
-  //          pTCA6416Alevel->IMU_INT2, pTCA6416Alevel->IMU_INT1,
-  //          pTCA6416Alevel->ALS_INT, pTCA6416Alevel->thumbwheel_CCW,
-  //          pTCA6416Alevel->thumbwheel_CW, pTCA6416Alevel->OTG_EN,
-  //          pTCA6416Alevel->charge_SIGN, pTCA6416Alevel->QC_TOUCH_R);
+  ESP_LOGI(TAG,
+           "TCA6416A引脚电平读写完成,当前寄存器回读:\n"
+           "P00-P07: [QC_TOUCH_L %d][EN_LED_BOARD % d]"
+           "[HP_DETECT % d][BAT_QSTRT % d][BAT_ALRT % d]"
+           "[EMF_DRDY % d][amplifier_MUTE % d]"
+           "[amplifier_SD % d]\n"
+           "P10-P17: [IMU_INT2 % d][IMU_INT1 % d][ALS_INT % d]"
+           "[thumbwheel_CCW % d][thumbwheel_CW % d]"
+           "[OTG_EN % d][charge_SIGN % d][QC_TOUCH_R % d]",
+           pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->EN_LED_BOARD,
+           pTCA6416Alevel->HP_DETECT, pTCA6416Alevel->BAT_QSTRT,
+           pTCA6416Alevel->BAT_ALRT, pTCA6416Alevel->EMF_DRDY,
+           pTCA6416Alevel->amplifier_MUTE, pTCA6416Alevel->amplifier_SD,
+           pTCA6416Alevel->IMU_INT2, pTCA6416Alevel->IMU_INT1,
+           pTCA6416Alevel->ALS_INT, pTCA6416Alevel->thumbwheel_CCW,
+           pTCA6416Alevel->thumbwheel_CW, pTCA6416Alevel->OTG_EN,
+           pTCA6416Alevel->charge_SIGN, pTCA6416Alevel->QC_TOUCH_R);
 
   return ESP_OK;
 }
@@ -343,16 +347,14 @@ esp_err_t TCA6416A_gpio_global_inversion_set(bool inversion) {
 
   TCA6416A_data_buf[0] = TCA6416A_PI1, TCA6416A_data_buf[1] = data1;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;
   }
   TCA6416A_data_buf[0] = TCA6416A_PI2, TCA6416A_data_buf[1] = data2;
   ret = i2c_master_transmit(TCA6416A_dev_handle, TCA6416A_data_buf,
-                                   sizeof(TCA6416A_data_buf),
-                                   TCA6416A_I2C_TIMEOUT_MS);
+                            sizeof(TCA6416A_data_buf), TCA6416A_I2C_TIMEOUT_MS);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "与TCA6416A通讯时发现问题 描述： %s", esp_err_to_name(ret));
     return ret;

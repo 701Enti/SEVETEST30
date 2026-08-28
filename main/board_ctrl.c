@@ -41,6 +41,8 @@
 #include "AHT20.h"
 #include "board.h"
 #include "gt32l32s0140.h"
+#include "OPT3001.h"
+#include "MAX17048.h"
 
 #include "HSCDTD008A.h"
 #include "LSM6DS3TRC.h"
@@ -152,6 +154,12 @@ esp_err_t *sevetest30_all_device_init(board_ctrl_t *board_ctrl) {
 
   // AGS10(空气质量传感器)
   board_ctrl_init_report[AGS10_INIT] = AGS10_init();
+
+  // OPT3001(环境光传感器)
+  board_ctrl_init_report[OPT3001_INIT] = OPT3001_init();
+
+  // MAX17048(电池状态传感器)
+  board_ctrl_init_report[MAX17048_INIT] = MAX17048_init();
 
   // LSM6DS3TRC(姿态传感器)
   board_ctrl_init_report[LSM6DS3TRC_INIT] = LSM6DS3TRC_init();

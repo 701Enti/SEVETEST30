@@ -707,12 +707,7 @@ void common_mp3_running_event() {
   while (sevetest30_music_running_flag) {
     audio_event_iface_msg_t msg;
 
-    esp_err_t ret =
-        audio_event_iface_listen(common_mp3_evt, &msg, portMAX_DELAY);
-    if (ret != ESP_OK) {
-      ESP_LOGE(TAG, "监听事件时出现问题 %d", ret);
-      continue;
-    }
+    audio_event_iface_listen(common_mp3_evt, &msg, pdMS_TO_TICKS(500));
 
     if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT &&
         msg.source == (void *)mp3 && msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
@@ -907,6 +902,7 @@ void common_asr_running_event() {
     ESP_LOGE(TAG, "申请vad_buf资源发现问题 正在重试");
     vad_buf = (int16_t *)malloc(vad_buf_size);
   }
+  memset(vad_buf, 0, vad_buf_size);
 
   // 申请识别数据帧缓存
   int asr_data_buf_size =
@@ -918,6 +914,7 @@ void common_asr_running_event() {
     ESP_LOGE(TAG, "申请asr_data_buf资源发现问题 正在重试");
     asr_data_buf = (char *)malloc(asr_data_buf_size);
   }
+  memset(asr_data_buf, 0, asr_data_buf_size);
 
   // 申请响应数据缓存
   int response_buf_size = ASR_HTTP_RESPONSE_BUF_MAX * sizeof(char);

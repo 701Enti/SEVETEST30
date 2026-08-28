@@ -202,6 +202,23 @@ typedef struct ASR_cfg_t {
   int vad_min_noise_ms;      // 最小噪声时长(单位ms)
 } ASR_cfg_t;
 
+#define ASR_DEFAULT_CONFIG(max_save, pid, mode_vad)                            \
+  {                                                                            \
+      .asr_one_frame_ms = 300,                                                 \
+      .sampling_rate = ASR_SAMPLING_RATE_16K,                                  \
+      .sampling_bits = ASR_SAMPLING_BITS_16,                                   \
+      .input_rate = 48000,                                                     \
+      .input_bits = 16,                                                        \
+      .dev_pid = pid,                                                          \
+      .stop_threshold = 5,                                                     \
+      .send_threshold = 5,                                                     \
+      .record_save_times_max = max_save,                                       \
+      .vad_mode = mode_vad,                                                    \
+      .vad_one_frame_ms = 30,                                                  \
+      .vad_min_speech_ms = 100,                                                \
+      .vad_min_noise_ms = 50,                                                 \
+  }
+
 typedef struct current_sound_collecter_t {
   // 实时音频收集缓冲区互斥锁，外部需要竞争并拿到锁再访问
   xSemaphoreHandle collecter_buf_mutex;
@@ -241,9 +258,9 @@ typedef struct current_sound_collecter_t {
 
   // 实时音频收集写指针索引
   int collecter_write_index;
-}current_sound_collecter_t;
+} current_sound_collecter_t;
 
-typedef struct current_sound_collecter_t* current_sound_collecter_handle_t;
+typedef struct current_sound_collecter_t *current_sound_collecter_handle_t;
 
 extern current_sound_collecter_handle_t collecter_handle;
 
@@ -254,7 +271,8 @@ extern bool volatile sevetest30_asr_running_flag; // 语音识别运行标志
 // 外部通用功能运行
 
 void tts_service_play_short(TTS_cfg_t *tts_cfg, UBaseType_t priority);
-void tts_service_play_long(TTS_cfg_t *tts_cfg, UBaseType_t priority,int timeout_ms);
+void tts_service_play_long(TTS_cfg_t *tts_cfg, UBaseType_t priority,
+                           int timeout_ms);
 
 void music_uri_or_url_play(const char *uri, UBaseType_t priority);
 

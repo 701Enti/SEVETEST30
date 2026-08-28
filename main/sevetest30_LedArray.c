@@ -137,7 +137,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode) {
 }
 
 /*******************************************************软件图像生成函数**********************************************************/
-/// @brief 生成一个矩形字模(需要释放)
+/// @brief 生成一个矩形字模(|字模数据大小|字模数据|)(需要释放)
 /// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
 /// @param height  矩形纵向长度(1-VERTICAL_LED_NUMBER)
 /// @return NULL 错误 / 返回值为矩形数据地址(令为rectangle_data)
@@ -146,19 +146,17 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode) {
 /// @return 例 返回值为p
 /// separation_draw(x,y,b,RECTANGLE_MATRIX(p),matrix_size(p),color); free(p);
 /// @note 生成的矩形字模需要手动释放内存,否则会导致内存泄漏
-uint8_t *rectangle(int32_t breadth, int32_t height) {
+uint8_t *new_rectangle(int32_t breadth, int32_t height) {
+  const static char *TAG = "new_rectangle";
+
   if (breadth < 0 || height < 0)
     return NULL;
 
-  uint64_t x_byte_num = 0,
-           entire_byte_num =
-               0; // 横向字节个数，总数据有效字节个数（不包含entire_byte_num段）
-  uint64_t Dx =
-      0; // 临时存储一下横向偏移长度，这只是用于计算。纵向偏移长度由绘制函数获取，不需要,
-  bool flag = 0; // 即将写入的位数据值
+  // 横向字节个数
+  uint64_t x_byte_num = 0;
 
-  static uint8_t *pT1 = NULL;
-  static uint8_t *p = NULL;
+  // 总数据有效字节个数（不包含entire_byte_num段）
+  uint64_t entire_byte_num = 0;
 
   // 进一法，最后不足8个点就补满8位。
   // 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
@@ -166,36 +164,95 @@ uint8_t *rectangle(int32_t breadth, int32_t height) {
   entire_byte_num = sizeof(uint8_t) * x_byte_num * height;
 
   if (entire_byte_num > RECTANGLE_SIZE_MAX * sizeof(uint8_t)) {
-    ESP_LOGE("rectangle", "RECTANGLE_SIZE_MAX常量设置过小,创建的缓存空间不足");
+    ESP_LOGE(TAG, "RECTANGLE_SIZE_MAX常量设置过小,创建的缓存空间不足");
     return NULL;
   }
 
+  // 8个字节(uint64_t)用于存储字模数据大小
   uint8_t *rectangle_data = (uint8_t *)malloc(
-      RECTANGLE_SIZE_MAX * sizeof(uint8_t) +
-      sizeof(uint64_t)); // 8个字节(uint64_t)用于存储字模数据大小
+      RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));
   memset(rectangle_data, 0,
          RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));
 
   // 装载entire_byte_num
   *((uint64_t *)rectangle_data) = entire_byte_num;
 
-  p = rectangle_data;
-  pT1 = rectangle_data + sizeof(uint64_t); // 获取到数据的起始地址
+  uint64_t Dx = 0;
+  uint8_t *p = NULL;
+  p = rectangle_data + sizeof(uint64_t); // 获取到数据的起始地址
 
-  // 先进行全图填充
-  flag = 1;
   for (uint64_t i = 0; i < entire_byte_num; i++) {
     for (uint64_t j = 0; j < 8; j++) {
-      *pT1 |= flag << (7 - j); // 写入
+      *p |= 1 << (7 - j); // 写入
       if (Dx == breadth - 1) {
         Dx = 0;
         j = 8; // 一行写完强制退出，写下一个，实际就是回车，因为下一个字节就是下一行的了
       } else
         Dx++;
     }
-    pT1++; // 地址偏移
+    p++; // 地址偏移
   }
   return rectangle_data;
+}
+
+/// @brief 构建一个矩形字模(|字模数据大小|字模数据|)(使用外部缓存,无需释放)
+/// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
+/// @param height  矩形纵向长度(1-VERTICAL_LED_NUMBER)
+/// @param dest 导入矩形数据存储位置
+/// @param dest_size 矩形数据存储位置大小(单位:Byte)
+/// [matrix_size(dest) 为 总数据大小(uint64_t)(单位:Byte)]
+/// [RECTANGLE_MATRIX(dest) 为 矩形字模]
+/// @return 例
+/// separation_draw(x,y,b,RECTANGLE_MATRIX(dest),matrix_size(dest),color);
+void build_rectangle(int32_t breadth, int32_t height, uint8_t *dest,
+                     int dest_size) {
+  const static char *TAG = "build_rectangle";
+
+  if (dest == NULL){
+    ESP_LOGE(TAG, "dest为NULL");
+    return;
+  }
+    
+  if (breadth < 0 || height < 0){
+    ESP_LOGE(TAG, "异常的输入数值");
+    return;
+  }
+    
+  // 横向字节个数
+  uint64_t x_byte_num = 0;
+
+  // 总数据有效字节个数（不包含entire_byte_num段）
+  uint64_t entire_byte_num = 0;
+
+  // 进一法，最后不足8个点就补满8位。
+  // 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
+  x_byte_num = ceil(breadth * 1.0 / 8.0);
+  entire_byte_num = sizeof(uint8_t) * x_byte_num * height;
+
+  if (entire_byte_num > dest_size - sizeof(uint64_t)) {
+    ESP_LOGE(TAG, "dest_size显示外部缓存dest空间不足");
+    return;
+  }
+
+  // 装载entire_byte_num
+  *((uint64_t *)dest) = entire_byte_num;
+
+  uint64_t Dx = 0;
+  uint8_t *p = NULL;
+  p = dest + sizeof(uint64_t); // 获取到数据的起始地址
+  
+  for (uint64_t i = 0; i < entire_byte_num; i++) {
+    for (uint64_t j = 0; j < 8; j++) {
+      *p |= 1 << (7 - j); // 写入
+      if (Dx == breadth - 1) {
+        Dx = 0;
+        j = 8; // 一行写完强制退出，写下一个，实际就是回车，因为下一个字节就是下一行的了
+      } else
+        Dx++;
+    }
+    p++; // 地址偏移
+  }
+  return;
 }
 
 /// @brief 获取字模有效图形数据大小(单位:Byte)
@@ -224,7 +281,7 @@ uint64_t matrix_size(uint8_t *matrix_data) {
 /// 失败,输入了无法处理的空指针]
 esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p,
                           uint64_t byte_number, uint8_t in_color[3]) {
-  const char *TAG = "separation_draw";
+  const static char *TAG = "separation_draw";
   if (p == NULL) {
     ESP_LOGE(TAG, "输入了无法处理的空指针");
     return ESP_ERR_INVALID_ARG;
@@ -284,7 +341,7 @@ esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p,
 /// @return [ESP_OK 成功 / ESP_FAIL 失败 /ESP_ERR_INVALID_ARG
 /// 失败,输入了无法处理的空指针]
 esp_err_t direct_draw(int x, int y, const uint8_t *p) {
-  const char *TAG = "direct_draw";
+  const static char *TAG = "direct_draw";
   if (p == NULL) {
     ESP_LOGE(TAG, "输入了无法处理的空指针");
     return ESP_ERR_INVALID_ARG;
@@ -389,6 +446,7 @@ void progress_draw_buf(int y, uint8_t step, uint8_t *color) {
 /// @param figure 输入整型0-9数字,不支持负数
 /// @param color 颜色RGB
 void print_number(int x, int y, int8_t figure, uint8_t color[3]) {
+  const static char *TAG = "print_number";
   uint8_t *p = NULL;
   // 将p指向对应数字字模
   switch (figure) {
@@ -433,7 +491,7 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3]) {
     break;
   }
   if (p == NULL) {
-    ESP_LOGE("print_number", "输入了0-9之外的数字");
+    ESP_LOGE(TAG, "输入了0-9之外的数字");
     return;
   }
   separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_7),
@@ -448,7 +506,7 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3]) {
 /// @param color 字符颜色
 /// @param format 形式同printf的可变参量表
 void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
-  const char *TAG = "font_raw_print_12x";
+  const char static *TAG = "font_raw_print_12x";
 
   // 申请字符unicode编码缓存
   uint32_t *buf_unicode = NULL;
@@ -553,7 +611,7 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
 /// @param format 形式同printf的可变参量表
 void font_roll_print_12x(int x, int y, uint8_t color[3],
                          cartoon_handle_t cartoon_handle, char *format, ...) {
-  const char *TAG = "font_roll_print_12x";
+  const static char *TAG = "font_roll_print_12x";
 
   // 申请字符unicode编码缓存
   uint32_t *buf_unicode = NULL;
@@ -722,7 +780,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
 /// @param color 字符颜色
 /// @param format 形式同printf的可变参量表
 void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
-  const char *TAG = "font_raw_print_16x";
+  const static char *TAG = "font_raw_print_16x";
 
   // 申请字符unicode编码缓存
   uint32_t *buf_unicode = NULL;
@@ -827,7 +885,7 @@ void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
 /// @param format 形式同printf的可变参量表
 void font_roll_print_16x(int x, int y, uint8_t color[3],
                          cartoon_handle_t cartoon_handle, char *format, ...) {
-  const char *TAG = "font_roll_print_16x";
+  const static char *TAG = "font_roll_print_16x";
 
   // 申请字符unicode编码缓存
   uint32_t *buf_unicode = NULL;
@@ -1001,7 +1059,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
 /// @return [ESP_ERR_INVALID_ARG 参数错误]
 /// @return [ESP_ERR_NO_MEM 内存不足]
 esp_err_t ledarray_init() {
-  const char *TAG = "ledarray_init";
+  const static char *TAG = "ledarray_init";
 
   if (is_initialized) {
     ESP_LOGE(TAG, "灯板阵列之前已经初始化,运行ledarray_deinit以去初始化");
@@ -1166,7 +1224,7 @@ esp_err_t ledarray_init() {
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
 /// @return [ESP_ERR_INVALID_ARG ledarray_gpio_num_list中存在错误的GPIO号码]
 esp_err_t ledarray_deinit() {
-  const char *TAG = "ledarray_deinit";
+  const static char *TAG = "ledarray_deinit";
 
   if (!is_initialized) {
     ESP_LOGE(TAG, "灯板阵列未初始化,无需反初始化");
@@ -1230,7 +1288,7 @@ esp_err_t ledarray_deinit() {
 /// @return [ESP_FAIL refresh_ledarray_task_mutex互斥量异常]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
 esp_err_t ledarray_show_frame() {
-  const char *TAG = "ledarray_show_frame";
+  const static char *TAG = "ledarray_show_frame";
 
   if (!is_initialized) {
     ESP_LOGE(TAG, "灯板阵列未初始化");
@@ -1339,8 +1397,9 @@ esp_err_t ledarray_show_frame() {
 /// @param y 纵坐标(1 到 VERTICAL_LED_NUMBER)
 /// @param data 导入的颜色RGB数据位置
 void color_input(int x, int y, uint8_t *data) {
+  const static char *TAG = "color_input";
   if (!data) {
-    ESP_LOGE("color_output", "输入了无法处理的空指针");
+    ESP_LOGE(TAG, "输入了无法处理的空指针");
     return;
   }
 
@@ -1358,8 +1417,9 @@ void color_input(int x, int y, uint8_t *data) {
 /// @param y 纵坐标(1 到 VERTICAL_LED_NUMBER)
 /// @param data 导出存储的颜色RGB数据的位置
 void color_output(int x, int y, uint8_t *data) {
+  const static char *TAG = "color_output";
   if (!data) {
-    ESP_LOGE("color_output", "输入了无法处理的空指针");
+    ESP_LOGE(TAG, "输入了无法处理的空指针");
     return;
   }
 

@@ -66,7 +66,7 @@ static void ext_io_int_task(void *arg)
       flag_buf = *(bool *)P_auto_read_flag;
       if (flag_buf)
       {
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
         gpio_get_level(TCA6416A_INT_IO);
         if (gpio_get_level(TCA6416A_INT_IO) == 0)
         {

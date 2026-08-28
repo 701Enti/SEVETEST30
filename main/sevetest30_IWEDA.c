@@ -735,7 +735,7 @@ esp_err_t url_encode(const char *src, char *dest, size_t dest_len,
   return ESP_OK;
 }
 
-/// @brief 构建安全的JSON报文
+/// @brief 构建安全的JSON字符串
 /// @param src 源字符串指针,内部不会更改/free
 /// @return NULL(构建失败)
 /// @return char* 安全的JSON字符串指针,内部申请内存,需要手动释放内存
@@ -2017,6 +2017,8 @@ esp_err_t GPT_chat_disable_multi_round_chat(GPT_chat_handle_t chat_handle) {
 /// @param task_stack 任务栈大小(单位字节)
 /// @param task_core 任务核心号
 /// @param task_prio 任务优先级
+/// @param waiting_cb
+/// 等待完成回调函数,在等待GPT文本交互完成时,该函数被快速反复调用(不需要可设置为NULL)
 /// @note 这是一个阻塞函数,直到GPT文本交互完成,才会返回
 /// @return
 /// [ESP_OK 成功]
@@ -2026,7 +2028,8 @@ esp_err_t GPT_chat_disable_multi_round_chat(GPT_chat_handle_t chat_handle) {
 /// [ESP_ERR_INVALID_STATE 解析任务内部运行异常 / 网络未连接]
 /// [ESP_ERR_NO_MEM 内存不足]
 /// [ESP_ERR_TIMEOUT 等待回复超时]
-esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
+esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio,
+                                 void (*waiting_cb)(void)) {
   const char *TAG = "GPT_chat_text_exchange";
 
   if (chat_handle == NULL) {
@@ -2060,12 +2063,15 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
                           chat_handle, task_prio, &chat_handle->task_handle,
                           GPT_CHAT_TASK_CORE);
 
-  int64_t start_time = esp_timer_get_time();
+
+  ESP_LOGW(TAG, "等待GPT回复...");                        
   while (!chat_handle->is_completed) {
-    int64_t current_time = esp_timer_get_time();
-    ESP_LOGW(TAG, "等待GPT回复...(已等待%" PRId64 "ms)",
-             (current_time - start_time) / 1000);
-    vTaskDelay(pdMS_TO_TICKS(5000));
+    if (waiting_cb != NULL) {
+      waiting_cb();
+    }
+    else{
+     vTaskDelay(pdMS_TO_TICKS(500)); 
+    }
   }
 
   if (chat_handle->err != ESP_OK) {
@@ -2078,6 +2084,37 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio) {
     GPT_chat_update_context_json(chat_handle);
   }
   return ESP_OK;
+}
+
+/// @brief 设置系统JSON字段读取位置
+/// @param chat_handle GPT文本交互句柄
+/// @param system_json_field 系统JSON字段位置(填入NULL时,系统JSON字段不发送)
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数
+/// @note 本函数不会申请任何内存,不会复制/克隆字符串
+/// @note 系统JSON字段格式(注意末尾带了英文逗号)必须为
+/// @note {"role": "system","content": "xxx"},
+/// @note 由于拼接式设计,输入内容为空的字符串不会造成异常,结果等效于NULL
+esp_err_t GPT_chat_set_system_json_field(GPT_chat_handle_t chat_handle,
+                                         char *system_json_field) {
+  const char *TAG = "GPT_chat_set_system_json_field";
+
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的句柄");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  chat_handle->system_json_field = system_json_field;
+  return ESP_OK;
+}
+
+char *GPT_chat_get_system_json_field(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_get_system_json_field";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的句柄");
+    return NULL;
+  }
+  return chat_handle->system_json_field;
 }
 
 /// @brief 更新用户内容
@@ -2132,27 +2169,32 @@ esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
         chat_handle->context.context_json_update_time = 0;
       }
     }
-    if (chat_handle->context.context_json != NULL) {
-      request_body_len = snprintf(
-          chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
-          "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[%s{"
-          "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
-          chat_handle->model, chat_handle->context.context_json,
-          chat_handle->user_content);
-    } else {
-      request_body_len = snprintf(
-          chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
-          "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
-          "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
-          chat_handle->model, chat_handle->user_content);
-    }
+    request_body_len = snprintf(
+        chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[%s"
+        "%s"
+        "{"
+        "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+        (chat_handle->model == NULL) ? "" : chat_handle->model,
+        (chat_handle->system_json_field == NULL)
+            ? ""
+            : chat_handle->system_json_field,
+        (chat_handle->context.context_json == NULL)
+            ? ""
+            : chat_handle->context.context_json,
+        (chat_handle->user_content == NULL) ? "" : chat_handle->user_content);
   } else {
     ESP_LOGW(TAG, "多轮对话未启用");
     request_body_len = snprintf(
         chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
-        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[{"
+        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":["
+        "%s{"
         "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
-        chat_handle->model, chat_handle->user_content);
+        (chat_handle->model == NULL) ? "" : chat_handle->model,
+        (chat_handle->system_json_field == NULL)
+            ? ""
+            : chat_handle->system_json_field,
+        (chat_handle->user_content == NULL) ? "" : chat_handle->user_content);
   }
 
   if (request_body_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {

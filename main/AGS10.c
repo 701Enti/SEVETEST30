@@ -7,27 +7,22 @@
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// 包含各种SE30对空气质量传感器AGS10 的支持
-// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
-// 敬告：文件本体不包含i2c通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
-// AGS10推荐I2C最高通讯频率为15kHz,而大部分器件目前使用100kHz,所以在库函数内提供临时频率变更支持,目前已经在AGS10_TVOC_result_get()应用,之后库中追加的API也应该调用频率变更支持
-// github: https://github.com/701Enti
+ // 对空气质量传感器AGS10的支持
+ // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+ // 敬告：文件本体不包含I2C通讯的任何初始化配置，若您单独使用而未进行配置，这可能无法运行
+ // AGS10推荐I2C最高通讯频率为15kHz
 
 #include "AGS10.h"
 #include "driver/i2c_master.h"
@@ -96,8 +91,10 @@ uint8_t Calc_CRC8(uint8_t *dat, uint8_t Num) {
   return crc;
 }
 
-void AGS10_TVOC_result_get(AGS10_result_t *dest) {
-  const char *TAG = "AGS10_TVOC_result_get";
+/// @brief 获取实时传感器硬件数据生成结果
+/// @param dest 结果数据存储位置
+void AGS10_TVOC_result_fetch(AGS10_result_t *dest) {
+  const char *TAG = "AGS10_TVOC_result_fetch";
 
   if (!dest) {
     ESP_LOGE(TAG, "导入了为空的数据地址");
@@ -145,7 +142,7 @@ void AGS10_TVOC_result_get(AGS10_result_t *dest) {
       }
     }
 
-    ESP_LOGI(TAG, "%d ppb", (int)dest->TVOC_value);
+    ESP_LOGI(TAG, "%"PRIu32" ppb",dest->TVOC_value);
 
     // 数据有效标记
     dest->valid = true;

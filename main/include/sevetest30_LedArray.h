@@ -142,7 +142,10 @@ void clean_draw_buf(int y);
 
 void progress_draw_buf(int y, uint8_t step, uint8_t *color);
 
-uint8_t *rectangle(int32_t breadth, int32_t height);
+uint8_t *new_rectangle(int32_t breadth, int32_t height);
+
+void build_rectangle(int32_t breadth, int32_t height, uint8_t *dest,
+                       int dest_size);
 
 uint64_t matrix_size(uint8_t *matrix_data);
 
