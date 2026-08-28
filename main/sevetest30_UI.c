@@ -357,609 +357,6 @@ uint32_t add_new_key_frame(cartoon_handle_t handle, key_frame_attr_t attr,
   }
 }
 
-// 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
-// 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G
-// B三个分量 0 - (value_max)
-// 以下函数是比较低级的数据可视化，对数据效果有很大损耗
-// 我们通过temp-26并获取绝对值，来得到temp与26的差值，再映射到0-1之间并用1去减它，
-// 再乘上 value_max 得到绿色分量的值，这样越接近26，绿色分量的值更大，更显示绿色
-// 而对于红色则是用temp-40，蓝色则用temp-12，按相同算法。
-// 如果是低于12摄氏度，则颜色始终为纯白色，如果高于40，始终为纯红色。
-// 为了颜色的合理与均匀，我们不得不设40和26和12摄氏度作为R G B
-// 分界阈值，损失12摄氏度以下可视化的机会，当然，这可以通过Kconfig修改适应不同气候
-
-/// @brief
-/// 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
-/// @param temp 温度值
-/// @param value_max 最大映射值
-/// @param high 高值分量 越趋近预设高温 向高值分量侧倾
-/// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
-/// @param low 低值分量 越趋近预设低温 向低值分量侧倾
-void temp_to_color(int temp, uint8_t value_max, uint8_t *high, uint8_t *comfort,
-                   uint8_t *low) {
-  float value_buf = 0;
-
-  // 如果在自由变化范围
-  if (temp >= CONFIG_LOW_TEMP && temp <= CONFIG_HIGH_TEMP) {
-    value_buf = abs(temp - CONFIG_HIGH_TEMP);
-    *high = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
-
-    value_buf = abs(temp - CONFIG_COMFORT_TEMP);
-    *comfort = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
-
-    value_buf = abs(temp - CONFIG_LOW_TEMP);
-    *low = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
-  }
-  // 高温
-  if (temp > CONFIG_HIGH_TEMP)
-    *high = value_max; // 只写入R
-  // 低温
-  if (temp < CONFIG_LOW_TEMP) {
-    *high = value_max;
-    *comfort = value_max;
-    *low = value_max;
-  }
-}
-
-/// @brief 将数据大小体现在颜色上
-/// @param data 数据值
-/// @param visual_cfg 可视化配置
-/// @param high 高值分量 越趋近预设高温 向高值分量侧倾
-/// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
-/// @param low 低值分量 越趋近预设低温 向低值分量侧倾
-void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high,
-                   uint8_t *comfort, uint8_t *low) {
-  float value_buf = 0;
-
-  // 如果在自由变化范围
-  if (data >= visual_cfg->low && data <= visual_cfg->high) {
-    value_buf = abs(data - visual_cfg->high);
-    *high =
-        (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
-
-    value_buf = abs(data - visual_cfg->medium);
-    *comfort =
-        (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
-
-    value_buf = abs(data - visual_cfg->low);
-    *low = (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
-  }
-  // 过高
-  if (data > visual_cfg->high)
-    *high = visual_cfg->value_max; // 只写入R
-  // 过低
-  if (data < visual_cfg->low) {
-    *high = visual_cfg->value_max;
-    *comfort = visual_cfg->value_max;
-    *low = visual_cfg->value_max;
-  }
-}
-
-/// @brief 显示表情
-/// @param x 起始坐标x
-/// @param y 起始坐标y
-/// @param emotion_label
-/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
-void facial_expression_show(int x, int y, char *emotion_label) {
-  const char *TAG = "facial_expression_show";
-
-  if (emotion_label == NULL) {
-    ESP_LOGE(TAG, "lable为NULL");
-    return;
-  }
-
-  if (strcmp(emotion_label, "normal") == 0) {
-    ESP_LOGI(TAG, "显示正常表情");
-    direct_draw(x, y, gImage_normal);
-  } else if (strcmp(emotion_label, "happy") == 0) {
-    ESP_LOGI(TAG, "显示愉快表情");
-    direct_draw(x, y, gImage_happy);
-  } else if (strcmp(emotion_label, "like") == 0) {
-    ESP_LOGI(TAG, "显示喜爱表情");
-    direct_draw(x, y, gImage_like);
-  } else if (strcmp(emotion_label, "angry") == 0) {
-    ESP_LOGI(TAG, "显示愤怒表情");
-    direct_draw(x, y, gImage_angry);
-  } else if (strcmp(emotion_label, "disgusting") == 0) {
-    ESP_LOGI(TAG, "显示厌恶表情");
-    direct_draw(x, y, gImage_disgusting);
-  } else if (strcmp(emotion_label, "fearful") == 0) {
-    ESP_LOGI(TAG, "显示恐惧表情");
-    direct_draw(x, y, gImage_fearful);
-  } else if (strcmp(emotion_label, "sad") == 0) {
-    ESP_LOGI(TAG, "显示悲伤表情");
-    direct_draw(x, y, gImage_sad);
-  } else {
-    ESP_LOGI(TAG, "无法识别表情标签 %s", emotion_label);
-  }
-}
-
-/// @brief 显示天气图标(9x9)+温度
-/// @param x 起始坐标x
-/// @param y 起始坐标y
-void weather_icon_temperature(int x, int y) {
-  const char *TAG = "weather_icon_temperature";
-  weather_change_flag = 0;
-
-  // 获取天气图标数据
-  unsigned char icon_data[251] = {0};
-  int ret =
-      get_weather_icon_data(icon_data, current_weather_data.condition_code);
-  if (ret == -1) {
-    weather_change_flag = 0;
-    ESP_LOGE(TAG, "获取天气图标数据失败");
-    return; // 如果获取失败，退出
-  } else {
-    weather_change_flag = ret;
-    direct_draw(x + ((LINE_LED_NUMBER / 2) - WEATHER_ICON_BREATH) / 2,
-                y + (VERTICAL_LED_NUMBER - WEATHER_ICON_HEIGHT) / 2, icon_data);
-  }
-
-  // 测试
-  current_weather_data.temperature = -7;
-
-  // 温度显示
-  int temp_buf = abs((int)round(
-      current_weather_data
-          .temperature)); // 因为这里温度只能识别到数字，并且只显示整数部分，四舍五入为整数后取一下绝对值
-  if (temp_buf >= 100) {
-    ESP_LOGE(TAG, "不合理的温度绝对值 %d", temp_buf);
-    return; // 如果绝对值大于99显示都是问题了，大可能是传错了，退出
-  }
-
-  uint8_t color[3] = {0};
-  temp_to_color(current_weather_data.temperature, 255, &color[0], &color[1],
-                &color[2]); // 数据可以通过颜色可视化
-
-  // 取出每位上的数
-  int8_t tens = temp_buf / 10;         // 十位
-  int8_t uints = temp_buf - tens * 10; // 个位
-
-  // 确定要不要带负号
-  int minus_breath = 2;
-  int minus_height = 1;
-  if (current_weather_data.temperature < 0) {
-    uint8_t *p = rectangle(minus_breath, minus_height);
-    separation_draw(x + (LINE_LED_NUMBER / 2) + 1,
-                    y + 1 + (VERTICAL_LED_NUMBER - minus_height) / 2,
-                    minus_breath, RECTANGLE_MATRIX(p), *p, color);
-    free(p);
-    print_number(x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
-                 color);
-    print_number(
-        x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1 + FIGURE_BREATH + 1,
-        y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints, color);
-  } else {
-    print_number(x + (LINE_LED_NUMBER / 2) + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
-                 color);
-    print_number(x + (LINE_LED_NUMBER / 2) + 1 + FIGURE_BREATH + 1,
-                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints,
-                 color);
-  }
-}
-
-/// @brief 显示了当前系统时间  时 分
-/// @param x 起始坐标x
-/// @param y 起始坐标y
-/// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m(int x, int y) {
-  static uint8_t color[3] = {0};
-  static int8_t minute_buf = 80;
-
-  if (minute_buf != systemtime_data.minute) {
-    // 时间的颜色使用随机
-    esp_fill_random(&color[0], 1);
-    esp_fill_random(&color[1], 1);
-    esp_fill_random(&color[2], 1);
-    minute_buf = systemtime_data.minute;
-  }
-
-  int8_t hour_tens = systemtime_data.hour / 10;              // 十位
-  int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
-  print_number(
-      x + LINE_LED_NUMBER / 4 * 0 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
-  print_number(
-      x + LINE_LED_NUMBER / 4 * 1 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
-
-  int8_t minute_tens = systemtime_data.minute / 10;                // 十位
-  int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
-  print_number(
-      x + LINE_LED_NUMBER / 4 * 2 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
-  print_number(
-      x + LINE_LED_NUMBER / 4 * 3 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
-}
-
-/// @brief 显示了当前系统时间  秒
-/// @param x 起始坐标x
-/// @param y 起始坐标y
-/// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_s(int x, int y) {
-  static uint8_t color[3] = {0};
-  static int8_t second_buf = 80;
-
-  if (second_buf != systemtime_data.second) {
-    // 时间的颜色使用随机
-    esp_fill_random(&color[0], 1);
-    esp_fill_random(&color[1], 1);
-    esp_fill_random(&color[2], 1);
-    second_buf = systemtime_data.second;
-  }
-
-  int8_t second_tens = systemtime_data.second / 10;                // 十位
-  int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
-  print_number(x + LINE_LED_NUMBER / 2 - FIGURE_BREATH - 1,
-               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
-               color); // 数字字模的尺寸为4x7
-  print_number(x + LINE_LED_NUMBER / 2 + 1,
-               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints,
-               color);
-}
-
-/// @brief 显示了当前系统时间  时 分 秒
-/// @param x 起始坐标x
-/// @param y 起始坐标y
-/// @param change 亮度值0-100% 为0不会任何进行显示操作
-void time_UI_h_m_s(int x, int y) {
-  static uint8_t color[3] = {0};
-  static int8_t second_buf = 80;
-
-  if (second_buf != systemtime_data.second) {
-    // 时间的颜色使用随机
-    esp_fill_random(&color[0], 1);
-    esp_fill_random(&color[1], 1);
-    esp_fill_random(&color[2], 1);
-    second_buf = systemtime_data.second;
-  }
-
-  int8_t hour_tens = systemtime_data.hour / 10;              // 十位
-  int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 0 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 1 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
-
-  int8_t minute_tens = systemtime_data.minute / 10;                // 十位
-  int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 2 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 3 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
-
-  int8_t second_tens = systemtime_data.second / 10;                // 十位
-  int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
-  print_number(x + LINE_LED_NUMBER / 6 * 4 +
-                   (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
-               color); // 数字字模的尺寸为4x7
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 5 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
-}
-
-/// @brief
-/// 启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现
-/// @param UI_cfg FFT的UI配置
-/// @param priority 任务优先级
-/// @return music_FFT_UI_handle_t 句柄,用于后续操作UI / NULL
-/// 表示申请失败,请检查内存是否足够
-music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg,
-                                         UBaseType_t priority) {
-  const char *TAG = "music_FFT_UI_start";
-
-  music_FFT_UI_handle_t handle = calloc(1, sizeof(music_FFT_UI_t));
-  if (!handle) {
-    ESP_LOGE(TAG, "申请handle资源时发现问题 需要 %d 字节",
-             sizeof(music_FFT_UI_t));
-    return NULL;
-  }
-
-  if (!collecter_handle->collecter_buf) {
-    ESP_LOGE(TAG, "当前音频缓存为空,无法启动FFT_UI");
-    return NULL;
-  }
-
-  memcpy(&(handle->cfg), UI_cfg, sizeof(music_FFT_UI_cfg_t));
-  if (handle->cfg.dampen_multiples <= 0) {
-    ESP_LOGW(TAG, "数据衰减倍数必须大于0,已自动调整为1");
-    handle->cfg.dampen_multiples = 1;
-  }
-  if (handle->cfg.x_multiples < 0) {
-    ESP_LOGW(TAG, "视口横向缩放倍数小于0,已自动调整为1");
-    handle->cfg.x_multiples = 1;
-  }
-  if (handle->cfg.width > FFT_VIEW_WIDTH_MAX) {
-    ESP_LOGW(TAG,
-             "视口宽度超过最大宽度 FFT_VIEW_WIDTH_MAX ,已自动调整为最大宽度");
-    handle->cfg.width = FFT_VIEW_WIDTH_MAX;
-  }
-
-  handle->running_flag = true;
-
-  xTaskCreatePinnedToCore((TaskFunction_t)&music_FFT_UI_refresh_Task,
-                          "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE,
-                          handle, priority, NULL, FFT_UI_TASK_CORE);
-
-  return handle;
-}
-
-/// @brief 停止音频频谱UI绘制任务
-/// @param handle 句柄
-/// @return esp_err_t ESP_OK 表示成功 / ESP_ERR_INVALID_ARG 表示参数柄为空
-esp_err_t music_FFT_UI_stop(music_FFT_UI_handle_t handle) {
-  const char *TAG = "music_FFT_UI_stop";
-  if (!handle) {
-    ESP_LOGE(TAG, "handle 为空,无法停止任务");
-    return ESP_ERR_INVALID_ARG;
-  }
-  handle->running_flag = false;
-  return ESP_OK;
-}
-
-/// @brief 利用 FFT 刷新音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程
-/// @param UI_cfg UI配置
-void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle) {
-  const char *TAG = "music_FFT_UI_refresh_Task";
-  __attribute__((aligned(16))) float *y1_cf = &y_cf[0]; // 指向合成缓存
-  int N = FFT_N_SAMPLES;                                // FFT 点数 N
-
-  // FFT数据缓存 通过__attribute__((aligned(16)))请求16字节对齐格式
-  src_data = malloc(N * sizeof(float)); // 源数据
-  wind = malloc(N * sizeof(float));     // 窗口系数
-  if (!src_data || !wind) {
-    ESP_LOGE(TAG, "申请FFT内存 src_data wind 时发现问题 需要 %d 字节",
-             N * sizeof(float) * 2);
-    handle->running_flag = false;
-  }
-
-  // 源数据缓存
-  int read_len_in_bytes = 0; // 已读取长度(单位字节)
-  int16_t *sample_buf = NULL;
-  sample_buf = malloc(FFT_N_SAMPLES * sizeof(int16_t));
-  if (!sample_buf) {
-    ESP_LOGE(TAG, "申请sample_buf资源时发现问题 需要 %d 字节",
-             FFT_N_SAMPLES * sizeof(int16_t));
-    handle->running_flag = false;
-  }
-
-  // 申请图谱绘制缓存
-  float *unit_data_max = NULL; // 存储每个单位频率范围下较大的幅度
-  unit_data_max = malloc(handle->cfg.width * sizeof(float));
-  if (!unit_data_max) {
-    ESP_LOGE(TAG, "申请unit_data_max资源时发现问题 需要 %d 字节",
-             handle->cfg.width * sizeof(float));
-    handle->running_flag = false;
-  }
-  float *unit_data_min = NULL; // 存储每个单位频率范围下较小的幅度
-  unit_data_min = malloc(handle->cfg.width * sizeof(float));
-  if (!unit_data_min) {
-    ESP_LOGE(TAG, "申请unit_data_min资源时发现问题 需要 %d 字节",
-             handle->cfg.width * sizeof(float));
-    handle->running_flag = false;
-  }
-
-  if (handle->running_flag) {
-    memset(sample_buf, 0, FFT_N_SAMPLES * sizeof(int16_t));
-    memset(unit_data_max, 0, handle->cfg.width * sizeof(float));
-    memset(unit_data_min, 0, handle->cfg.width * sizeof(float));
-    memset(src_data, 0, N * sizeof(float));
-    memset(wind, 0, N * sizeof(float));
-    if (dsps_fft2r_init_fc32(NULL, DSP_MAX_FFT_SIZE) != ESP_OK) {
-      ESP_LOGE(TAG, "初始化FFT模块时发现问题");
-      handle->running_flag = false;
-    }
-    dsps_wind_hann_f32(wind, N);
-  }
-
-  ESP_LOGW(TAG, "FFT监视已启动");
-
-  while (handle->running_flag) {
-    vTaskDelay(pdMS_TO_TICKS(10));
-
-    if (collecter_handle->collecter_running_flag == false) {
-      // 如果音频活动未进行,仅清理屏幕缓存并等待
-      memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
-      memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
-      vTaskDelay(pdMS_TO_TICKS(500));
-      continue;
-    } else {
-      if (collecter_handle->collecter_buf_overflow_flag ==
-          false) {
-        // 如果音频活动进行中,且缓存未溢出,则等待缓存溢出
-        continue;
-      }
-    }
-
-    if (xSemaphoreTake(collecter_handle->collecter_buf_mutex,
-                       pdMS_TO_TICKS(FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS)) !=
-        pdTRUE) {
-      continue;
-    }
-
-    // 清理之前缓存的数据
-    memset(unit_data_max, 0, handle->cfg.width * sizeof(float));
-    memset(unit_data_min, 0, handle->cfg.width * sizeof(float));
-
-    if (N * sizeof(int16_t) > CURRENT_SOUND_BUF_SIZE / 2) {
-      read_len_in_bytes = CURRENT_SOUND_BUF_SIZE / 2;
-    } else {
-      read_len_in_bytes = N * sizeof(int16_t);
-    }
-
-    if (collecter_handle->collecter_element_info.bits == 16) {
-      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
-        sample_buf[i] =
-            ((int16_t *)(collecter_handle
-                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch];
-      }
-    } else if (collecter_handle->collecter_element_info.bits ==
-               24) {
-      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
-        sample_buf[i] =
-            ((int32_t *)(collecter_handle
-                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
-            0x7FFFFF * INT16_MAX;
-      }
-    } else if (collecter_handle->collecter_element_info.bits ==
-               32) {
-      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
-        sample_buf[i] =
-            ((int32_t *)(collecter_handle
-                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
-            INT32_MAX * INT16_MAX;
-      }
-    } else if (collecter_handle->collecter_element_info.bits ==
-               8) {
-      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
-        sample_buf[i] =
-            ((int8_t *)(collecter_handle
-                            ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
-            INT8_MAX * INT16_MAX;
-      }
-    } else {
-      ESP_LOGW(TAG, "不支持的音频位深度 %d",
-               collecter_handle->collecter_element_info.bits);
-      vTaskDelay(pdMS_TO_TICKS(500));
-      continue;
-    }
-
-    xSemaphoreGive(collecter_handle->collecter_buf_mutex);
-
-    for (int i = 0; i < N; i++) {
-      src_data[i] = (float)(sample_buf[i]) / handle->cfg.dampen_multiples;
-    }
-
-    // // 转换为复向量
-    for (int i = 0; i < N; i++) {
-      y_cf[i * 2 + 0] = src_data[i] * wind[i];
-      y_cf[i * 2 + 1] = 0;
-    }
-
-    dsps_fft2r_fc32(y_cf, N);    // 运行FFT
-    dsps_bit_rev_fc32(y_cf, N);  // 位翻转
-    dsps_cplx2reC_fc32(y_cf, N); // 转换为两个复向量
-
-    for (int i = 0; i < N / 2; i++)
-      y1_cf[i] = 10 * log10f((y1_cf[i * 2 + 0] * y1_cf[i * 2 + 0] +
-                              y1_cf[i * 2 + 1] * y1_cf[i * 2 + 1]) /
-                                 N +
-                             1e-10);
-
-    // // 调试时可使用官方提供的显示API,将以图表形式把数据打印到 ESP-IDF
-    // Monitor上 dsps_view(y1_cf, N, 24, 12, handle->cfg.data_min,
-    // handle->cfg.data_max, '|'); vTaskDelay(pdMS_TO_TICKS(100));
-
-    // 处理FFT数据即处理 y1_cf数组数据
-    // y1_cf数组的角标数值映射到频率X轴 每个单位值的大小映射到幅度Y轴
-    // 然而LedArray尺寸有限，需要缩放到点阵下
-    // 我们可以由 0 到 N-1 遍历整个y1_cf查看数据，伴随 unit_data_max 数组 由 0
-    // 遍历 到 视口宽度-1
-    // 存储每一纵列的数据最大值（视口横向缩放倍数为1不缩放时）
-    // 之后我们不再关心y1_cf，而是使用unit_data_max中的数据
-    // 根据视口预设的数据最大值最小值计算灯光柱高度颜色并显示
-
-    // 遍历 y1_cf 中的数据
-
-    int unit_select = 0;
-    for (int i = 0; i < N / handle->cfg.x_multiples; i++) {
-      unit_select = handle->cfg.width *
-                    (i / (N / handle->cfg.x_multiples)); // 映射值由 0 到 width
-      // 在有效数据宽度进行
-      if (unit_select < handle->cfg.width && unit_select >= 0) {
-        // 取出每个单位频率范围下较大的幅度
-        int y1_cf_select = i + N / handle->cfg.x_multiples *
-                                   handle->cfg.x_move; // 按照预设偏移
-        if (y1_cf_select >= 0 && y1_cf_select < N) {
-          if (unit_data_max[unit_select] < y1_cf[y1_cf_select])
-            unit_data_max[unit_select] = y1_cf[y1_cf_select];
-          if (unit_data_min[unit_select] > y1_cf[y1_cf_select])
-            unit_data_min[unit_select] = y1_cf[y1_cf_select];
-        }
-        // 排除过高值
-        if (unit_data_max[unit_select] > handle->cfg.data_max)
-          unit_data_max[unit_select] = handle->cfg.data_max;
-        // 排除过低值
-        if (unit_data_min[unit_select] < handle->cfg.data_min)
-          unit_data_min[unit_select] = handle->cfg.data_min;
-      }
-    }
-
-    // 遍历 unit_data_max 中的数据
-    for (int j = 0; j < handle->cfg.width; j++) {
-      // 计算灯光柱颜色
-      data_to_color((unit_data_max[j]), &(handle->cfg.color_visual_cfg),
-                    &unit_led_color[j * 3 + 0], &unit_led_color[j * 3 + 1],
-                    &unit_led_color[j * 3 + 2]);
-
-      // 计算灯光柱高度
-      unit_led_height[j] =
-          VERTICAL_LED_NUMBER * (unit_data_max[j] - unit_data_min[j]) /
-          (handle->cfg.data_max -
-           handle->cfg.data_min); // 映射值由 0 到 VERTICAL_LED_NUMBER
-
-      // 排除过高值
-      if (unit_led_height[j] > handle->cfg.show_height_max)
-        unit_led_height[j] = handle->cfg.show_height_max;
-    }
-  }
-
-  ESP_LOGW(TAG, "FFT绘制任务关闭");
-
-  memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
-  memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
-
-  free(unit_data_min);
-  free(unit_data_max);
-  free(sample_buf);
-  free(src_data);
-  free(wind);
-  unit_data_max = NULL;
-  unit_data_min = NULL;
-  sample_buf = NULL;
-  src_data = NULL;
-  wind = NULL;
-
-  dsps_fft2r_deinit_fc32();
-
-  vTaskDelete(NULL);
-}
-
-void music_FFT_UI_draw(music_FFT_UI_handle_t handle) {
-  const char *TAG = "music_FFT_UI_draw";
-
-  if (!handle) {
-    ESP_LOGE(TAG, "无效的空句柄");
-    return;
-  }
-
-  int x = handle->cfg.x;
-  int y = handle->cfg.y;
-
-  for (int j = 0; j < handle->cfg.width; j++) {
-    // 显示数据到缓存
-    uint8_t *p = rectangle(1, unit_led_height[j]);
-    if (p) {
-      uint8_t color_buf[3] = {0};
-      color_buf[0] = unit_led_color[j * 3 + 0];
-      color_buf[1] = unit_led_color[j * 3 + 1];
-      color_buf[2] = unit_led_color[j * 3 + 2];
-      separation_draw(x + j, y + handle->cfg.height - unit_led_height[j], 1,
-                      RECTANGLE_MATRIX(p), *p, color_buf);
-      free(p);
-      p = NULL;
-    }
-  }
-}
-
 /// @brief 隐写支持服务
 /// @param handle 动画句柄
 /// @param idx 触发隐写的隐写关键帧在关键帧数据库的角标位置
@@ -1108,5 +505,745 @@ void steganography_service(cartoon_handle_t handle, int idx) {
   default:
     ESP_LOGE(TAG, "未知的隐写模式");
     break;
+  }
+}
+
+/**
+ * @brief HSV 转 RGB，输出写入传入的 uint8_t color[3] 数组
+ * @param H 色相  [0.0f, 360.0f)
+ * @param S 饱和度 [0.0f, 1.0f]
+ * @param V 明度   [0.0f, 1.0f]
+ * @param color 输出数组: color[0]=R, color[1]=G, color[2]=B，范围0‑255
+ */
+void ui_tool_hsv2rgb(float H, float S, float V, uint8_t color[3]) {
+  const char *TAG = "hsv2rgb";
+
+  if (H < 0.0f || H >= 360.0f) {
+    ESP_LOGE(TAG, "H 超出范围 [0.0f, 360.0f)");
+    return;
+  }
+  if (S < 0.0f || S > 1.0f) {
+    ESP_LOGE(TAG, "S 超出范围 [0.0f, 1.0f)");
+    return;
+  }
+  if (V < 0.0f || V > 1.0f) {
+    ESP_LOGE(TAG, "V 超出范围 [0.0f, 1.0f)");
+    return;
+  }
+
+  // 饱和度接近0，输出灰度
+  if (S < 1e-6f) {
+    uint8_t val = (uint8_t)(V * 255.0f + 0.5f);
+    color[0] = val;
+    color[1] = val;
+    color[2] = val;
+    return;
+  }
+
+  float h_prime = H / 60.0f;
+  int i = (int)floorf(h_prime);
+  float f = h_prime - (float)i;
+
+  float c = V * S;
+  float x = c * (1.0f - fabsf(f - 1.0f));
+  float m = V - c;
+
+  float r0, g0, b0;
+  switch (i) {
+  case 0:
+    r0 = c;
+    g0 = x;
+    b0 = 0.0f;
+    break;
+  case 1:
+    r0 = x;
+    g0 = c;
+    b0 = 0.0f;
+    break;
+  case 2:
+    r0 = 0.0f;
+    g0 = c;
+    b0 = x;
+    break;
+  case 3:
+    r0 = 0.0f;
+    g0 = x;
+    b0 = c;
+    break;
+  case 4:
+    r0 = x;
+    g0 = 0.0f;
+    b0 = c;
+    break;
+  case 5:
+    r0 = c;
+    g0 = 0.0f;
+    b0 = x;
+    break;
+  default:
+    r0 = 0;
+    g0 = 0;
+    b0 = 0;
+  }
+
+  // 归一化0‑1 → 0‑255
+  float rf = (r0 + m) * 255.0f;
+  float gf = (g0 + m) * 255.0f;
+  float bf = (b0 + m) * 255.0f;
+
+  // 钳位，防止浮点越界
+  if (rf < 0.0f)
+    rf = 0.0f;
+  if (rf > 255.0f)
+    rf = 255.0f;
+  if (gf < 0.0f)
+    gf = 0.0f;
+  if (gf > 255.0f)
+    gf = 255.0f;
+  if (bf < 0.0f)
+    bf = 0.0f;
+  if (bf > 255.0f)
+    bf = 255.0f;
+
+  color[0] = (uint8_t)roundf(rf);
+  color[1] = (uint8_t)roundf(gf);
+  color[2] = (uint8_t)roundf(bf);
+}
+
+// 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
+// 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G
+// B三个分量 0 - (value_max)
+// 以下函数是比较低级的数据可视化，对数据效果有很大损耗
+// 我们通过temp-26并获取绝对值，来得到temp与26的差值，再映射到0-1之间并用1去减它，
+// 再乘上 value_max 得到绿色分量的值，这样越接近26，绿色分量的值更大，更显示绿色
+// 而对于红色则是用temp-40，蓝色则用temp-12，按相同算法。
+// 如果是低于12摄氏度，则颜色始终为纯白色，如果高于40，始终为纯红色。
+// 为了颜色的合理与均匀，我们不得不设40和26和12摄氏度作为R G B
+// 分界阈值，损失12摄氏度以下可视化的机会，当然，这可以通过Kconfig修改适应不同气候
+
+/// @brief
+/// 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
+/// @param temp 温度值
+/// @param value_max 最大映射值
+/// @param high 高值分量 越趋近预设高温 向高值分量侧倾
+/// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
+/// @param low 低值分量 越趋近预设低温 向低值分量侧倾
+void temp_to_color(int temp, uint8_t value_max, uint8_t *high, uint8_t *comfort,
+                   uint8_t *low) {
+  float value_buf = 0;
+
+  // 如果在自由变化范围
+  if (temp >= CONFIG_LOW_TEMP && temp <= CONFIG_HIGH_TEMP) {
+    value_buf = abs(temp - CONFIG_HIGH_TEMP);
+    *high = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
+
+    value_buf = abs(temp - CONFIG_COMFORT_TEMP);
+    *comfort = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
+
+    value_buf = abs(temp - CONFIG_LOW_TEMP);
+    *low = (1 - value_buf / CONFIG_PUBLIC_DIVISOR) * value_max;
+  }
+  // 高温
+  if (temp > CONFIG_HIGH_TEMP)
+    *high = value_max; // 只写入R
+  // 低温
+  if (temp < CONFIG_LOW_TEMP) {
+    *high = value_max;
+    *comfort = value_max;
+    *low = value_max;
+  }
+}
+
+/// @brief 将数据大小体现在颜色上
+/// @param data 数据值
+/// @param visual_cfg 可视化配置
+/// @param high 高值分量 越趋近预设高温 向高值分量侧倾
+/// @param comfort 适宜分量 越趋近预设适宜温度 向适宜分量侧倾
+/// @param low 低值分量 越趋近预设低温 向低值分量侧倾
+void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high,
+                   uint8_t *comfort, uint8_t *low) {
+  float value_buf = 0;
+
+  // 如果在自由变化范围
+  if (data >= visual_cfg->low && data <= visual_cfg->high) {
+    value_buf = abs(data - visual_cfg->high);
+    *high =
+        (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
+
+    value_buf = abs(data - visual_cfg->medium);
+    *comfort =
+        (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
+
+    value_buf = abs(data - visual_cfg->low);
+    *low = (1 - value_buf / visual_cfg->public_divisor) * visual_cfg->value_max;
+  }
+  // 过高
+  if (data > visual_cfg->high)
+    *high = visual_cfg->value_max; // 只写入R
+  // 过低
+  if (data < visual_cfg->low) {
+    *high = visual_cfg->value_max;
+    *comfort = visual_cfg->value_max;
+    *low = visual_cfg->value_max;
+  }
+}
+
+/// @brief 显示表情
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+/// @param emotion_label
+/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
+void facial_expression_show(int x, int y, char *emotion_label) {
+  const char *TAG = "facial_expression_show";
+
+  if (emotion_label == NULL) {
+    ESP_LOGE(TAG, "lable为NULL");
+    return;
+  }
+
+  if (strcmp(emotion_label, "normal") == 0) {
+    ESP_LOGI(TAG, "显示正常表情");
+    direct_draw(x, y, gImage_normal);
+  } else if (strcmp(emotion_label, "happy") == 0) {
+    ESP_LOGI(TAG, "显示愉快表情");
+    direct_draw(x, y, gImage_happy);
+  } else if (strcmp(emotion_label, "like") == 0) {
+    ESP_LOGI(TAG, "显示喜爱表情");
+    direct_draw(x, y, gImage_like);
+  } else if (strcmp(emotion_label, "angry") == 0) {
+    ESP_LOGI(TAG, "显示愤怒表情");
+    direct_draw(x, y, gImage_angry);
+  } else if (strcmp(emotion_label, "disgusting") == 0) {
+    ESP_LOGI(TAG, "显示厌恶表情");
+    direct_draw(x, y, gImage_disgusting);
+  } else if (strcmp(emotion_label, "fearful") == 0) {
+    ESP_LOGI(TAG, "显示恐惧表情");
+    direct_draw(x, y, gImage_fearful);
+  } else if (strcmp(emotion_label, "sad") == 0) {
+    ESP_LOGI(TAG, "显示悲伤表情");
+    direct_draw(x, y, gImage_sad);
+  } else {
+    ESP_LOGI(TAG, "无法识别表情标签 %s", emotion_label);
+  }
+}
+
+/// @brief 显示天气图标(9x9)+温度
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void weather_icon_temperature(int x, int y) {
+  const char *TAG = "weather_icon_temperature";
+  weather_change_flag = 0;
+
+  // 获取天气图标数据
+  unsigned char icon_data[251] = {0};
+  int ret =
+      get_weather_icon_data(icon_data, current_weather_data.condition_code);
+  if (ret == -1) {
+    weather_change_flag = 0;
+    ESP_LOGE(TAG, "获取天气图标数据失败");
+    return; // 如果获取失败，退出
+  } else {
+    weather_change_flag = ret;
+    direct_draw(x + ((LINE_LED_NUMBER / 2) - WEATHER_ICON_BREATH) / 2,
+                y + (VERTICAL_LED_NUMBER - WEATHER_ICON_HEIGHT) / 2, icon_data);
+  }
+
+  // // 测试
+  // current_weather_data.temperature = -7;
+
+  // 温度显示
+  int temp_buf = abs((int)round(
+      current_weather_data
+          .temperature)); // 因为这里温度只能识别到数字，并且只显示整数部分，四舍五入为整数后取一下绝对值
+  if (temp_buf >= 100) {
+    ESP_LOGE(TAG, "不合理的温度绝对值 %d", temp_buf);
+    return; // 如果绝对值大于99显示都是问题了，大可能是传错了，退出
+  }
+
+  uint8_t color[3] = {0};
+  temp_to_color(current_weather_data.temperature, 255, &color[0], &color[1],
+                &color[2]); // 数据可以通过颜色可视化
+
+  // 取出每位上的数
+  int8_t tens = temp_buf / 10;         // 十位
+  int8_t uints = temp_buf - tens * 10; // 个位
+
+  // 确定要不要带负号
+  int minus_breath = 2;
+  int minus_height = 1;
+  static uint8_t rectangle_data[1 * sizeof(uint8_t) + sizeof(uint64_t)] = {0};
+
+  if (current_weather_data.temperature < 0) {
+    build_rectangle(minus_breath, minus_height, rectangle_data,
+                    sizeof(rectangle_data));
+    separation_draw(x + (LINE_LED_NUMBER / 2) + 1,
+                    y + 1 + (VERTICAL_LED_NUMBER - minus_height) / 2,
+                    minus_breath, RECTANGLE_MATRIX(rectangle_data),
+                    matrix_size(rectangle_data), color);
+
+    print_number(x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1,
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
+                 color);
+    print_number(
+        x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1 + FIGURE_BREATH + 1,
+        y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints, color);
+  } else {
+    print_number(x + (LINE_LED_NUMBER / 2) + 1,
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
+                 color);
+    print_number(x + (LINE_LED_NUMBER / 2) + 1 + FIGURE_BREATH + 1,
+                 y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, uints,
+                 color);
+  }
+}
+
+void show_701Enti_sign(int x, int y) { direct_draw(x, y, gImage_701Enti_sign); }
+
+void show_se30_sign(int x, int y) { direct_draw(x, y, gImage_se30_sign); }
+
+/// @brief 显示了当前系统时间  时 分
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void time_UI_h_m(int x, int y) {
+  static uint8_t color[3] = {0};
+  static int8_t minute_buf = 80;
+
+  if (minute_buf != systemtime_data.minute) {
+    // 时间的颜色使用随机
+    esp_fill_random(&color[0], 1);
+    esp_fill_random(&color[1], 1);
+    esp_fill_random(&color[2], 1);
+    minute_buf = systemtime_data.minute;
+  }
+
+  int8_t hour_tens = systemtime_data.hour / 10;              // 十位
+  int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
+  print_number(
+      x + LINE_LED_NUMBER / 4 * 0 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
+  print_number(
+      x + LINE_LED_NUMBER / 4 * 1 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
+
+  int8_t minute_tens = systemtime_data.minute / 10;                // 十位
+  int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
+  print_number(
+      x + LINE_LED_NUMBER / 4 * 2 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
+  print_number(
+      x + LINE_LED_NUMBER / 4 * 3 + (LINE_LED_NUMBER / 4 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
+}
+
+/// @brief 显示了当前系统时间  秒
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void time_UI_s(int x, int y) {
+  static uint8_t color[3] = {0};
+  static int8_t second_buf = 80;
+
+  if (second_buf != systemtime_data.second) {
+    // 时间的颜色使用随机
+    esp_fill_random(&color[0], 1);
+    esp_fill_random(&color[1], 1);
+    esp_fill_random(&color[2], 1);
+    second_buf = systemtime_data.second;
+  }
+
+  int8_t second_tens = systemtime_data.second / 10;                // 十位
+  int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
+  print_number(x + LINE_LED_NUMBER / 2 - FIGURE_BREATH - 1,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
+               color); // 数字字模的尺寸为4x7
+  print_number(x + LINE_LED_NUMBER / 2 + 1,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints,
+               color);
+}
+
+/// @brief 显示了当前系统时间  时 分 秒
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void time_UI_h_m_s(int x, int y) {
+  static uint8_t color[3] = {0};
+  static int8_t second_buf = 80;
+
+  if (second_buf != systemtime_data.second) {
+    // 时间的颜色使用随机
+    esp_fill_random(&color[0], 1);
+    esp_fill_random(&color[1], 1);
+    esp_fill_random(&color[2], 1);
+    second_buf = systemtime_data.second;
+  }
+
+  int8_t hour_tens = systemtime_data.hour / 10;              // 十位
+  int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
+  print_number(
+      x + LINE_LED_NUMBER / 6 * 0 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
+  print_number(
+      x + LINE_LED_NUMBER / 6 * 1 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
+
+  int8_t minute_tens = systemtime_data.minute / 10;                // 十位
+  int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
+  print_number(
+      x + LINE_LED_NUMBER / 6 * 2 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
+  print_number(
+      x + LINE_LED_NUMBER / 6 * 3 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
+
+  int8_t second_tens = systemtime_data.second / 10;                // 十位
+  int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
+  print_number(x + LINE_LED_NUMBER / 6 * 4 +
+                   (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
+               color); // 数字字模的尺寸为4x7
+  print_number(
+      x + LINE_LED_NUMBER / 6 * 5 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
+}
+
+/// @brief 显示了当前电池电量百分比(SOC)
+/// @param x 起始坐标x
+/// @param y 起始坐标y
+void battery_UI(int x, int y) {
+  static uint8_t color[3] = {0};
+
+  if (battery_data.result.battery_soc < 0.0f ||
+      battery_data.result.battery_soc > 100.0f) {
+    return;
+  }
+
+  int8_t soc_buf = roundf(battery_data.result.battery_soc);
+  ui_tool_hsv2rgb((float)soc_buf / 100.0f * 0.5f, 1.0f, 1.0f, color);
+
+  if (soc_buf < 100) {
+    int8_t soc_tens = soc_buf / 10;             // 十位
+    int8_t soc_uints = soc_buf - soc_tens * 10; // 个位
+    print_number(x + LINE_LED_NUMBER / 2 - FIGURE_BREATH - 1,
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, soc_tens,
+                 color);
+    print_number(x + LINE_LED_NUMBER / 2 + 1,
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, soc_uints,
+                 color);
+  } else {
+    print_number(x + (LINE_LED_NUMBER - (FIGURE_BREATH * 3 + 2)) / 2,
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 0, color);
+    print_number(x + (LINE_LED_NUMBER - (FIGURE_BREATH * 3 + 2)) / 2 +
+                     FIGURE_BREATH * 1 + 1,
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 0, color);
+    print_number(x + (LINE_LED_NUMBER - (FIGURE_BREATH * 3 + 2)) / 2 +
+                     FIGURE_BREATH * 2 + 2,
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 0, color);
+  }
+}
+
+/// @brief
+/// 启动音频频谱UI绘制任务(必须有音频任务进行中才可以启动),检测到音频活动任务结束会暂停监视,直到新的音频活动出现
+/// @param UI_cfg FFT的UI配置
+/// @param priority 任务优先级
+/// @return music_FFT_UI_handle_t 句柄,用于后续操作UI / NULL
+/// 表示申请失败,请检查内存是否足够
+music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg,
+                                         UBaseType_t priority) {
+  const char *TAG = "music_FFT_UI_start";
+
+  music_FFT_UI_handle_t handle = calloc(1, sizeof(music_FFT_UI_t));
+  if (!handle) {
+    ESP_LOGE(TAG, "申请handle资源时发现问题 需要 %d 字节",
+             sizeof(music_FFT_UI_t));
+    return NULL;
+  }
+
+  if (!collecter_handle->collecter_buf) {
+    ESP_LOGE(TAG, "当前音频缓存为空,无法启动FFT_UI");
+    return NULL;
+  }
+
+  memcpy(&(handle->cfg), UI_cfg, sizeof(music_FFT_UI_cfg_t));
+  if (handle->cfg.dampen_multiples <= 0) {
+    ESP_LOGW(TAG, "数据衰减倍数必须大于0,已自动调整为1");
+    handle->cfg.dampen_multiples = 1;
+  }
+  if (handle->cfg.x_multiples < 0) {
+    ESP_LOGW(TAG, "视口横向缩放倍数小于0,已自动调整为1");
+    handle->cfg.x_multiples = 1;
+  }
+  if (handle->cfg.width > FFT_VIEW_WIDTH_MAX) {
+    ESP_LOGW(TAG,
+             "视口宽度超过最大宽度 FFT_VIEW_WIDTH_MAX ,已自动调整为最大宽度");
+    handle->cfg.width = FFT_VIEW_WIDTH_MAX;
+  }
+
+  handle->running_flag = true;
+
+  xTaskCreatePinnedToCore((TaskFunction_t)&music_FFT_UI_refresh_Task,
+                          "music_FFT_UI_refresh_Task", FFT_UI_TASK_STACK_SIZE,
+                          handle, priority, NULL, FFT_UI_TASK_CORE);
+
+  return handle;
+}
+
+/// @brief 停止音频频谱UI绘制任务
+/// @param handle 句柄
+/// @return esp_err_t ESP_OK 表示成功 / ESP_ERR_INVALID_ARG 表示参数柄为空
+esp_err_t music_FFT_UI_stop(music_FFT_UI_handle_t handle) {
+  const char *TAG = "music_FFT_UI_stop";
+  if (!handle) {
+    ESP_LOGE(TAG, "handle 为空,无法停止任务");
+    return ESP_ERR_INVALID_ARG;
+  }
+  handle->running_flag = false;
+  return ESP_OK;
+}
+
+/// @brief 利用 FFT 刷新音频频谱任务,需要创建任务调用,参考了ESP-DSP fft例程
+/// @param UI_cfg UI配置
+void music_FFT_UI_refresh_Task(music_FFT_UI_handle_t handle) {
+  const char *TAG = "music_FFT_UI_refresh_Task";
+  __attribute__((aligned(16))) float *y1_cf = &y_cf[0]; // 指向合成缓存
+  int N = FFT_N_SAMPLES;                                // FFT 点数 N
+
+  // FFT数据缓存 通过__attribute__((aligned(16)))请求16字节对齐格式
+  src_data = malloc(N * sizeof(float)); // 源数据
+  wind = malloc(N * sizeof(float));     // 窗口系数
+  if (!src_data || !wind) {
+    ESP_LOGE(TAG, "申请FFT内存 src_data wind 时发现问题 需要 %d 字节",
+             N * sizeof(float) * 2);
+    handle->running_flag = false;
+  }
+
+  // 源数据缓存
+  int read_len_in_bytes = 0; // 已读取长度(单位字节)
+  int16_t *sample_buf = NULL;
+  sample_buf = malloc(FFT_N_SAMPLES * sizeof(int16_t));
+  if (!sample_buf) {
+    ESP_LOGE(TAG, "申请sample_buf资源时发现问题 需要 %d 字节",
+             FFT_N_SAMPLES * sizeof(int16_t));
+    handle->running_flag = false;
+  }
+
+  // 申请图谱绘制缓存
+  float *unit_data_max = NULL; // 存储每个单位频率范围下较大的幅度
+  unit_data_max = malloc(handle->cfg.width * sizeof(float));
+  if (!unit_data_max) {
+    ESP_LOGE(TAG, "申请unit_data_max资源时发现问题 需要 %d 字节",
+             handle->cfg.width * sizeof(float));
+    handle->running_flag = false;
+  }
+  float *unit_data_min = NULL; // 存储每个单位频率范围下较小的幅度
+  unit_data_min = malloc(handle->cfg.width * sizeof(float));
+  if (!unit_data_min) {
+    ESP_LOGE(TAG, "申请unit_data_min资源时发现问题 需要 %d 字节",
+             handle->cfg.width * sizeof(float));
+    handle->running_flag = false;
+  }
+
+  if (handle->running_flag) {
+    memset(sample_buf, 0, FFT_N_SAMPLES * sizeof(int16_t));
+    memset(unit_data_max, 0, handle->cfg.width * sizeof(float));
+    memset(unit_data_min, 0, handle->cfg.width * sizeof(float));
+    memset(src_data, 0, N * sizeof(float));
+    memset(wind, 0, N * sizeof(float));
+    if (dsps_fft2r_init_fc32(NULL, DSP_MAX_FFT_SIZE) != ESP_OK) {
+      ESP_LOGE(TAG, "初始化FFT模块时发现问题");
+      handle->running_flag = false;
+    }
+    dsps_wind_hann_f32(wind, N);
+  }
+
+  ESP_LOGW(TAG, "FFT监视已启动");
+
+  while (handle->running_flag) {
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    if (collecter_handle->collecter_running_flag == false) {
+      // 如果音频活动未进行,仅清理屏幕缓存并等待
+      memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
+      memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
+      vTaskDelay(pdMS_TO_TICKS(500));
+      continue;
+    } else {
+      if (collecter_handle->collecter_buf_overflow_flag == false) {
+        // 如果音频活动进行中,且缓存未溢出,则等待缓存溢出
+        continue;
+      }
+    }
+
+    if (xSemaphoreTake(collecter_handle->collecter_buf_mutex,
+                       pdMS_TO_TICKS(FFT_CURRENT_SOUND_BUF_WAIT_TIME_MS)) !=
+        pdTRUE) {
+      continue;
+    }
+
+    // 清理之前缓存的数据
+    memset(unit_data_max, 0, handle->cfg.width * sizeof(float));
+    memset(unit_data_min, 0, handle->cfg.width * sizeof(float));
+
+    if (N * sizeof(int16_t) > CURRENT_SOUND_BUF_SIZE / 2) {
+      read_len_in_bytes = CURRENT_SOUND_BUF_SIZE / 2;
+    } else {
+      read_len_in_bytes = N * sizeof(int16_t);
+    }
+
+    if (collecter_handle->collecter_element_info.bits == 16) {
+      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
+        sample_buf[i] =
+            ((int16_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch];
+      }
+    } else if (collecter_handle->collecter_element_info.bits == 24) {
+      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
+        sample_buf[i] =
+            ((int32_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
+            0x7FFFFF * INT16_MAX;
+      }
+    } else if (collecter_handle->collecter_element_info.bits == 32) {
+      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
+        sample_buf[i] =
+            ((int32_t *)(collecter_handle
+                             ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
+            INT32_MAX * INT16_MAX;
+      }
+    } else if (collecter_handle->collecter_element_info.bits == 8) {
+      for (int i = 0; i < read_len_in_bytes / sizeof(int16_t); i++) {
+        sample_buf[i] =
+            ((int8_t *)(collecter_handle
+                            ->collecter_buf))[i * 2 + handle->cfg.lr_switch] /
+            INT8_MAX * INT16_MAX;
+      }
+    } else {
+      ESP_LOGW(TAG, "不支持的音频位深度 %d",
+               collecter_handle->collecter_element_info.bits);
+      vTaskDelay(pdMS_TO_TICKS(500));
+      continue;
+    }
+
+    xSemaphoreGive(collecter_handle->collecter_buf_mutex);
+
+    for (int i = 0; i < N; i++) {
+      src_data[i] = (float)(sample_buf[i]) / handle->cfg.dampen_multiples;
+    }
+
+    // // 转换为复向量
+    for (int i = 0; i < N; i++) {
+      y_cf[i * 2 + 0] = src_data[i] * wind[i];
+      y_cf[i * 2 + 1] = 0;
+    }
+
+    dsps_fft2r_fc32(y_cf, N);    // 运行FFT
+    dsps_bit_rev_fc32(y_cf, N);  // 位翻转
+    dsps_cplx2reC_fc32(y_cf, N); // 转换为两个复向量
+
+    for (int i = 0; i < N / 2; i++)
+      y1_cf[i] = 10 * log10f((y1_cf[i * 2 + 0] * y1_cf[i * 2 + 0] +
+                              y1_cf[i * 2 + 1] * y1_cf[i * 2 + 1]) /
+                                 N +
+                             1e-10);
+
+    // // 调试时可使用官方提供的显示API,将以图表形式把数据打印到 ESP-IDF
+    // Monitor上 dsps_view(y1_cf, N, 24, 12, handle->cfg.data_min,
+    // handle->cfg.data_max, '|'); vTaskDelay(pdMS_TO_TICKS(100));
+
+    // 处理FFT数据即处理 y1_cf数组数据
+    // y1_cf数组的角标数值映射到频率X轴 每个单位值的大小映射到幅度Y轴
+    // 然而LedArray尺寸有限，需要缩放到点阵下
+    // 我们可以由 0 到 N-1 遍历整个y1_cf查看数据，伴随 unit_data_max 数组 由 0
+    // 遍历 到 视口宽度-1
+    // 存储每一纵列的数据最大值（视口横向缩放倍数为1不缩放时）
+    // 之后我们不再关心y1_cf，而是使用unit_data_max中的数据
+    // 根据视口预设的数据最大值最小值计算灯光柱高度颜色并显示
+
+    // 遍历 y1_cf 中的数据
+
+    int unit_select = 0;
+    for (int i = 0; i < N / handle->cfg.x_multiples; i++) {
+      unit_select = handle->cfg.width *
+                    (i / (N / handle->cfg.x_multiples)); // 映射值由 0 到 width
+      // 在有效数据宽度进行
+      if (unit_select < handle->cfg.width && unit_select >= 0) {
+        // 取出每个单位频率范围下较大的幅度
+        int y1_cf_select = i + N / handle->cfg.x_multiples *
+                                   handle->cfg.x_move; // 按照预设偏移
+        if (y1_cf_select >= 0 && y1_cf_select < N) {
+          if (unit_data_max[unit_select] < y1_cf[y1_cf_select])
+            unit_data_max[unit_select] = y1_cf[y1_cf_select];
+          if (unit_data_min[unit_select] > y1_cf[y1_cf_select])
+            unit_data_min[unit_select] = y1_cf[y1_cf_select];
+        }
+        // 排除过高值
+        if (unit_data_max[unit_select] > handle->cfg.data_max)
+          unit_data_max[unit_select] = handle->cfg.data_max;
+        // 排除过低值
+        if (unit_data_min[unit_select] < handle->cfg.data_min)
+          unit_data_min[unit_select] = handle->cfg.data_min;
+      }
+    }
+
+    // 遍历 unit_data_max 中的数据
+    for (int j = 0; j < handle->cfg.width; j++) {
+      // 计算灯光柱颜色
+      data_to_color((unit_data_max[j]), &(handle->cfg.color_visual_cfg),
+                    &unit_led_color[j * 3 + 0], &unit_led_color[j * 3 + 1],
+                    &unit_led_color[j * 3 + 2]);
+
+      // 计算灯光柱高度
+      unit_led_height[j] =
+          VERTICAL_LED_NUMBER * (unit_data_max[j] - unit_data_min[j]) /
+          (handle->cfg.data_max -
+           handle->cfg.data_min); // 映射值由 0 到 VERTICAL_LED_NUMBER
+
+      // 排除过高值
+      if (unit_led_height[j] > handle->cfg.show_height_max)
+        unit_led_height[j] = handle->cfg.show_height_max;
+    }
+  }
+
+  ESP_LOGW(TAG, "FFT绘制任务关闭");
+
+  memset(unit_led_color, 0, FFT_VIEW_WIDTH_MAX * 3);
+  memset(unit_led_height, 0, FFT_VIEW_WIDTH_MAX);
+
+  free(unit_data_min);
+  free(unit_data_max);
+  free(sample_buf);
+  free(src_data);
+  free(wind);
+  unit_data_max = NULL;
+  unit_data_min = NULL;
+  sample_buf = NULL;
+  src_data = NULL;
+  wind = NULL;
+
+  dsps_fft2r_deinit_fc32();
+
+  vTaskDelete(NULL);
+}
+
+void music_FFT_UI_draw(music_FFT_UI_handle_t handle) {
+  const char *TAG = "music_FFT_UI_draw";
+
+  static uint8_t rectangle_data[VERTICAL_LED_NUMBER * sizeof(uint8_t) +
+                                sizeof(uint64_t)] = {0};
+
+  if (!handle) {
+    ESP_LOGE(TAG, "无效的空句柄");
+    return;
+  }
+
+  int x = handle->cfg.x;
+  int y = handle->cfg.y;
+  for (int j = 0; j < handle->cfg.width; j++) {
+    build_rectangle(1, unit_led_height[j], rectangle_data,
+                    sizeof(rectangle_data));
+    uint8_t color_buf[3] = {0};
+    color_buf[0] = unit_led_color[j * 3 + 0];
+    color_buf[1] = unit_led_color[j * 3 + 1];
+    color_buf[2] = unit_led_color[j * 3 + 2];
+    separation_draw(x + j, y + handle->cfg.height - unit_led_height[j], 1,
+                    RECTANGLE_MATRIX(rectangle_data),
+                    matrix_size(rectangle_data), color_buf);
   }
 }

@@ -27,6 +27,7 @@
 // github: https://github.com/701Enti
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,40 +37,73 @@
 #include "esp_wifi.h"
 #include "lwip/dns.h"
 
+#include "OPT3001.h"
 #include "audio_hal.h"
 #include "board_ctrl.h"
 #include "board_def.h"
 #include "board_pins_config.h"
 #include "gt32l32s0140.h"
 
+#include "HSCDTD008A.h"
 #include "TCA6416A.h"
 #include "calibration_tools.h"
-#include "hscdtd008a.h"
+#include "esp_timer.h"
 #include "math_tools.h"
 #include "sevetest30_BWEDA.h"
 #include "sevetest30_IWEDA.h"
 #include "sevetest30_LedArray.h"
 #include "sevetest30_SWEDA.h"
 #include "sevetest30_UI.h"
+#include "sevetest30_config.h"
 #include "sevetest30_gpio.h"
 #include "sevetest30_sound.h"
 #include "sevetest30_touch.h"
 
 board_ctrl_t board_ctrl = {0};
 
+char *system_json_head_prompt =
+    "你是一个部署在SEVETEST30智能闹钟上的AI语音助手,"
+    "你的名字是:07(零七,中文谐音寓意trying,数字取自701Enti),"
+    "SEVETEST30是github上的701Enti组织归属的非盈利开源项目."
+    "你可以和我聊天,尽量用简短文字回答问题,文学创作除外."
+    "以下信息来自我的SEVETEST30闹钟通过网络API或硬件传感器获取的数据."
+    "实时更新,我们的聊天可以不涉及."
+    "注意:你需要根据时区获取当前时间,这里不会提供."
+    "注意:位置数据来自IP定位,不要引起用户不必要的恐慌,经纬度数据可能不准确."
+    "注意:用户通过语音识别聊天,文字书写可能错误,请重点关注拼音和上下文,"
+    "忽略多音字歧义.";
+
 void init(void);
 void test(void);
+
+void AI_chat(void);
 
 void app_main(void) {
 
   init();
 
+  refresh_battery_data();
+  refresh_env_temp_hum_data();
+  refresh_env_TVOC_data(true);
+
+  refresh_position_data();
+  refresh_current_weather_data();
+
+  if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
+      pdTRUE) {
+    clean_all_draw_buf();
+    xSemaphoreGive(refresh_ledarray_task_mutex);
+  }
+
   test();
 
   int UI_switch = 0;
+  bool UI_switch_changed = false;
 
   while (1) {
+
     refresh_systemtime_data();
+
     vTaskDelay(pdMS_TO_TICKS(10));
     if (ext_io_ctrl.auto_read_INT) {
       if (ext_io_level_service() == ESP_OK) {
@@ -80,29 +114,51 @@ void app_main(void) {
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
           UI_switch++;
+          UI_switch_changed = true;
         } else if (board_ctrl.p_ext_io_value->thumbwheel_CW == 1 &&
                    board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
           vibra_motor_start();
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
           UI_switch--;
+          UI_switch_changed = true;
+        } else if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+                   board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
+          vibra_motor_start();
+          vTaskDelay(pdMS_TO_TICKS(50));
+          vibra_motor_stop();
+          vTaskDelay(pdMS_TO_TICKS(100));
+          vibra_motor_start();
+          vTaskDelay(pdMS_TO_TICKS(50));
+          vibra_motor_stop();
+          AI_chat();
         }
       }
     }
     if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
         pdTRUE) {
-      clean_all_draw_buf();
       switch (UI_switch) {
       case 0:
+        clean_all_draw_buf();
         time_UI_h_m_s(1, 1);
         break;
       case 1:
+        clean_all_draw_buf();
         weather_icon_temperature(1, 1);
         break;
       case 2:
-        time_UI_h_m(1, 1);
+        if (UI_switch_changed) {
+          clean_all_draw_buf();
+          refresh_battery_data();
+          battery_UI(1, 1);
+        }
         break;
       case 3:
+        clean_all_draw_buf();
+        time_UI_h_m(1, 1);
+        break;
+      case 4:
+        clean_all_draw_buf();
         time_UI_s(1, 1);
         break;
       default:
@@ -111,12 +167,18 @@ void app_main(void) {
       }
       xSemaphoreGive(refresh_ledarray_task_mutex);
     }
+
+    if (UI_switch_changed) {
+      UI_switch_changed = false;
+    }
   }
 
   return;
 }
 
 void init(void) {
+  const char *TAG = "init";
+
   static TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
   static TCA6416A_level_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
 
@@ -127,7 +189,7 @@ void init(void) {
   board_ctrl.amplifier_sd = false;
   board_ctrl.codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START;
   board_ctrl.codec_mode = AUDIO_HAL_CODEC_MODE_BOTH;
-  board_ctrl.codec_adc_gain = MIC_GAIN_12DB;
+  board_ctrl.codec_adc_gain = MIC_GAIN_9DB;
   board_ctrl.codec_dac_pin = DAC_OUTPUT_ALL;
   board_ctrl.codec_dac_volume = 100;
   board_ctrl.codec_adc_pin = CODEC_ADC_INPUT_MIC_ON_BOARD;
@@ -135,9 +197,18 @@ void init(void) {
   sevetest30_all_device_init(&board_ctrl);
 
   if (refresh_ledarray_task_mutex == NULL) {
-    ESP_LOGE("MAIN", "LED阵列初始化失败");
+    ESP_LOGE(TAG, "LED阵列初始化失败");
     return;
   }
+
+  // 打开屏幕显示
+  board_ctrl_t *b = board_status_get();
+  b->p_ext_io_value->EN_LED_BOARD = 0;
+  sevetest30_board_ctrl(b, BOARD_CTRL_EXT_IO);
+
+  ext_io_ctrl.auto_read_EN = true;
+
+  show_701Enti_sign(1, 1);
 
   esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
   wifi_init(&wifi_periph_config);
@@ -148,9 +219,9 @@ void init(void) {
       .wifi_config.sta.password = CONFIG_WIFI_PASSWORD,
   };
   if (wifi_connect(&wifi_cfg) != ESP_OK) {
-    ESP_LOGE("MAIN", "网络连接失败");
+    ESP_LOGE(TAG, "网络连接失败");
   } else {
-    ESP_LOGI("MAIN", "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
+    ESP_LOGI(TAG, "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
     // // 关闭wifi省电模式
     // esp_wifi_set_ps(WIFI_PS_NONE);
     // 配置DNS服务器
@@ -162,17 +233,7 @@ void init(void) {
   init_timezone();
   init_time_data_sntp(20000);
 
-  // 打开屏幕显示
-  board_ctrl_t *b = board_status_get();
-  b->p_ext_io_value->EN_LED_BOARD = 0;
-  sevetest30_board_ctrl(b, BOARD_CTRL_EXT_IO);
-
-  refresh_env_temp_hum_data();
-  refresh_env_TVOC_data(true);
-  refresh_position_data();
-  refresh_current_weather_data();
-
-  ext_io_ctrl.auto_read_EN = true;
+  show_se30_sign(1, 1);
 }
 
 void test(void) {
@@ -252,7 +313,7 @@ void test(void) {
   // fetch_music_lyric_by_url("",lrc,5000);
   // ESP_LOGE("main", "%s",lrc);
 
-  // // lsm6ds3trc全部使用例子
+  // // LSM6DS3TRC全部使用例子
   // //  (输出XYZ分量总是一致，待优化)FIFO
   // while (1)
   // {
@@ -292,30 +353,30 @@ void test(void) {
   //   ESP_LOGI("main", "---------------------------");
 
   //   IMU_acceleration_value_t acceleration =
-  //   lsm6ds3trc_gat_now_acceleration(); ESP_LOGI("main", "加速度 X:%d Y:%d
+  //   LSM6DS3TRC_gat_now_acceleration(); ESP_LOGI("main", "加速度 X:%d Y:%d
   //   Z:%d", acceleration.x, acceleration.y, acceleration.z);
 
   //   IMU_angular_rate_value_t angular_rate =
-  //   lsm6ds3trc_gat_now_angular_rate(); ESP_LOGI("main", "角速度 X:%d Y:%d
+  //   LSM6DS3TRC_gat_now_angular_rate(); ESP_LOGI("main", "角速度 X:%d Y:%d
   //   Z:%d", angular_rate.x, angular_rate.y, angular_rate.z);
   // }
   // // (偏移标志位不会自动设置为0，待优化)自动记录
   // while (1)
   // {
   //   vTaskDelay(pdMS_TO_TICKS(1000));
-  //   IMU_D6D_data_value_t value = lsm6ds3trc_get_D6D_data_value(true);
+  //   IMU_D6D_data_value_t value = LSM6DS3TRC_get_D6D_data_value(true);
   //   ESP_LOGI("main", "D6D反向偏移标识 [%d<-X轴->%d] [%d<-Y轴->%d]
   //   [%d<-Z轴->%d]", value.XL, value.XH, value.YL, value.YH, value.ZL,
   //   value.ZH); ESP_LOGI("main", "温度 %.3f ℃",
-  //   (double)lsm6ds3trc_get_now_temperature() / 1000); if
-  //   (lsm6ds3trc_get_free_fall_status())
+  //   (double)LSM6DS3TRC_get_now_temperature() / 1000); if
+  //   (LSM6DS3TRC_get_free_fall_status())
   //     ESP_LOGW("main", "自由落体");
   // }
 
-  // //(经常出现校准失败，待优化) hscdtd008a
+  // //(经常出现校准失败，待优化) HSCDTD008A
 
-  // hscdtd008a_mode_set(GS_MODE_ACTIVE);
-  // hscdtd008a_state_set(GS_STATE_NORMAL);
+  // HSCDTD008A_mode_set(GS_MODE_ACTIVE);
+  // HSCDTD008A_state_set(GS_STATE_NORMAL);
 
   // ESP_LOGI("main", "5s后开始校准");
   // vTaskDelay(pdMS_TO_TICKS(5000));
@@ -330,7 +391,7 @@ void test(void) {
   //   GS_angle_data_t angle;
   //   while (1)
   //   {
-  //     hscdtd008a_output_data_get(&output);
+  //     HSCDTD008A_output_data_get(&output);
   //     to_magnetic_flux_density_data(&output, &mfd);
   //     calculate_calibrated_GS_only_by_static_model(&static_model, &mfd);
   //     to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
@@ -361,7 +422,7 @@ void test(void) {
   //   refresh_env_TVOC_data(true);
   //   if (env_TVOC_data.valid)
   //   {
-  //     ESP_LOGI("main", "环境TVOC:%" PRIu32, env_TVOC_data.TVOC_value);
+  //     ESP_LOGI("main", "环境TVOC:%" PRIu32 "ppb", env_TVOC_data.TVOC_value);
   //   }
   //   else
   //   {
@@ -369,32 +430,45 @@ void test(void) {
   //   }
   // }
 
+  // // 通过OPT3001获取环境光照数据
+  // while (1) {
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
+  //   refresh_env_lux_data();
+  //   if (env_lux_data >= 0.0f) {
+  //     ESP_LOGI("main", "环境光照:%.2f lx", env_lux_data);
+  //   } else {
+  //     ESP_LOGE("main", "环境光照数据无效");
+  //   }
+  // }
+
+  // // 通过MAX17048获取电池数据
+  // while (1) {
+  //   vTaskDelay(pdMS_TO_TICKS(1000));
+  //   refresh_battery_data();
+  //   if (battery_data.charge_flag) {
+  //     ESP_LOGI("main", "电池充电中");
+  //   } else {
+  //     ESP_LOGI("main", "电池不处于充电状态");
+  //   }
+  //   if (battery_data.result.battery_voltage >= 0.0f) {
+  //     ESP_LOGI("main", "电池电压:%.2fmV",
+  //     battery_data.result.battery_voltage);
+  //   } else {
+  //     ESP_LOGE("main", "电池数据无效");
+  //   }
+  //   if (battery_data.result.battery_soc >= 0.0f) {
+  //     ESP_LOGI("main", "电池SOC:%.2f%%", battery_data.result.battery_soc);
+  //   } else {
+  //     ESP_LOGE("main", "电池数据无效");
+  //   }
+  // }
+
   // bluetooth_connect();
 
-  // music_FFT_UI_cfg_t FFT_UI_cfg = {
-  //     .x = 1,
-  //     .y = 1,
-  //     .lr_switch = 0,
-  //     .color_visual_cfg =
-  //         {
-  //             .value_max = 255,
-  //             .high = 4096,
-  //             .medium = (4096 - 0) / 2,
-  //             .low = 0,
-  //             .public_divisor = (4096 - 0) / 2,
-  //         },
-  //     .dampen_multiples = 50,
-  //     .data_max = 4096,
-  //     .data_min = 0,
-  //     .x_multiples = 5,
-  //     .x_move = 2.8,
-  //     .width = LINE_LED_NUMBER,
-  //     .height = VERTICAL_LED_NUMBER,
-  //     .show_height_max = VERTICAL_LED_NUMBER,
-  // };
+  // music_FFT_UI_cfg_t FFT_UI_cfg = FFT_UI_DEFAULT_CONFIG();
 
   // // 网络音乐播放
-  // // 官方测试音频 "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
+  // // espressif官方测试音频 "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
   // char *url1 = "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
 
   // IWEDA_handle_t music_play_IWEDA_handle = new_iweda_handle(2048, 2048);
@@ -538,28 +612,43 @@ void test(void) {
   //   }
   // }
 
-  // AI交流例程
-  ASR_cfg_t asr_cfg;
-  asr_cfg.dev_pid = ASR_PID_CM_NEAR;
-  asr_cfg.sampling_rate = ASR_SAMPLING_RATE_16K;
-  asr_cfg.sampling_bits = ASR_SAMPLING_BITS_16;
-  asr_cfg.input_rate = 48000;
-  asr_cfg.input_bits = 16;
-  asr_cfg.asr_one_frame_ms = 1000;
-  asr_cfg.stop_threshold = 1;
-  asr_cfg.send_threshold = 1;
-  asr_cfg.record_save_times_max = 10;
-  asr_cfg.vad_mode = VAD_MODE_3;
-  asr_cfg.vad_one_frame_ms = 30;
-  asr_cfg.vad_min_speech_ms = 150;
-  asr_cfg.vad_min_noise_ms = 50;
+  // // AI交流例程
+  // AI_chat();
+}
+
+void _main_chat_wait_cb(void) {
+  static uint8_t loading_bar[(LINE_LED_NUMBER / 8 + 1) * sizeof(uint8_t) +
+                             sizeof(uint64_t)] = {0};
+  if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
+      pdTRUE) {
+    uint8_t color[3] = {0};
+    static float H = 0.0f;
+    H += 1.0f;
+    if (H >= 360.0f) {
+      H = 0.0f;
+    }
+    ui_tool_hsv2rgb(H, 1.0f, 1.0f, color);
+    build_rectangle(LINE_LED_NUMBER, 1, loading_bar, sizeof(loading_bar));
+    separation_draw(1, VERTICAL_LED_NUMBER, LINE_LED_NUMBER,
+                    RECTANGLE_MATRIX(loading_bar), matrix_size(loading_bar),
+                    color);
+    xSemaphoreGive(refresh_ledarray_task_mutex);
+  }
+  vTaskDelay(pdMS_TO_TICKS(10));
+}
+
+void AI_chat(void) {
+  const char *TAG = "AI_chat";
+  ESP_LOGI(TAG, "AI_chat 开始");
+
+  ASR_cfg_t asr_cfg = ASR_DEFAULT_CONFIG(50, ASR_PID_CM_NEAR, VAD_MODE_3);
   asr_service_begin(&asr_cfg, 1);
 
   GPT_chat_handle_t GPT_chat_handle =
       GPT_chat_start(ERNIE_BOT_URL, CONFIG_GPT_CHAT_ACCESS_KEY,
                      "ernie-4.5-turbo-128k", "", 60000);
   if (GPT_chat_handle == NULL) {
-    ESP_LOGE("main", "GPT_chat_handle 为空,无法绘制任务");
+    ESP_LOGE(TAG, "GPT_chat_handle 为空,无法绘制任务");
     return;
   }
 
@@ -567,7 +656,17 @@ void test(void) {
   if (GPT_chat_enable_multi_round_chat(GPT_chat_handle, 8192, 10 * 60 * 1000) !=
       ESP_OK) {
     GPT_chat_stop(GPT_chat_handle);
-    ESP_LOGE("main", "GPT_chat_enable_multi_round_chat 失败\n");
+    ESP_LOGE(TAG, "GPT_chat_enable_multi_round_chat 失败\n");
+    return;
+  }
+
+  // 设置系统JSON字段
+  char system_json_field[2048] = {0};
+
+  if (GPT_chat_set_system_json_field(GPT_chat_handle, system_json_field) !=
+      ESP_OK) {
+    GPT_chat_stop(GPT_chat_handle);
+    ESP_LOGE(TAG, "GPT_chat_set_system_json_field 失败");
     return;
   }
 
@@ -580,8 +679,31 @@ void test(void) {
       xSemaphoreGive(refresh_ledarray_task_mutex);
     }
 
+    int64_t start_time = esp_timer_get_time();
     while (1) {
       vTaskDelay(pdMS_TO_TICKS(500));
+
+      int64_t current_time = esp_timer_get_time();
+      if (current_time - start_time > 30 * 1000 * 1000) {
+        sevetest30_asr_running_flag = false;
+        GPT_chat_stop(GPT_chat_handle);
+        ESP_LOGW(TAG, "长时间未获取到样本,自动退出对话");
+        return;
+      }
+
+      if (ext_io_ctrl.auto_read_INT) {
+        if (ext_io_level_service() == ESP_OK) {
+          ext_io_ctrl.auto_read_INT = false;
+          if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+              board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
+            sevetest30_asr_running_flag = false;
+            GPT_chat_stop(GPT_chat_handle);
+            ESP_LOGW(TAG, "用户退出对话");
+            return;
+          }
+        }
+      }
+
       if (sevetest30_asr_result_text) {
         if (sevetest30_asr_result_text[0] != 0) {
           sevetest30_asr_running_flag = false; // 获取到样本,强制终止ASR服务
@@ -589,17 +711,65 @@ void test(void) {
         }
       }
     }
+    sevetest30_asr_running_flag = false;
 
-    // 发送文本内容给GPT
+    refresh_battery_data();
+    refresh_env_TVOC_data(true);
+
+    // 添加system内容
+    int system_json_field_len = snprintf(
+        system_json_field, sizeof(system_json_field),
+        "{\"role\": \"system\",\"content\": "
+        "\""
+        "%s"
+        "time_zone:%s,"
+        "以下是来自闹钟硬件传感器的数据"
+        "battery_data.charge_flag:%d(0:不在充电,1:充电中),"
+        "battery_data.result.battery_soc:%.2f%%(-1表示获取失败),"
+        "battery_data.result.battery_voltage:%.2fmV(-1表示获取失败),"
+        "env_TVOC_data:%" PRId64 "ppb(-1表示预热中,不可用,大概需2分钟)"
+        "env_env_temp_hum_data.temperature:%.2f℃,"
+        "env_env_temp_hum_data.humidity:%.2f,"
+        "以下是来自网络API的数据"
+        "(如current_weather_data来自天气API),"
+        "current_weather_data.temperature:%.2f℃,"
+        "current_weather_data.humidity:%.2f,"
+        "current_weather_data.uvIndex:%.2f,"
+        "position_data.longitude:%s,"
+        "position_data.latitude:%s,"
+        "position_data.country:%s,"
+        "position_data.adm1:%s,"
+        "position_data.adm2:%s,"
+        "position_data.name:%s,"
+        "\"},",
+        system_json_head_prompt, CONFIG_LOCAL_TZ, battery_data.charge_flag,
+        battery_data.result.battery_soc, battery_data.result.battery_voltage,
+        (env_TVOC_data.valid == false) ? -1 : (int64_t)env_TVOC_data.TVOC_value,
+        env_temp_hum_data.temperature, env_temp_hum_data.humidity,
+        current_weather_data.temperature, current_weather_data.humidity,
+        current_weather_data.uvIndex,
+        (position_data.longitude == NULL) ? "" : position_data.longitude,
+        (position_data.latitude == NULL) ? "" : position_data.latitude,
+        (position_data.country == NULL) ? "" : position_data.country,
+        (position_data.adm1 == NULL) ? "" : position_data.adm1,
+        (position_data.adm2 == NULL) ? "" : position_data.adm2,
+        (position_data.name == NULL) ? "" : position_data.name);
+
+    if (system_json_field_len >= sizeof(system_json_field)) {
+      ESP_LOGE(TAG, "system_json_field 内存不足");
+      memset(system_json_field, 0, sizeof(system_json_field));
+    }
+
     if (GPT_chat_update_user_content(GPT_chat_handle,
                                      sevetest30_asr_result_text) != ESP_OK) {
       GPT_chat_stop(GPT_chat_handle);
-      ESP_LOGE("main", "GPT_chat_update_user_content 失败");
+      ESP_LOGE(TAG, "GPT_chat_update_user_content 失败");
       return;
     }
-    if (GPT_chat_text_exchange(GPT_chat_handle, 1) != ESP_OK) {
+    if (GPT_chat_text_exchange(GPT_chat_handle, 1, _main_chat_wait_cb) !=
+        ESP_OK) {
       GPT_chat_stop(GPT_chat_handle);
-      ESP_LOGE("main", "GPT_chat_text_exchange 失败");
+      ESP_LOGE(TAG, "GPT_chat_text_exchange 失败");
       return;
     }
 
@@ -613,16 +783,16 @@ void test(void) {
         sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
         if (GPT_chat_handle->result != NULL) {
-          
+
           // 启动TTS服务
-          if (strlen(GPT_chat_handle->result) > BAIDU_SHORT_TTS_TEXT_STRLEN_MAX){
+          if (strlen(GPT_chat_handle->result) >
+              BAIDU_SHORT_TTS_TEXT_STRLEN_MAX) {
             TTS_cfg_t tts_cfg =
-              LONG_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
+                LONG_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
             tts_service_play_long(&tts_cfg, 1, 120000);
-          }
-          else{
+          } else {
             TTS_cfg_t tts_cfg =
-              SHORT_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
+                SHORT_TTS_DEFAULT_CONFIG(GPT_chat_handle->result, 4189);
             tts_service_play_short(&tts_cfg, 1);
           }
 
@@ -630,20 +800,44 @@ void test(void) {
           char emotion_lable[512] = {0};
           if (fetch_text_emotion(GPT_chat_handle->result, emotion_lable,
                                  sizeof(emotion_lable), 10000) == ESP_OK) {
-            ESP_LOGI("main", "情绪标签:%s", emotion_lable);
+            ESP_LOGI(TAG, "情绪标签:%s", emotion_lable);
             if (xSemaphoreTake(refresh_ledarray_task_mutex,
                                pdMS_TO_TICKS(100)) == pdTRUE) {
               clean_all_draw_buf();
               facial_expression_show(1, 1, emotion_lable);
               xSemaphoreGive(refresh_ledarray_task_mutex);
             }
+          } else {
+            ESP_LOGW(TAG, "fetch_text_emotion 失败,显示正常表情");
+            if (xSemaphoreTake(refresh_ledarray_task_mutex,
+                               pdMS_TO_TICKS(100)) == pdTRUE) {
+              clean_all_draw_buf();
+              facial_expression_show(1, 1, "normal");
+              xSemaphoreGive(refresh_ledarray_task_mutex);
+            }
           }
 
           while (sevetest30_music_running_flag) {
+            if (ext_io_ctrl.auto_read_INT) {
+              if (ext_io_level_service() == ESP_OK) {
+                ext_io_ctrl.auto_read_INT = false;
+                if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+                    board_ctrl.p_ext_io_value->thumbwheel_CCW == 1) {
+                  sevetest30_music_running_flag = false;
+                  if (xSemaphoreTake(refresh_ledarray_task_mutex,
+                                     pdMS_TO_TICKS(100)) == pdTRUE) {
+                    clean_all_draw_buf();
+                    xSemaphoreGive(refresh_ledarray_task_mutex);
+                  }
+                  vTaskDelay(pdMS_TO_TICKS(3000)); // 等待结束
+                  break;
+                }
+              }
+            }
             vTaskDelay(pdMS_TO_TICKS(500));
           }
+          sevetest30_music_running_flag = false;
         }
-
       }
     }
 

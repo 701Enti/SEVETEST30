@@ -33,6 +33,8 @@ extern const unsigned char gImage_fearful[1544];
 extern const unsigned char gImage_sad[1544];
 extern const unsigned char gImage_normal[1544];
 
+extern const unsigned char gImage_701Enti_sign[872];
+extern const unsigned char gImage_se30_sign[872];
 
 
 extern const unsigned char weather_icon_100[251];
