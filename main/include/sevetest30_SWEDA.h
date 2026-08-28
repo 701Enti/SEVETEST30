@@ -33,6 +33,7 @@
 #include "AHT20.h"
 #include "AGS10.h"
 #include "LSM6DS3TRC.h"
+#include "MAX17048.h"
 
 
 typedef struct systemtime_t {
@@ -47,9 +48,8 @@ typedef struct systemtime_t {
 
 typedef struct battery_data_t {
   bool charge_flag;//正在充电标识(正在充电为 true)
-  bool finished_flag;//充电完成标识(完成充电为 true)
+  MAX17048_result_t result;//电池测量结果
 }battery_data_t;
-
 
 typedef AHT20_result_t env_temp_hum_data_t;
 typedef AGS10_result_t env_TVOC_data_t;
@@ -59,6 +59,7 @@ extern systemtime_t systemtime_data;
 extern battery_data_t battery_data;
 extern env_temp_hum_data_t env_temp_hum_data;
 extern env_TVOC_data_t env_TVOC_data;
+extern float env_lux_data;
 
 extern uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM];
 extern uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM];
@@ -79,6 +80,7 @@ void refresh_battery_data();
 void refresh_systemtime_data();
 void refresh_env_temp_hum_data();
 void refresh_env_TVOC_data(bool crc_flag);
+void refresh_env_lux_data();
 
 
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);

@@ -28,16 +28,20 @@
 
 
 #include "sevetest30_SWEDA.h"
+#include "OPT3001.h"
 #include "esp_log.h"
 #include "time.h"
 #include "sevetest30_config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "sevetest30_gpio.h"
+#include "board_ctrl.h"
 
 systemtime_t systemtime_data = { 0 };
 battery_data_t battery_data = { 0 };
 env_temp_hum_data_t env_temp_hum_data = { 0 };
 env_TVOC_data_t env_TVOC_data = { 0 };
+float env_lux_data = 0.0f;
 
 uint8_t IMU_Gx_L[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
 uint8_t IMU_Gx_H[IMU_FIFO_DEFAULT_READ_NUM] = { 0 };
@@ -88,13 +92,14 @@ void refresh_systemtime_data()
     systemtime_data.week  = time_info.tm_wday;
 }
 
-/// @brief 刷新缓存的电池数据，充电状态，该函数需要频繁调用
+/// @brief 刷新缓存的电池数据，充电状态
 /// @brief 数据保存至全局变量
 void refresh_battery_data()
 {
-  const char* TAG = "refresh_battery_data";
-  // 电池数据请求
-  // 充电状态
+  ext_io_level_service();
+  board_ctrl_t* board_ctrl = board_status_get();
+  battery_data.charge_flag = !board_ctrl->p_ext_io_value->charge_SIGN;
+  MAX17048_result_fetch(&(battery_data.result));
 }
 
 /// @brief 刷新当前环境的温度湿度数据,使用硬件传感器
@@ -109,7 +114,12 @@ void refresh_env_temp_hum_data() {
 /// @param crc_flag 启用CRC校验
 void refresh_env_TVOC_data(bool crc_flag) {
   env_TVOC_data.flag_crc = crc_flag;
-  AGS10_TVOC_result_get(&env_TVOC_data);
+  AGS10_TVOC_result_fetch(&env_TVOC_data);
+}
+
+/// @brief 刷新当前环境的光照数据,使用硬件传感器
+void refresh_env_lux_data() {
+  env_lux_data = OPT3001_fetch_lux();
 }
 
 /// @brief 刷新姿态传感器FIFO抽取后的数据,有(默认方式)和(自定义方式)
