@@ -115,9 +115,9 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode) {
   }
 
   // ESP_LOGI(TAG,
-  //          "准备进行TCA6416A引脚模式设置,准备写入:\n"
+  //          "准备进行TCA6416A引脚模式设置,准备写入:"
   //          "P00-P07: [P00 %d][P01 %d] [P02 %d] [P03 %d] "
-  //          "[P04 %d] [P05 %d] [P06 %d] [P07 %d]\n"
+  //          "[P04 %d] [P05 %d] [P06 %d] [P07 %d]"
   //          "P10-P17: [P10 %d] [P11 %d] [P12 %d] [P13 %d] "
   //          "[P14 %d] [P15 %d] [P16 %d] [P17 %d]",
   //          data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01,
@@ -162,9 +162,9 @@ esp_err_t TCA6416A_gpio_mode_set(TCA6416A_mode_t *pTCA6416Amode) {
   }
 
   ESP_LOGI(TAG,
-           "TCA6416A引脚模式设置完成,当前寄存器回读:\n"
+           "TCA6416A引脚模式设置完成,当前寄存器回读:"
            "P00-P07: [P00 %d] [P01 %d] [P02 %d] [P03 %d] "
-           "[P04 %d] [P05 %d] [P06 %d] [P07 %d]\n"
+           "[P04 %d] [P05 %d] [P06 %d] [P07 %d]"
            "P10-P17:[P10 %d] [P11 %d] [P12 %d] [P13 %d] "
            "[P14 %d] [P15 %d] [P16 %d] [P17 %d]",
            data1 & 0x01, (data1 >> 1) & 0x01, (data1 >> 2) & 0x01,
@@ -214,10 +214,10 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
   }
 
   // ESP_LOGI(TAG,
-  //          "准备进行TCA6416A输出引脚电平设置,准备写入:\n"
-  //          "P00-P07: [QC_TOUCH_L %d][EN_LED_BOARD %d][HP_DETECT %d]"
+  //          "准备进行TCA6416A输出引脚电平设置,准备写入:"
+  //          "P00-P07: [QC_TOUCH_L %d][DISABLE_LED_BOARD %d][HP_DETECT %d]"
   //          "[BAT_QSTRT %d][BAT_ALRT%d][EMF_DRDY %d]"
-  //          "[amplifier_MUTE %d][amplifier_SD %d]\n"
+  //          "[amplifier_MUTE %d][amplifier_SD %d]"
   //          "P10-P17: [IMU_INT2%d][IMU_INT1 %d][ALS_INT %d]"
   //          "[thumbwheel_CCW %d][thumbwheel_CW %d][OTG_EN%d]"
   //          "[charge_SIGN %d][QC_TOUCH_R %d]",
@@ -305,15 +305,15 @@ esp_err_t TCA6416A_gpio_level_service(TCA6416A_level_t *pTCA6416Alevel,
   }
 
   ESP_LOGI(TAG,
-           "TCA6416A引脚电平读写完成,当前寄存器回读:\n"
-           "P00-P07: [QC_TOUCH_L %d][EN_LED_BOARD % d]"
+           "TCA6416A引脚电平读写完成,当前寄存器回读:"
+           "P00-P07: [QC_TOUCH_L %d][DISABLE_LED_BOARD % d]"
            "[HP_DETECT % d][BAT_QSTRT % d][BAT_ALRT % d]"
            "[EMF_DRDY % d][amplifier_MUTE % d]"
-           "[amplifier_SD % d]\n"
+           "[amplifier_SD % d]"
            "P10-P17: [IMU_INT2 % d][IMU_INT1 % d][ALS_INT % d]"
            "[thumbwheel_CCW % d][thumbwheel_CW % d]"
            "[OTG_EN % d][charge_SIGN % d][QC_TOUCH_R % d]",
-           pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->EN_LED_BOARD,
+           pTCA6416Alevel->QC_TOUCH_L, pTCA6416Alevel->DISABLE_LED_BOARD,
            pTCA6416Alevel->HP_DETECT, pTCA6416Alevel->BAT_QSTRT,
            pTCA6416Alevel->BAT_ALRT, pTCA6416Alevel->EMF_DRDY,
            pTCA6416Alevel->amplifier_MUTE, pTCA6416Alevel->amplifier_SD,

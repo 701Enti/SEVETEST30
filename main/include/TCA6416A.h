@@ -88,7 +88,7 @@ typedef struct TCA6416A_level_t
 {
 
     bool QC_TOUCH_L;     // 输入,左触摸信号,高电平表示触摸,无锁
-    bool EN_LED_BOARD;   // 输出,高电平将使得灯板关闭
+    bool DISABLE_LED_BOARD;// 输出,高电平将使得灯板关闭
     bool HP_DETECT;      // 输入,耳机已插入信号 高电平表示检测到耳机插入
     bool BAT_QSTRT;      // 输出,电量计量QSTRT快速启动信号
     bool BAT_ALRT;       // 输入,电量计量ALRT提醒信号
@@ -100,7 +100,7 @@ typedef struct TCA6416A_level_t
     bool ALS_INT;        // 输入,环境光传感器-中断信号
     bool thumbwheel_CW; // 输入,拨轮开关-0表示逆时针转动 （CCW和CW同时0表示按下-PUSH）
     bool thumbwheel_CCW;  // 输入,拨轮开关-0表示顺时针转动 （CCW和CW同时0表示按下-PUSH）
-    bool OTG_EN;         // 输出,OTG电源供应 1启动 启动后SE30充电活动将被硬件性禁止
+    bool OTG_EN;         // 输出,OTG电源供应 1启动 启动后充电活动将被硬件性禁止
     bool charge_SIGN;    // 输入,正在充电信号 0表示正在充电
     bool QC_TOUCH_R;     // 输入,右触摸信号,高电平表示触摸,无锁
 } TCA6416A_level_t;
