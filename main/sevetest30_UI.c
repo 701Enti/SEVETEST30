@@ -47,6 +47,7 @@
 #include <sevetest30_sound.h>
 #include <sevetest30_touch.h>
 #include <soc/soc_caps.h>
+#include <stdint.h>
 
 #define LOW_TEMP_MULTIPLE 20 // 低于BLUE_TEMP多少倍将达到设定的最高白色亮度
 
@@ -771,7 +772,7 @@ void weather_icon_temperature(int x, int y) {
   // 确定要不要带负号
   int minus_breath = 2;
   int minus_height = 1;
-  static uint8_t rectangle_data[1 * sizeof(uint8_t) + sizeof(uint64_t)] = {0};
+  static uint8_t rectangle_data[1 * sizeof(uint8_t) + sizeof(uint32_t)] = {0};
 
   if (current_weather_data.temperature < 0) {
     build_rectangle(minus_breath, minus_height, rectangle_data,
@@ -877,30 +878,29 @@ void time_UI_h_m_s(int x, int y) {
 
   int8_t hour_tens = systemtime_data.hour / 10;              // 十位
   int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 0,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens,
+               color);
   print_number(
-      x + LINE_LED_NUMBER / 6 * 0 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens, color);
-  print_number(
-      x + LINE_LED_NUMBER / 6 * 1 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 1,
       y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
 
   int8_t minute_tens = systemtime_data.minute / 10;                // 十位
   int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
   print_number(
-      x + LINE_LED_NUMBER / 6 * 2 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 2,
       y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
   print_number(
-      x + LINE_LED_NUMBER / 6 * 3 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 3,
       y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
 
   int8_t second_tens = systemtime_data.second / 10;                // 十位
   int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
-  print_number(x + LINE_LED_NUMBER / 6 * 4 +
-                   (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
-               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
-               color); // 数字字模的尺寸为4x7
   print_number(
-      x + LINE_LED_NUMBER / 6 * 5 + (LINE_LED_NUMBER / 6 - FIGURE_BREATH) / 2,
+      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 4,
+      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color);
+  print_number(
+      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 5,
       y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
 }
 
@@ -916,7 +916,19 @@ void battery_UI(int x, int y) {
   }
 
   int8_t soc_buf = roundf(battery_data.result.battery_soc);
-  ui_tool_hsv2rgb((float)soc_buf / 100.0f * 0.5f, 1.0f, 1.0f, color);
+
+  // // 测试
+  // soc_buf = 0;
+
+  ui_tool_hsv2rgb((float)soc_buf / 100.0f * 180.0f, 1.0f, 1.0f, color);
+
+  // 绘制背景
+  static uint8_t background[(LINE_LED_NUMBER / 8 + 1) * VERTICAL_LED_NUMBER] = {
+      0};
+  uint32_t background_breadth = soc_buf / 100.0f * LINE_LED_NUMBER;
+  build_rectangle(background_breadth, 3, background, sizeof(background));
+  separation_draw(1, VERTICAL_LED_NUMBER - 2, background_breadth,
+                  RECTANGLE_MATRIX(background), matrix_size(background), color);
 
   if (soc_buf < 100) {
     int8_t soc_tens = soc_buf / 10;             // 十位
@@ -929,7 +941,7 @@ void battery_UI(int x, int y) {
                  color);
   } else {
     print_number(x + (LINE_LED_NUMBER - (FIGURE_BREATH * 3 + 2)) / 2,
-                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 0, color);
+                 y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 1, color);
     print_number(x + (LINE_LED_NUMBER - (FIGURE_BREATH * 3 + 2)) / 2 +
                      FIGURE_BREATH * 1 + 1,
                  y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, 0, color);
@@ -1226,7 +1238,7 @@ void music_FFT_UI_draw(music_FFT_UI_handle_t handle) {
   const char *TAG = "music_FFT_UI_draw";
 
   static uint8_t rectangle_data[VERTICAL_LED_NUMBER * sizeof(uint8_t) +
-                                sizeof(uint64_t)] = {0};
+                                sizeof(uint32_t)] = {0};
 
   if (!handle) {
     ESP_LOGE(TAG, "无效的空句柄");

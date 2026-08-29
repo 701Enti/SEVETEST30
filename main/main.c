@@ -34,7 +34,9 @@
 #include "esp_log.h"
 #include "esp_peripherals.h"
 
+#include "esp_sleep.h"
 #include "esp_wifi.h"
+#include "freertos/idf_additions.h"
 #include "lwip/dns.h"
 
 #include "OPT3001.h"
@@ -61,6 +63,8 @@
 
 board_ctrl_t board_ctrl = {0};
 
+xSemaphoreHandle update_ui_data_mutex = NULL;
+
 char *system_json_head_prompt =
     "你是一个部署在SEVETEST30智能闹钟上的AI语音助手,"
     "你的名字是:07(零七,中文谐音寓意trying,数字取自701Enti),"
@@ -78,6 +82,17 @@ void test(void);
 
 void AI_chat(void);
 
+/// @brief
+/// 立即执行关机,全局设备通过断电/失能/低功耗模式/深度睡眠使得设备进入软关机状态(硬件不支持除外)
+void sevetest30_shutdown(void) {
+  ESP_LOGW("main", "关机...");
+  vibra_motor_start();
+  vTaskDelay(pdMS_TO_TICKS(3000));
+  sevetest30_all_device_deep_sleep();
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_1, 0);
+  esp_deep_sleep_start();
+}
+
 void app_main(void) {
 
   init();
@@ -89,41 +104,74 @@ void app_main(void) {
   refresh_position_data();
   refresh_current_weather_data();
 
-  if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
-      pdTRUE) {
+  if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
     clean_all_draw_buf();
-    xSemaphoreGive(refresh_ledarray_task_mutex);
+    xSemaphoreGive(update_ui_data_mutex);
   }
 
   test();
 
   int UI_switch = 0;
-  bool UI_switch_changed = false;
+  bool UI_changed = false;
 
   while (1) {
 
+    vTaskDelay(pdMS_TO_TICKS(10));
+
     refresh_systemtime_data();
 
-    vTaskDelay(pdMS_TO_TICKS(10));
     if (ext_io_ctrl.auto_read_INT) {
       if (ext_io_level_service() == ESP_OK) {
         ext_io_ctrl.auto_read_INT = false;
+
         if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
             board_ctrl.p_ext_io_value->thumbwheel_CCW == 1) {
+          if (board_ctrl.p_ext_io_value->DISABLE_LED_BOARD) {
+            continue;
+          }
           vibra_motor_start();
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
           UI_switch++;
-          UI_switch_changed = true;
+          UI_changed = true;
         } else if (board_ctrl.p_ext_io_value->thumbwheel_CW == 1 &&
                    board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
+          if (board_ctrl.p_ext_io_value->DISABLE_LED_BOARD) {
+            continue;
+          }
           vibra_motor_start();
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
           UI_switch--;
-          UI_switch_changed = true;
+          UI_changed = true;
         } else if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
                    board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
+
+          vTaskDelay(pdMS_TO_TICKS(200));
+          ext_io_level_service();
+
+          if (!(board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+                board_ctrl.p_ext_io_value->thumbwheel_CCW == 0)) {
+            board_ctrl.p_ext_io_value->DISABLE_LED_BOARD =
+                !(board_ctrl.p_ext_io_value->DISABLE_LED_BOARD);
+            sevetest30_board_ctrl(&board_ctrl, BOARD_CTRL_EXT_IO);
+            vibra_motor_start();
+            vTaskDelay(pdMS_TO_TICKS(100));
+            vibra_motor_stop();
+            continue;
+          }
+
+          if (board_ctrl.p_ext_io_value->DISABLE_LED_BOARD) {
+            continue;
+          }
+
+          if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
+              pdTRUE) {
+            clean_all_draw_buf();
+            facial_expression_show(1, 1, "normal");
+            xSemaphoreGive(update_ui_data_mutex);
+          }
+
           vibra_motor_start();
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
@@ -131,12 +179,23 @@ void app_main(void) {
           vibra_motor_start();
           vTaskDelay(pdMS_TO_TICKS(50));
           vibra_motor_stop();
+
+          int64_t start_time = esp_timer_get_time();
+          while (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+                 board_ctrl.p_ext_io_value->thumbwheel_CCW == 0) {
+            vTaskDelay(pdMS_TO_TICKS(100));
+            ext_io_level_service();
+            if (esp_timer_get_time() - start_time > 5 * 1000 * 1000) {
+              sevetest30_shutdown();
+            }
+          }
+
           AI_chat();
+          UI_changed = true;
         }
       }
     }
-    if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
-        pdTRUE) {
+    if (xSemaphoreTake(update_ui_data_mutex, 100) == pdTRUE) {
       switch (UI_switch) {
       case 0:
         clean_all_draw_buf();
@@ -147,10 +206,26 @@ void app_main(void) {
         weather_icon_temperature(1, 1);
         break;
       case 2:
-        if (UI_switch_changed) {
-          clean_all_draw_buf();
+        clean_all_draw_buf();
+        if (UI_changed) {
           refresh_battery_data();
-          battery_UI(1, 1);
+        }
+        battery_UI(1, 1);
+        if (board_ctrl.p_ext_io_value->charge_SIGN == 0) {
+          static int i = 0;
+          static uint8_t rectangle_data[VERTICAL_LED_NUMBER * sizeof(uint8_t) +
+                                        sizeof(uint32_t)];
+          uint8_t color[3] = {255, 255, 255};
+
+          build_rectangle(1, i / 100.0f * (int)(VERTICAL_LED_NUMBER / 2),
+                          rectangle_data, sizeof(rectangle_data));
+          separation_draw(LINE_LED_NUMBER, (VERTICAL_LED_NUMBER / 2), 1,
+                          RECTANGLE_MATRIX(rectangle_data),
+                          matrix_size(rectangle_data), color);
+          i++;
+          if (i > 100) {
+            i = 0;
+          }
         }
         break;
       case 3:
@@ -165,11 +240,11 @@ void app_main(void) {
         UI_switch = 0;
         break;
       }
-      xSemaphoreGive(refresh_ledarray_task_mutex);
-    }
+      xSemaphoreGive(update_ui_data_mutex);
 
-    if (UI_switch_changed) {
-      UI_switch_changed = false;
+      if (UI_changed) {
+        UI_changed = false;
+      }
     }
   }
 
@@ -196,14 +271,15 @@ void init(void) {
 
   sevetest30_all_device_init(&board_ctrl);
 
-  if (refresh_ledarray_task_mutex == NULL) {
-    ESP_LOGE(TAG, "LED阵列初始化失败");
+  update_ui_data_mutex = xSemaphoreCreateMutex();
+  if (update_ui_data_mutex == NULL) {
+    ESP_LOGE(TAG, "update_ui_data_mutex创建失败");
     return;
   }
 
   // 打开屏幕显示
   board_ctrl_t *b = board_status_get();
-  b->p_ext_io_value->EN_LED_BOARD = 0;
+  b->p_ext_io_value->DISABLE_LED_BOARD = 0;
   sevetest30_board_ctrl(b, BOARD_CTRL_EXT_IO);
 
   ext_io_ctrl.auto_read_EN = true;
@@ -298,12 +374,12 @@ void test(void) {
   // while (1)
   // {
   //   refresh_systemtime_data();
-  //   if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
+  //   if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
   //   pdTRUE)
   //   {
   //     clean_all_draw_buf();
   //     time_UI_h_m_s(1, 1);
-  //     xSemaphoreGive(refresh_ledarray_task_mutex);
+  //     xSemaphoreGive(update_ui_data_mutex);
   //   }
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   // }
@@ -468,28 +544,26 @@ void test(void) {
   // music_FFT_UI_cfg_t FFT_UI_cfg = FFT_UI_DEFAULT_CONFIG();
 
   // // 网络音乐播放
-  // // espressif官方测试音频 "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
-  // char *url1 = "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
+  // // // espressif官方测试音频
+  // // "https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
+  // char *url1 ="https://dl.espressif.cn/dl/audio/ff-16b-2c-44100hz.mp3";
 
   // IWEDA_handle_t music_play_IWEDA_handle = new_iweda_handle(2048, 2048);
-  // if (!music_play_IWEDA_handle)
-  // {
+  // if (!music_play_IWEDA_handle) {
   //   ESP_LOGE("main", "music_play_IWEDA_handle 为空,无法绘制任务");
   //   return;
   // }
 
   // int url_len = snprintf(music_play_IWEDA_handle->url_buf,
-  // music_play_IWEDA_handle->url_buf_size, "%s", url1);
-  // if (url_len >= music_play_IWEDA_handle->url_buf_size)
-  // {
+  //                        music_play_IWEDA_handle->url_buf_size, "%s", url1);
+  // if (url_len >= music_play_IWEDA_handle->url_buf_size) {
   //   ESP_LOGE("main", "url_len 超出 url_buf_size");
   //   return;
   // }
   // iweda_change_url_if_need_redirect(music_play_IWEDA_handle);
 
   // // 检查资源可用性
-  // if (iweda_check_common_url(music_play_IWEDA_handle) == ESP_OK)
-  // {
+  // if (iweda_check_common_url(music_play_IWEDA_handle) == ESP_OK) {
 
   //   board_ctrl_t *b = board_status_get();
   //   b->amplifier_mute = false;
@@ -500,24 +574,21 @@ void test(void) {
   //   music_uri_or_url_play(music_play_IWEDA_handle->url_buf, 1);
 
   //   music_FFT_UI_handle_t handle = music_FFT_UI_start(&FFT_UI_cfg, 1);
-  //   if (!handle)
-  //   {
+  //   if (!handle) {
   //     ESP_LOGE("main", "handle 为空,无法绘制任务");
   //     return;
   //   }
 
-  //   while (1)
-  //   {
-  //     if (handle && xSemaphoreTake(refresh_ledarray_task_mutex,
-  //     pdMS_TO_TICKS(10)) == pdTRUE)
-  //     {
+  //   while (1) {
+  //     if (handle &&
+  //         xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(10)) == pdTRUE)
+  //         {
   //       clean_all_draw_buf();
   //       music_FFT_UI_draw(handle);
-  //       xSemaphoreGive(refresh_ledarray_task_mutex);
+  //       xSemaphoreGive(update_ui_data_mutex);
   //     }
   //     vTaskDelay(pdMS_TO_TICKS(10));
-  //     if (!sevetest30_music_running_flag)
-  //     {
+  //     if (!sevetest30_music_running_flag) {
   //       music_FFT_UI_stop(handle);
   //       delete_iweda_handle(music_play_IWEDA_handle);
   //       music_play_IWEDA_handle = NULL;
@@ -538,12 +609,12 @@ void test(void) {
   // while (1)
   // {
   //   refresh_systemtime_data();
-  //   if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
+  //   if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
   //   pdTRUE)
   //   {
   //     clean_all_draw_buf();
   //     time_UI_h_m_s(1, 1);
-  //     xSemaphoreGive(refresh_ledarray_task_mutex);
+  //     xSemaphoreGive(update_ui_data_mutex);
   //   }
   //   vibra_motor_start();
   //   vTaskDelay(pdMS_TO_TICKS(500));
@@ -598,12 +669,12 @@ void test(void) {
 
   // while (1)
   // {
-  //   if (FFT_UI_handle && xSemaphoreTake(refresh_ledarray_task_mutex,
+  //   if (FFT_UI_handle && xSemaphoreTake(update_ui_data_mutex,
   //   pdMS_TO_TICKS(10)) == pdTRUE)
   //   {
   //     clean_all_draw_buf();
   //     music_FFT_UI_draw(FFT_UI_handle);
-  //     xSemaphoreGive(refresh_ledarray_task_mutex);
+  //     xSemaphoreGive(update_ui_data_mutex);
   //   }
   //   vTaskDelay(pdMS_TO_TICKS(10));
   //   if (!sevetest30_music_running_flag)
@@ -618,9 +689,8 @@ void test(void) {
 
 void _main_chat_wait_cb(void) {
   static uint8_t loading_bar[(LINE_LED_NUMBER / 8 + 1) * sizeof(uint8_t) +
-                             sizeof(uint64_t)] = {0};
-  if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
-      pdTRUE) {
+                             sizeof(uint32_t)] = {0};
+  if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
     uint8_t color[3] = {0};
     static float H = 0.0f;
     H += 1.0f;
@@ -632,7 +702,7 @@ void _main_chat_wait_cb(void) {
     separation_draw(1, VERTICAL_LED_NUMBER, LINE_LED_NUMBER,
                     RECTANGLE_MATRIX(loading_bar), matrix_size(loading_bar),
                     color);
-    xSemaphoreGive(refresh_ledarray_task_mutex);
+    xSemaphoreGive(update_ui_data_mutex);
   }
   vTaskDelay(pdMS_TO_TICKS(10));
 }
@@ -672,11 +742,10 @@ void AI_chat(void) {
 
   while (1) {
 
-    if (xSemaphoreTake(refresh_ledarray_task_mutex, pdMS_TO_TICKS(100)) ==
-        pdTRUE) {
+    if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
       clean_all_draw_buf();
       facial_expression_show(1, 1, "normal");
-      xSemaphoreGive(refresh_ledarray_task_mutex);
+      xSemaphoreGive(update_ui_data_mutex);
     }
 
     int64_t start_time = esp_timer_get_time();
@@ -801,19 +870,19 @@ void AI_chat(void) {
           if (fetch_text_emotion(GPT_chat_handle->result, emotion_lable,
                                  sizeof(emotion_lable), 10000) == ESP_OK) {
             ESP_LOGI(TAG, "情绪标签:%s", emotion_lable);
-            if (xSemaphoreTake(refresh_ledarray_task_mutex,
-                               pdMS_TO_TICKS(100)) == pdTRUE) {
+            if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
+                pdTRUE) {
               clean_all_draw_buf();
               facial_expression_show(1, 1, emotion_lable);
-              xSemaphoreGive(refresh_ledarray_task_mutex);
+              xSemaphoreGive(update_ui_data_mutex);
             }
           } else {
             ESP_LOGW(TAG, "fetch_text_emotion 失败,显示正常表情");
-            if (xSemaphoreTake(refresh_ledarray_task_mutex,
-                               pdMS_TO_TICKS(100)) == pdTRUE) {
+            if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
+                pdTRUE) {
               clean_all_draw_buf();
               facial_expression_show(1, 1, "normal");
-              xSemaphoreGive(refresh_ledarray_task_mutex);
+              xSemaphoreGive(update_ui_data_mutex);
             }
           }
 
@@ -824,10 +893,10 @@ void AI_chat(void) {
                 if (board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
                     board_ctrl.p_ext_io_value->thumbwheel_CCW == 1) {
                   sevetest30_music_running_flag = false;
-                  if (xSemaphoreTake(refresh_ledarray_task_mutex,
+                  if (xSemaphoreTake(update_ui_data_mutex,
                                      pdMS_TO_TICKS(100)) == pdTRUE) {
                     clean_all_draw_buf();
-                    xSemaphoreGive(refresh_ledarray_task_mutex);
+                    xSemaphoreGive(update_ui_data_mutex);
                   }
                   vTaskDelay(pdMS_TO_TICKS(3000)); // 等待结束
                   break;

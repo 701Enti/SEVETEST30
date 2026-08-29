@@ -216,7 +216,7 @@ typedef struct ASR_cfg_t {
       .vad_mode = mode_vad,                                                    \
       .vad_one_frame_ms = 30,                                                  \
       .vad_min_speech_ms = 100,                                                \
-      .vad_min_noise_ms = 50,                                                 \
+      .vad_min_noise_ms = 10,                                                 \
   }
 
 typedef struct current_sound_collecter_t {

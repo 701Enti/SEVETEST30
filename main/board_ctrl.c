@@ -122,9 +122,7 @@ board_ctrl_t *board_status_get() { return board_ctrl_buf; }
 // }
 
 /// @brief 全局设备初始化
-/// @param board_ctrl 定义board_ctrl_t非指针类型全局变量，进行所有值设置后导入
-/// @param board_device_handle
-/// 设备句柄，定义board_device_handle_t非指针类型全局变量不进行任何更改，在进行一些活动时将使用其中句柄
+/// @param board_ctrl 定义board_ctrl_t全局变量，进行所有值设置后导入
 /// @return 初始化操作的所有esp_err_t返回记录
 esp_err_t *sevetest30_all_device_init(board_ctrl_t *board_ctrl) {
   // // 初始化设备I2C总线(SEVETEST30的设备与音频共用I2C总线，所以无需执行)
@@ -176,6 +174,18 @@ esp_err_t *sevetest30_all_device_init(board_ctrl_t *board_ctrl) {
       sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
 
   return board_ctrl_init_report;
+}
+
+/// @brief 全局设备通过断电/失能/低功耗模式/深度睡眠使得设备进入软关机状态(硬件不支持除外)
+void sevetest30_all_device_deep_sleep() {
+  board_ctrl_t *board_ctrl = board_status_get();
+  board_ctrl->p_ext_io_value->DISABLE_LED_BOARD = true;
+  board_ctrl->p_ext_io_value->amplifier_MUTE = true;
+  board_ctrl->p_ext_io_value->amplifier_SD = false;
+  board_ctrl->p_ext_io_value->OTG_EN = false;
+  sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
+
+  vibra_motor_stop();
 }
 
 /// @brief
