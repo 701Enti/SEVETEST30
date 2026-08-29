@@ -96,7 +96,6 @@ const uint8_t matrix_9[7] = {0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0};
  * [绘制函数本身不会刷新屏幕,需要手动或自动运行屏幕刷新,才会在屏幕上点亮]
  * *****************************/
 ledarray_auto_refresh_mode_t refresh_mode_buf = LEDARRAY_AUTO_REFRESH_DISABLE;
-SemaphoreHandle_t refresh_ledarray_task_mutex = NULL;
 
 /// @brief [单次全刷任务 -
 /// ALL_ONCE]一次性刷新整个屏幕所有行,全屏刷新之后才发生延时
@@ -141,7 +140,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode) {
 /// @param breadth 矩形横向长度(1-LINE_LED_NUMBER)
 /// @param height  矩形纵向长度(1-VERTICAL_LED_NUMBER)
 /// @return NULL 错误 / 返回值为矩形数据地址(令为rectangle_data)
-/// [matrix_size(rectangle_data) 为 总数据大小(uint64_t)(单位:Byte)]
+/// [matrix_size(rectangle_data) 为 总数据大小(uint32_t)(单位:Byte)]
 /// [RECTANGLE_MATRIX(rectangle_data) 为 矩形字模]
 /// @return 例 返回值为p
 /// separation_draw(x,y,b,RECTANGLE_MATRIX(p),matrix_size(p),color); free(p);
@@ -153,10 +152,10 @@ uint8_t *new_rectangle(int32_t breadth, int32_t height) {
     return NULL;
 
   // 横向字节个数
-  uint64_t x_byte_num = 0;
+  uint32_t x_byte_num = 0;
 
   // 总数据有效字节个数（不包含entire_byte_num段）
-  uint64_t entire_byte_num = 0;
+  uint32_t entire_byte_num = 0;
 
   // 进一法，最后不足8个点就补满8位。
   // 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
@@ -168,21 +167,21 @@ uint8_t *new_rectangle(int32_t breadth, int32_t height) {
     return NULL;
   }
 
-  // 8个字节(uint64_t)用于存储字模数据大小
+  //(uint32_t)用于存储字模数据大小
   uint8_t *rectangle_data = (uint8_t *)malloc(
-      RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));
+      RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint32_t));
   memset(rectangle_data, 0,
-         RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint64_t));
+         RECTANGLE_SIZE_MAX * sizeof(uint8_t) + sizeof(uint32_t));
 
   // 装载entire_byte_num
-  *((uint64_t *)rectangle_data) = entire_byte_num;
+  *((uint32_t *)rectangle_data) = entire_byte_num;
 
-  uint64_t Dx = 0;
+  uint32_t Dx = 0;
   uint8_t *p = NULL;
-  p = rectangle_data + sizeof(uint64_t); // 获取到数据的起始地址
+  p = rectangle_data + sizeof(uint32_t); // 获取到数据的起始地址
 
-  for (uint64_t i = 0; i < entire_byte_num; i++) {
-    for (uint64_t j = 0; j < 8; j++) {
+  for (uint32_t i = 0; i < entire_byte_num; i++) {
+    for (uint32_t j = 0; j < 8; j++) {
       *p |= 1 << (7 - j); // 写入
       if (Dx == breadth - 1) {
         Dx = 0;
@@ -200,49 +199,52 @@ uint8_t *new_rectangle(int32_t breadth, int32_t height) {
 /// @param height  矩形纵向长度(1-VERTICAL_LED_NUMBER)
 /// @param dest 导入矩形数据存储位置
 /// @param dest_size 矩形数据存储位置大小(单位:Byte)
-/// [matrix_size(dest) 为 总数据大小(uint64_t)(单位:Byte)]
+/// [matrix_size(dest) 为 总数据大小(uint32_t)(单位:Byte)]
 /// [RECTANGLE_MATRIX(dest) 为 矩形字模]
 /// @return 例
 /// separation_draw(x,y,b,RECTANGLE_MATRIX(dest),matrix_size(dest),color);
+/// @note 构建正常开始后自动清理缓存之前的数据,缓存内全部设置为0
 void build_rectangle(int32_t breadth, int32_t height, uint8_t *dest,
                      int dest_size) {
   const static char *TAG = "build_rectangle";
 
-  if (dest == NULL){
+  if (dest == NULL) {
     ESP_LOGE(TAG, "dest为NULL");
     return;
   }
-    
-  if (breadth < 0 || height < 0){
+
+  if (breadth < 0 || height < 0) {
     ESP_LOGE(TAG, "异常的输入数值");
     return;
   }
-    
+
   // 横向字节个数
-  uint64_t x_byte_num = 0;
+  uint32_t x_byte_num = 0;
 
   // 总数据有效字节个数（不包含entire_byte_num段）
-  uint64_t entire_byte_num = 0;
+  uint32_t entire_byte_num = 0;
 
   // 进一法，最后不足8个点就补满8位。
   // 因为ceil传入的是浮点数，全部提前转换，防止整型相除而向下取整，否则ceil在这里就没意义了
   x_byte_num = ceil(breadth * 1.0 / 8.0);
   entire_byte_num = sizeof(uint8_t) * x_byte_num * height;
 
-  if (entire_byte_num > dest_size - sizeof(uint64_t)) {
+  if (entire_byte_num > dest_size - sizeof(uint32_t)) {
     ESP_LOGE(TAG, "dest_size显示外部缓存dest空间不足");
     return;
   }
 
-  // 装载entire_byte_num
-  *((uint64_t *)dest) = entire_byte_num;
+  memset(dest, 0, dest_size);
 
-  uint64_t Dx = 0;
+  // 装载entire_byte_num
+  *((uint32_t *)dest) = entire_byte_num;
+
+  uint32_t Dx = 0;
   uint8_t *p = NULL;
-  p = dest + sizeof(uint64_t); // 获取到数据的起始地址
-  
-  for (uint64_t i = 0; i < entire_byte_num; i++) {
-    for (uint64_t j = 0; j < 8; j++) {
+  p = dest + sizeof(uint32_t); // 获取到数据的起始地址
+
+  for (uint32_t i = 0; i < entire_byte_num; i++) {
+    for (uint32_t j = 0; j < 8; j++) {
       *p |= 1 << (7 - j); // 写入
       if (Dx == breadth - 1) {
         Dx = 0;
@@ -258,8 +260,8 @@ void build_rectangle(int32_t breadth, int32_t height, uint8_t *dest,
 /// @brief 获取字模有效图形数据大小(单位:Byte)
 /// @param matrix_data 字模数据,如rectangle()的返回值
 /// @return 有效图形数据大小(单位:Byte)
-uint64_t matrix_size(uint8_t *matrix_data) {
-  return *((uint64_t *)matrix_data);
+uint32_t matrix_size(uint8_t *matrix_data) {
+  return *((uint32_t *)matrix_data);
 }
 
 /*******************************************************基本绘制函数**********************************************************/
@@ -279,15 +281,15 @@ uint64_t matrix_size(uint8_t *matrix_data) {
 /// @param in_color 注入颜色 （RGB顺序）
 /// @return [ESP_OK 成功 / ESP_FAIL 失败 / ESP_ERR_INVALID_ARG
 /// 失败,输入了无法处理的空指针]
-esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p,
-                          uint64_t byte_number, uint8_t in_color[3]) {
+esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
+                          uint32_t byte_number, uint8_t in_color[3]) {
   const static char *TAG = "separation_draw";
   if (p == NULL) {
     ESP_LOGE(TAG, "输入了无法处理的空指针");
     return ESP_ERR_INVALID_ARG;
   }
 
-  uint64_t Dx = 0, Dy = 0; // xy的增加量
+  uint32_t Dx = 0, Dy = 0; // xy的增加量
   uint8_t data = 0x00;     // 临时数据存储
   uint8_t i = 0;           // 临时变量i
   int sx = 0;              // 临时存储选定的横坐标
@@ -310,10 +312,9 @@ esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p,
       // 存储到缓冲区
       sx = x + Dx;
 
-      if (flag)
+      if (flag) {
         color_input(sx, y + Dy, color);
-      else
-        color_input(sx, y + Dy, black);
+      }
 
       if (Dx == breadth - 1) {
         Dx = 0; // 横向写入最后一个像素完毕，回车
@@ -347,11 +348,11 @@ esp_err_t direct_draw(int x, int y, const uint8_t *p) {
     return ESP_ERR_INVALID_ARG;
   }
 
-  uint64_t Dx = 0, Dy = 0;              // xy的增加量
+  uint32_t Dx = 0, Dy = 0;              // xy的增加量
   uint8_t *pT1 = p, *pT2 = p, *pT3 = p; // 临时指针
 
   // 获取图案长宽数据
-  uint64_t length = 0, breadth = 0; // 长宽信息
+  uint32_t length = 0, breadth = 0; // 长宽信息
   uint8_t data[4] = {0x00};         // 临时数据存储
   p += 0x02;                        // 偏移到长宽数据区
   for (uint8_t i = 0; i < 4; i++) {
@@ -1050,9 +1051,6 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
 
 /// @brief  初始化灯板阵列
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL 创建refresh_ledarray_task_mutex互斥量时发现问题 /
-/// 无法获取refresh_ledarray_task_mutex互斥量 /
-/// refresh_ledarray_task_mutex互斥量已经被意外创建]
 /// @return [ESP_ERR_INVALID_STATE
 /// 灯板阵列之前已经初始化,运行ledarray_deinit以去初始化 /
 /// RMT控制器之前已经安装,请调用对应rmt_driver_uninstall释放需要的资源]
@@ -1066,161 +1064,137 @@ esp_err_t ledarray_init() {
     return ESP_ERR_INVALID_STATE;
   } else {
     is_initialized = true;
-    if (refresh_ledarray_task_mutex == NULL) {
-      refresh_ledarray_task_mutex = xSemaphoreCreateMutex();
-      if (!refresh_ledarray_task_mutex) {
-        ESP_LOGE(TAG, "创建refresh_ledarray_task_mutex互斥量时发现问题");
-        return ESP_FAIL;
-      }
-    } else {
-      ESP_LOGE(TAG, "refresh_ledarray_task_mutex互斥量已经被意外创建");
-      return ESP_FAIL;
-    }
   }
 
-  if (xSemaphoreTake(
-          refresh_ledarray_task_mutex,
-          pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS)) ==
-      pdTRUE) {
+  // 申请显示数据内存空间
+  ledarray_blue_layer_buf = (uint8_t *)malloc(
+      LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  ledarray_green_layer_buf = (uint8_t *)malloc(
+      LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  ledarray_red_layer_buf = (uint8_t *)malloc(
+      LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  ledarray_tx_buf =
+      (uint8_t *)malloc(LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
+  if (!ledarray_blue_layer_buf || !ledarray_green_layer_buf ||
+      !ledarray_red_layer_buf || !ledarray_tx_buf) {
+    ESP_LOGE(TAG, "申请显示数据内存空间失败");
+    return ESP_ERR_NO_MEM;
+  }
+  memset(ledarray_blue_layer_buf, 0,
+         LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  memset(ledarray_green_layer_buf, 0,
+         LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  memset(ledarray_red_layer_buf, 0,
+         LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
+  memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
 
-    // 申请显示数据内存空间
-    ledarray_blue_layer_buf = (uint8_t *)malloc(
-        LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    ledarray_green_layer_buf = (uint8_t *)malloc(
-        LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    ledarray_red_layer_buf = (uint8_t *)malloc(
-        LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    ledarray_tx_buf =
-        (uint8_t *)malloc(LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
-    if (!ledarray_blue_layer_buf || !ledarray_green_layer_buf ||
-        !ledarray_red_layer_buf || !ledarray_tx_buf) {
-      ESP_LOGE(TAG, "申请显示数据内存空间失败");
-      return ESP_ERR_NO_MEM;
-    }
-    memset(ledarray_blue_layer_buf, 0,
-           LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    memset(ledarray_green_layer_buf, 0,
-           LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    memset(ledarray_red_layer_buf, 0,
-           LINE_LED_NUMBER * VERTICAL_LED_NUMBER * sizeof(uint8_t));
-    memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
+  // 配置spi总线
+  spi_bus_config_t bus_config = {
+      .mosi_io_num = -1,
+      .miso_io_num = -1,
+      .sclk_io_num = -1,
+      .quadwp_io_num = -1,
+      .quadhd_io_num = -1,
+      .data4_io_num = -1,
+      .data5_io_num = -1,
+      .data6_io_num = -1,
+      .data7_io_num = -1,
+      .max_transfer_sz = SOC_SPI_MAXIMUM_BUFFER_SIZE,
+      .flags = SPICOMMON_BUSFLAG_MASTER,
+  };
+  spi_device_interface_config_t interface_config = {
+      .command_bits = 0,
+      .address_bits = 0,
+      .dummy_bits = 0,
+      .mode = 0,
+      .clock_speed_hz = LEDARRAY_SPI_FREQ,
+      .spics_io_num = -1,
+      .queue_size = 1,
+      .flags = SPI_DEVICE_HALFDUPLEX,
+  };
 
-    // 配置spi总线
-    spi_bus_config_t bus_config = {
-        .mosi_io_num = -1,
-        .miso_io_num = -1,
-        .sclk_io_num = -1,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .data4_io_num = -1,
-        .data5_io_num = -1,
-        .data6_io_num = -1,
-        .data7_io_num = -1,
-        .max_transfer_sz = SOC_SPI_MAXIMUM_BUFFER_SIZE,
-        .flags = SPICOMMON_BUSFLAG_MASTER,
-    };
-    spi_device_interface_config_t interface_config = {
-        .command_bits = 0,
-        .address_bits = 0,
-        .dummy_bits = 0,
-        .mode = 0,
-        .clock_speed_hz = LEDARRAY_SPI_FREQ,
-        .spics_io_num = -1,
-        .queue_size = 1,
-        .flags = SPI_DEVICE_HALFDUPLEX,
-    };
+  // 按照board_def中的引脚配置修改上面初步配置,之后是最终引脚配置
+  ESP_RETURN_ON_ERROR(get_spi_pins_ledarray(&bus_config, &interface_config),
+                      TAG, "获取为LED阵列提供的SPI通讯IO定义时发现问题");
 
-    // 按照board_def中的引脚配置修改上面初步配置,之后是最终引脚配置
-    ESP_RETURN_ON_ERROR(get_spi_pins_ledarray(&bus_config, &interface_config),
-                        TAG, "获取为LED阵列提供的SPI通讯IO定义时发现问题");
+  // 配置spi并载入设备
+  ESP_RETURN_ON_ERROR(
+      spi_bus_initialize(LEDARRAY_SPI_ID, &bus_config, SPI_DMA_CH_AUTO), TAG,
+      "初始化SPI异常");
+  ESP_RETURN_ON_ERROR(spi_bus_add_device(LEDARRAY_SPI_ID, &interface_config,
+                                         &ledarray_spi_handle),
+                      TAG, "添加SPI设备异常");
 
-    // 配置spi并载入设备
-    ESP_RETURN_ON_ERROR(
-        spi_bus_initialize(LEDARRAY_SPI_ID, &bus_config, SPI_DMA_CH_AUTO), TAG,
-        "初始化SPI异常");
-    ESP_RETURN_ON_ERROR(spi_bus_add_device(LEDARRAY_SPI_ID, &interface_config,
-                                           &ledarray_spi_handle),
-                        TAG, "添加SPI设备异常");
+  // 设置合适的灯板SPI相关引脚驱动能力,减少干扰并提升抗干扰能力
+  gpio_set_drive_capability(LEDARRAY_SPI_MOSI_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_SPI_SCLK_IO, GPIO_DRIVE_CAP_3);
 
-    // 设置合适的灯板SPI相关引脚驱动能力,减少干扰并提升抗干扰能力
-    gpio_set_drive_capability(LEDARRAY_SPI_MOSI_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_SPI_SCLK_IO, GPIO_DRIVE_CAP_3);
+  // 配置其他IO
+  esp_err_t err = ESP_OK;
 
-    // 配置其他IO
-    esp_err_t err = ESP_OK;
+  gpio_config_t gpio_ledarray = {
+      .mode = GPIO_MODE_OUTPUT,
+      .pull_up_en = GPIO_PULLUP_DISABLE,
+      .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      .intr_type = GPIO_INTR_DISABLE,
+  };
 
-    gpio_config_t gpio_ledarray = {
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
+  err |= gpio_force_unhold_all();
 
-    err |= gpio_force_unhold_all();
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_LE_IO;
+  err |= gpio_reset_pin(LEDARRAY_LE_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_LE_IO, 0);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_LE_IO;
-    err |= gpio_reset_pin(LEDARRAY_LE_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_LE_IO, 0);
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_OE_IO;
+  err |= gpio_reset_pin(LEDARRAY_OE_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_OE_IO, 1);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_OE_IO;
-    err |= gpio_reset_pin(LEDARRAY_OE_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_OE_IO, 1);
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSE_IO;
+  err |= gpio_reset_pin(LEDARRAY_CSE_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_CSE_IO, 0);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSE_IO;
-    err |= gpio_reset_pin(LEDARRAY_CSE_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_CSE_IO, 0);
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA0_IO;
+  err |= gpio_reset_pin(LEDARRAY_CSA0_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_CSA0_IO, 0);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA0_IO;
-    err |= gpio_reset_pin(LEDARRAY_CSA0_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_CSA0_IO, 0);
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA1_IO;
+  err |= gpio_reset_pin(LEDARRAY_CSA1_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_CSA1_IO, 0);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA1_IO;
-    err |= gpio_reset_pin(LEDARRAY_CSA1_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_CSA1_IO, 0);
+  gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA2_IO;
+  err |= gpio_reset_pin(LEDARRAY_CSA2_IO);
+  err |= gpio_config(&gpio_ledarray);
+  err |= gpio_set_level(LEDARRAY_CSA2_IO, 0);
 
-    gpio_ledarray.pin_bit_mask = 1ULL << LEDARRAY_CSA2_IO;
-    err |= gpio_reset_pin(LEDARRAY_CSA2_IO);
-    err |= gpio_config(&gpio_ledarray);
-    err |= gpio_set_level(LEDARRAY_CSA2_IO, 0);
+  // 设置合适的引脚驱动能力,减少干扰并提升抗干扰能力
+  gpio_set_drive_capability(LEDARRAY_OE_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_LE_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_CSE_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_CSA0_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_CSA1_IO, GPIO_DRIVE_CAP_3);
+  gpio_set_drive_capability(LEDARRAY_CSA2_IO, GPIO_DRIVE_CAP_3);
 
-    // 设置合适的引脚驱动能力,减少干扰并提升抗干扰能力
-    gpio_set_drive_capability(LEDARRAY_OE_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_LE_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_CSE_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_CSA0_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_CSA1_IO, GPIO_DRIVE_CAP_3);
-    gpio_set_drive_capability(LEDARRAY_CSA2_IO, GPIO_DRIVE_CAP_3);
+  // 设置自动刷新模式为默认模式
+  ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
 
-    xSemaphoreGive(refresh_ledarray_task_mutex);
-
-    // 设置自动刷新模式为默认模式
-    ledarray_set_auto_refresh_mode(LEDARRAY_REFRESH_INIT_MODE);
-
-    if (err == ESP_OK) {
-      ESP_LOGW(TAG, " %d X %d LED阵列初始化完成 当前自动刷新服务模式 %d",
-               LINE_LED_NUMBER, VERTICAL_LED_NUMBER,
-               LEDARRAY_REFRESH_INIT_MODE);
-      return ESP_OK;
-    } else {
-      ESP_LOGE(TAG, "LED阵列初始化GPIO时发现问题");
-      return ESP_FAIL;
-    }
+  if (err == ESP_OK) {
+    ESP_LOGW(TAG, " %d X %d LED阵列初始化完成 当前自动刷新服务模式 %d",
+             LINE_LED_NUMBER, VERTICAL_LED_NUMBER, LEDARRAY_REFRESH_INIT_MODE);
+    return ESP_OK;
   } else {
-    ESP_LOGE(
-        TAG,
-        "LED阵列初始化时发现问题,无法获取refresh_ledarray_task_mutex互斥量");
+    ESP_LOGE(TAG, "LED阵列初始化GPIO时发现问题");
     return ESP_FAIL;
   }
 }
 
 /// @brief  灯板阵列反初始化操作
 /// @return [ESP_OK 成功]
-/// @return [ESP_FAIL 释放资源失败 / refresh_ledarray_task_mutex互斥量异常]
+/// @return [ESP_FAIL 释放资源失败]
 /// @return [ESP_ERR_INVALID_STATE 灯板阵列未初始化,无需反初始化]
 /// @return [ESP_ERR_INVALID_ARG ledarray_gpio_num_list中存在错误的GPIO号码]
 esp_err_t ledarray_deinit() {
@@ -1234,29 +1208,7 @@ esp_err_t ledarray_deinit() {
   // 禁用刷新服务
   ledarray_set_auto_refresh_mode(LEDARRAY_AUTO_REFRESH_DISABLE);
 
-  // 安全终止工作并删除互斥量
-  BaseType_t ret = xSemaphoreTake(
-      refresh_ledarray_task_mutex,
-      pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
-  if (ret != pdTRUE) {
-    ESP_LOGE(TAG,
-             "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全清理");
-    return ESP_FAIL;
-  }
-
   is_initialized = false;
-
-  xSemaphoreGive(refresh_ledarray_task_mutex);
-  vTaskDelay(100);
-
-  ret = xSemaphoreTake(
-      refresh_ledarray_task_mutex,
-      pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS));
-  if (ret != pdTRUE) {
-    ESP_LOGE(TAG,
-             "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全清理");
-    return ESP_FAIL;
-  }
 
   free(ledarray_blue_layer_buf);
   ledarray_blue_layer_buf = NULL;
@@ -1273,8 +1225,6 @@ esp_err_t ledarray_deinit() {
   spi_bus_remove_device(ledarray_spi_handle);
 
   spi_bus_free(LEDARRAY_SPI_ID);
-
-  vSemaphoreDelete(refresh_ledarray_task_mutex);
 
   ESP_LOGW(
       TAG,
@@ -1305,15 +1255,6 @@ esp_err_t ledarray_show_frame() {
       .length = LINE_LED_NUMBER * 3,
       .tx_buffer = ledarray_tx_buf,
   };
-
-  if (xSemaphoreTake(
-          refresh_ledarray_task_mutex,
-          pdMS_TO_TICKS(LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS)) !=
-      pdTRUE) {
-    // ESP_LOGE(TAG,
-    // "refresh_ledarray_task_mutex互斥量异常,无法占用互斥量以安全写入灯板阵列");
-    return ESP_FAIL;
-  }
 
   for (bcm_bit_plane_idx = 0; bcm_bit_plane_idx < 8; bcm_bit_plane_idx++) {
     for (int n = 0; n < VERTICAL_LED_NUMBER; n++) {
@@ -1386,8 +1327,6 @@ esp_err_t ledarray_show_frame() {
 
   // 最后一行灭灯消隐
   gpio_set_level(LEDARRAY_OE_IO, 1);
-
-  xSemaphoreGive(refresh_ledarray_task_mutex);
 
   return ESP_OK;
 }

@@ -56,7 +56,7 @@
 
 
 // 矩形字模数据区位置,需要填入矩形的位置
-#define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE + sizeof(uint64_t))
+#define RECTANGLE_MATRIX(pRECTANGLE) (pRECTANGLE + sizeof(uint32_t))
 
 // 矩形最大允许数据字节数，这决定矩形生成函数可以生成多大矩形
 #define RECTANGLE_SIZE_MAX 1024
@@ -82,13 +82,6 @@
 
 
 
-// 硬件刷新函数竞争刷新锁最大超时时间(单位ms)
-#define LEDARRAY_REFRESH_MUTEX_SHOW_TAKE_TIMEOUT_MS 0
-
-// 硬件刷新资源管理函数竞争刷新锁最大超时时间(单位ms)
-#define LEDARRAY_REFRESH_MUTEX_MANAGE_TAKE_TIMEOUT_MS 1000
-
-
 
 // BCM调光算法 - 单位时延对应的NOP空指令个数
 #define LEDARRAY_REFRESH_BCM_DELAY_NOP_NUM 1
@@ -100,9 +93,6 @@ typedef enum {
 
 // 初始化时设置的默认屏幕刷新模式
 #define LEDARRAY_REFRESH_INIT_MODE (LEDARRAY_AUTO_REFRESH_ALL_ONCE)
-
-// 刷新锁，外部需要抢到并完成所有操作后释放以允许屏幕刷新
-extern xSemaphoreHandle refresh_ledarray_task_mutex; 
 
 // 数字 0-9
 extern const uint8_t matrix_1[7];
@@ -124,8 +114,8 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode);
 // 取模说明：从第一行开始向右每取8个点作为一个字节，如果最后不足8个点就补满8位。
 // 取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
-esp_err_t separation_draw(int x, int y, uint64_t breadth, const uint8_t *p,
-                          uint64_t byte_number, uint8_t in_color[3]);
+esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
+                          uint32_t byte_number, uint8_t in_color[3]);
 
 // direct_draw彩色图像直显方式
 // 取模方式适配Img2Lcd
@@ -147,7 +137,7 @@ uint8_t *new_rectangle(int32_t breadth, int32_t height);
 void build_rectangle(int32_t breadth, int32_t height, uint8_t *dest,
                        int dest_size);
 
-uint64_t matrix_size(uint8_t *matrix_data);
+uint32_t matrix_size(uint8_t *matrix_data);
 
 void print_number(int x, int y, int8_t figure, uint8_t color[3]);
 
