@@ -105,6 +105,9 @@ extern const uint8_t matrix_7[7];
 extern const uint8_t matrix_8[7];
 extern const uint8_t matrix_9[7];
 
+// 更新UI数据互斥锁，用于保护UI数据的安全访问
+extern xSemaphoreHandle update_ui_data_mutex;
+
 void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode);
 
 // 以下函数将数据存储到缓冲区，不包含发送
@@ -115,7 +118,7 @@ void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode);
 // 取模顺序是从高到低，即第一个点作为最高位。如*-------取为10000000
 
 esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
-                          uint32_t byte_number, uint8_t in_color[3]);
+                          uint32_t byte_number, uint8_t in_color[3], bool is_write_black_when_zero);
 
 // direct_draw彩色图像直显方式
 // 取模方式适配Img2Lcd

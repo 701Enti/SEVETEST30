@@ -66,6 +66,8 @@
 
 #include "sevetest30_config.h"
 
+xSemaphoreHandle update_ui_data_mutex = NULL;
+
 // 一个图像可看作不同颜色的像素组合，而每个像素颜色可用红绿蓝三元色的深度（亮度）表示
 // 因此，我们可以将一个图像分离成三个单色图层，每个图层的每个像素的值表示该像素在该图层的亮度，这里用uint8_t表示(0-255)
 // 所以这里申请三块连续的uint8_t内存空间，每块大小为 LINE_LED_NUMBER *
@@ -279,10 +281,11 @@ uint32_t matrix_size(uint8_t *matrix_data) {
 /// @param p       导入字模指针
 /// @param byte_number 总数据长度(Byte)
 /// @param in_color 注入颜色 （RGB顺序）
+/// @param is_write_black_when_zero 是否在数据位为0的区域写入黑色
 /// @return [ESP_OK 成功 / ESP_FAIL 失败 / ESP_ERR_INVALID_ARG
 /// 失败,输入了无法处理的空指针]
 esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
-                          uint32_t byte_number, uint8_t in_color[3]) {
+                          uint32_t byte_number, uint8_t in_color[3], bool is_write_black_when_zero) {
   const static char *TAG = "separation_draw";
   if (p == NULL) {
     ESP_LOGE(TAG, "输入了无法处理的空指针");
@@ -315,6 +318,12 @@ esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
       if (flag) {
         color_input(sx, y + Dy, color);
       }
+      else{
+        if(is_write_black_when_zero){
+          color_input(sx, y + Dy, black);
+        }
+      }
+        
 
       if (Dx == breadth - 1) {
         Dx = 0; // 横向写入最后一个像素完毕，回车
@@ -495,8 +504,8 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3]) {
     ESP_LOGE(TAG, "输入了0-9之外的数字");
     return;
   }
-  separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_7),
-                  color); // 因为，数字字模数据大小一样，随便输入一个字模就可以
+  separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_0),
+                  color, false); // 因为，数字字模数据大小一样，随便输入一个字模就可以
 }
 
 /// @brief (12x12大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
@@ -582,13 +591,13 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
         separation_draw(x_buf, y, 12,
                         &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                        FONT_CHIP_READ_ZH_CN_12X_BYTES, color);
+                        FONT_CHIP_READ_ZH_CN_12X_BYTES, color, true);
       x_base += 12;
     } else { // Unicode小于128兼容ASCII字符集
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
         separation_draw(x_buf, y, 6,
                         &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                        FONT_CHIP_READ_ASCII_6X12_BYTES, color);
+                        FONT_CHIP_READ_ASCII_6X12_BYTES, color, true);
       x_base += 6;
     }
   }
@@ -703,13 +712,13 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 12,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                            FONT_CHIP_READ_ZH_CN_12X_BYTES, color);
+                            FONT_CHIP_READ_ZH_CN_12X_BYTES, color, true);
           x_base += 12;
         } else { // Unicode小于128兼容ASCII字符集
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 6,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                            FONT_CHIP_READ_ASCII_6X12_BYTES, color);
+                            FONT_CHIP_READ_ASCII_6X12_BYTES, color, true);
           x_base += 6;
         }
       }
@@ -749,13 +758,13 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 12,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                            FONT_CHIP_READ_ZH_CN_12X_BYTES, ccolor);
+                            FONT_CHIP_READ_ZH_CN_12X_BYTES, ccolor, true);
           x_base += 12;
         } else { // Unicode小于128兼容ASCII字符集
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 6,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
-                            FONT_CHIP_READ_ASCII_6X12_BYTES, ccolor);
+                            FONT_CHIP_READ_ASCII_6X12_BYTES, ccolor, true);
           x_base += 6;
         }
       }
@@ -856,13 +865,13 @@ void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
         separation_draw(x_buf, y, 16,
                         &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color);
+                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
       x_base += 16;
     } else { // Unicode小于128兼容ASCII字符集
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
         separation_draw(x_buf, y, 8,
                         &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                        FONT_CHIP_READ_ASCII_8X16_BYTES, color);
+                        FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
       x_base += 8;
     }
   }
@@ -977,13 +986,13 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 16,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                            FONT_CHIP_READ_ZH_CN_16X_BYTES, color);
+                            FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
           x_base += 16;
         } else { // Unicode小于128兼容ASCII字符集
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 8,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                            FONT_CHIP_READ_ASCII_8X16_BYTES, color);
+                            FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
           x_base += 8;
         }
       }
@@ -1023,13 +1032,13 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 16,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                            FONT_CHIP_READ_ZH_CN_16X_BYTES, ccolor);
+                            FONT_CHIP_READ_ZH_CN_16X_BYTES, ccolor, true);
           x_base += 16;
         } else { // Unicode小于128兼容ASCII字符集
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 8,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                            FONT_CHIP_READ_ASCII_8X16_BYTES, ccolor);
+                            FONT_CHIP_READ_ASCII_8X16_BYTES, ccolor, true);
           x_base += 8;
         }
       }
@@ -1056,6 +1065,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
 /// RMT控制器之前已经安装,请调用对应rmt_driver_uninstall释放需要的资源]
 /// @return [ESP_ERR_INVALID_ARG 参数错误]
 /// @return [ESP_ERR_NO_MEM 内存不足]
+/// @return [ESP_FAIL 其他失败]
 esp_err_t ledarray_init() {
   const static char *TAG = "ledarray_init";
 
@@ -1064,6 +1074,12 @@ esp_err_t ledarray_init() {
     return ESP_ERR_INVALID_STATE;
   } else {
     is_initialized = true;
+  }
+
+  update_ui_data_mutex = xSemaphoreCreateMutex();
+  if (update_ui_data_mutex == NULL) {
+    ESP_LOGE(TAG, "update_ui_data_mutex创建失败");
+    return ESP_FAIL;
   }
 
   // 申请显示数据内存空间

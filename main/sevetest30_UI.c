@@ -780,7 +780,7 @@ void weather_icon_temperature(int x, int y) {
     separation_draw(x + (LINE_LED_NUMBER / 2) + 1,
                     y + 1 + (VERTICAL_LED_NUMBER - minus_height) / 2,
                     minus_breath, RECTANGLE_MATRIX(rectangle_data),
-                    matrix_size(rectangle_data), color);
+                    matrix_size(rectangle_data), color, false);
 
     print_number(x + (LINE_LED_NUMBER / 2) + 1 + minus_breath + 1,
                  y + 1 + (VERTICAL_LED_NUMBER - FIGURE_HEIGHT) / 2, tens,
@@ -928,7 +928,7 @@ void battery_UI(int x, int y) {
   uint32_t background_breadth = soc_buf / 100.0f * LINE_LED_NUMBER;
   build_rectangle(background_breadth, 3, background, sizeof(background));
   separation_draw(1, VERTICAL_LED_NUMBER - 2, background_breadth,
-                  RECTANGLE_MATRIX(background), matrix_size(background), color);
+                  RECTANGLE_MATRIX(background), matrix_size(background), color, false);
 
   if (soc_buf < 100) {
     int8_t soc_tens = soc_buf / 10;             // 十位
@@ -1256,6 +1256,6 @@ void music_FFT_UI_draw(music_FFT_UI_handle_t handle) {
     color_buf[2] = unit_led_color[j * 3 + 2];
     separation_draw(x + j, y + handle->cfg.height - unit_led_height[j], 1,
                     RECTANGLE_MATRIX(rectangle_data),
-                    matrix_size(rectangle_data), color_buf);
+                    matrix_size(rectangle_data), color_buf, true);
   }
 }

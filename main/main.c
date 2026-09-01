@@ -38,6 +38,7 @@
 #include "esp_wifi.h"
 #include "freertos/idf_additions.h"
 #include "lwip/dns.h"
+#include "nvs_flash.h"
 
 #include "OPT3001.h"
 #include "audio_hal.h"
@@ -63,13 +64,11 @@
 
 board_ctrl_t board_ctrl = {0};
 
-xSemaphoreHandle update_ui_data_mutex = NULL;
-
 char *system_json_head_prompt =
     "你是一个部署在SEVETEST30智能闹钟上的AI语音助手,"
     "你的名字是:07(零七,中文谐音寓意trying,数字取自701Enti),"
     "SEVETEST30是github上的701Enti组织归属的非盈利开源项目."
-    "你可以和我聊天,尽量用简短文字回答问题,文学创作除外."
+    "你可以和我聊天,简单的问题尽量用简短文字回答问题."
     "以下信息来自我的SEVETEST30闹钟通过网络API或硬件传感器获取的数据."
     "实时更新,我们的聊天可以不涉及."
     "注意:你需要根据时区获取当前时间,这里不会提供."
@@ -81,17 +80,6 @@ void init(void);
 void test(void);
 
 void AI_chat(void);
-
-/// @brief
-/// 立即执行关机,全局设备通过断电/失能/低功耗模式/深度睡眠使得设备进入软关机状态(硬件不支持除外)
-void sevetest30_shutdown(void) {
-  ESP_LOGW("main", "关机...");
-  vibra_motor_start();
-  vTaskDelay(pdMS_TO_TICKS(3000));
-  sevetest30_all_device_deep_sleep();
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_1, 0);
-  esp_deep_sleep_start();
-}
 
 void app_main(void) {
 
@@ -113,6 +101,7 @@ void app_main(void) {
 
   int UI_switch = 0;
   bool UI_changed = false;
+  int64_t UI_changed_time = 0;
 
   while (1) {
 
@@ -186,6 +175,7 @@ void app_main(void) {
             vTaskDelay(pdMS_TO_TICKS(100));
             ext_io_level_service();
             if (esp_timer_get_time() - start_time > 5 * 1000 * 1000) {
+              vibra_motor_start();
               sevetest30_shutdown();
             }
           }
@@ -221,7 +211,7 @@ void app_main(void) {
                           rectangle_data, sizeof(rectangle_data));
           separation_draw(LINE_LED_NUMBER, (VERTICAL_LED_NUMBER / 2), 1,
                           RECTANGLE_MATRIX(rectangle_data),
-                          matrix_size(rectangle_data), color);
+                          matrix_size(rectangle_data), color,false);
           i++;
           if (i > 100) {
             i = 0;
@@ -243,7 +233,14 @@ void app_main(void) {
       xSemaphoreGive(update_ui_data_mutex);
 
       if (UI_changed) {
+        UI_changed_time = esp_timer_get_time();
         UI_changed = false;
+      } else {
+        if (UI_switch != 0) {
+          if (esp_timer_get_time() - UI_changed_time > 15 * 1000 * 1000) {
+            UI_switch = 0;
+          }
+        }
       }
     }
   }
@@ -264,18 +261,12 @@ void init(void) {
   board_ctrl.amplifier_sd = false;
   board_ctrl.codec_audio_hal_ctrl = AUDIO_HAL_CTRL_START;
   board_ctrl.codec_mode = AUDIO_HAL_CODEC_MODE_BOTH;
-  board_ctrl.codec_adc_gain = MIC_GAIN_9DB;
+  board_ctrl.codec_adc_gain = MIC_GAIN_15DB;
   board_ctrl.codec_dac_pin = DAC_OUTPUT_ALL;
   board_ctrl.codec_dac_volume = 100;
   board_ctrl.codec_adc_pin = CODEC_ADC_INPUT_MIC_ON_BOARD;
 
   sevetest30_all_device_init(&board_ctrl);
-
-  update_ui_data_mutex = xSemaphoreCreateMutex();
-  if (update_ui_data_mutex == NULL) {
-    ESP_LOGE(TAG, "update_ui_data_mutex创建失败");
-    return;
-  }
 
   // 打开屏幕显示
   board_ctrl_t *b = board_status_get();
@@ -283,8 +274,48 @@ void init(void) {
   sevetest30_board_ctrl(b, BOARD_CTRL_EXT_IO);
 
   ext_io_ctrl.auto_read_EN = true;
+  ext_io_level_service();
+  refresh_battery_data();
+
+  // 如果当前不在充电，非长按/连续快速按下拨轮开关禁止开机
+  // （设置“当前不在充电“条件主要为了防止连接电脑时的调试不便，但是如果连接电脑时电池充满也是不在充电，这是潜在缺陷）
+  // （如果调试时发现不能启动，请注释该代码块）
+  if (board_ctrl.p_ext_io_value->charge_SIGN == 1) {
+    if (!(board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+          board_ctrl.p_ext_io_value->thumbwheel_CCW == 0)) {
+      sevetest30_shutdown();
+    }
+    ext_io_level_service();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    if (!(board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
+          board_ctrl.p_ext_io_value->thumbwheel_CCW == 0)) {
+      sevetest30_shutdown();
+    }
+    vibra_motor_start();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    vibra_motor_stop();
+  }
+
+  // 电量低且未在充电禁止开机
+  if (battery_data.result.battery_soc < 10 &&
+      board_ctrl.p_ext_io_value->charge_SIGN == 1) {
+    battery_UI(1, 1);
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    sevetest30_shutdown();
+  }
 
   show_701Enti_sign(1, 1);
+
+  // 初始化NVS存储
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+  start_bluetooth_connect_service();
 
   esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
   wifi_init(&wifi_periph_config);
@@ -325,7 +356,7 @@ void test(void) {
   //         if (rp1 != NULL)
   //         {
   //             separation_draw(1, 1, i, RECTANGLE_MATRIX(rp1),
-  //             matrix_size(rp1), color); free(rp1);
+  //             matrix_size(rp1), color, true); free(rp1);
   //         }
   //         vTaskDelay(pdMS_TO_TICKS(500));
   //     }
@@ -337,34 +368,35 @@ void test(void) {
   //         if (rp1 != NULL)
   //         {
   //             separation_draw(1, 1, i, RECTANGLE_MATRIX(rp1),
-  //             matrix_size(rp1), color); free(rp1);
+  //             matrix_size(rp1), color, true); free(rp1);
   //         }
   //         vTaskDelay(pdMS_TO_TICKS(500));
   //     }
   // }
 
-  // /// 屏幕动画测试+字库测试+UI库动画API测试
+  // /// 滚动显示 屏幕动画测试+字库测试+UI库动画API测试
   // /// 其他参数渲染与多关键帧支持待完善,隐写关键帧正在测试阶段
   // uint8_t color[3] = {255, 255, 0};
-  // while (1)
-  // {
-  //   cartoon_handle_t cartoon1 = cartoon_new(CARTOON_RUN_MODE_PRE_RENDER,
-  //   true, false, false, 10); if (cartoon1)
-  //   {
+  // while (1) {
+  //   cartoon_handle_t cartoon1 =
+  //       cartoon_new(CARTOON_RUN_MODE_PRE_RENDER, true, false, false, 10);
+  //   if (cartoon1) {
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
-  //     CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color);
+  //                       CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color);
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
-  //     (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100, 1, color);
+  //                       (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100, 1,
+  //                       color);
   //     uint32_t c1steg1 =
   //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
-  //         CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color);
+  //                           CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color);
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY,
-  //     STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1,
-  //     (int32_t)&cartoon1->cartoon_plan.total_step_buf, NULL, NULL);
+  //                       STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1,
+  //                       (int32_t)&cartoon1->cartoon_plan.total_step_buf, (int32_t)NULL,
+  //                       NULL);
 
   //     font_roll_print_16x(1, 1, color, cartoon1,
-  //     "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying
-  //     entire,trying all time!");
+  //     "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying"
+  //     "entire,trying all time!");
 
   //     cartoon_delete(cartoon1);
   //   }
@@ -539,8 +571,6 @@ void test(void) {
   //   }
   // }
 
-  // bluetooth_connect();
-
   // music_FFT_UI_cfg_t FFT_UI_cfg = FFT_UI_DEFAULT_CONFIG();
 
   // // 网络音乐播放
@@ -701,7 +731,7 @@ void _main_chat_wait_cb(void) {
     build_rectangle(LINE_LED_NUMBER, 1, loading_bar, sizeof(loading_bar));
     separation_draw(1, VERTICAL_LED_NUMBER, LINE_LED_NUMBER,
                     RECTANGLE_MATRIX(loading_bar), matrix_size(loading_bar),
-                    color);
+                    color, false);
     xSemaphoreGive(update_ui_data_mutex);
   }
   vTaskDelay(pdMS_TO_TICKS(10));
