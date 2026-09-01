@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include "board_def.h"
-
 // 蓝牙配置
 #define SEVETEST30_BLE_DEVICE_NAME "SEVETEST30" // 蓝牙设备名称
 #define SEVETEST30_BLE_DEVICE_APPEARANCE_VALUE                                 \
@@ -35,7 +33,7 @@
 #define SEVETEST30_BLE_LOCAL_MTU 100 // 本地最大可传输单元MTU限制大小
 
 // I2C配置-默认为其他设备控制提供
-#define DEVICE_I2C_PORT (AUDIO_I2C_PORT)
+#define DEVICE_I2C_PORT (0)
 #define DEVICE_I2C_SDA_IO GPIO_NUM_18
 #define DEVICE_I2C_SCL_IO GPIO_NUM_17
 #define DEVICE_I2C_CLK_SRC (I2C_CLK_SRC_DEFAULT)

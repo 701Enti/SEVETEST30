@@ -49,6 +49,7 @@
 #include "driver/i2c_master.h"
 #include "es8388.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
 #include "sevetest30_BWEDA.h"
 #include "sevetest30_LedArray.h"
 #include "sevetest30_gpio.h"
@@ -186,6 +187,16 @@ void sevetest30_all_device_deep_sleep() {
   sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_ALL);
 
   vibra_motor_stop();
+}
+
+/// @brief
+/// 立即执行关机,全局设备通过断电/失能/低功耗模式/深度睡眠使得设备进入软关机状态(硬件不支持除外)
+void sevetest30_shutdown(void) {
+  ESP_LOGW("main", "关机...");
+  vTaskDelay(pdMS_TO_TICKS(3000));
+  sevetest30_all_device_deep_sleep();
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_1, 0);
+  esp_deep_sleep_start();
 }
 
 /// @brief

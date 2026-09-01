@@ -179,7 +179,6 @@ typedef enum {
 typedef enum {
   ASR_PID_CM_NEAR_PRO = 80001, // 近场 中文-普通话 极速版
   ASR_PID_CM_NEAR = 1537,      // 近场 中文-普通话 标准版
-  ASR_PID_CM_FAR = 1936,       // 远场 中文-普通话 标准版
   ASR_PID_CC = 1637,           // 中文-粤语
   ASR_PID_CS = 1837,           // 中文-四川话
   ASR_PID_EN = 1737,           // 英语
@@ -216,7 +215,7 @@ typedef struct ASR_cfg_t {
       .vad_mode = mode_vad,                                                    \
       .vad_one_frame_ms = 30,                                                  \
       .vad_min_speech_ms = 100,                                                \
-      .vad_min_noise_ms = 10,                                                 \
+      .vad_min_noise_ms = 30,                                                  \
   }
 
 typedef struct current_sound_collecter_t {

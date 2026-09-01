@@ -105,6 +105,7 @@ typedef struct board_ctrl_t
 
 esp_err_t* sevetest30_all_device_init(board_ctrl_t* board_ctrl);
 void sevetest30_all_device_deep_sleep();
+void sevetest30_shutdown(void);
 
 esp_err_t sevetest30_board_ctrl(board_ctrl_t* board_ctrl, board_ctrl_select_t ctrl_select);
 void codechip_set(board_ctrl_t* board_ctrl);
