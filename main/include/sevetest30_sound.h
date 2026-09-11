@@ -275,7 +275,7 @@ void tts_service_play_long(TTS_cfg_t *tts_cfg, UBaseType_t priority,
 
 void music_uri_or_url_play(const char *uri, UBaseType_t priority);
 
-void asr_service_begin(ASR_cfg_t *asr_cfg, UBaseType_t priority);
+esp_err_t asr_service_begin(ASR_cfg_t *asr_cfg, UBaseType_t priority);
 
 // 外部扩展功能API
 uint64_t mp3_decoder_play_time_get();

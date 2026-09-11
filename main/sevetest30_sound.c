@@ -629,16 +629,22 @@ void tts_service_play_long(TTS_cfg_t *cfg, UBaseType_t priority,
 /// 启动语音识别服务，启动后不断地自动监听并完成识别,是一个不断循环识别的任务
 /// @param asr_cfg asr配置
 /// @param priority 任务优先级
-void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
+/// @return 错误码
+/// ESP_OK 成功
+/// ESP_ERR_NOT_SUPPORTED 识别任务正在运行中，无法准备新任务
+/// ESP_ERR_INVALID_STATE 网络未连接
+/// ESP_ERR_INVALID_RESPONSE 获取百度API的AccessToken失败
+/// ESP_FAIL 准备音频元素时发现问题
+esp_err_t asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
   const char *TAG = "asr_service_begin";
 
   if (sevetest30_asr_running_flag) {
     ESP_LOGE(TAG, "识别繁忙中，无法准备新识别任务");
-    return;
+    return ESP_ERR_NOT_SUPPORTED;
   } else {
     if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
       ESP_LOGE(TAG, "网络未连接");
-      return;
+      return ESP_ERR_INVALID_STATE;
     }
     sevetest30_asr_running_flag = true;
   }
@@ -665,7 +671,7 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
   baidu_api_access_token = get_baidu_api_access_token();
   if (baidu_api_access_token == NULL) {
     ESP_LOGE(TAG, "获取百度API的AccessToken失败");
-    return;
+    return ESP_ERR_INVALID_RESPONSE;
   }
 
   const char *link_tag[4] = {"i2s", "current_sound_collecter", "filter", "raw"};
@@ -673,7 +679,7 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
   if (audio_element_all_init(link_tag, 4) != ESP_OK) {
     ESP_LOGE(TAG, "准备音频元素时发现问题");
     sevetest30_asr_running_flag = false;
-    return;
+    return ESP_FAIL;
   }
 
   audio_pipeline_link(pipeline, link_tag, 4);
@@ -682,6 +688,8 @@ void asr_service_begin(ASR_cfg_t *cfg, UBaseType_t priority) {
                                           cfg->sampling_bits);
 
   i2s_filter_raw_start(common_asr_running_event, priority);
+  
+  return ESP_OK;
 }
 
 /// @brief 获取MP3解码器播放实时时间进度
