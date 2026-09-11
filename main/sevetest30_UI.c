@@ -693,7 +693,7 @@ void data_to_color(int data, UI_color_visual_cfg_t *visual_cfg, uint8_t *high,
 /// @param x 起始坐标x
 /// @param y 起始坐标y
 /// @param emotion_label
-/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
+/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱......
 void facial_expression_show(int x, int y, char *emotion_label) {
   const char *TAG = "facial_expression_show";
 
@@ -723,6 +723,9 @@ void facial_expression_show(int x, int y, char *emotion_label) {
   } else if (strcmp(emotion_label, "sad") == 0) {
     ESP_LOGI(TAG, "显示悲伤表情");
     direct_draw(x, y, gImage_sad);
+  } else if (strcmp(emotion_label, "error") == 0) {
+    ESP_LOGI(TAG, "显示错误表情");
+    direct_draw(x, y, gImage_error);
   } else {
     ESP_LOGI(TAG, "无法识别表情标签 %s", emotion_label);
   }
@@ -802,6 +805,14 @@ void show_701Enti_sign(int x, int y) { direct_draw(x, y, gImage_701Enti_sign); }
 
 void show_se30_sign(int x, int y) { direct_draw(x, y, gImage_se30_sign); }
 
+void show_wifi_connected(int x, int y) {
+  direct_draw(x, y, gImage_sign_wifi_connected);
+}
+
+void show_wifi_not_connected(int x, int y) {
+  direct_draw(x, y, gImage_sign_wifi_not_connected);
+}
+
 /// @brief 显示了当前系统时间  时 分
 /// @param x 起始坐标x
 /// @param y 起始坐标y
@@ -878,30 +889,36 @@ void time_UI_h_m_s(int x, int y) {
 
   int8_t hour_tens = systemtime_data.hour / 10;              // 十位
   int8_t hour_uints = systemtime_data.hour - hour_tens * 10; // 个位
-  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 0,
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 0,
                y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_tens,
                color);
-  print_number(
-      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 1,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints, color);
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 1,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, hour_uints,
+               color);
 
   int8_t minute_tens = systemtime_data.minute / 10;                // 十位
   int8_t minute_uints = systemtime_data.minute - minute_tens * 10; // 个位
-  print_number(
-      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 2,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens, color);
-  print_number(
-      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 3,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints, color);
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 2,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_tens,
+               color);
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 3,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, minute_uints,
+               color);
 
   int8_t second_tens = systemtime_data.second / 10;                // 十位
   int8_t second_uints = systemtime_data.second - second_tens * 10; // 个位
-  print_number(
-      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 4,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens, color);
-  print_number(
-      x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 + (FIGURE_BREATH + 1) * 5,
-      y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints, color);
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 4,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_tens,
+               color);
+  print_number(x + (LINE_LED_NUMBER - FIGURE_BREATH * 6 - 5) / 2 +
+                   (FIGURE_BREATH + 1) * 5,
+               y + VERTICAL_LED_NUMBER / 2 - FIGURE_HEIGHT / 2, second_uints,
+               color);
 }
 
 /// @brief 显示了当前电池电量百分比(SOC)
@@ -928,7 +945,8 @@ void battery_UI(int x, int y) {
   uint32_t background_breadth = soc_buf / 100.0f * LINE_LED_NUMBER;
   build_rectangle(background_breadth, 3, background, sizeof(background));
   separation_draw(1, VERTICAL_LED_NUMBER - 2, background_breadth,
-                  RECTANGLE_MATRIX(background), matrix_size(background), color, false);
+                  RECTANGLE_MATRIX(background), matrix_size(background), color,
+                  false);
 
   if (soc_buf < 100) {
     int8_t soc_tens = soc_buf / 10;             // 十位

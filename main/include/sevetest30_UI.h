@@ -269,6 +269,8 @@ void battery_UI(int x, int y);
 
 void show_701Enti_sign(int x, int y);
 void show_se30_sign(int x, int y);
+void show_wifi_connected(int x, int y);
+void show_wifi_not_connected(int x, int y);
 
 void music_FFT_UI_draw(music_FFT_UI_handle_t handle);
 

@@ -79,7 +79,7 @@ char *system_json_head_prompt =
 void init(void);
 void test(void);
 
-void AI_chat(void);
+esp_err_t AI_chat(void);
 
 void app_main(void) {
 
@@ -180,13 +180,48 @@ void app_main(void) {
             }
           }
 
-          AI_chat();
+          esp_err_t ret = AI_chat();
+          if (ret != ESP_OK) {
+            ESP_LOGE("main", "AI_chat 失败,错误码：%d", ret);
+            if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
+                pdTRUE) {
+              clean_all_draw_buf();
+              if (ret == ESP_ERR_INVALID_STATE) {
+                show_wifi_not_connected(1, 1);
+              } else if (ret == ESP_FAIL) {
+                facial_expression_show(1, 1, "error");
+              }
+              xSemaphoreGive(update_ui_data_mutex);
+              vTaskDelay(pdMS_TO_TICKS(1000));
+            }
+          }
           UI_changed = true;
         }
       }
     }
+
     if (xSemaphoreTake(update_ui_data_mutex, 100) == pdTRUE) {
       switch (UI_switch) {
+      case -1: {
+        if (UI_changed) {
+          clean_all_draw_buf();
+          memset(media_ctrl_roll_print_str, 0,
+                 sizeof(media_ctrl_roll_print_str));
+        }
+        if (xSemaphoreTake(data_mutex_media_ctrl_roll_print, 100) == pdTRUE) {
+          if (media_ctrl_roll_print_str[0] != 0) {
+            uint8_t color[3] = {255, 255, 255};
+            clean_all_draw_buf();
+            ESP_LOGI("main", "滚动打印：%s", media_ctrl_roll_print_str);
+            font_roll_print_16x(1, 1, color, NULL, "%s",
+                                media_ctrl_roll_print_str);
+            memset(media_ctrl_roll_print_str, 0,
+                   sizeof(media_ctrl_roll_print_str));
+            clean_all_draw_buf();
+          }
+          xSemaphoreGive(data_mutex_media_ctrl_roll_print);
+        }
+      } break;
       case 0:
         clean_all_draw_buf();
         time_UI_h_m_s(1, 1);
@@ -211,7 +246,7 @@ void app_main(void) {
                           rectangle_data, sizeof(rectangle_data));
           separation_draw(LINE_LED_NUMBER, (VERTICAL_LED_NUMBER / 2), 1,
                           RECTANGLE_MATRIX(rectangle_data),
-                          matrix_size(rectangle_data), color,false);
+                          matrix_size(rectangle_data), color, false);
           i++;
           if (i > 100) {
             i = 0;
@@ -236,7 +271,7 @@ void app_main(void) {
         UI_changed_time = esp_timer_get_time();
         UI_changed = false;
       } else {
-        if (UI_switch != 0) {
+        if (UI_switch != 0 && UI_switch > 0) {
           if (esp_timer_get_time() - UI_changed_time > 15 * 1000 * 1000) {
             UI_switch = 0;
           }
@@ -279,7 +314,7 @@ void init(void) {
 
   // 如果当前不在充电，非长按/连续快速按下拨轮开关禁止开机
   // （设置“当前不在充电“条件主要为了防止连接电脑时的调试不便，但是如果连接电脑时电池充满也是不在充电，这是潜在缺陷）
-  // （如果调试时发现不能启动，请注释该代码块）
+  // （如果调试时发现不能启动，请注释该代码块，或者烧写代码后手动开机）
   if (board_ctrl.p_ext_io_value->charge_SIGN == 1) {
     if (!(board_ctrl.p_ext_io_value->thumbwheel_CW == 0 &&
           board_ctrl.p_ext_io_value->thumbwheel_CCW == 0)) {
@@ -384,15 +419,16 @@ void test(void) {
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
   //                       CARTOON_KEY_FRAME_PCT_MAX * 0, false, 1, 1, color);
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
-  //                       (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100, 1,
-  //                       color);
+  //                       (float)CARTOON_KEY_FRAME_PCT_MAX * 0.5, false, -100,
+  //                       1, color);
   //     uint32_t c1steg1 =
   //         add_new_key_frame(cartoon1, KEY_FRAME_ATTR_LINEAR,
-  //                           CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1, color);
+  //                           CARTOON_KEY_FRAME_PCT_MAX * 1, false, 1, 1,
+  //                           color);
   //     add_new_key_frame(cartoon1, KEY_FRAME_ATTR_STEGANOGRAPHY,
   //                       STEGANOGRAPHY_MODE_MAPPING_SUBTRACTION, c1steg1,
-  //                       (int32_t)&cartoon1->cartoon_plan.total_step_buf, (int32_t)NULL,
-  //                       NULL);
+  //                       (int32_t)&cartoon1->cartoon_plan.total_step_buf,
+  //                       (int32_t)NULL, NULL);
 
   //     font_roll_print_16x(1, 1, color, cartoon1,
   //     "hi,701Enti,美好皆于不懈尝试之中,热爱终在不断追逐之下,trying"
@@ -737,19 +773,33 @@ void _main_chat_wait_cb(void) {
   vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void AI_chat(void) {
+/// @brief AI交流例程
+/// @return esp_err_t 错误码
+/// @note ESP_OK 成功
+/// @note ESP_ERR_INVALID_STATE 网络未连接
+/// @note ESP_FAIL 其他错误
+esp_err_t AI_chat(void) {
   const char *TAG = "AI_chat";
   ESP_LOGI(TAG, "AI_chat 开始");
 
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return ESP_ERR_INVALID_STATE;
+  }
+
   ASR_cfg_t asr_cfg = ASR_DEFAULT_CONFIG(50, ASR_PID_CM_NEAR, VAD_MODE_3);
-  asr_service_begin(&asr_cfg, 1);
+  esp_err_t ret = asr_service_begin(&asr_cfg, 1);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "asr_service_begin 失败,错误码 %s", esp_err_to_name(ret));
+    return ESP_FAIL;
+  }
 
   GPT_chat_handle_t GPT_chat_handle =
       GPT_chat_start(ERNIE_BOT_URL, CONFIG_GPT_CHAT_ACCESS_KEY,
                      "ernie-4.5-turbo-128k", "", 60000);
   if (GPT_chat_handle == NULL) {
     ESP_LOGE(TAG, "GPT_chat_handle 为空,无法绘制任务");
-    return;
+    return ESP_FAIL;
   }
 
   // 启用多轮对话
@@ -757,7 +807,7 @@ void AI_chat(void) {
       ESP_OK) {
     GPT_chat_stop(GPT_chat_handle);
     ESP_LOGE(TAG, "GPT_chat_enable_multi_round_chat 失败\n");
-    return;
+    return ESP_FAIL;
   }
 
   // 设置系统JSON字段
@@ -767,7 +817,7 @@ void AI_chat(void) {
       ESP_OK) {
     GPT_chat_stop(GPT_chat_handle);
     ESP_LOGE(TAG, "GPT_chat_set_system_json_field 失败");
-    return;
+    return ESP_FAIL;
   }
 
   while (1) {
@@ -787,7 +837,7 @@ void AI_chat(void) {
         sevetest30_asr_running_flag = false;
         GPT_chat_stop(GPT_chat_handle);
         ESP_LOGW(TAG, "长时间未获取到样本,自动退出对话");
-        return;
+        return ESP_OK;
       }
 
       if (ext_io_ctrl.auto_read_INT) {
@@ -798,7 +848,7 @@ void AI_chat(void) {
             sevetest30_asr_running_flag = false;
             GPT_chat_stop(GPT_chat_handle);
             ESP_LOGW(TAG, "用户退出对话");
-            return;
+            return ESP_OK;
           }
         }
       }
@@ -863,13 +913,13 @@ void AI_chat(void) {
                                      sevetest30_asr_result_text) != ESP_OK) {
       GPT_chat_stop(GPT_chat_handle);
       ESP_LOGE(TAG, "GPT_chat_update_user_content 失败");
-      return;
+      return ESP_FAIL;
     }
     if (GPT_chat_text_exchange(GPT_chat_handle, 1, _main_chat_wait_cb) !=
         ESP_OK) {
       GPT_chat_stop(GPT_chat_handle);
       ESP_LOGE(TAG, "GPT_chat_text_exchange 失败");
-      return;
+      return ESP_FAIL;
     }
 
     // 如果正常回复,TTS语音播放

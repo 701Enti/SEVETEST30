@@ -32,6 +32,10 @@ extern const unsigned char gImage_disgusting[1544];
 extern const unsigned char gImage_fearful[1544];
 extern const unsigned char gImage_sad[1544];
 extern const unsigned char gImage_normal[1544];
+extern const unsigned char gImage_error[1544];
+
+extern const unsigned char gImage_sign_wifi_connected[1544];
+extern const unsigned char gImage_sign_wifi_not_connected[1544];
 
 extern const unsigned char gImage_701Enti_sign[872];
 extern const unsigned char gImage_se30_sign[872];
