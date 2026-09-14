@@ -22,8 +22,7 @@
  // 包含各种基于ESP-DSP的数学工具函数
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
- // bilibili: 701Enti
-
+ 
 #include "math_tools.h"
 #include "esp_err.h"
 #include "esp_check.h"

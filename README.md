@@ -1,14 +1,13 @@
 # 简介
 
-- 具有 12\*24RGB 显示阵列和大量环境传感器的物联网 AI 个性化时钟
+- 具有 16\*32RGB 显示阵列和大量环境传感器的物联网 AI 个性化时钟
 - 基于 ESP32S3 模组和 ESP-IDF 框架开发
 - 仅 TYPE-C 接入即可实现充电和程序调试(支持接口静电保护)
-- 长边 24 灯\*短边 12 灯,共计 288 个 WS2812 可编程彩色灯珠
+- 使用具有长边 32 灯\*短边 16 灯,共计 512 个 RGB灯珠的灯板 + 驱动板组成的显示模块
 - 灯板和主控板采用易插拔的排线设计
 - 板载电池和充电管理
 - 支持电池电量计量
 - 只需连接网络即可获取设备粗略位置并同步天气数据
-- 支持英语,中文等多语言显示
 - 最高支持 24bit 高保真音频播放/录制(DAC 最高支持 192kHz,ADC 最高支持 96kHz)
 - 具有 3W 双声道音频功率放大器
 - 喇叭接口采用易插拔端子设计
@@ -19,15 +18,14 @@
 - 姿态传感
 - 地磁传感
 - 线性振动马达
-- 关机后继续计时(通过板载电池供电)
+- 软关机低功耗设计
 - NTP 网络时间同步
 - TVOC 空气质量传感
 - 温湿度传感
 - 支持语音识别 ASR
 - 支持语音合成 TTS
-- 支持百度文心一言语音聊天交互
-- 支持 DeepSeek 语音聊天交互(等待开发中)
-- 通过物联工具实现个性化定制(等待开发中)
+- 任意主流AI大语音模型API对话支持
+- 通过物联工具实现个性化定制(等待开发和优化中)
 - 交互式开关机(等待开发和优化中)
 
 # 软件
@@ -35,7 +33,7 @@
 - 业务代码编程语言为 C 语言
 - 使用了 CMake 构建
 - 基于 ESP-IDF 框架开发
-- 本项目 IDE 开发环境推荐使用 Visual Studio Code
+- 本项目 IDE 开发环境推荐使用 Visual Studio Code / TRAE
 
 # 软件安全设施
 
@@ -44,8 +42,7 @@
 - **SDK 配置文件 - sdkconfig**
 
   - SEVETEST30 的 WIFI 连接密码和 API 相关密钥均需要在 SDK 配置编辑器(menuconfig)设置,其生成的 sdkconfig 硬编码这些敏感内容
-  - sdkconfig 及其任意扩展名的文件均被排除,包括 sdkconfig.default
-  - 在本仓库任何分支中都请不要使用 sdkconfig.default 配置默认值,请在./main/Kconfig.prebuild 直接配置默认值,它更易维护
+  - 提供安全的默认无密钥初始配置文件 sdkconfig.defaults
 
 - **其他常见敏感文件**:
   - 环境变量和其他配置文件（含 API 密钥/数据库密码）
@@ -98,14 +95,18 @@
 
 - **显示板 - SEVETEST30 灯板(50mm \* 100mm)**:
 
-  - 串行可控彩色 LED:WS2812
+  - 普通共阳RGB灯珠
+
+- **显示驱动板 - SEVETEST30 显示驱动板(50mm \* 100mm)**:
+
+  - ICND2013
+  - ICND2038S
 
 - **必要设备 I2C 硬件通信地址**:
 
   - ES8388 (音频编解码) - 10
   - TPL0401B(音量调整) - 3E
   - TPL0401A(5V 电压下调) - 2E
-  - BL5372(离线 RTC) - 32
   - TCA6416A(IO 扩展) - 20
   - MAX17048(电量计量) - 36
 
@@ -202,31 +203,7 @@
   - 文件重命名：dspm_sub_f32_ansi.c → matrix_fp64_dotprod_ansi.c
   - 注释了原文件所有包含,仅包含接口头文件 matrix_fp64.h
 
-## components/base64_re/base64_re.c
-
-- **原项目**: hostapd
-- **项目链接**: https://w1.fi/hostapd/
-- **项目 README 链接**: https://w1.fi/cgit/hostap/plain/hostapd/README
-- **原文件**: base64.c
-- **原文件协议类型**: BSD 3-Clause License
-- **修改说明**:
-  - 取消了 base64 编码的"\n"操作以满足特殊需要[^2][^3]
-  - 文件重命名：base64.c → base64_re.c
-  - 与已修改内容有关的函数添加了"\_re"后缀
-
-## components/base64_re/include/base64_re.h
-
-- **原项目**: hostapd
-- **项目链接**: https://w1.fi/hostapd/
-- **项目 README 链接**: https://w1.fi/cgit/hostap/plain/hostapd/README
-- **原文件**: base64.h
-- **原文件协议类型**: BSD 3-Clause License
-- **修改说明**:
-  - 文件重命名：base64.h → base64_re.h
-  - 与已修改内容有关的函数添加了"\_re"后缀
-  - 取消了修改者的项目没有使用到的函数声明
-
-## components/sevetest30_board/board_def.h
+## sevetest30_board/board_def.h
 
 - **原项目**: esp-adf
 - **项目链接**: https://github.com/espressif/esp-adf
@@ -237,7 +214,7 @@
   - 更改为项目需要的数值设置
   - 添加一些项目个性化需要的定义
 
-## components/sevetest30_board/board_pins_config.c
+## sevetest30_board/board_pins_config.c
 
 - **原项目**: esp-adf
 - **项目链接**: https://github.com/espressif/esp-adf
@@ -247,7 +224,7 @@
 - **修改说明**:
   - 更改为项目需要的数值设置
 
-## components/sevetest30_board/board_pins_config.h
+## sevetest30_board/board_pins_config.h
 
 - **原项目**: esp-adf
 - **项目链接**: https://github.com/espressif/esp-adf
@@ -257,7 +234,7 @@
 - **修改说明**:
   - 更改为项目需要的数值设置
 
-## components/sevetest30_board/board.c
+## sevetest30_board/board.c
 
 - **原项目**: esp-adf
 - **项目链接**: https://github.com/espressif/esp-adf
@@ -267,7 +244,7 @@
 - **修改说明**:
   - 更改为项目需要的数值设置
 
-## components/sevetest30_board/board.h
+## sevetest30_board/board.h
 
 - **原项目**: esp-adf
 - **项目链接**: https://github.com/espressif/esp-adf
@@ -277,7 +254,7 @@
 - **修改说明**:
   - 更改为项目需要的数值设置
 
-## main/AGS10.c 和 components/sevetest30_board/include/AGS10.h 的 Calc_CRC8 函数
+## main/AGS10.c 和 main/include/AGS10.h 的 Calc_CRC8 函数
 
 - **原文件**:来自奥松电子官方的 AGS10 数据手册内(需登录后点击"文件下载"获取手册) https://www.aosong.com/Products/info.aspx?lcid=&proid=49
 - **原文件协议类型**: (未发现声明)
@@ -285,10 +262,6 @@
   - 添加日志打印相关
 
 ## [^1]: 值得明确的是修改为 double 后,运算需要的时间可能延长
-
-## [^2]: 在原程序基础上,取消了 base64 编码的"\n"操作,因为将音频编码为 base64 时添加"\n"引起了一些 API 服务无法识别的问题
-
-## [^3]: 这个修改为适应 API 服务的一个项目需求, 不是否认原作者设计的可靠性, 事实上添加"\n"是一个正常编码操作
 
 ## [^4]: 本项目开发者和贡献者不承担任何硬件更改活动导致的财产损失,信息泄露和人员伤亡(详见下方 法律声明 - 免责声明)
 

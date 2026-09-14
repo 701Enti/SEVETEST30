@@ -22,26 +22,21 @@
  // 包含各种传感器校准工作
  // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
  // github: https://github.com/701Enti
- // bilibili: 701Enti
 
 
 #include "calibration_tools.h"
 #include <string.h>
 #include <sys/time.h>
-#include "math_tools.h"
 #include "math_tools_fp64.h"
 #include "math.h"
 #include "esp_sntp.h"
 #include "esp_timer.h"
 #include "esp_check.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/projdefs.h"
-#include "cJSON.h"
 
 static const char* calibration_tools_TAG = __FILE__;
-static const char* name_of_PsP2P_DM_Producer = __FILE__;
 
 
 /// @brief 生成磁传感器静态校准模型
@@ -91,7 +86,7 @@ esp_err_t generate_GS_calibration_static_model(GS_calibration_static_model_t* st
     for (;;) {
         //获取磁感应强度数据
         esp_err_t ret = ESP_OK;
-        ret = hscdtd008a_output_data_get(&output);//读取原始数据
+        ret = HSCDTD008A_output_data_get(&output);//读取原始数据
         ESP_RETURN_ON_ERROR(ret, calibration_tools_TAG, "读取传感器数据时发现问题 描述%s", esp_err_to_name(ret));
         ret = to_magnetic_flux_density_data(&output, &mfd);//转换为磁感应强度数据
         ESP_RETURN_ON_ERROR(ret, calibration_tools_TAG, "将原始数据转换为磁感应强度数据时发现问题 描述%s", esp_err_to_name(ret));

@@ -6,520 +6,941 @@
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
- // 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
- // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
- // 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
- // github: https://github.com/701Enti
- // bilibili: 701Enti
-
-
-#include "zlib.h"
-#include "zutil.h"
-#include "inftrees.h"
-#include "inflate.h"
-
-#include <sys/time.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+// 包含一些sevetest30的  互联网环境中  数据获取（IWEDA）
+// 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
+// 敬告：有效的数据存储变量都封装在该库下，不需要在外部函数定义一个数据结构体缓存作为参数，直接读取公共变量，主要为了方便FreeRTOS的任务支持
+// github: https://github.com/701Enti
 
 #include "sevetest30_IWEDA.h"
+#include "esp_http_client.h"
 #include "sevetest30_sound.h"
+#include "zlib.h"
+#include "zutil.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <time.h>
 
-#include "baidu_access_token.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
-#include "esp_sntp.h"
 
-
-#include "periph_wifi.h"
+#include "audio_idf_version.h"
 #include "board.h"
 #include "board_ctrl.h"
 #include "cJSON.h"
-#include "audio_idf_version.h"
-#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
 #include "esp_netif.h"
-#else
-#include "tcpip_adapter.h"
-#endif
+#include "esp_netif_sntp.h"
+#include "periph_wifi.h"
 
-char http_output_buf[HTTP_BUF_MAX] = { 0 }; // 输出数据缓存
-char http_url_buf[HTTP_BUF_MAX] = { 0 }; // url缓存,留着调用时候可以用
-char* ip_address;                          // 公网IP
+#include "esp_timer.h"
 
-char* sevetest30_asr_result_tex = NULL; // 语音识别结果
-char* ERNIE_Bot_4_chat_result = NULL;
-char* ERNIE_Bot_4_chat_user_content = NULL;
+#include "mbedtls/base64.h"
+#include "monocypher-ed25519.h"
 
-Real_time_weather* real_time_weather_data;
-ip_position* ip_position_data;
+char *ip_address;                            // 公网IP
+char *sevetest30_asr_result_text = NULL;     // 语音识别结果
+current_weather_data_t current_weather_data; // 当前天气数据
+position_data_t position_data;               // 位置数据
 
-esp_http_client_handle_t http_client_handle = NULL;
-esp_periph_handle_t se30_wifi_periph_handle = NULL;
+esp_periph_handle_t wifi_periph_handle = NULL;
 
-char baidu_ERNIE_Bot_access_token[ACCESSTOKEN_SIZE_MAX] = { 0 };
+void iweda_init_http_get_request(IWEDA_handle_t iweda_handle);
+void iweda_http_get_request_send(IWEDA_handle_t iweda_handle);
+void iweda_change_url_if_need_redirect(IWEDA_handle_t iweda_handle);
 
-void transform_ip_address();
-void transform_postcode();
-void transform_lng_lat();
-void transform_locationID();
-void transform_real_time_weather_data();
+/// @brief 创建IWEDA句柄
+/// @param output_buf_size 输出缓存大小，单位字节
+/// @param url_buf_size URL缓存大小，单位字节
+/// @return IWEDA_handle_t IWEDA句柄
+/// @note 该函数会分配内存，包括句柄本身和缓存, 如果分配失败，会返回NULL
+/// @note 调用者使用后，需要调用delete_iweda_handle函数释放内存
+IWEDA_handle_t new_iweda_handle(int output_buf_size, int url_buf_size) {
+  static const char *TAG = "new_iweda_handle";
 
+  if (output_buf_size <= 0 || url_buf_size <= 0) {
+    ESP_LOGE(TAG, "缓存大小不能小于或等于0");
+    return NULL;
+  }
+
+  IWEDA_handle_t iweda_handle = malloc(sizeof(IWEDA_t));
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle缓存分配失败");
+    return NULL;
+  }
+  memset(iweda_handle, 0, sizeof(IWEDA_t));
+
+  iweda_handle->output_buf_size = output_buf_size;
+  iweda_handle->output_buf = malloc(output_buf_size);
+  if (!iweda_handle->output_buf) {
+    free(iweda_handle);
+    ESP_LOGE(TAG, "output_buf缓存分配失败");
+    return NULL;
+  }
+
+  iweda_handle->url_buf_size = url_buf_size;
+  iweda_handle->url_buf = malloc(url_buf_size);
+  if (!iweda_handle->url_buf) {
+    free(iweda_handle->output_buf);
+    free(iweda_handle);
+    ESP_LOGE(TAG, "url_buf缓存分配失败");
+    return NULL;
+  }
+
+  memset(iweda_handle->output_buf, 0, output_buf_size);
+  memset(iweda_handle->url_buf, 0, url_buf_size);
+
+  return iweda_handle;
+}
+
+/// @brief 删除IWEDA句柄
+/// @param iweda_handle IWEDA句柄
+/// @note 该函数会释放句柄占用的内存，包括缓存和句柄本身
+void delete_iweda_handle(IWEDA_handle_t iweda_handle) {
+  if (!iweda_handle) {
+    return;
+  }
+  free(iweda_handle->output_buf);
+  free(iweda_handle->url_buf);
+  free(iweda_handle);
+}
 
 /// @brief WIFI外设初始化
 /// @param periph_config 网络外设配置
 /// @return ESP_OK / ESP_FAIL
-esp_err_t wifi_init(esp_periph_config_t* periph_config)
-{
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
+esp_err_t wifi_init(esp_periph_config_t *periph_config) {
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
 
-    // 初始化TCP/IP协议栈
+  // 初始化TCP/IP协议栈
 #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
-    ESP_ERROR_CHECK(esp_netif_init());
+  ESP_ERROR_CHECK(esp_netif_init());
 #else
-    tcpip_adapter_init();
+  tcpip_adapter_init();
 #endif
 
-    // 初始化网络外设
-    se30_periph_set_handle = esp_periph_set_init(periph_config); // 获取运行配置句柄
+  // 初始化网络外设
+  se30_periph_set_handle =
+      esp_periph_set_init(periph_config); // 获取运行配置句柄
 
-    return ret;
+  return ret;
 }
-
 
 /// @brief 通用网络连接函数
 /// @param wifi_cfg 网络配置,要连接的网络SSID和密码必填
 /// @return ESP_OK / ESP_FAIL
-esp_err_t wifi_connect(periph_wifi_cfg_t* wifi_cfg)
-{
-    static const char* TAG = "wifi_connect";
+esp_err_t wifi_connect(periph_wifi_cfg_t *wifi_cfg) {
+  static const char *TAG = "wifi_connect";
 
-    if (!se30_periph_set_handle) {
-        ESP_LOGE(TAG, "初始化工作未完成");
-        return ESP_FAIL;
-    }
+  if (!se30_periph_set_handle) {
+    ESP_LOGE(TAG, "初始化工作未完成");
+    return ESP_FAIL;
+  }
 
-    if (se30_wifi_periph_handle) {
-        ESP_LOGE(TAG, "上次的WIFI句柄未有效删除,无法连接");
-        return ESP_FAIL;
-    }
+  if (wifi_periph_handle) {
+    ESP_LOGE(TAG, "上次的WIFI句柄未有效删除,无法连接");
+    return ESP_FAIL;
+  }
 
-    se30_wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
+  wifi_periph_handle = periph_wifi_init(wifi_cfg); // 获取wifi配置句柄
 
-    esp_periph_start(se30_periph_set_handle, se30_wifi_periph_handle);// 启动连接任务
-    return periph_wifi_wait_for_connected(se30_wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS));//请求连接
+  esp_periph_start(se30_periph_set_handle, wifi_periph_handle); // 启动连接任务
+  return periph_wifi_wait_for_connected(
+      wifi_periph_handle, pdMS_TO_TICKS(WIFI_CONNECT_TIMEOUT_MS)); // 请求连接
 }
 
-/// @brief 百度API获取AccessToken,保存到char数组
-/// @param client_id client_id 字符串
-/// @param client_secret client_secret 字符串
-/// @param AccessToken char数组地址
-/// @return ESP_FAIL / ESP_OK
-esp_err_t baidu_get_AccessToken(char* client_id, char* client_secret, char* AccessToken)
-{
-    const char* TAG = "baidu_get_AccessToken";
-
-    if (!AccessToken)
-    {
-        ESP_LOGE(TAG, "需要导入一个char数组的地址,而导入的为空指针");
-        return ESP_FAIL;
+/**
+ * @brief 将标准 Base64 字符串原地转换为 Base64URL 格式
+ * @param str 标准 Base64 字符串指针
+ */
+void base64_to_base64url(char *str) {
+  if (str == NULL) {
+    return;
+  }
+  for (; *str != '\0'; str++) {
+    if (*str == '+') {
+      *str = '-';
+    } else if (*str == '/') {
+      *str = '_';
+    } else if (*str == '=') {
+      *str = '\0';
+      break;
     }
-
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE(TAG, "网络未连接");
-        return ESP_FAIL;
-    }
-
-    //发送请求
-    bool Task_comp_flag = false;                                                                    // 任务是否完成标识
-    snprintf(http_url_buf, HTTP_BUF_MAX, BAIDU_GET_ACCESS_TOKEN_URL, client_id, client_secret); // 确定请求URL
-    http_init_get_request();
-    esp_http_client_set_timeout_ms(http_client_handle, 10000);
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-
-    //检查是否得到请求响应的结果
-    if (!strcasecmp(http_output_buf, ""))
-        return ESP_FAIL;
-    else
-    {
-        //解析数据
-        cJSON* root_data = NULL;
-        root_data = cJSON_Parse(http_output_buf);
-        cJSON* cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
-
-        memset(AccessToken, 0, ACCESSTOKEN_SIZE_MAX * sizeof(char));//清空之前的存储
-        snprintf(AccessToken, ACCESSTOKEN_SIZE_MAX, "%s", cjson_AccessToken->valuestring);//复制AccessToken
-
-        cJSON_Delete(root_data);
-
-        return ESP_OK;
-    }
+  }
 }
 
+/// @brief 从Base64字符串中提取Ed25519种子
+/// @param b64_key Base64编码的Ed25519私钥字符串
+/// @param seed 提取到的Ed25519种子，大小为32字节
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG Base64解码失败
+/// @return ESP_ERR_NOT_FOUND 未找到Ed25519 seed段
+esp_err_t ed25519_b64_to_seed(const char *b64_key, uint8_t seed[32]) {
+  uint8_t der[256];
+  size_t der_len = sizeof(der);
+  uint32_t offset;
 
-// 封装好的网络信息API请求服务，包含信息解析，并存储到对应结构体或缓冲变量
+  // Base64解码失败
+  if (mbedtls_base64_decode(der, der_len, &der_len, (uint8_t *)b64_key,
+                            strlen(b64_key)) != 0) {
+    return ESP_ERR_INVALID_ARG;
+  }
 
-// 刷新位置数据
-void refresh_position_data()
-{
+  // 仅在末尾34字节区间查找，减少误匹配
+  offset = (der_len >= 34) ? (der_len - 34) : 0;
 
-    bool Task_comp_flag = false; // 任务是否完成标识
-
-    // 获取公网IP
-    Task_comp_flag = false;
-    sprintf(http_url_buf, GET_IP_ADDRESS_API_URL);
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE);
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_ip_address();
-
-    // 获取IP归属地邮政编码
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, IP_POSITION_API_URL, ip_address);
-    http_init_get_request();
-    esp_http_client_set_header(http_client_handle, "token", CONFIG_IP_138_TOKEN);
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_postcode();
-
-    // ip_position_data.postcode = "343100";//调试用,并将上面这块注释来避免调试时的花费
-
-    // 通过邮政编码获取经纬度以进行城市搜索
-    // 原因有三点
-    // 1.cilent库似乎没有URL中文解码，在URL装载时出现错误
-    // 2.IP138的API返回可能不包含"县""市"等字，如此处返回的是两个吉安，因为这里县和市的名字一样被认定为模糊搜索，通过GeoAPI返回的是市里下级的所有县
-    // 3.邮政编码大概率直接对应一个县或区，并且IP138API网页还可找到一个免费还不用鉴权的"行政区划"查询服务，会返回一个经纬度，这是GeoAPI支持的搜索关键词
-    //  免费还不用鉴权的行政区划查询服务，支持多种关键词搜索： https://quhua.ipchaxun.com/
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, TO_LNG_LAT_API_URL, ip_position_data->postcode); // 确定请求URL
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_lng_lat();
-
-    // 城市搜索，获取locationID
-    Task_comp_flag = false;
-    snprintf(http_url_buf, HTTP_BUF_MAX, GEO_API_URL, ip_position_data->lng, ip_position_data->lat, CONFIG_WEATHER_API_KEY);
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_locationID();
-}
-
-// 刷新天气数据
-void refresh_weather_data()
-{
-    bool Task_comp_flag = false;                                                                             // 任务是否完成标识
-    snprintf(http_url_buf, HTTP_BUF_MAX, WEATHER_API_URL, ip_position_data->id, CONFIG_WEATHER_API_KEY); // 确定请求URL
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    transform_real_time_weather_data();
-}
-
-// 初始化系统时间数据,sntp方式
-// 调用这个函数后，系统需要等待NTP服务器响应
-// 测试发现默认使用的NTP需要调用完成后3到4秒完成更新
-void init_time_data_sntp()
-{
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE("http_init_get_request", "网络未连接");
-        return;
+  while (offset + 34 <= der_len) {
+    if (der[offset] == 0x04 && der[offset + 1] == 0x20) {
+      // 向前20字节校验Ed25519专属OID 0x2b 0x65 0x70
+      uint32_t check_start = (offset > 20) ? (offset - 20) : 0;
+      for (uint32_t p = check_start; p < offset - 2; p++) {
+        if (der[p] == 0x2b && der[p + 1] == 0x65 && der[p + 2] == 0x70) {
+          memcpy(seed, der + offset + 2, 32);
+          return ESP_OK;
+        }
+      }
     }
-    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
-    esp_sntp_setservername(0, CONFIG_NTP_SERVER_0); // 索引表示第0个，其NTP服务器名为
-    esp_sntp_setservername(1, CONFIG_NTP_SERVER_1); // 索引表示第1个，其NTP服务器名为
-    esp_sntp_setservername(2, CONFIG_NTP_SERVER_2); // 索引表示第2个，其NTP服务器名为
-    esp_sntp_init();
+    offset++;
+  }
+
+  // 未找到合法Ed25519 seed段
+  return ESP_ERR_NOT_FOUND;
+}
+
+/**
+ * @brief 生成 JWT Token(使用ED25519)(含"Bearer "前缀)
+ * @param kid 凭据 ID
+ * @param sub 项目 ID
+ * @param private_key_pem 私钥字符串
+ * (去掉-----BEGIN/END-----、无换行空格的纯base64私钥串
+ * @return 生成的 JWT Token 字符串指针，失败返回 NULL
+ * @note 使用完生成的 JWT Token 后，需要手动调用 free() 函数释放内存
+ * @note 生成的 JWT Token 有效期为 1 天
+ */
+char *generate_ed25519_jwt_token(const char *kid, const char *sub,
+                                 const char *private_key) {
+  static const char *TAG = "generate_ed25519_jwt_token";
+
+  // 检查参数
+  if (!kid || !sub || !private_key) {
+    ESP_LOGE(TAG, "参数不能为NULL");
+    return NULL;
+  }
+
+  // 构造 JWT Header
+  char header[128];
+  int header_len = snprintf(header, sizeof(header),
+                            "{\"alg\":\"EdDSA\",\"kid\":\"%s\"}", kid);
+  if (header_len >= sizeof(header)) {
+    ESP_LOGE(TAG, "header内存不足");
+    return NULL;
+  }
+
+  // 构造 JWT Payload
+  time_t now = time(NULL);
+  char payload[128];
+  int payload_len = snprintf(
+      payload, sizeof(payload), "{\"sub\":\"%s\",\"iat\":%ld,\"exp\":%ld}", sub,
+      (long)(now - 30), (long)(now + QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY));
+  if (payload_len >= sizeof(payload)) {
+    ESP_LOGE(TAG, "payload内存不足");
+    return NULL;
+  }
+
+  // 对 Header 进行 Base64URL 编码
+  unsigned char b64_header[256];
+  size_t header_write_len = 0;
+  if (mbedtls_base64_encode(b64_header, sizeof(b64_header), &header_write_len,
+                            (unsigned char *)header, strlen(header)) != 0) {
+    ESP_LOGE(TAG, "请求头 Base64 编码失败");
+    return NULL;
+  }
+  base64_to_base64url((char *)b64_header);
+
+  // 对 Payload 进行 Base64URL 编码
+  unsigned char b64_payload[256];
+  size_t payload_write_len = 0;
+  if (mbedtls_base64_encode(b64_payload, sizeof(b64_payload),
+                            &payload_write_len, (unsigned char *)payload,
+                            strlen(payload)) != 0) {
+    ESP_LOGE(TAG, "载荷 Base64 编码失败");
+    return NULL;
+  }
+  base64_to_base64url((char *)b64_payload);
+
+  // 拼接待签名消息
+  char message[512];
+  int message_len =
+      snprintf(message, sizeof(message), "%.*s.%.*s", (int)header_write_len,
+               b64_header, (int)payload_write_len, b64_payload);
+  if (message_len >= sizeof(message)) {
+    ESP_LOGE(TAG, "message内存不足");
+    return NULL;
+  }
+
+  // Base64私钥解码成DER二进制
+  uint8_t der_buf[256] = {0};
+  size_t der_size = sizeof(der_buf);
+  size_t der_write_len = 0;
+  int mb_ret =
+      mbedtls_base64_decode(der_buf, der_size, &der_write_len,
+                            (const uint8_t *)private_key, strlen(private_key));
+  if (mb_ret != 0) {
+    ESP_LOGE(TAG, "私钥Base64解码失败");
+    return NULL;
+  }
+
+  // 提取ed25519种子
+  uint8_t seed[32] = {0};
+  esp_err_t ret = ed25519_b64_to_seed(private_key, seed);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "私钥解析失败 esp_err_t: %d", ret);
+    return NULL;
+  }
+
+  // 派生secret_key
+  uint8_t secret_key[64] = {0};
+  uint8_t public_key[32] = {0};
+
+  crypto_ed25519_key_pair(secret_key, public_key, seed);
+
+  // 执行Ed25519签名
+  unsigned char signature[64] = {0};
+  size_t sig_len = 64;
+  crypto_ed25519_sign(signature, secret_key, (uint8_t *)message,
+                      strlen(message));
+
+  // 对签名进行 Base64URL 编码
+  unsigned char b64_signature[128];
+  size_t sig_b64_len = 0;
+  if (mbedtls_base64_encode(b64_signature, sizeof(b64_signature), &sig_b64_len,
+                            signature, sig_len) != 0) {
+    ESP_LOGE(TAG, "签名 Base64 编码失败");
+    return NULL;
+  }
+  base64_to_base64url((char *)b64_signature);
+
+  // 拼接最终 JWT Token,含"Bearer "前缀
+  char token[512] = {0};
+  int token_len =
+      snprintf(token, sizeof(token), "Bearer %.*s.%.*s.%.*s",
+               (int)header_write_len, b64_header, (int)payload_write_len,
+               b64_payload, (int)sig_b64_len, b64_signature);
+  if (token_len >= sizeof(token)) {
+    ESP_LOGE(TAG, "token内存不足");
+    return NULL;
+  }
+
+  ESP_LOGI(TAG, "JWT 令牌生成成功 %s", token);
+  return strdup(token);
+}
+
+/// @brief 获取和风天气 JWT Token,含"Bearer "前缀
+/// @return JWT Token 字符串指针
+/// @note 自动管理，只要令牌有效期剩余一半，就刷新令牌，无需手动调用 free()
+/// 函数释放内存
+char *get_qweather_jwt_token() {
+  static const char *TAG = "get_qweather_jwt_token";
+  static char *token = NULL;
+  static time_t last_time = 0;
+  // 只要令牌有效期剩余一半，就刷新令牌
+  if (token != NULL &&
+      time(NULL) - last_time > QWEATHER_JWT_TOKEN_TERM_OF_VALIDITY / 2) {
+    free(token);
+    token = NULL;
+    last_time = time(NULL);
+  }
+  if (token == NULL) {
+    token = generate_ed25519_jwt_token(
+        CONFIG_QWEATHER_API_JWT_CREDENTIAL_ID,
+        CONFIG_QWEATHER_API_JWT_PROJECT_ID,
+        CONFIG_QWEATHER_API_JWT_PRIVATE_KEY_WITHOUT_HEADER_FOOTER);
+    if (token == NULL) {
+      return NULL;
+    } else {
+      last_time = time(NULL);
+      return token;
+    }
+  } else {
+    ESP_LOGI(TAG, "使用已存在的JWT 令牌(生成时间：%ld)", (long)last_time);
+    return token;
+  }
+}
+
+/// @brief 生成百度API的AccessToken
+/// @param api_key API Key 字符串
+/// @param secret_key Secret Key 字符串
+/// @return 生成的 AccessToken 字符串指针，失败返回 NULL
+/// @note 使用完生成的 AccessToken 后，需要手动调用 free() 函数释放内存
+char *generate_baidu_api_access_token(char *api_key, char *secret_key) {
+  const char *TAG = "generate_baidu_api_access_token";
+
+  if (!api_key || !secret_key) {
+    ESP_LOGE(TAG, "api_key或secret_key为NULL");
+    return NULL;
+  }
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return NULL;
+  }
+
+  char *AccessToken = NULL;
+
+  IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
+                                                 IWEDA_DEFAULT_URL_BUF_SIZE);
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle创建失败");
+    return NULL;
+  }
+
+  int url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                         BAIDU_GET_ACCESS_TOKEN_URL, api_key, secret_key);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return NULL;
+  }
+
+  iweda_init_http_get_request(iweda_handle);
+  esp_http_client_set_timeout_ms(iweda_handle->http_client_handle, 10000);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+  // 检查是否得到请求响应的结果
+  if (!strcasecmp(iweda_handle->output_buf, "")) {
+    delete_iweda_handle(iweda_handle);
+    return NULL;
+  } else {
+    // 解析数据
+    cJSON *root_data = NULL;
+    cJSON *cjson_AccessToken = NULL;
+
+    root_data = cJSON_Parse(iweda_handle->output_buf);
+    if (root_data) {
+      cjson_AccessToken = cJSON_GetObjectItem(root_data, "access_token");
+      if (cjson_AccessToken) {
+        if (cjson_AccessToken->valuestring) {
+          AccessToken = strdup(cjson_AccessToken->valuestring);
+        }
+      }
+      cJSON_Delete(root_data);
+    }
+
+    delete_iweda_handle(iweda_handle);
+    ESP_LOGI(TAG, "生成百度API的AccessToken成功 %s", AccessToken);
+    return AccessToken;
+  }
+}
+
+/// @brief 获取百度API的AccessToken
+/// @return 生成的 AccessToken 字符串指针，失败返回NULL
+/// @note 自动管理，无需手动调用 free()
+/// 函数释放内存
+char *get_baidu_api_access_token() {
+  const char *TAG = "get_baidu_api_access_token";
+
+  static char *AccessToken = NULL;
+  static time_t last_time = 0;
+
+  if (AccessToken != NULL &&
+      time(NULL) - last_time > BAIDU_API_ACCESSTOKEN_REFRESH_TIME) {
+    free(AccessToken);
+    AccessToken = NULL;
+    last_time = time(NULL);
+  }
+
+  if (AccessToken == NULL) {
+    AccessToken = generate_baidu_api_access_token(
+        CONFIG_BAIDU_API_ACCESS_API_KEY, CONFIG_BAIDU_API_ACCESS_SECRET_KEY);
+    if (AccessToken == NULL) {
+      return NULL;
+    } else {
+      last_time = time(NULL);
+      return AccessToken;
+    }
+  } else {
+    ESP_LOGI(TAG, "使用已存在的AccessToken(生成时间：%ld)", (long)last_time);
+    return AccessToken;
+  }
+}
+
+/// @brief 初始化系统时间数据,sntp方式
+/// @brief 调用这个函数后，系统需要等待NTP服务器响应,本函数会阻塞
+/// @brief 直到NTP服务器响应完成或超过设置的超时时间
+/// @param timeout_ms 超时时间,单位:ms
+/// @return ESP_OK 初始化成功
+/// @return ESP_FAIL 请求初始化SNTP失败
+/// @return ESP_ERR_TIMEOUT 初始化失败,NTP服务器响应超时
+/// @return ESP_ERR_NOT_FINISHED
+/// 初始化未完成,NTP服务器在超时时间内仍然处于同步中(可能开启了平滑时间过渡模式或超时时间过短)
+/// @return ESP_ERR_INVALID_STATE 网络未连接
+esp_err_t init_time_data_sntp(uint32_t timeout_ms) {
+  const char *TAG = "init_time_data_sntp";
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  esp_sntp_config_t sntp_cfg = ESP_NETIF_SNTP_DEFAULT_CONFIG_MULTIPLE(
+      3, ESP_SNTP_SERVER_LIST(CONFIG_NTP_SERVER_0, CONFIG_NTP_SERVER_1,
+                              CONFIG_NTP_SERVER_2));
+  esp_err_t init_ret = esp_netif_sntp_init(&sntp_cfg);
+  if (init_ret != ESP_OK) {
+    ESP_LOGE(TAG, "请求初始化SNTP失败 %s", esp_err_to_name(init_ret));
+    return init_ret;
+  }
+
+  esp_err_t sync_ret = esp_netif_sntp_sync_wait(pdMS_TO_TICKS(timeout_ms));
+  if (sync_ret == ESP_ERR_TIMEOUT) {
+    ESP_LOGE(TAG, "初始化系统时间数据失败,NTP服务器响应超时");
+    return ESP_ERR_TIMEOUT;
+  } else if (sync_ret == ESP_ERR_NOT_FINISHED) {
+    ESP_LOGW(TAG,
+             "初始化系统时间数据未完成,NTP服务器在超时时间内仍然处于同步中("
+             "可能开启了平滑时间过渡模式或超时时间过短)");
+    return ESP_ERR_NOT_FINISHED;
+  } else if (sync_ret == ESP_OK) {
+    ESP_LOGI(TAG, "初始化系统时间数据成功");
+    return ESP_OK;
+  }
+  ESP_LOGE(TAG, "初始化系统时间数据失败 %s", esp_err_to_name(sync_ret));
+  return sync_ret;
 }
 
 /// @brief 检查响应内容是不是可以直接获取资源
-/// @param client_handle 连接句柄
+/// @param iweda_handle IWEDA句柄
 /// @return ESP_OK 可以直接获取资源 否则(不可用/需要重定向)返回 响应码
-int http_check_response_content(esp_http_client_handle_t client_handle)
-{
-    const char* TAG = "http_check_response_content";
+int iweda_check_response_content(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "iweda_check_response_content";
 
-    esp_http_client_fetch_headers(client_handle);                //   接收消息头
-    int status = esp_http_client_get_status_code(client_handle); // 获取消息头中的响应状态信息
-    int len = esp_http_client_get_content_length(client_handle); // 获取消息头中的总数据大小信息
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return ESP_FAIL;
+  }
 
+  esp_http_client_fetch_headers(
+      iweda_handle->http_client_handle); //   接收消息头
+  int status = esp_http_client_get_status_code(
+      iweda_handle->http_client_handle); // 获取消息头中的响应状态信息
+  int len = esp_http_client_get_content_length(
+      iweda_handle->http_client_handle); // 获取消息头中的总数据大小信息
+  esp_http_client_read_response(iweda_handle->http_client_handle,
+                                iweda_handle->output_buf,
+                                iweda_handle->output_buf_size); // 接收消息体
 
-    //检查是否为临时重定向
-    if (status == 302 || status == 307) {
-        if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ,本次传输响应数据已分块", status);
-        else
-            ESP_LOGW(TAG, "需要临时重定向，响应状态-> %d ，响应数据共 %d", status, len);
-
-        return status;
-    }
-
-    if (status != 200)
-    {
-        if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGE(TAG, "本次传输响应数据已分块 但是处于不正常的响应状态 -> %d 数据将不会保存", status);
-        else
-            ESP_LOGE(TAG, "不正常的响应状态 -> %d 共接收到 -> %d 数据将不会保存", status, len);
-
-        return status;
-    }
+  // 检查是否为临时重定向
+  if (status == 302 || status == 307) {
+    if (esp_http_client_is_chunked_response(iweda_handle->http_client_handle) ==
+        true)
+      ESP_LOGW(TAG, "[%s] 需要临时重定向，响应状态[%d] ,本次传输响应数据已分块",
+               iweda_handle->url_buf, status);
     else
-    {
-        if (esp_http_client_is_chunked_response(client_handle) == true)
-            ESP_LOGI(TAG, "连接就绪，响应状态-> %d ,本次传输响应数据已分块", status);
-        else
-            ESP_LOGI(TAG, "连接就绪，响应状态-> %d ，响应数据共 %d", status, len);
+      ESP_LOGW(TAG,
+               "[%s] 需要临时重定向，响应状态[%d] ，响应数据(共 %d bytes)-> %s",
+               iweda_handle->url_buf, status, len, iweda_handle->output_buf);
 
-        return ESP_OK;
-    }
+    return status;
+  }
+
+  if (status != 200) {
+    if (esp_http_client_is_chunked_response(iweda_handle->http_client_handle) ==
+        true)
+      ESP_LOGE(TAG,
+               "[%s] 本次传输响应数据已分块 但是处于不正常的响应状态[%d] "
+               "数据将不会保存，响应数据(共 %d bytes)-> %s",
+               iweda_handle->url_buf, status, len, iweda_handle->output_buf);
+    else
+      ESP_LOGE(TAG, "[%s] 不正常的响应状态[%d]，响应数据(共 %d bytes)-> %s",
+               iweda_handle->url_buf, status, len, iweda_handle->output_buf);
+
+    return status;
+  } else {
+    if (esp_http_client_is_chunked_response(iweda_handle->http_client_handle) ==
+        true)
+      ESP_LOGI(TAG, "[%s] 连接就绪，响应状态-> %d ,本次传输响应数据已分块",
+               iweda_handle->url_buf, status);
+    else
+      ESP_LOGI(TAG, "[%s] 连接就绪，响应状态-> %d ，响应数据共 %d bytes",
+               iweda_handle->url_buf, status, len);
+
+    return ESP_OK;
+  }
 }
 
 /// @brief 检测URL的可用性，进行针对如音频资源的可用检查而无其他复杂上下文
-/// @param url 需要检测的URL
+/// @param iweda_handle IWEDA句柄
 /// @return ESP_FAIL 无法连接 ESP_OK 正确可用  否则返回 响应错误码
-int http_check_common_url(const char* url)
-{
-    const char* TAG = "http_check_common_url";
-    int ret = ESP_OK;
+int iweda_check_common_url(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "iweda_check_common_url";
+  int ret = ESP_OK;
 
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE("http_check_common_url", "网络未连接");
-        return ESP_FAIL;
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return ESP_FAIL;
+  }
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return ESP_FAIL;
+  }
+
+  iweda_init_http_get_request(iweda_handle);
+
+  if (esp_http_client_open(iweda_handle->http_client_handle, 0) != ESP_OK) {
+    ESP_LOGE(TAG, "无法打开连接的URL -> %s", iweda_handle->url_buf);
+    esp_http_client_cleanup(iweda_handle->http_client_handle);
+    return ESP_FAIL;
+  }
+
+  // 校验响应状态与数据
+  ret = iweda_check_response_content(iweda_handle);
+  if (ret != ESP_OK) {
+    if (ret == 302 || ret == 307) {
+      ESP_LOGW(TAG, "需要重定向处理的URL \n-> %s", iweda_handle->url_buf);
+    } else {
+      ESP_LOGE(TAG, "响应信息发现异常的URL \n-> %s", iweda_handle->url_buf);
+    }
+  }
+  esp_http_client_cleanup(iweda_handle->http_client_handle);
+  return ret;
+}
+
+/// @brief 如果当前URL需要重定向,更改URL内容
+/// @param iweda_handle IWEDA句柄
+void iweda_change_url_if_need_redirect(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "iweda_change_url_if_need_redirect";
+
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
+
+  if (periph_wifi_is_connected(wifi_periph_handle) == PERIPH_WIFI_CONNECTED) {
+    iweda_init_http_get_request(iweda_handle);
+    if (esp_http_client_open(iweda_handle->http_client_handle, 0) == ESP_OK) {
+      // 校验响应状态与数据
+      int ret = iweda_check_response_content(iweda_handle);
+      if (ret == 302 || ret == 307) {
+        // 需要重定向
+        char *location = "NULL";
+        esp_http_client_get_header(iweda_handle->http_client_handle, "Location",
+                                   &location);
+        if (location != NULL) {
+          if (strlen(location) >= iweda_handle->url_buf_size) {
+            ESP_LOGE(TAG, "url_buf内存不足");
+          } else {
+            snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s",
+                     location);
+            ESP_LOGW(TAG, "重定向到 %s", iweda_handle->url_buf);
+          }
+        } else {
+          ESP_LOGE(TAG,
+                   "尝试获取重定向信息时发现问题,需要重定向但无法完成更改");
+        }
+      }
+    }
+    esp_http_client_cleanup(iweda_handle->http_client_handle);
+  }
+}
+
+/**
+ * @brief 将 UTF-8 字符串进行 URL 编码
+ *
+ * @param src 源字符串指针
+ * @param dest 目标字符数组（存放编码后的结果）
+ * @param dest_len 目标数组的总大小
+ * @param use_plus_for_space
+ * true:空格编码为'+'(表单post)；false:空格编码为%20(标准URI)
+ * @return esp_err_t ESP_OK 成功，ESP_ERR_NO_MEM 空间不足，ESP_ERR_INVALID_ARG
+ * 参数错误
+ */
+esp_err_t url_encode(const char *src, char *dest, size_t dest_len,
+                     bool use_plus_for_space) {
+  if (src == NULL || dest == NULL || dest_len == 0) {
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  static const char *hex = "0123456789ABCDEF";
+  size_t i = 0; // 源字符串索引
+  size_t j = 0; // 目标字符串索引
+
+  while (src[i] != '\0') {
+    unsigned char c = (unsigned char)src[i];
+
+    if (c == ' ') {
+      if (j + 2 > dest_len) {
+        return ESP_ERR_NO_MEM;
+      }
+      if (use_plus_for_space) {
+        dest[j++] = '+';
+      } else {
+        dest[j++] = '%';
+        dest[j++] = hex[(c >> 4) & 0x0F];
+        dest[j++] = hex[c & 0x0F];
+      }
+    }
+    // 判断是否是安全字符（字母、数字、- _ . ~）
+    else if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+      // 检查空间：安全字符需要 1 个字节 + 1 个结束符
+      if (j + 2 > dest_len) {
+        return ESP_ERR_NO_MEM;
+      }
+      dest[j++] = c;
+    } else {
+      // 检查空间：非安全字符需要 3 个字节(如 %E5) + 1 个结束符
+      if (j + 4 > dest_len) {
+        return ESP_ERR_NO_MEM;
+      }
+      dest[j++] = '%';
+      dest[j++] = hex[c >> 4];
+      dest[j++] = hex[c & 0x0F];
+    }
+    i++;
+  }
+
+  dest[j] = '\0'; // 安全补上字符串结束符
+  return ESP_OK;
+}
+
+/// @brief 构建安全的JSON字符串
+/// @param src 源字符串指针,内部不会更改/free
+/// @return NULL(构建失败)
+/// @return char* 安全的JSON字符串指针,内部申请内存,需要手动释放内存
+/// @note src == NULL或strlen(src) == 0 时,返回NULL
+/// @note
+/// 不会对"进行转义,{"model":"ernie-4.5-turbo-128k"}->{"model":"ernie-4.5-turbo-128k"}
+/// @note 连续的\"会被替换为"
+char *build_safe_json_string(const char *src) {
+  if (src == NULL || strlen(src) == 0) {
+    return NULL;
+  }
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) {
+    return NULL;
+  }
+  cJSON_AddStringToObject(root, "src", src);
+  char *json_str = cJSON_PrintUnformatted(root);
+  cJSON_Delete(root);
+
+  if (json_str != NULL && strlen(json_str) > 0) {
+    char *out_buf = strchr(json_str, ':') + 2;
+    out_buf[strlen(out_buf) - 2] = '\0';
+
+    char *out = strdup(out_buf);
+    if (out != NULL && strlen(out) > 0) {
+      int j = 0;
+      for (int i = 0; i < strlen(out_buf); i++) {
+        if (out_buf[i] == '\\') {
+          if (out_buf[i + 1] == '"') {
+            continue;
+          }
+        }
+        out[j] = out_buf[i];
+        j++;
+      }
+      out[j] = '\0';
+    }
+    out_buf = NULL;
+
+    free(json_str);
+    json_str = NULL;
+
+    return out;
+  }
+
+  return NULL;
+}
+
+/// @brief 初始化GET请求
+/// @param iweda_handle IWEDA句柄
+void iweda_init_http_get_request(IWEDA_handle_t iweda_handle) {
+
+  const char *TAG = "iweda_init_http_get_request";
+
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return;
+  }
+
+  esp_http_client_config_t config;
+  memset(&config, 0, sizeof(config)); // 对参数初始化为0
+  config.url = iweda_handle->url_buf; // 导入URL
+
+  iweda_handle->http_client_handle = esp_http_client_init(&config);
+  esp_http_client_set_method(iweda_handle->http_client_handle, HTTP_METHOD_GET);
+
+  // 清除残留数据
+  memset(iweda_handle->output_buf, 0, iweda_handle->output_buf_size);
+  strcpy(iweda_handle->output_buf, "");
+
+  iweda_handle->is_completed = false;
+  return;
+}
+
+/// @brief 发送GET请求
+/// @note 响应内容将保存到iweda_handle->output_buf中
+/// @note 可以查看iweda_handle->is_completed判断是否完成请求
+/// @param iweda_handle IWEDA句柄
+void iweda_http_get_request_send(IWEDA_handle_t iweda_handle) {
+  while (1) {
+    const char *TAG = "iweda_http_get_request_send";
+
+    if (!iweda_handle) {
+      ESP_LOGE(TAG, "iweda_handle为NULL");
+      vTaskDelete(NULL); // 终止任务
     }
 
-    sprintf(http_url_buf, url);
-    http_init_get_request();
-
-    if (esp_http_client_open(http_client_handle, 0) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "无法打开连接的URL -> %s", url);
-        esp_http_client_cleanup(http_client_handle);
-        return ESP_FAIL;
+    // 对服务器发送连接请求
+    esp_err_t err_flag =
+        esp_http_client_open(iweda_handle->http_client_handle, 0);
+    if (err_flag != ESP_OK) {
+      ESP_LOGE(TAG, "请求连接服务器时出现问题 -> %s", iweda_handle->url_buf);
+      esp_http_client_cleanup(iweda_handle->http_client_handle);
+      iweda_handle->is_completed = true;
+      vTaskDelete(NULL); // 终止任务
     }
 
     // 校验响应状态与数据
-    ret = http_check_response_content(http_client_handle);
-    if (ret != ESP_OK) {
-        if (ret == 302 || ret == 307) {
-            ESP_LOGW(TAG, "需要重定向处理的URL \n-> %s", url);
-        }
-        else {
-            ESP_LOGE(TAG, "响应信息发现异常的URL \n-> %s", url);
-        }
+    if (iweda_check_response_content(iweda_handle) != ESP_OK) {
+      esp_http_client_cleanup(iweda_handle->http_client_handle);
+      iweda_handle->is_completed = true;
+      vTaskDelete(NULL); // 终止任务
     }
-    esp_http_client_cleanup(http_client_handle);
-    return ret;
+
+    // 读取响应内容
+    esp_http_client_read_response(iweda_handle->http_client_handle,
+                                  iweda_handle->output_buf,
+                                  iweda_handle->output_buf_size);
+
+    esp_http_client_cleanup(
+        iweda_handle->http_client_handle); // 关闭连接 释放数据缓存
+
+    iweda_handle->is_completed = true;
+    vTaskDelete(NULL); // 完成，终止任务
+  }
 }
 
+/// @brief 解压gzip压缩后的响应数据
+/// @param input 输入数据指针
+/// @param input_len 输入数据长度
+/// @param output 输出数据指针
+void gzip_decompress(void *input, int input_len, void *output) {
+  const char *TAG = "gzip_decompress";
+  int flag = 0; // 解压状态标识
+  // 配置zlib数据流
+  z_stream stream_config = {0};
+  stream_config.next_in = input;   // 输入数据
+  stream_config.next_out = output; // 输出数据
+  stream_config.avail_in = 0;      // 当前输入数据的有效字节数
+  stream_config.zalloc = NULL;     // 内部内存分配状态标识，不需要
+  stream_config.zfree = NULL;      // 内部内存释放状态标识，不需要
+  stream_config.opaque = NULL;     // 给上述两个内存标识的私有数据对象，没有
 
-/// @brief 如果这个url需要重定向,更改url内容
-/// @brief 原来url数据不会清除, 只是参数url指代位置切换到location_url缓存
-/// @brief 请尽快使用或复制该url, 在下次change_url_if_need_redirect调用之前
-/// @param url 
-void change_url_if_need_redirect(char** url) {
-    const char* TAG = "change_url_if_need_redirect";
+  flag = inflateInit2(&stream_config, ZLIB_WINDOW_MAX); // 传入参数
+  if (flag != Z_OK) {
+    ESP_LOGE(TAG, "配置解压参数时出错");
+    return;
+  }
 
-    static char location_url_buf[HTTP_BUF_MAX] = { 0 }; // location_url缓存
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) == PERIPH_WIFI_CONNECTED) {
-        sprintf(http_url_buf, *url);
-        http_init_get_request();
-        if (esp_http_client_open(http_client_handle, 0) == ESP_OK)
-        {
-            // 校验响应状态与数据
-            int ret = http_check_response_content(http_client_handle);
-            if (ret == 302 || ret == 307) {
-                // 需要重定向
-                char* location = "NULL";
-                esp_http_client_get_header(http_client_handle, "Location", &location);
-                if (location != NULL) {
-                    strncpy(location_url_buf, location, HTTP_BUF_MAX);
-                    *url = location_url_buf;
-                    ESP_LOGW(TAG, "重定向到 %s", *url);
-                }
-                else {
-                    ESP_LOGE(TAG, "尝试获取重定向信息时发现问题,需要重定向但无法完成更改");
-                }
-            }
-        }
-        esp_http_client_cleanup(http_client_handle);
+  // 开始解压
+  while (stream_config.total_in < input_len) {
+    stream_config.avail_in = 1;                 // 解压1字节
+    stream_config.avail_out = 1;                // 解压1字节
+    flag = inflate(&stream_config, Z_NO_FLUSH); // 解压并获取返回状态
+    // 如果解压完成，正常退出解压循环，如果解压未完成却出现非正常标识，报告问题并退出函数，如果是正常标识，继续解压循环
+    if (flag == Z_STREAM_END)
+      break;
+    else if (flag != Z_OK) {
+      ESP_LOGE(TAG, "解压数据时出现问题，在 0x%lx -> 0x%lx 时",
+               stream_config.total_in, stream_config.total_out);
+      return;
     }
+  }
+
+  ESP_LOGI(TAG, "数据解压完成 0x%lx -> 0x%lx", stream_config.total_in,
+           stream_config.total_out);
+
+  // 最后一件事，在输出末尾添加结束标识以便识别
+  ((char *)output)[stream_config.total_out] = '\0';
 }
-
-
-/// @brief 初始化GET请求
-void http_init_get_request()
-{
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE("http_init_get_request", "网络未连接");
-        return;
-    }
-
-    // 配置http传输信息
-    esp_http_client_config_t http_config;
-    memset(&http_config, 0, sizeof(http_config)); // 对参数初始化为0
-    http_config.buffer_size_tx = HTTP_BUF_MAX;    //发送缓冲区大小
-    http_config.buffer_size = HTTP_BUF_MAX;       //接收缓冲区大小
-    http_config.url = &http_url_buf[0];       // 导入URL
-
-    // 配置传输任务，GET方式
-    http_client_handle = esp_http_client_init(&http_config);         // 获取连接句柄，之后读取状态和响应都需要这个
-    esp_http_client_set_method(http_client_handle, HTTP_METHOD_GET); // GET方式
-
-    // 清除http_get_out_buf之前的残留数据
-    strcpy(http_output_buf, "");
-    // URL也清一下
-    strcpy(http_url_buf, "");
-}
-
-// 发送GET请求，传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束），
-// 输出会保存到 http_get_out_buf，本函数不提供任何实时解码，特殊API参考手册将在外部进行解析前预处理
-// 如果服务器响应的数据使用chunked编码发送或gzip压缩等传输处理，不会发生报错，并且这是在设计考虑范围之内的，
-// 如果出现响应数据无法解析的问题，考虑解码方式是否对应合理，本库中包含对gzip的便捷解压支持函数
-// 有效的分析方式是通过抓包，参考详细响应的消息头，极少数API文档也许不会提供这些信息
-void http_get_request_send(bool* flag)
-{
-    while (1)
-    {
-        const char* TAG = "http_get_request_send";
-        // 对服务器发送连接请求
-        esp_err_t err_flag = esp_http_client_open(http_client_handle, 0); // get请求无需额外添加报文数据
-        if (err_flag != ESP_OK)
-        {
-            ESP_LOGE(TAG, "请求连接服务器时出现问题 -> %s", &http_url_buf[0]);
-            esp_http_client_cleanup(http_client_handle); // 释放数据缓存
-            *flag = true;
-            vTaskDelete(NULL); // 终止任务
-        }
-
-        // 校验响应状态与数据
-        if (http_check_response_content(http_client_handle) != ESP_OK)
-        {
-            esp_http_client_cleanup(http_client_handle);
-            *flag = true;
-            vTaskDelete(NULL); // 终止任务
-        }
-
-        // 读取响应内容
-        esp_http_client_read_response(http_client_handle, http_output_buf, HTTP_BUF_MAX);
-
-        esp_http_client_cleanup(http_client_handle); // 关闭连接 释放数据缓存
-
-        *flag = true;
-        vTaskDelete(NULL); // 完成，终止任务
-    }
-}
-
-// 对gzip压缩后的响应，解压回原来的JSON格式，外部函数需要对传入参数有效性负责
-// 输入数据选择，输出数据缓冲区选择，输入数据最大允许长度
-// 对于 和风天气+ESP32 通过zlib解压gzip数据的思路可以参考这位大佬的博客，甚有帮助非常感谢：https://yuanze.wang/posts/esp32-unzip-gzip-http-response/
-void gzip_decompress(void* input, void* output, int len)
-{
-    const char* TAG = "zlib_gzip_decompress";
-    int flag = 0; // 解压状态标识
-    // 配置zlib数据流
-    z_stream stream_config = { 0 };
-    stream_config.next_in = input;   // 输入数据
-    stream_config.next_out = output; // 输出数据
-    stream_config.avail_in = 0;      // 当前输入数据的有效字节数
-    stream_config.zalloc = NULL;     // 内部内存分配状态标识，不需要
-    stream_config.zfree = NULL;      // 内部内存释放状态标识，不需要
-    stream_config.opaque = NULL;     // 给上述两个内存标识的私有数据对象，没有
-
-    flag = inflateInit2(&stream_config, ZLIB_WINDOW_MAX); // 传入参数
-    if (flag != Z_OK)
-    {
-        ESP_LOGE(TAG, "配置解压参数时出错");
-        return;
-    }
-
-    // 开始解压
-    while (stream_config.total_in < len)
-    {
-        stream_config.avail_in = 1;                 // 解压1字节
-        stream_config.avail_out = 1;                // 解压1字节
-        flag = inflate(&stream_config, Z_NO_FLUSH); // 解压并获取返回状态
-        // 如果解压完成，正常退出解压循环，如果解压未完成却出现非正常标识，报告问题并退出函数，如果是正常标识，继续解压循环
-        if (flag == Z_STREAM_END)
-            break;
-        else if (flag != Z_OK)
-        {
-            ESP_LOGE(TAG, "解压数据时出现问题，在 %lx -> %lx 时", stream_config.total_in, stream_config.total_out);
-            return;
-        }
-    }
-
-    ESP_LOGI(TAG, "数据解压完成 %lx -> %lx", stream_config.total_in, stream_config.total_out);
-
-    // 最后一件事，在输出末尾添加结束标识以便识别
-    ((char*)output)[stream_config.total_out] = '\0';
-}
-
 
 /// @brief 获取JSON_Line数据中的有效数据单元个数
 /// @param data 要扫描的JSON_Line数据字符串或字符数组首地址
 /// @param len 要扫描的字符长度
 /// @return 合法的数据单元个数
-int json_line_unit_num_get(char* data, int len) {
+int json_line_unit_num_get(char *data, int len) {
 
-    //此处的处理思路
-     //当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
-     //当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
-     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
-     //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
-     //假设通过参数data传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
-     //按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 | [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
-     //显然地,focus_num在"关闭焦点"时跳变到0一次,就有一个单元;跳变到0两次,就有两个单元(保存到缓存unit_num中),以此类推,只要原数据合理,数据单元计算将不受到数据长度和复杂度的干涉
+  // 此处的处理思路(以下数据仅为演示,不一定为真实响应数据)
+  // 当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
+  // 当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
+  //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+  //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+  // 假设通过参数data传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
+  // 按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 |
+  // [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
+  // 显然地,focus_num在"关闭焦点"时跳变到0一次,就有一个单元;跳变到0两次,就有两个单元(保存到缓存unit_num中),以此类推,只要原数据合理,数据单元计算将不受到数据长度和复杂度的干涉
 
-    int focus_num = 0;//焦点个数
-    int unit_num = 0;//扫描到的数据单元个数
+  int focus_num = 0; // 焦点个数
+  int unit_num = 0;  // 扫描到的数据单元个数
 
-    for (int idx = 0;idx < len;idx++) {
-        if (data[idx] == '{')focus_num++;//出现新焦点
-        if (data[idx] == '}') {
-            focus_num--;//关闭焦点
-            if (focus_num == 0)unit_num++;//focus_num在"关闭焦点"时跳变到0一次,就有一个单元
-        }
-
-        //不合法的JSON_Line数据 - 源数据末尾被截断
-        if (idx == len - 1 && focus_num != 0) {
-            return unit_num;
-        }
-
-        //不合法的JSON_Line数据 - 格式错误
-        if (focus_num < 0) {
-            return unit_num;
-        }
-
+  for (int idx = 0; idx < len; idx++) {
+    if (data[idx] == '{')
+      focus_num++; // 出现新焦点
+    if (data[idx] == '}') {
+      focus_num--; // 关闭焦点
+      if (focus_num == 0)
+        unit_num++; // focus_num在"关闭焦点"时跳变到0一次,就有一个单元
     }
-    return unit_num;
+
+    // 不合法的JSON_Line数据 - 源数据末尾被截断
+    if (idx == len - 1 && focus_num != 0) {
+      return unit_num;
+    }
+
+    // 不合法的JSON_Line数据 - 格式错误
+    if (focus_num < 0) {
+      return unit_num;
+    }
+  }
+  return unit_num;
 }
 
 /// @brief 选定JSON_Line数据中的一个数据单元复制到外部字符缓存区
@@ -527,626 +948,2111 @@ int json_line_unit_num_get(char* data, int len) {
 /// @param src JSON_Line格式源数据字符串
 /// @param unit_id 选定复制的数据单元ID,第一个单元为0,第二个单元为1....
 /// @param max_len 最多复制max_len个字符
-void json_line_unit_copy(char* dest, char* src, int unit_id, int max_len) {
+void json_line_unit_copy(char *dest, char *src, int unit_id, int max_len) {
 
-    //此处的处理思路(基于上面的json_line_unit_num_get函数思路)
-     //当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
-     //当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
-     //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
-     //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
-     //假设传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
-     //按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 | [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
-     //显然地,数据中任意单元开始位置是"出现新焦点"并且focus_num由0跳变到1的位置,结束位置是"关闭焦点"并且focus_num由1跳变到0的位置
-     //记录这些"坐标"以及间距,利用strncpy标准C函数的特性复制目标区域即可
+  // 此处的处理思路(以下数据仅为演示,不一定为真实响应数据)(基于上面的json_line_unit_num_get函数思路)
+  // 当一个" { "出现,表示json数据中一个对象开始表达,出现新焦点focus_num++
+  // 当一个" } "出现,表示json数据中一个对象停止表达,关闭焦点focus_num--
+  //{"is_end":false,"result":"当然可以！","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+  //{"is_end":false,"result":"这是一个经典的笑话。","usage":{"prompt_tokens":5,"completion_tokens":0,"total_tokens":5}}
+  // 假设传入一个上面的数据整体,此函数遍历该文本数据时,仅关注"{"和"}"
+  // 按照上面的逻辑,focus_num变化为[单元0] 0(变量初始化后为0) - 1 - 2 - 1 - 0 |
+  // [单元1] 0(单元1末尾变成0)  - 1 - 2 - 1 - 0
+  // 显然地,数据中任意单元开始位置是"出现新焦点"并且focus_num由0跳变到1的位置,结束位置是"关闭焦点"并且focus_num由1跳变到0的位置
+  // 记录这些"坐标"以及间距,利用strncpy标准C函数的特性复制目标区域即可
 
-    int focus_num = 0;//焦点个数
-    int unit_num = 0;//扫描到的数据单元个数
-    int start = 0;//开始位置
-    int total_len = 0;//选定单元的实际总长度
+  int focus_num = 0; // 焦点个数
+  int unit_num = 0;  // 扫描到的数据单元个数
+  int start = 0;     // 开始位置
+  int total_len = 0; // 选定单元的实际总长度
 
-    for (int idx = 0;idx < max_len;idx++) {
-        if (src[idx] == '{') {
-            focus_num++;//出现新焦点  
-            if (focus_num == 1 && unit_num == unit_id)//扫描到指定的数据单元
-                start = idx;//开始位置是"出现新焦点"并且focus_num由0跳变到1的位置
-        }
-        if (src[idx] == '}') {
-            focus_num--;//关闭焦点
-            if (focus_num == 0) {
-                //现在在指定的数据单元
-                if (unit_num == unit_id) {
-                    total_len = idx - start + 1;//选定单元的实际总长度
-                    if (total_len >= max_len)total_len = max_len;//最多复制max_len个字符
-                    strncpy(dest, &src[start], total_len);//利用strncpy标准C函数的特性复制目标区域即可
-                    return;
-                }
-                unit_num++;//focus_num在"关闭焦点"时跳变到0一次,一个单元被扫过
-            }
-        }
-        if (focus_num < 0) {
-            ESP_LOGE("json_line_unit_copy", "不合法的JSON_Line数据 终止字符的下标位置-%d", idx);
-            return;
-        }
+  for (int idx = 0; idx < max_len; idx++) {
+    if (src[idx] == '{') {
+      focus_num++;                               // 出现新焦点
+      if (focus_num == 1 && unit_num == unit_id) // 扫描到指定的数据单元
+        start = idx; // 开始位置是"出现新焦点"并且focus_num由0跳变到1的位置
     }
+    if (src[idx] == '}') {
+      focus_num--; // 关闭焦点
+      if (focus_num == 0) {
+        // 现在在指定的数据单元
+        if (unit_num == unit_id) {
+          total_len = idx - start + 1; // 选定单元的实际总长度
+          if (total_len >= max_len)
+            total_len = max_len; // 最多复制max_len个字符
+          strncpy(dest, &src[start],
+                  total_len); // 利用strncpy标准C函数的特性复制目标区域即可
+          return;
+        }
+        unit_num++; // focus_num在"关闭焦点"时跳变到0一次,一个单元被扫过
+      }
+    }
+    if (focus_num < 0) {
+      ESP_LOGE("json_line_unit_copy",
+               "不合法的JSON_Line数据 终止字符的下标位置-%d", idx);
+      return;
+    }
+  }
 }
 
-// 解析返回的IP地址数据，保存到ip_address
-void transform_ip_address()
-{
+/// @brief 解析返回的IP地址数据，保存到ip_address
+/// @param iweda_handle IWEDA句柄
+void transform_ip_address(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "transform_ip_address";
 
-    const char* TAG = "transform_ip_address";
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
 
-    ip_address = malloc(30);
-    memset(ip_address, 0, 30);
-    char* buf = "0";
-    uint8_t i = 0;
-    while (http_output_buf[i] != '\0')
-    {
-        switch (http_output_buf[i])
-        {
-        case '0':
-            buf = "0";
-            break;
+  ip_address = malloc(30);
+  memset(ip_address, 0, 30);
+  char *buf = "0";
+  uint8_t i = 0;
+  while (iweda_handle->output_buf[i] != '\0') {
+    switch (iweda_handle->output_buf[i]) {
+    case '0':
+      buf = "0";
+      break;
 
-        case '1':
-            buf = "1";
-            break;
+    case '1':
+      buf = "1";
+      break;
 
-        case '2':
-            buf = "2";
-            break;
+    case '2':
+      buf = "2";
+      break;
 
-        case '3':
-            buf = "3";
-            break;
+    case '3':
+      buf = "3";
+      break;
 
-        case '4':
-            buf = "4";
-            break;
+    case '4':
+      buf = "4";
+      break;
 
-        case '5':
-            buf = "5";
-            break;
+    case '5':
+      buf = "5";
+      break;
 
-        case '6':
-            buf = "6";
-            break;
+    case '6':
+      buf = "6";
+      break;
 
-        case '7':
-            buf = "7";
-            break;
+    case '7':
+      buf = "7";
+      break;
 
-        case '8':
-            buf = "8";
-            break;
+    case '8':
+      buf = "8";
+      break;
 
-        case '9':
-            buf = "9";
-            break;
+    case '9':
+      buf = "9";
+      break;
 
-        case '.':
-            buf = ".";
-            break;
+    case '.':
+      buf = ".";
+      break;
 
-        default:
-            goto OK;
-            break;
-        }
-        strcat(ip_address, buf);
-        i++;
+    default:
+      goto OK;
+      break;
     }
-OK:
-    buf = "\0";
     strcat(ip_address, buf);
-    ESP_LOGI(TAG, "解析完毕,获取到公网IP %s (总字符数 %d)", ip_address, i);
-}
-// 解析返回的IP归属地址邮政编码信息，保存到ip_position_data
-void transform_postcode()
-{
-    const char* TAG = "transform_postcode";
-
-    // 因为返回数据中被一个find（）扩住了，json解析不了，想办法缓存有用的数据再解析,注意其中特征 "find("的位置    ")"始终为结束字符
-    // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
-    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };
-    uint8_t i = 5;
-    while (http_output_buf[i] != ')')
-    {
-        json_buf[i - 5] = http_output_buf[i];
-        i++;
-    }
-    http_output_buf[i] = '\0';
-
-    // 提取完成开始json解析
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(json_buf);
-    cJSON* cjson_data = cJSON_GetObjectItem(root_data, "data");
-
-    cJSON* cjson_postcode = cJSON_GetArrayItem(cjson_data, 5);
-    ip_position_data->postcode = cjson_postcode->valuestring;
-
-    ESP_LOGI(TAG, "解析完毕,获取到IP归属地邮政编码 %s", cjson_postcode->valuestring);
-
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
-}
-// 解析经纬度数据,保存到ip_position_data
-void transform_lng_lat()
-{
-    const char* TAG = "transform_lng_lat";
-
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(http_output_buf);
-
-    cJSON* cjson_data = cJSON_GetObjectItem(root_data, "data");
-    cJSON* cjson_results = cJSON_GetObjectItem(cjson_data, "results");
-
-    cJSON* cjson_results_root = cJSON_GetArrayItem(cjson_results, 0);
-
-    cJSON* cjson_lng = cJSON_GetObjectItem(cjson_results_root, "lng");
-    cJSON* cjson_lat = cJSON_GetObjectItem(cjson_results_root, "lat");
-
-    ip_position_data->lng = cjson_lng->valuestring;
-    ip_position_data->lat = cjson_lat->valuestring;
-
-    ESP_LOGI(TAG, "获取到归属地 经度为%s 纬度为%s", ip_position_data->lng, ip_position_data->lat);
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
-}
-// 解析locationID数据,保存到ip_position_data,同时会进一步完善ip_position_data数据
-void transform_locationID()
-{
-    const char* TAG = "transform_locationID";
-
-    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
-    gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
-
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(json_buf);
-    cJSON* cjson_location = cJSON_GetObjectItem(root_data, "location");
-    cJSON* cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
-
-    cJSON* cjson_name = cJSON_GetObjectItem(cjson_location_root, "name");
-    cJSON* cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
-    cJSON* cjson_adm2 = cJSON_GetObjectItem(cjson_location_root, "adm2");
-    cJSON* cjson_adm1 = cJSON_GetObjectItem(cjson_location_root, "adm1");
-    cJSON* cjson_country = cJSON_GetObjectItem(cjson_location_root, "country");
-
-    ip_position_data->country = cjson_country->valuestring;
-    ip_position_data->adm1 = cjson_adm1->valuestring;
-    ip_position_data->adm2 = cjson_adm2->valuestring;
-    ip_position_data->name = cjson_name->valuestring;
-    ip_position_data->id = cjson_id->valuestring;
-
-    ESP_LOGI(TAG, "获取到locationID %s", ip_position_data->id);
-    ESP_LOGI(TAG, "详细地址：%s - %s - %s  - %s ", ip_position_data->country, ip_position_data->adm1,
-        ip_position_data->adm2, ip_position_data->name);
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
-}
-// 解析实时天气，保存到全局 real_time_weather_data
-void transform_real_time_weather_data()
-{
-    const char* TAG = "transform_real_time_weather_data";
-
-    char json_buf[PRE_CJSON_BUF_MAX] = { 0 };                    // 缓存JOSN数据
-    gzip_decompress(http_output_buf, json_buf, HTTP_BUF_MAX); // 由于目前和风天气响应数据经过gzip压缩，需要zlib库支持，这个解压函数是要自行按需求封装的，请看本文件该函数的声明
-
-    // JSON数据解析,当前仅需要 now 的数据 15个 全部解析
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(json_buf);
-    cJSON* cjson_now = cJSON_GetObjectItem(root_data, "now"); // 选定参数为为 now
-
-    cJSON* cjson_obsTime = cJSON_GetObjectItem(cjson_now, "obsTime");     // 数据观测时间
-    cJSON* cjson_temp = cJSON_GetObjectItem(cjson_now, "temp");           // 温度，摄氏度
-    cJSON* cjson_feelsLike = cJSON_GetObjectItem(cjson_now, "feelsLike"); // 体感温度，摄氏度
-    cJSON* cjson_icon = cJSON_GetObjectItem(cjson_now, "icon");           // 天气状况代码
-    cJSON* cjson_text = cJSON_GetObjectItem(cjson_now, "text");           // 天气文字描述例如多云
-    cJSON* cjson_wind360 = cJSON_GetObjectItem(cjson_now, "wind360");     // 360度风向
-    cJSON* cjson_windDir = cJSON_GetObjectItem(cjson_now, "windDir");     // 风向文字描述
-    cJSON* cjson_windScale = cJSON_GetObjectItem(cjson_now, "windScale"); // 风力等级
-    cJSON* cjson_windSpeed = cJSON_GetObjectItem(cjson_now, "windSpeed"); // 风速
-    cJSON* cjson_humidity = cJSON_GetObjectItem(cjson_now, "humidity");   // 相对湿度，百分比
-    cJSON* cjson_precip = cJSON_GetObjectItem(cjson_now, "precip");       // 当前每小时降水量，毫米
-    cJSON* cjson_pressure = cJSON_GetObjectItem(cjson_now, "pressure");   // 大气压强
-    cJSON* cjson_vis = cJSON_GetObjectItem(cjson_now, "vis");             // 能见度,KM
-    cJSON* cjson_cloud = cJSON_GetObjectItem(cjson_now, "cloud");         // 云量，可能为空
-    cJSON* cjson_dew = cJSON_GetObjectItem(cjson_now, "dew");             // 露点温度，可能为空
-
-    // 存储到 real_time_weather_data
-
-    // 传来的是字符型，因为后续分析需要，转换成整型存储起来
-    // weather_UI_1
-    sscanf(cjson_temp->valuestring, "%d", &real_time_weather_data->temp);
-    sscanf(cjson_icon->valuestring, "%d", &real_time_weather_data->icon);
-    // weather_UI_2
-    sscanf(cjson_humidity->valuestring, "%d", &real_time_weather_data->humidity);
-
-    // real_time_weather_data.obsTime = cjson_obsTime->type;
-    // real_time_weather_data.feelsLike = cjson_feelsLike->type;
-    // real_time_weather_data.text = cjson_text->type;
-    // real_time_weather_data.wind360 = cjson_wind360->type;
-    // real_time_weather_data.windDir = cjson_windDir->type;
-    // real_time_weather_data.windScale = cjson_windScale->type;
-    // real_time_weather_data.windSpeed = cjson_windSpeed->type;
-
-    // real_time_weather_data.precip = cjson_precip->type;
-    // real_time_weather_data.pressure = cjson_pressure->type;
-    // real_time_weather_data.vis = cjson_vis->type;
-
-    // //可能为空
-    // real_time_weather_data.cloud = cjson_cloud->type;
-    // real_time_weather_data.dew = cjson_dew->type;
-
-    ESP_LOGI(TAG, "解析完毕,实时天气数据已保存到real_time_weather_data");
-    // cJSON_Delete(root_data); // 完成数据解析，释放cJSON，但是由于外部需要使用其中字符串数据，不进行释放
+    i++;
+  }
+OK:
+  buf = "\0";
+  strcat(ip_address, buf);
+  ESP_LOGI(TAG, "解析完毕,获取到公网IP %s (总字符数 %d)", ip_address, i);
 }
 
+/// @brief 解析IP138返回的IP归属地址信息，保存到position_data
+/// @note API文档：https://www.ip138.com/api/
+void transform_ip_position_ip138(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "transform_ip_position_ip138";
 
-/// @brief 解析百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，缓存识别结果追加到 ERNIE_Bot_4_chat_result(自动申请内存)
-/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
-void ERNIE_Bot_4_chat_transform(char* chat_response)
-{
-    static const char* TAG = "ERNIE_Bot_4_chat_transform";
-    if (!chat_response)
-    {
-        ESP_LOGE(TAG, "传入了为空的输入数据");
-        return;
-    }
-
-    //如果缓存为空,申请缓存
-    if (!ERNIE_Bot_4_chat_result)
-    {
-        ERNIE_Bot_4_chat_result = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!ERNIE_Bot_4_chat_result)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请ERNIE_Bot_4_chat_result资源发现问题 正在重试");
-            ERNIE_Bot_4_chat_result = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        }
-        memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
-    }
-
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(chat_response);
-    cJSON* cjson_result = NULL;
-    cjson_result = cJSON_GetObjectItem(root_data, "result");
-
-    if (!cjson_result)
-        ESP_LOGE(TAG, "交互出现问题,请重试");
-    else
-        strncat(ERNIE_Bot_4_chat_result, cjson_result->valuestring, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX - strlen(ERNIE_Bot_4_chat_result));
-
-    cJSON_Delete(root_data);
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
     return;
+  }
+
+  // 因为返回数据中被一个find（）扩住了，json解析不了，想办法缓存有用的数据再解析,注意其中特征
+  // "find("的位置    ")"始终为结束字符
+  // find({"ret":"ok","ip":"39.158.160.240","data":["中国","江西","吉安","吉安","移动","343100","0796"]})
+  char json_buf[PRE_CJSON_BUF_MAX] = {0};
+  uint8_t i = 5;
+  while (iweda_handle->output_buf[i] != ')') {
+    json_buf[i - 5] = iweda_handle->output_buf[i];
+    i++;
+    if (i > strlen(iweda_handle->output_buf)) {
+      ESP_LOGE(TAG, "位置信息无法解析");
+      return;
+    }
+  }
+  iweda_handle->output_buf[i] = '\0';
+
+  // 提取完成开始json解析
+  cJSON *root_data = NULL;
+  cJSON *cjson_data = NULL;
+  cJSON *cjson_country = NULL;
+  cJSON *cjson_adm1 = NULL;
+  cJSON *cjson_adm2 = NULL;
+  cJSON *cjson_name = NULL;
+
+  root_data = cJSON_Parse(json_buf);
+
+  if (root_data) {
+    cjson_data = cJSON_GetObjectItem(root_data, "data");
+    if (cjson_data) {
+      cjson_country = cJSON_GetArrayItem(cjson_data, 0);
+      cjson_adm1 = cJSON_GetArrayItem(cjson_data, 1);
+      cjson_adm2 = cJSON_GetArrayItem(cjson_data, 2);
+      cjson_name = cJSON_GetArrayItem(cjson_data, 3);
+      if (cjson_country && cjson_country->valuestring) {
+        if (position_data.country != NULL) {
+          free(position_data.country);
+          position_data.country = NULL;
+        }
+        position_data.country = strdup(cjson_country->valuestring);
+        ESP_LOGI(TAG, "获取到IP归属地国家 %s", position_data.country);
+      }
+      if (cjson_adm1 && cjson_adm1->valuestring) {
+        if (position_data.adm1 != NULL) {
+          free(position_data.adm1);
+          position_data.adm1 = NULL;
+        }
+        position_data.adm1 = strdup(cjson_adm1->valuestring);
+        ESP_LOGI(TAG, "获取到IP归属地adm1 %s", position_data.adm1);
+      }
+      if (cjson_adm2 && cjson_adm2->valuestring) {
+        if (position_data.adm2 != NULL) {
+          free(position_data.adm2);
+          position_data.adm2 = NULL;
+        }
+        position_data.adm2 = strdup(cjson_adm2->valuestring);
+        ESP_LOGI(TAG, "获取到IP归属地adm2 %s", position_data.adm2);
+      }
+      if (cjson_name && cjson_name->valuestring) {
+        if (position_data.name != NULL) {
+          free(position_data.name);
+          position_data.name = NULL;
+        }
+        position_data.name = strdup(cjson_name->valuestring);
+        ESP_LOGI(TAG, "获取到IP归属地name %s", position_data.name);
+      }
+    }
+    cJSON_Delete(root_data);
+  }
 }
 
-/// @brief 根据百度文心一言 ERNIE-Bot 4.0 返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元) 获取聊天传输状态是否结束
-/// @param chat_response 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
-/// @return true 结束 / false 进行中(或者错误)
-int ERNIE_Bot_4_chat_over_status(char* chat_response)
-{
-    static const char* TAG = "ERNIE_Bot_4_chat_over_status";
-    if (!chat_response)
-    {
-        ESP_LOGE(TAG, "传入了为空的输入数据");
-        return false;
-    }
+/// @brief 通过高德地图API-POI搜索，获取高德地图经纬度数据,保存到position_data
+/// @param iweda_handle IWEDA句柄
+/// @note API文档：https://lbs.amap.com/api/webservice/guide/api-advanced/search
+void transform_lng_lat_amap(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "transform_lng_lat_amap";
 
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(chat_response);
-    cJSON* cjson_is_end = NULL;
-    cjson_is_end = cJSON_GetObjectItem(root_data, "is_end");
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
 
-    if (!cjson_is_end) {
-        cJSON_Delete(root_data);
-        return false;
+  cJSON *root_data = NULL;
+  cJSON *cjson_pois = NULL;
+  cJSON *cjson_pois_item = NULL;
+  cJSON *cjson_location = NULL;
+
+  root_data = cJSON_Parse(iweda_handle->output_buf);
+
+  if (root_data) {
+    cjson_pois = cJSON_GetObjectItem(root_data, "pois");
+    if (cjson_pois) {
+      cjson_pois_item = cJSON_GetArrayItem(cjson_pois, 0);
+      if (cjson_pois_item) {
+        cjson_location = cJSON_GetObjectItem(cjson_pois_item, "location");
+        if (cjson_location) {
+          if (cjson_location->valuestring) {
+            if (position_data.longitude != NULL) {
+              free(position_data.longitude);
+              position_data.longitude = NULL;
+            }
+            if (position_data.latitude != NULL) {
+              free(position_data.latitude);
+              position_data.latitude = NULL;
+            }
+            char lon[32] = {0}; // 经度
+            char lat[32] = {0}; // 纬度
+            sscanf(cjson_location->valuestring, "%[^,],%s", lon, lat);
+            position_data.longitude = strdup(lon);
+            position_data.latitude = strdup(lat);
+            ESP_LOGI(TAG, "获取到经度 %s,纬度 %s", position_data.longitude,
+                     position_data.latitude);
+          }
+        }
+      }
     }
-    else {
-        int ret = cjson_is_end->valueint;
-        cJSON_Delete(root_data);
-        return ret;
-    }
+    cJSON_Delete(root_data);
+  }
 }
 
-/// @brief [使用流式传输模式]ERNIE-4.0聊天传输任务,使用POST请求
-/// @param flag 传入flag来确定任务是否结束（结束为true，也有可能是非正常的结束）
-void ERNIE_Bot_4_chat_http_Task(bool* flag)
-{
-    while (1)
-    {
-        static const char* TAG = "ERNIE_Bot_4_chat";
+/// @brief
+/// 使用和风天气GeoAPI-城市搜索，通过经纬度获取和风天气返回的locationID,保存到position_data,同时会进一步完善position_data数据
+/// @param iweda_handle IWEDA句柄
+/// @note API文档：https://dev.qweather.com/docs/api/geoapi/city-lookup/
+void transform_locationID_qweather(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "transform_locationID_qweather";
 
-        // 设置URL
-        char* url_buf = NULL;
-        url_buf = (char*)malloc(1024 * sizeof(char));
-        while (!url_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请url_buf资源发现问题 正在重试");
-            url_buf = (char*)malloc(1024 * sizeof(char));
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
+
+  char json_buf[PRE_CJSON_BUF_MAX] = {0}; // 缓存JOSN数据
+  gzip_decompress(iweda_handle->output_buf, iweda_handle->output_buf_size,
+                  json_buf);
+
+  cJSON *root_data = NULL;
+  cJSON *cjson_location = NULL;
+  cJSON *cjson_location_root = NULL;
+  cJSON *cjson_id = NULL;
+
+  root_data = cJSON_Parse(json_buf);
+  if (root_data) {
+    cjson_location = cJSON_GetObjectItem(root_data, "location");
+    if (cjson_location) {
+      cjson_location_root = cJSON_GetArrayItem(cjson_location, 0);
+      if (cjson_location_root) {
+        cjson_id = cJSON_GetObjectItem(cjson_location_root, "id");
+        if (cjson_id) {
+          if (cjson_id->valuestring) {
+            if (position_data.qweather_location_id != NULL) {
+              free(position_data.qweather_location_id);
+              position_data.qweather_location_id = NULL;
+            }
+            position_data.qweather_location_id = strdup(cjson_id->valuestring);
+            ESP_LOGI(TAG, "获取到详细地址 locationID %s",
+                     position_data.qweather_location_id);
+          }
         }
-        memset(url_buf, 0, sizeof(1024 * sizeof(char)));
-        strcat(url_buf, ERNIE_BOT_4_URL);
-        strcat(url_buf, baidu_ERNIE_Bot_access_token);
+      }
+    }
+    cJSON_Delete(root_data);
+  }
+}
 
-        // 申请响应数据缓存
-        char* response_buf = NULL;
-        response_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!response_buf)
+/// @brief 使用和风天气天气预报-实时天气，通过经纬度获取实时天气数据
+/// @brief 保存到全局current_weather_data
+/// @param iweda_handle IWEDA句柄
+/// @note API文档：https://dev.qweather.com/docs/api/weather/weather-current/
+void transform_current_weather_data_qweather(IWEDA_handle_t iweda_handle) {
+  const char *TAG = "transform_current_weather_data_qweather";
+
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle为NULL");
+    return;
+  }
+
+  char json_buf[PRE_CJSON_BUF_MAX] = {0}; // 缓存JOSN数据
+  gzip_decompress(iweda_handle->output_buf, iweda_handle->output_buf_size,
+                  json_buf);
+
+  cJSON *root_data = NULL;
+
+  cJSON *cjson_metadata = NULL;
+  cJSON *cjson_metadata_tag = NULL;
+  cJSON *cjson_metadata_attributions = NULL;
+
+  cJSON *cjson_condition = NULL;
+  cJSON *cjson_condition_text = NULL;
+  cJSON *cjson_condition_code = NULL;
+
+  cJSON *cjson_temperature = NULL;
+  cJSON *cjson_temperature_value = NULL;
+
+  cJSON *cjson_feelsLike = NULL;
+  cJSON *cjson_feelsLike_value = NULL;
+
+  cJSON *cjson_humidity = NULL;
+
+  cJSON *cjson_wind = NULL;
+  cJSON *cjson_wind_direction = NULL;
+  cJSON *cjson_wind_direction_degree = NULL;
+  cJSON *cjson_wind_direction_compass = NULL;
+  cJSON *cjson_wind_speed = NULL;
+  cJSON *cjson_wind_speed_value = NULL;
+  cJSON *cjson_wind_scale = NULL;
+
+  cJSON *cjson_windGust = NULL;
+  cJSON *cjson_windGust_value = NULL;
+
+  cJSON *cjson_precipitation = NULL;
+  cJSON *cjson_precipitation_amount = NULL;
+  cJSON *cjson_precipitation_amount_value = NULL;
+  cJSON *cjson_precipitation_intensity = NULL;
+  cJSON *cjson_precipitation_intensity_value = NULL;
+  cJSON *cjson_precipitation_type = NULL;
+
+  cJSON *cjson_pressure = NULL;
+  cJSON *cjson_pressure_value = NULL;
+
+  cJSON *cjson_visibility = NULL;
+  cJSON *cjson_visibility_value = NULL;
+
+  cJSON *cjson_dewPoint = NULL;
+  cJSON *cjson_dewPoint_value = NULL;
+
+  cJSON *cjson_cloudCover = NULL;
+  cJSON *cjson_uvIndex = NULL;
+
+  // 测试数据(包含所有字段，来自官方API文档
+  // https://dev.qweather.com/docs/api/weather/weather-current/)
+  //  {
+  //    "metadata": {
+  //      "tag":
+  //      "03ec2ded05fa80a43df2664dd9e4a8f48f7cc4f97c6a81dfd736ae17098aba14",
+  //      "attributions": [
+  //        "https://developer.qweather.com/attribution.html"
+  //      ]
+  //    },
+  //    "condition": {
+  //      "text": "少云",
+  //      "code": "102"
+  //    },
+  //    "temperature": {
+  //      "value": 31.71,
+  //      "unit": "°C"
+  //    },
+  //    "feelsLike": {
+  //      "value": 33.64,
+  //      "unit": "°C"
+  //    },
+  //    "humidity": 0.69,
+  //    "wind": {
+  //      "direction": {
+  //        "degree": 226,
+  //        "compass": "sw"
+  //      },
+  //      "speed": {
+  //        "value": 4.74,
+  //        "unit": "m/s"
+  //      },
+  //      "scale": 3
+  //    },
+  //    "windGust": {
+  //      "value": 7.07,
+  //      "unit": "m/s"
+  //    },
+  //    "precipitation": {
+  //      "amount": {
+  //        "value": 0,
+  //        "unit": "mm"
+  //      },
+  //      "intensity": {
+  //        "value": 0,
+  //        "unit": "mm/h"
+  //      },
+  //      "type": "none"
+  //    },
+  //    "pressure": {
+  //      "value": 1001.5,
+  //      "unit": "hPa"
+  //    },
+  //    "visibility": {
+  //      "value": 29020,
+  //      "unit": "m"
+  //    },
+  //    "dewPoint": {
+  //      "value": 25.36,
+  //      "unit": "°C"
+  //    },
+  //    "cloudCover": 0.05,
+  //    "uvIndex": 3
+  //  }
+  const char *test =
+      "{"
+      "\"metadata\": {"
+      "\"tag\": "
+      "\"03ec2ded05fa80a43df2664dd9e4a8f48f7cc4f97c6a81dfd736ae17098aba14\","
+      "\"attributions\": ["
+      "\"https://developer.qweather.com/attribution.html\""
+      "]"
+      "},"
+      "\"condition\": {"
+      "\"text\": \"少云\","
+      "\"code\": \"102\""
+      "},"
+      "\"temperature\": {"
+      "\"value\": 31.71,"
+      "\"unit\": \"°C\""
+      "},"
+      "\"feelsLike\": {"
+      "\"value\": 33.64,"
+      "\"unit\": \"°C\""
+      "},"
+      "\"humidity\": 0.69,"
+      "\"wind\": {"
+      "\"direction\": {"
+      "\"degree\": 226,"
+      "\"compass\": \"sw\""
+      "},"
+      "\"speed\": {"
+      "\"value\": 4.74,"
+      "\"unit\": \"m/s\""
+      "},"
+      "\"scale\": 3"
+      "},"
+      "\"windGust\": {"
+      "\"value\": 7.07,"
+      "\"unit\": \"m/s\""
+      "},"
+      "\"precipitation\": {"
+      "\"amount\": {"
+      "\"value\": 0,"
+      "\"unit\": \"mm\""
+      "},"
+      "\"intensity\": {"
+      "\"value\": 0,"
+      "\"unit\": \"mm/h\""
+      "},"
+      "\"type\": \"none\""
+      "},"
+      "\"pressure\": {"
+      "\"value\": 1001.5,"
+      "\"unit\": \"hPa\""
+      "},"
+      "\"visibility\": {"
+      "\"value\": 29020,"
+      "\"unit\": \"m\""
+      "},"
+      "\"dewPoint\": {"
+      "\"value\": 25.36,"
+      "\"unit\": \"°C\""
+      "},"
+      "\"cloudCover\": 0.05,"
+      "\"uvIndex\": 3"
+      "}";
+
+  // root_data = cJSON_Parse(test);
+  root_data = cJSON_Parse(json_buf);
+
+  if (root_data) {
+    cjson_metadata = cJSON_GetObjectItem(root_data, "metadata");
+    if (cjson_metadata) {
+      cjson_metadata_tag = cJSON_GetObjectItem(cjson_metadata, "tag");
+      if (cjson_metadata_tag && cjson_metadata_tag->valuestring) {
         {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
-            response_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+          if (current_weather_data.metadata_tag != NULL) {
+            free(current_weather_data.metadata_tag);
+            current_weather_data.metadata_tag = NULL;
+          }
+          current_weather_data.metadata_tag =
+              strdup(cjson_metadata_tag->valuestring);
+          ESP_LOGI(TAG, "获取到 metadata_tag %s",
+                   current_weather_data.metadata_tag);
         }
-        memset(response_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        strcpy(response_buf, "");
-
-
-        //申请json_line格式解析缓存
-        char* json_buf = NULL;
-        json_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-        while (!json_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请json_buf资源发现问题 正在重试");
-            json_buf = (char*)malloc(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
+      }
+      cjson_metadata_attributions =
+          cJSON_GetObjectItem(cjson_metadata, "attributions");
+      if (cjson_metadata_attributions) {
+        if (current_weather_data.metadata_attributions_raw_json != NULL) {
+          free(current_weather_data.metadata_attributions_raw_json);
+          current_weather_data.metadata_attributions_raw_json = NULL;
         }
-        memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-
-        //清理交互结果缓存
-        if (ERNIE_Bot_4_chat_result)
-            memset(ERNIE_Bot_4_chat_result, 0, sizeof(ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char)));
-
-        // 初始化http_client
-        esp_http_client_config_t http_config;
-        memset(&http_config, 0, sizeof(http_config));
-        http_config.url = url_buf;             // 导入url
-        http_config.method = HTTP_METHOD_POST; // 使用POST请求
-        esp_http_client_handle_t client_handle = esp_http_client_init(&http_config);
-
-        // 设置HTTP-HEADER
-        esp_http_client_set_header(client_handle, "Content-Type", "application/json");
-
-        // 准备HTTP-BODY
-        char* request_body_buf = NULL;
-        request_body_buf = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
-        while (!request_body_buf)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
-            request_body_buf = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
+        current_weather_data.metadata_attributions_raw_json =
+            strdup(cJSON_PrintUnformatted(cjson_metadata_attributions));
+        ESP_LOGI(TAG, "获取到 metadata_attributions_raw_json %s",
+                 current_weather_data.metadata_attributions_raw_json);
+      }
+    }
+    cjson_condition = cJSON_GetObjectItem(root_data, "condition");
+    if (cjson_condition) {
+      cjson_condition_text = cJSON_GetObjectItem(cjson_condition, "text");
+      if (cjson_condition_text && cjson_condition_text->valuestring) {
+        if (current_weather_data.condition_text != NULL) {
+          free(current_weather_data.condition_text);
+          current_weather_data.condition_text = NULL;
         }
-        memset(request_body_buf, 0, ASR_RESULT_TEX_BUF_MAX * sizeof(char) + 2048 * sizeof(char));
-        snprintf(request_body_buf, ASR_RESULT_TEX_BUF_MAX + 2048,
-            "{\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"disable_search\":false,\"enable_citation\":false,\"stream\":true}", ERNIE_Bot_4_chat_user_content);
-
-        esp_err_t err_flag = ESP_OK;
-
-        // 设置超时时间
-        err_flag |= esp_http_client_set_timeout_ms(client_handle, ERNIE_BOT_4_CHAT_TIMEOUT_MS);
-
-        // 对服务器发送连接请求
-        err_flag |= esp_http_client_open(client_handle, strlen(request_body_buf));
-
-        if (err_flag != ESP_OK)
-        {
-            ESP_LOGE(TAG, "配置连接时出现问题 -> %s", http_config.url);
-            goto TASK_OVER;
+        current_weather_data.condition_text =
+            strdup(cjson_condition_text->valuestring);
+        ESP_LOGI(TAG, "获取到 condition_text %s",
+                 current_weather_data.condition_text);
+      }
+      cjson_condition_code = cJSON_GetObjectItem(cjson_condition, "code");
+      if (cjson_condition_code && cjson_condition_code->valuestring) {
+        sscanf(cjson_condition_code->valuestring, "%d",
+               &current_weather_data.condition_code);
+        ESP_LOGI(TAG, "获取到 condition_code %d",
+                 current_weather_data.condition_code);
+      }
+    }
+    cjson_temperature = cJSON_GetObjectItem(root_data, "temperature");
+    if (cjson_temperature) {
+      cjson_temperature_value = cJSON_GetObjectItem(cjson_temperature, "value");
+      if (cjson_temperature_value &&
+          cjson_temperature_value->type == cJSON_Number) {
+        current_weather_data.temperature = cjson_temperature_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 temperature %lf",
+                 current_weather_data.temperature);
+      }
+    }
+    cjson_feelsLike = cJSON_GetObjectItem(root_data, "feelsLike");
+    if (cjson_feelsLike) {
+      cjson_feelsLike_value = cJSON_GetObjectItem(cjson_feelsLike, "value");
+      if (cjson_feelsLike_value &&
+          cjson_feelsLike_value->type == cJSON_Number) {
+        current_weather_data.feelsLike = cjson_feelsLike_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 feelsLike %lf", current_weather_data.feelsLike);
+      }
+    }
+    cjson_humidity = cJSON_GetObjectItem(root_data, "humidity");
+    if (cjson_humidity && cjson_humidity->type == cJSON_Number) {
+      current_weather_data.humidity = cjson_humidity->valuedouble;
+      ESP_LOGI(TAG, "获取到 humidity %lf", current_weather_data.humidity);
+    }
+    cjson_wind = cJSON_GetObjectItem(root_data, "wind");
+    if (cjson_wind) {
+      cjson_wind_direction = cJSON_GetObjectItem(cjson_wind, "direction");
+      if (cjson_wind_direction) {
+        cjson_wind_direction_degree =
+            cJSON_GetObjectItem(cjson_wind_direction, "degree");
+        if (cjson_wind_direction_degree &&
+            cjson_wind_direction_degree->type == cJSON_Number) {
+          current_weather_data.wind_direction_degree =
+              cjson_wind_direction_degree->valuedouble;
+          ESP_LOGI(TAG, "获取到 wind_direction_degree %lf",
+                   current_weather_data.wind_direction_degree);
         }
-
-        ESP_LOGW(TAG, "等待回答");
-
-        // 写入请求体
-        esp_http_client_write(client_handle, request_body_buf, strlen(request_body_buf));
-
-        // 校验响应
-        if (http_check_response_content(client_handle) != ESP_OK)
-        {
-            ESP_LOGE(TAG, "校验响应时发现问题");
-            goto TASK_OVER;
+        cjson_wind_direction_compass =
+            cJSON_GetObjectItem(cjson_wind_direction, "compass");
+        if (cjson_wind_direction_compass &&
+            cjson_wind_direction_compass->valuestring) {
+          if (current_weather_data.wind_direction_compass != NULL) {
+            free(current_weather_data.wind_direction_compass);
+            current_weather_data.wind_direction_compass = NULL;
+          }
+          current_weather_data.wind_direction_compass =
+              strdup(cjson_wind_direction_compass->valuestring);
+          ESP_LOGI(TAG, "获取到 wind_direction_compass %s",
+                   current_weather_data.wind_direction_compass);
         }
+      }
+      cjson_wind_speed = cJSON_GetObjectItem(cjson_wind, "speed");
+      if (cjson_wind_speed) {
+        cjson_wind_speed_value = cJSON_GetObjectItem(cjson_wind_speed, "value");
+        if (cjson_wind_speed_value &&
+            cjson_wind_speed_value->type == cJSON_Number) {
+          current_weather_data.wind_speed = cjson_wind_speed_value->valuedouble;
+          ESP_LOGI(TAG, "获取到 wind_speed %lf",
+                   current_weather_data.wind_speed);
+        }
+      }
+      cjson_wind_scale = cJSON_GetObjectItem(cjson_wind, "scale");
+      if (cjson_wind_scale && cjson_wind_scale->type == cJSON_Number) {
+        current_weather_data.wind_scale = cjson_wind_scale->valuedouble;
+        ESP_LOGI(TAG, "获取到 wind_scale %lf", current_weather_data.wind_scale);
+      }
+    }
+    cjson_windGust = cJSON_GetObjectItem(root_data, "windGust");
+    if (cjson_windGust) {
+      cjson_windGust_value = cJSON_GetObjectItem(cjson_windGust, "value");
+      if (cjson_windGust_value && cjson_windGust_value->type == cJSON_Number) {
+        current_weather_data.windGust = cjson_windGust_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 windGust %lf", current_weather_data.windGust);
+      }
+    }
+    cjson_precipitation = cJSON_GetObjectItem(root_data, "precipitation");
+    if (cjson_precipitation) {
+      cjson_precipitation_amount =
+          cJSON_GetObjectItem(cjson_precipitation, "amount");
+      if (cjson_precipitation_amount) {
+        cjson_precipitation_amount_value =
+            cJSON_GetObjectItem(cjson_precipitation_amount, "value");
+        if (cjson_precipitation_amount_value &&
+            cjson_precipitation_amount_value->type == cJSON_Number) {
+          current_weather_data.precipitation_amount =
+              cjson_precipitation_amount_value->valuedouble;
+          ESP_LOGI(TAG, "获取到 precipitation_amount %lf",
+                   current_weather_data.precipitation_amount);
+        }
+      }
+      cjson_precipitation_intensity =
+          cJSON_GetObjectItem(cjson_precipitation, "intensity");
+      if (cjson_precipitation_intensity) {
+        cjson_precipitation_intensity_value =
+            cJSON_GetObjectItem(cjson_precipitation_intensity, "value");
+        if (cjson_precipitation_intensity_value &&
+            cjson_precipitation_intensity_value->type == cJSON_Number) {
+          current_weather_data.precipitation_intensity =
+              cjson_precipitation_intensity_value->valuedouble;
+          ESP_LOGI(TAG, "获取到 precipitation_intensity %lf",
+                   current_weather_data.precipitation_intensity);
+        }
+      }
+      cjson_precipitation_type =
+          cJSON_GetObjectItem(cjson_precipitation, "type");
+      if (cjson_precipitation_type &&
+          cjson_precipitation_type->valuestring != NULL) {
+        if (current_weather_data.precipitation_type != NULL) {
+          free(current_weather_data.precipitation_type);
+          current_weather_data.precipitation_type = NULL;
+        }
+        current_weather_data.precipitation_type =
+            strdup(cjson_precipitation_type->valuestring);
+        ESP_LOGI(TAG, "获取到 precipitation_type %s",
+                 current_weather_data.precipitation_type);
+      }
+    }
+    cjson_pressure = cJSON_GetObjectItem(root_data, "pressure");
+    if (cjson_pressure) {
+      cjson_pressure_value = cJSON_GetObjectItem(cjson_pressure, "value");
+      if (cjson_pressure_value && cjson_pressure_value->type == cJSON_Number) {
+        current_weather_data.pressure = cjson_pressure_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 pressure %lf", current_weather_data.pressure);
+      }
+    }
+    cjson_visibility = cJSON_GetObjectItem(root_data, "visibility");
+    if (cjson_visibility) {
+      cjson_visibility_value = cJSON_GetObjectItem(cjson_visibility, "value");
+      if (cjson_visibility_value &&
+          cjson_visibility_value->type == cJSON_Number) {
+        current_weather_data.visibility = cjson_visibility_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 visibility %lf", current_weather_data.visibility);
+      }
+    }
+    cjson_dewPoint = cJSON_GetObjectItem(root_data, "dewPoint");
+    if (cjson_dewPoint) {
+      cjson_dewPoint_value = cJSON_GetObjectItem(cjson_dewPoint, "value");
+      if (cjson_dewPoint_value && cjson_dewPoint_value->type == cJSON_Number) {
+        current_weather_data.dewPoint = cjson_dewPoint_value->valuedouble;
+        ESP_LOGI(TAG, "获取到 dewPoint %lf", current_weather_data.dewPoint);
+      }
+    }
+    cjson_cloudCover = cJSON_GetObjectItem(root_data, "cloudCover");
+    if (cjson_cloudCover && cjson_cloudCover->type == cJSON_Number) {
+      current_weather_data.cloudCover = cjson_cloudCover->valuedouble;
+      ESP_LOGI(TAG, "获取到 cloudCover %lf", current_weather_data.cloudCover);
+    }
+    cjson_uvIndex = cJSON_GetObjectItem(root_data, "uvIndex");
+    if (cjson_uvIndex && cjson_uvIndex->type == cJSON_Number) {
+      current_weather_data.uvIndex = cjson_uvIndex->valuedouble;
+      ESP_LOGI(TAG, "获取到 uvIndex %lf", current_weather_data.uvIndex);
+    }
+    cJSON_Delete(root_data);
+  }
+}
 
-        //数据处理
+/// @brief
+/// 解析GPT返回的数据(单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元)，
+/// @brief 缓存识别结果追加到result(自动申请内存)
+/// @param line_response
+/// 单个json格式数据/[流式传输]JSON_Line数据中的一个数据单元
+/// @param result 收集结果的字符串地址
+void GPT_chat_transform_collect(char *line_response, char **result) {
+  static const char *TAG = "GPT_chat_transform_collect";
+  if (!line_response) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return;
+  }
 
-        int complete_num = 0;//实时已经读取的单元个数,可以为0
-        int right_num = 0;//实时合法的单元个数,可以为0
+  // 如果缓存为NULL,申请缓存
+  if (!*result) {
+    *result = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    while (!*result) {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      ESP_LOGE(TAG, "申请result资源发现问题 正在重试");
+      *result = (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+    }
+    memset(*result, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  }
 
-        //根据单元总数,解析并拼接单元内容
-        while (true) {
-            //获取合法单元个数
-            right_num = json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);
+  cJSON *root_data = NULL;
+  cJSON *cjson_choices = NULL;
+  cJSON *cjson_choices_item = NULL;
+  cJSON *cjson_delta = NULL;
+  cJSON *cjson_content = NULL;
 
-            //此前未读取任何响应数据,循环开始时right_num必然为0,第一次读取响应发生在下面的等待下
+  root_data = cJSON_Parse(line_response);
 
-            //如果有未读单元,执行读取
-            if (complete_num < right_num) {
-                memset(json_buf, 0, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX * sizeof(char));
-                json_line_unit_copy(json_buf, response_buf, complete_num, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX);//复制一个数据单元
-                ERNIE_Bot_4_chat_transform(json_buf);//解析并拼接保存
-                complete_num++;
+  if (root_data) {
+    cjson_choices = cJSON_GetObjectItem(root_data, "choices");
+    if (cjson_choices) {
+      cjson_choices_item = cJSON_GetArrayItem(cjson_choices, 0);
+      if (cjson_choices_item) {
+        cjson_delta = cJSON_GetObjectItem(cjson_choices_item, "delta");
+        if (cjson_delta) {
+          cjson_content = cJSON_GetObjectItem(cjson_delta, "content");
+          if (cjson_content && cjson_content->valuestring) {
+            strncat(*result, cjson_content->valuestring,
+                    GPT_CHAT_RESPONSE_BUF_SIZE - strlen(*result) - 1);
+          }
+        }
+      }
+    }
+    cJSON_Delete(root_data);
+  }
+}
+
+/// @brief [流式传输]根据GPT返回的数据(HTTP原始响应数据)
+/// @brief 获取聊天传输状态是否结束
+/// @param http_response HTTP原始响应数据
+/// @return true 结束 / false 进行中
+bool GPT_stream_chat_over_status(char *http_response) {
+  static const char *TAG = "GPT_stream_chat_over_status";
+  if (!http_response) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return false;
+  }
+
+  char buf[10] = {0};
+  if (strlen(http_response) - strlen("[DONE]\n\n") >= 0)
+    strncpy(buf, http_response + strlen(http_response) - strlen("[DONE]\n\n"),
+            sizeof(buf) - 1);
+
+  if (strcmp(buf, "[DONE]\n\n") == 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/// @brief GPT聊天传输任务,使用POST请求
+/// @param chat_handle 传入聊天句柄
+void GPT_chat_http_Task(GPT_chat_handle_t chat_handle) {
+  static const char *TAG = "GPT_chat_http_Task";
+
+  while (1) {
+    esp_err_t err_flag = ESP_OK;
+    int64_t start_time = esp_timer_get_time();
+
+    /// 初始化http_client
+    esp_http_client_config_t config;
+    memset(&config, 0, sizeof(config));
+    config.url = chat_handle->url;    // 导入url
+    config.method = HTTP_METHOD_POST; // 使用POST请求
+    chat_handle->client_handle = esp_http_client_init(&config);
+
+    ESP_LOGI(TAG, "初始化完成,开始配置...");
+
+    // 设置HTTP-HEADER
+    esp_http_client_set_header(chat_handle->client_handle, "Content-Type",
+                               "application/json");
+    esp_http_client_set_header(chat_handle->client_handle, "Authorization",
+                               chat_handle->auth_header_buf);
+
+    // 设置超时时间
+    esp_http_client_set_timeout_ms(chat_handle->client_handle,
+                                   chat_handle->timeout_ms);
+
+    ESP_LOGI(TAG, "配置完成,尝试建立连接...");
+
+    // 对服务器发送连接请求
+    err_flag = esp_http_client_open(chat_handle->client_handle,
+                                    strlen(chat_handle->request_body_buf));
+
+    if (err_flag != ESP_OK) {
+      chat_handle->err = err_flag;
+      ESP_LOGE(TAG, "连接时出现问题 -> %s", chat_handle->url);
+
+      esp_http_client_cleanup(chat_handle->client_handle);
+      chat_handle->task_handle = NULL;
+      chat_handle->is_completed = true;
+      chat_handle->client_handle = NULL;
+
+      vTaskDelete(NULL);
+    }
+
+    ESP_LOGI(TAG, "连接已建立,写入请求体...");
+
+    // 写入请求体
+    esp_http_client_write(chat_handle->client_handle,
+                          chat_handle->request_body_buf,
+                          strlen(chat_handle->request_body_buf));
+
+    ESP_LOGI(TAG, "连接写入请求体完成,等待响应...");
+
+    esp_http_client_fetch_headers(chat_handle->client_handle);
+    int status = esp_http_client_get_status_code(chat_handle->client_handle);
+    if (status != 200) {
+      chat_handle->err = ESP_FAIL;
+      ESP_LOGE(TAG, "校验响应时发现问题 状态码 -> %d", status);
+      esp_http_client_read_response(chat_handle->client_handle,
+                                    chat_handle->response_buf,
+                                    GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+      ESP_LOGE(TAG, "响应体内容 -> %s", chat_handle->response_buf);
+
+      esp_http_client_close(chat_handle->client_handle);
+      esp_http_client_cleanup(chat_handle->client_handle);
+      chat_handle->task_handle = NULL;
+      chat_handle->is_completed = true;
+      chat_handle->client_handle = NULL;
+
+      vTaskDelete(NULL);
+    }
+
+    int read_index = 0;   // response_buf读取索引
+    int complete_num = 0; // 实时已经读取的单元个数,可以为0
+    int right_num = 0;    // 实时合法的单元个数,可以为0
+
+    // 根据单元总数,解析并拼接单元内容
+    while (1) {
+
+      vTaskDelay(pdMS_TO_TICKS(100));
+
+      // 获取合法单元个数
+      right_num = json_line_unit_num_get(chat_handle->response_buf,
+                                         GPT_CHAT_RESPONSE_BUF_SIZE);
+
+      // 此前未读取任何响应数据,循环开始时right_num必然为0,第一次读取响应发生在下面的等待下
+
+      // 如果有未读单元,执行读取
+      if (complete_num < right_num) {
+        memset(chat_handle->json_buf, 0,
+               GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+        json_line_unit_copy(chat_handle->json_buf, chat_handle->response_buf,
+                            complete_num,
+                            GPT_CHAT_RESPONSE_BUF_SIZE); // 复制一个数据单元
+        GPT_chat_transform_collect(chat_handle->json_buf,
+                                   &chat_handle->result); // 解析并拼接保存
+        complete_num++;
+      }
+
+      //(right_num=0 complete_num=0)或者(读完最后一个单元)[已读个数 =
+      // 总个数],检验,如果数据没有完全读取完成,需要等待并读取更多下文
+      if (complete_num == right_num) {
+        if (GPT_stream_chat_over_status(chat_handle->response_buf) == false) {
+          while (1) {
+            if (GPT_CHAT_RESPONSE_BUF_SIZE - read_index <= 0) {
+              chat_handle->err = ESP_ERR_NO_MEM;
+              ESP_LOGE(TAG, "响应缓存内存空间不足 已读取内容 -> %s",
+                       chat_handle->response_buf);
+
+              esp_http_client_close(chat_handle->client_handle);
+              esp_http_client_cleanup(chat_handle->client_handle);
+              chat_handle->task_handle = NULL;
+              chat_handle->is_completed = true;
+              chat_handle->client_handle = NULL;
+
+              vTaskDelete(NULL);
             }
 
-            //(right_num=0 complete_num=0)或者(读完最后一个单元)[已读个数 = 总个数],检验,如果数据没有完全读取完成,需要等待并读取更多下文
-            if (complete_num == right_num) {
-                if (ERNIE_Bot_4_chat_over_status(json_buf) == false) {
-                    uint32_t count;//等待一个单位延时的次数,count=[3]就是等待了[3ms]
-                    count = 0;
-                    while (count < ERNIE_BOT_4_CHAT_TIMEOUT_MS) {
+            read_index += esp_http_client_read_response(
+                chat_handle->client_handle,
+                chat_handle->response_buf + read_index,
+                GPT_CHAT_RESPONSE_BUF_SIZE - read_index);
 
-                        //拼接新的响应内容,响应读取仅发生在这里,包含第一次读取
-                        //如果有未读部分,读取速度是 1ms => 1字符 否则 1ms => 0字符(等待)
-                        if (strlen(response_buf) + 1 < ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX) {
-                            esp_http_client_read_response(client_handle, &response_buf[strlen(response_buf)], 1);
-                        }
-                        else {
-                            ESP_LOGE(TAG, "响应缓存内存空间不足");
-                            goto TASK_OVER;
-                        }
+            // 如果有新的发现,退出等待
+            if (json_line_unit_num_get(chat_handle->response_buf,
+                                       GPT_CHAT_RESPONSE_BUF_SIZE) > right_num)
+              break;
 
-
-                        //如果有新的发现,退出等待
-                        if (json_line_unit_num_get(response_buf, ERNIE_BOT_4_CHAT_RESPONSE_BUF_MAX) > right_num)
-                            break;
-
-                        vTaskDelay(pdMS_TO_TICKS(1));
-                        count++;
-
-                        if (count >= ERNIE_BOT_4_CHAT_TIMEOUT_MS) {
-                            ESP_LOGE(TAG, "等待回复超时");
-                            goto TASK_OVER;//等待超时,退出                            
-                        }
-                    }
-                }
-                else {
-                    if (ERNIE_Bot_4_chat_result) {
-                        ESP_LOGI(TAG, "%s", ERNIE_Bot_4_chat_result);
-                        ESP_LOGI(TAG, "解析完成,共拼接%d个数据单元", complete_num);
-                    }
-                    else {
-                        ESP_LOGE(TAG, "解析任务内部运行异常");
-                    }
-                    goto TASK_OVER;
-                }
-            }
-        }
-
-
-    TASK_OVER:
-
-        // 关闭连接清理缓存
-        esp_http_client_cleanup(client_handle);
-
-        // 释放内存
-        free(url_buf);
-        free(response_buf);
-        free(request_body_buf);
-        free(json_buf);
-        url_buf = NULL;
-        response_buf = NULL;
-        request_body_buf = NULL;
-        json_buf = NULL;
-
-        *flag = true;
-
-        vTaskDelete(NULL); // 终止任务
-    }
-}
-
-
-/// @brief [使用流式传输模式]文心一言ERNIE-Bot 4.0文本交互
-/// @param user_content 用户内容
-/// @return 对话返回结果/NULL(错误)
-char* ERNIE_Bot_4_chat_tex_exchange(char* user_content)
-{
-    const char* TAG = "ERNIE_Bot_4_chat_tex_exchange";
-
-    if (!strcasecmp(user_content, ""))
-    {
-        ESP_LOGE(TAG, "空的用户内容");
-        return NULL;
-    }
-
-    if (periph_wifi_is_connected(se30_wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
-        ESP_LOGE(TAG, "网络未连接");
-        return NULL;
-    }
-
-    ERNIE_Bot_4_chat_user_content = user_content;
-
-    if (baidu_ERNIE_Bot_access_token[1] == 0) {
-        ESP_LOGW(TAG, "即将初始化请求token");
-        if (baidu_get_AccessToken(CONFIG_BAIDU_ERNIE_BOT_ACCESS_KEY, CONFIG_BAIDU_ERNIE_BOT_SECRET_KEY, baidu_ERNIE_Bot_access_token))
-        {
-            ESP_LOGE(TAG, "获取请求token时发现问题");
             vTaskDelay(pdMS_TO_TICKS(1000));
-        }
-    }
+            if ((esp_timer_get_time() - start_time) / 1000 >=
+                chat_handle->timeout_ms) {
+              chat_handle->err = ESP_ERR_TIMEOUT;
+              ESP_LOGE(TAG, "等待回复超时 已读取内容 -> %s",
+                       chat_handle->response_buf);
 
-    bool Task_comp_flag = false;
-    xTaskCreatePinnedToCore(&ERNIE_Bot_4_chat_http_Task, "ERNIE_Bot_4_chat_http_Task", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
-    return ERNIE_Bot_4_chat_result;
+              esp_http_client_close(chat_handle->client_handle);
+              esp_http_client_cleanup(chat_handle->client_handle);
+              chat_handle->task_handle = NULL;
+              chat_handle->is_completed = true;
+              chat_handle->client_handle = NULL;
+
+              vTaskDelete(NULL);
+            }
+          }
+        } else {
+          if (chat_handle->result) {
+            ESP_LOGI(TAG, "%s", chat_handle->result);
+            ESP_LOGI(TAG, "解析完成,共拼接%d个数据单元", complete_num);
+            chat_handle->err = ESP_OK;
+
+            esp_http_client_close(chat_handle->client_handle);
+            esp_http_client_cleanup(chat_handle->client_handle);
+            chat_handle->task_handle = NULL;
+            chat_handle->is_completed = true;
+            chat_handle->client_handle = NULL;
+
+            vTaskDelete(NULL);
+          } else {
+            ESP_LOGE(TAG, "解析任务内部运行异常");
+            chat_handle->err = ESP_ERR_INVALID_STATE;
+
+            esp_http_client_close(chat_handle->client_handle);
+            esp_http_client_cleanup(chat_handle->client_handle);
+            chat_handle->task_handle = NULL;
+            chat_handle->is_completed = true;
+            chat_handle->client_handle = NULL;
+
+            vTaskDelete(NULL);
+          }
+        }
+      }
+    }
+  }
 }
 
+/// @brief 启用多轮对话
+/// @param chat_handle GPT文本交互句柄
+/// @param context_json_max_len 交互上下文最大长度(单位字节)
+/// @param context_json_expire_ms 交互上下文过期时间(单位毫秒)
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+/// @note 本函数仅设置配置参数,不会触碰非配置内容
+/// @note 这不意味着启动会立即占用最大长度对应内存,而是根据需要动态申请
+esp_err_t GPT_chat_enable_multi_round_chat(GPT_chat_handle_t chat_handle,
+                                           int context_json_max_len,
+                                           int context_json_expire_ms) {
+  const char *TAG = "GPT_chat_enable_multi_round_chat";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  chat_handle->context.is_enable_multi_round_chat = true;
+  chat_handle->context.context_json_max_len = context_json_max_len;
+  chat_handle->context.context_json_expire_ms = context_json_expire_ms;
+  return ESP_OK;
+}
 
-/// @brief 解析百度语音识别响应的数据，缓存识别结果到 asr_result_tex
+esp_err_t GPT_chat_update_context_json(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_update_context_json";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  if (chat_handle->result == NULL || chat_handle->user_content == NULL) {
+    ESP_LOGE(TAG, "chat_handle->result 或 chat_handle->user_content 为NULL");
+    return ESP_ERR_INVALID_STATE;
+  }
+  if (!strcasecmp(chat_handle->user_content, "")) {
+    ESP_LOGW(TAG, "chat_handle->user_content无内容");
+    return ESP_ERR_INVALID_STATE;
+  }
+  if (!strcasecmp(chat_handle->result, "")) {
+    ESP_LOGW(TAG, "chat_handle->result无内容");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  int old_context_json_len = (chat_handle->context.context_json == NULL)
+                                 ? 0
+                                 : strlen(chat_handle->context.context_json);
+  int add_len = snprintf(NULL, 0,
+                         "{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+                         "\"assistant\",\"content\":\"%s\"},",
+                         chat_handle->user_content, chat_handle->result);
+
+  if (old_context_json_len + add_len >
+      chat_handle->context.context_json_max_len) {
+    if (chat_handle->context.context_json != NULL) {
+      ESP_LOGW(TAG, "追加后长度超过最大长度,正常释放上下文缓存,"
+                    "本次交互内容不会保存到context_json");
+      free(chat_handle->context.context_json);
+      chat_handle->context.context_json = NULL;
+      chat_handle->context.context_json_update_time = 0;
+      return ESP_OK;
+    } else {
+      ESP_LOGE(TAG, "context_json_max_len过小,第一轮对话上下文都无法保存");
+      return ESP_ERR_NOT_SUPPORTED;
+    }
+  }
+
+  int new_context_json_buf_size =
+      (old_context_json_len + add_len + 1) * sizeof(char);
+  char *new_context_json_buf = malloc(new_context_json_buf_size);
+  if (new_context_json_buf == NULL) {
+    ESP_LOGE(TAG, "内存分配失败");
+    return ESP_ERR_NO_MEM;
+  }
+  memset(new_context_json_buf, 0, new_context_json_buf_size);
+
+  char *old_context_json_buf = chat_handle->context.context_json;
+  chat_handle->context.context_json = NULL;
+
+  if (old_context_json_buf != NULL) {
+    snprintf(new_context_json_buf, new_context_json_buf_size,
+             "%s{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+             "\"assistant\",\"content\":\"%s\"},",
+             old_context_json_buf, chat_handle->user_content,
+             chat_handle->result);
+    free(old_context_json_buf);
+    old_context_json_buf = NULL;
+  } else {
+    snprintf(new_context_json_buf, new_context_json_buf_size,
+             "{\"role\":\"user\",\"content\":\"%s\"},{\"role\":"
+             "\"assistant\",\"content\":\"%s\"},",
+             chat_handle->user_content, chat_handle->result);
+  }
+
+  chat_handle->context.context_json = new_context_json_buf;
+  chat_handle->context.context_json_update_time = esp_timer_get_time();
+
+  return ESP_OK;
+}
+
+/// @brief 关闭多轮对话
+/// @param chat_handle GPT文本交互句柄
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+/// @note 本函数会尝试释放多轮对话相关资源，初始化所有相关参数
+esp_err_t GPT_chat_disable_multi_round_chat(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_disable_multi_round_chat";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+  chat_handle->context.is_enable_multi_round_chat = false;
+  chat_handle->context.context_json_max_len = 0;
+  chat_handle->context.context_json_expire_ms = 0;
+  chat_handle->context.context_json_update_time = 0;
+  if (chat_handle->context.context_json != NULL) {
+    free(chat_handle->context.context_json);
+    chat_handle->context.context_json = NULL;
+  }
+  return ESP_OK;
+}
+
+/// @brief [使用流式传输模式]GPT文本交互
+/// @param chat_handle GPT对话句柄
+/// @param task_stack 任务栈大小(单位字节)
+/// @param task_core 任务核心号
+/// @param task_prio 任务优先级
+/// @param waiting_cb
+/// 等待完成回调函数,在等待GPT文本交互完成时,该函数被快速反复调用(不需要可设置为NULL)
+/// @note 这是一个阻塞函数,直到GPT文本交互完成,才会返回
+/// @return
+/// [ESP_OK 成功]
+/// [ESP_FAIL HTTP访问错误]
+/// [ESP_ERR_HTTP_CONNECT HTTP连接错误]
+/// [ESP_ERR_INVALID_ARG 传入了为NULL的输入数据 / 空的用户内容]
+/// [ESP_ERR_INVALID_STATE 解析任务内部运行异常 / 网络未连接]
+/// [ESP_ERR_NO_MEM 内存不足]
+/// [ESP_ERR_TIMEOUT 等待回复超时]
+esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio,
+                                 void (*waiting_cb)(void)) {
+  const char *TAG = "GPT_chat_text_exchange";
+
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (!strcasecmp(chat_handle->user_content, "")) {
+    ESP_LOGE(TAG, "空的用户内容");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  if (chat_handle->result) {
+    free(chat_handle->result);
+    chat_handle->result = NULL;
+  }
+  memset(chat_handle->response_buf, 0,
+         GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  memset(chat_handle->json_buf, 0,
+         GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+
+  chat_handle->is_completed = false;
+
+  xTaskCreatePinnedToCore((TaskFunction_t)GPT_chat_http_Task,
+                          "GPT_chat_http_Task", GPT_CHAT_TASK_STACK_SIZE,
+                          chat_handle, task_prio, &chat_handle->task_handle,
+                          GPT_CHAT_TASK_CORE);
+
+
+  ESP_LOGW(TAG, "等待GPT回复...");                        
+  while (!chat_handle->is_completed) {
+    if (waiting_cb != NULL) {
+      waiting_cb();
+    }
+    else{
+     vTaskDelay(pdMS_TO_TICKS(500)); 
+    }
+  }
+
+  if (chat_handle->err != ESP_OK) {
+    ESP_LOGE(TAG, "GPT文本交互任务运行异常 错误:%s",
+             esp_err_to_name(chat_handle->err));
+    return chat_handle->err;
+  }
+
+  if (chat_handle->context.is_enable_multi_round_chat) {
+    GPT_chat_update_context_json(chat_handle);
+  }
+  return ESP_OK;
+}
+
+/// @brief 设置系统JSON字段读取位置
+/// @param chat_handle GPT文本交互句柄
+/// @param system_json_field 系统JSON字段位置(填入NULL时,系统JSON字段不发送)
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数
+/// @note 本函数不会申请任何内存,不会复制/克隆字符串
+/// @note 系统JSON字段格式(注意末尾带了英文逗号)必须为
+/// @note {"role": "system","content": "xxx"},
+/// @note 由于拼接式设计,输入内容为空的字符串不会造成异常,结果等效于NULL
+esp_err_t GPT_chat_set_system_json_field(GPT_chat_handle_t chat_handle,
+                                         char *system_json_field) {
+  const char *TAG = "GPT_chat_set_system_json_field";
+
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的句柄");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  chat_handle->system_json_field = system_json_field;
+  return ESP_OK;
+}
+
+char *GPT_chat_get_system_json_field(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_get_system_json_field";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的句柄");
+    return NULL;
+  }
+  return chat_handle->system_json_field;
+}
+
+/// @brief 更新用户内容
+/// @param chat_handle GPT文本交互句柄
+/// @param user_content 新用户内容
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数
+/// @return ESP_ERR_INVALID_STATE 初始化未完成,request_body_buf为NULL
+/// @return ESP_ERR_NO_MEM 内存不足
+esp_err_t GPT_chat_update_user_content(GPT_chat_handle_t chat_handle,
+                                       char *user_content) {
+  const char *TAG = "GPT_chat_update_user_content";
+
+  if (chat_handle == NULL || user_content == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (!chat_handle->request_body_buf) {
+    ESP_LOGE(TAG, "初始化未完成,request_body_buf为NULL");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  if (!strcasecmp(user_content, "")) {
+    ESP_LOGW(TAG, "缺少必填参数");
+  }
+
+  if (chat_handle->user_content) {
+    free(chat_handle->user_content);
+    chat_handle->user_content = NULL;
+  }
+
+  chat_handle->user_content = strdup(user_content);
+
+  memset(chat_handle->request_body_buf, 0,
+         GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+
+  int request_body_len = 0;
+
+  if (chat_handle->context.is_enable_multi_round_chat) {
+    ESP_LOGW(TAG, "多轮对话已启用");
+    if (chat_handle->context.context_json != NULL) {
+      if ((esp_timer_get_time() -
+           chat_handle->context.context_json_update_time) /
+                  1000 >=
+              chat_handle->context.context_json_expire_ms ||
+          strlen(chat_handle->context.context_json) >
+              chat_handle->context.context_json_max_len) {
+        // context_json过期/超过最大长度
+        free(chat_handle->context.context_json);
+        chat_handle->context.context_json = NULL;
+        chat_handle->context.context_json_update_time = 0;
+      }
+    }
+    request_body_len = snprintf(
+        chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":[%s"
+        "%s"
+        "{"
+        "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+        (chat_handle->model == NULL) ? "" : chat_handle->model,
+        (chat_handle->system_json_field == NULL)
+            ? ""
+            : chat_handle->system_json_field,
+        (chat_handle->context.context_json == NULL)
+            ? ""
+            : chat_handle->context.context_json,
+        (chat_handle->user_content == NULL) ? "" : chat_handle->user_content);
+  } else {
+    ESP_LOGW(TAG, "多轮对话未启用");
+    request_body_len = snprintf(
+        chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+        "{\"model\":\"%s\",\"web_search\":{\"enable\":true},\"messages\":["
+        "%s{"
+        "\"role\":\"user\",\"content\":\"%s\"}],\"stream\":true}",
+        (chat_handle->model == NULL) ? "" : chat_handle->model,
+        (chat_handle->system_json_field == NULL)
+            ? ""
+            : chat_handle->system_json_field,
+        (chat_handle->user_content == NULL) ? "" : chat_handle->user_content);
+  }
+
+  if (request_body_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {
+    ESP_LOGE(TAG, "request_body_buf内存不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  char *safe_json = build_safe_json_string(chat_handle->request_body_buf);
+  if (safe_json == NULL) {
+    ESP_LOGE(TAG, "构建安全的JSON报文失败");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  int request_body_buf_len = snprintf(NULL, 0, "%s", safe_json);
+  if (request_body_buf_len >= GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE) {
+    ESP_LOGE(TAG, "安全的JSON报文大小超过request_body_buf大小");
+    free(safe_json);
+    safe_json = NULL;
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  snprintf(chat_handle->request_body_buf, GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE,
+           "%s", safe_json);
+  free(safe_json);
+  safe_json = NULL;
+
+  ESP_LOGW(TAG, "更新用户内容:%s", chat_handle->user_content);
+
+  return ESP_OK;
+}
+
+/// @brief 启动GPT对话
+/// @param url API地址(必填)
+/// @param access_key 访问密钥(必填)
+/// @param model 模型名称(必填)
+/// @param user_content 用户内容(选填，但是不能为NULL，可以为“”)
+/// @param timeout_ms 超时时间(必填)(单位ms)
+/// @return GPT对话句柄
+/// @note 会自动申请内存，所有参数均会拷贝克隆一份到GPT对话句柄中
+GPT_chat_handle_t GPT_chat_start(char *url, char *access_key, char *model,
+                                 char *user_content, int timeout_ms) {
+  const char *TAG = "GPT_chat_start";
+
+  if (url == NULL || access_key == NULL || model == NULL ||
+      user_content == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return NULL;
+  }
+
+  if (!strcasecmp(url, "") || !strcasecmp(access_key, "") ||
+      !strcasecmp(model, "")) {
+    ESP_LOGE(TAG, "缺少必填参数");
+    return NULL;
+  }
+
+  GPT_chat_handle_t chat_handle = (GPT_chat_handle_t)malloc(sizeof(GPT_chat_t));
+  if (!chat_handle) {
+    ESP_LOGE(TAG, "申请GPT_chat_handle资源发现问题");
+    return NULL;
+  }
+  memset(chat_handle, 0, sizeof(GPT_chat_t));
+
+  chat_handle->url = strdup(url);
+  chat_handle->access_key = strdup(access_key);
+  chat_handle->model = strdup(model);
+
+  if (!chat_handle->url || !chat_handle->access_key || !chat_handle->model) {
+    ESP_LOGE(TAG, "克隆字符串失败，请检查内存是否足够");
+    GPT_chat_stop(chat_handle);
+    return NULL;
+  }
+
+  chat_handle->is_completed = false;
+  chat_handle->timeout_ms = timeout_ms;
+  chat_handle->err = ESP_OK;
+
+  ESP_LOGW(TAG, "准备访问:%s", chat_handle->url);
+  ESP_LOGW(TAG, "使用模型:%s", chat_handle->model);
+  ESP_LOGW(TAG, "超时时间:%dms", chat_handle->timeout_ms);
+
+  // 申请响应数据缓存
+  chat_handle->response_buf =
+      (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  while (!chat_handle->response_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请response_buf资源发现问题 正在重试");
+    chat_handle->response_buf =
+        (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  }
+  memset(chat_handle->response_buf, 0,
+         GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  strcpy(chat_handle->response_buf, "");
+
+  // 申请json_line格式解析缓存
+  chat_handle->json_buf =
+      (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  while (!chat_handle->json_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请json_buf资源发现问题 正在重试");
+    chat_handle->json_buf =
+        (char *)malloc(GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+  }
+  memset(chat_handle->json_buf, 0, GPT_CHAT_RESPONSE_BUF_SIZE * sizeof(char));
+
+  // 准备Authorization头
+  const char *prefix = "Bearer ";
+  size_t auth_len = strlen(prefix) + strlen(chat_handle->access_key) + 1;
+  chat_handle->auth_header_buf = (char *)malloc(auth_len * sizeof(char));
+  while (!chat_handle->auth_header_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请auth_header_buf资源发现问题 正在重试");
+    chat_handle->auth_header_buf = (char *)malloc(auth_len * sizeof(char));
+  }
+  memset(chat_handle->auth_header_buf, 0, auth_len * sizeof(char));
+  snprintf(chat_handle->auth_header_buf, auth_len, "%s%s", prefix,
+           chat_handle->access_key);
+
+  // 准备HTTP-BODY
+  chat_handle->request_body_buf =
+      (char *)malloc(GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+  while (!chat_handle->request_body_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请request_body_buf资源发现问题 正在重试");
+    chat_handle->request_body_buf =
+        (char *)malloc(GPT_CHAT_HTTP_REQUEST_BODY_BUF_SIZE * sizeof(char));
+  }
+  GPT_chat_update_user_content(chat_handle, user_content);
+
+  ESP_LOGW(TAG, "GPT文本交互开始准备已完成");
+
+  return chat_handle;
+}
+
+/// @brief 停止GPT文本交互
+/// @param chat_handle GPT文本交互句柄
+/// @note
+/// 如果你不确定用这个句柄调用的GPT_chat_text_exchange是否已经返回，就不要调用这个函数，这非常危险
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 传入了无效的参数柄
+esp_err_t GPT_chat_stop(GPT_chat_handle_t chat_handle) {
+  const char *TAG = "GPT_chat_stop";
+  if (chat_handle == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (chat_handle->client_handle != NULL) {
+    esp_http_client_close(chat_handle->client_handle);
+    esp_http_client_cleanup(chat_handle->client_handle);
+  }
+
+  chat_handle->is_completed = true;
+
+  free(chat_handle->auth_header_buf);
+  chat_handle->auth_header_buf = NULL;
+
+  free(chat_handle->request_body_buf);
+  chat_handle->request_body_buf = NULL;
+
+  free(chat_handle->response_buf);
+  chat_handle->response_buf = NULL;
+
+  free(chat_handle->json_buf);
+  chat_handle->json_buf = NULL;
+
+  free(chat_handle->url);
+  chat_handle->url = NULL;
+
+  free(chat_handle->access_key);
+  chat_handle->access_key = NULL;
+
+  free(chat_handle->model);
+  chat_handle->model = NULL;
+
+  free(chat_handle->user_content);
+  chat_handle->user_content = NULL;
+
+  free(chat_handle->result);
+  chat_handle->result = NULL;
+
+  free(chat_handle);
+  chat_handle = NULL;
+
+  ESP_LOGW(TAG, "GPT文本交互停止");
+
+  return ESP_OK;
+}
+
+/// @brief 解析百度语音识别响应的数据，缓存识别结果到 sevetest30_asr_result_text
 /// @param asr_response 语音识别响应的数据
-void asr_data_save_result(char* asr_response)
-{
-    static const char* TAG = "asr_data_get_result";
-    if (asr_response == NULL)
-    {
-        ESP_LOGE(TAG, "传入了为空的输入数据");
-        return;
-    }
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(asr_response);
-    cJSON* cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
-    if (strcasecmp(cjson_err_msg->valuestring, "success."))
-    {
-        ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
-        return;
-    }
-
-    cJSON* cjson_result = cJSON_GetObjectItem(root_data, "result");
-    cJSON* cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
-    ESP_LOGI(TAG, "%s", cjson_result_root->valuestring);
-
-    if (!sevetest30_asr_result_tex)
-    {
-    ASR_RESULT_TEX_MALLOC:
-        sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        while (!sevetest30_asr_result_tex)
-        {
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
-            sevetest30_asr_result_tex = (char*)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
-        }
-        memset(sevetest30_asr_result_tex, 0, sizeof(ASR_RESULT_TEX_BUF_MAX * sizeof(char)));
-    }
-    else
-    {
-        free(sevetest30_asr_result_tex);
-        sevetest30_asr_result_tex = NULL;
-        goto ASR_RESULT_TEX_MALLOC;
-    }
-    strncpy(sevetest30_asr_result_tex, cjson_result_root->valuestring, ASR_RESULT_TEX_BUF_MAX);
-
-    cJSON_Delete(root_data);
+void asr_data_save_result(char *asr_response) {
+  static const char *TAG = "asr_data_get_result";
+  if (asr_response == NULL) {
+    ESP_LOGE(TAG, "传入了为NULL的输入数据");
     return;
-}
+  }
+  cJSON *root_data = NULL;
+  cJSON *cjson_err_msg = NULL;
+  root_data = cJSON_Parse(asr_response);
 
+  cjson_err_msg = cJSON_GetObjectItem(root_data, "err_msg");
+  if (cjson_err_msg == NULL || cjson_err_msg->valuestring == NULL) {
+    ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s", asr_response);
+    return;
+  }
+  if (strcasecmp(cjson_err_msg->valuestring, "success.")) {
+    ESP_LOGE(TAG, "不是成功的响应信息 [%s]", cjson_err_msg->valuestring);
+    return;
+  }
+
+  cJSON *cjson_result = cJSON_GetObjectItem(root_data, "result");
+  cJSON *cjson_result_root = cJSON_GetArrayItem(cjson_result, 0);
+  ESP_LOGI(TAG, "响应数据: %s", asr_response);
+  ESP_LOGI(TAG, "识别结果: %s", cjson_result_root->valuestring);
+
+  if (!sevetest30_asr_result_text) {
+  ASR_RESULT_TEX_MALLOC:
+    sevetest30_asr_result_text =
+        (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+    while (!sevetest30_asr_result_text) {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      ESP_LOGE(TAG, "申请sevetest30_asr_result_tex资源发现问题 正在重试");
+      sevetest30_asr_result_text =
+          (char *)malloc(ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+    }
+    memset(sevetest30_asr_result_text, 0,
+           ASR_RESULT_TEX_BUF_MAX * sizeof(char));
+  } else {
+    free(sevetest30_asr_result_text);
+    sevetest30_asr_result_text = NULL;
+    goto ASR_RESULT_TEX_MALLOC;
+  }
+  strncpy(sevetest30_asr_result_text, cjson_result_root->valuestring,
+          ASR_RESULT_TEX_BUF_MAX);
+
+  cJSON_Delete(root_data);
+  return;
+}
 
 /// @brief 通过特定URL提取json数据中音乐歌词(LRC格式数据)
 /// @param url  获取音乐歌词使用的完整URL
-/// @param dest 读取保存到的位置 
+/// @param dest 读取保存到的位置
 /// @param len_max 最大允许保存的字符长度
-esp_err_t get_music_lyric_by_url(char* url, char* dest, int len_max) {
-    const char* TAG = "get_music_lyric_by_url";
-    bool Task_comp_flag = false;// 任务是否完成标识
-    snprintf(http_url_buf, HTTP_BUF_MAX, url); // 确定请求URL
-    http_init_get_request();
-    xTaskCreatePinnedToCore(&http_get_request_send, "http_get_request_send", 8192, &Task_comp_flag, HTTP_TASK_PRIO, NULL, HTTP_TASK_CORE); // 启动http传输任务,GET方式
-    while (!Task_comp_flag)
-        vTaskDelay(pdMS_TO_TICKS(200));
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_STATE iweda_handle创建失败
+/// @return ESP_FAIL 交互出现问题 / 解析失败
+/// @return ESP_ERR_NO_MEM 内存不足
+esp_err_t fetch_music_lyric_by_url(char *url, char *dest, int len_max) {
+  const char *TAG = "fetch_music_lyric_by_url";
 
-    //开始json解析
-    cJSON* root_data = NULL;
-    root_data = cJSON_Parse(http_output_buf);
-    cJSON* cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
-    if (cjson_lyric) {
-        if (strlen(cjson_lyric->valuestring) < len_max) {
-            strcpy(dest, cjson_lyric->valuestring);
-            cJSON_Delete(root_data);
-            return ESP_OK;
-        }
-        else {
-            ESP_LOGE(TAG, "歌词数据长度过大");
-            cJSON_Delete(root_data);
-            return ESP_FAIL;
-        }
+  IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
+                                                 IWEDA_DEFAULT_URL_BUF_SIZE);
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle创建失败");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  int url_len =
+      snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size, "%s", url);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  iweda_init_http_get_request(iweda_handle);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+  // 开始json解析
+  cJSON *root_data = NULL;
+  cJSON *cjson_lyric = NULL;
+
+  root_data = cJSON_Parse(iweda_handle->output_buf);
+  if (root_data == NULL) {
+    ESP_LOGE(TAG, "交互出现问题,无法解析,响应内容-> %s",
+             iweda_handle->output_buf);
+    delete_iweda_handle(iweda_handle);
+    return ESP_FAIL;
+  }
+
+  cjson_lyric = cJSON_GetObjectItem(root_data, "lyric");
+  if (cjson_lyric && cjson_lyric->valuestring) {
+    if (strlen(cjson_lyric->valuestring) < len_max) {
+      strcpy(dest, cjson_lyric->valuestring);
+      cJSON_Delete(root_data);
+      delete_iweda_handle(iweda_handle);
+      return ESP_OK;
+    } else {
+      ESP_LOGE(TAG, "歌词数据长度过大");
+      cJSON_Delete(root_data);
+      delete_iweda_handle(iweda_handle);
+      return ESP_FAIL;
     }
-    else {
-        ESP_LOGW(TAG, "发现歌词获取对选定的音乐不支持或该音乐无歌词");
+  } else {
+    ESP_LOGW(TAG, "发现歌词获取对选定的音乐不支持或该音乐无歌词");
+    cJSON_Delete(root_data);
+    delete_iweda_handle(iweda_handle);
+    return ESP_FAIL;
+  }
+}
+
+///@brief 刷新位置数据
+/// @note 保存到全局position_data
+void refresh_position_data() {
+  const char *TAG = "refresh_position_data";
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return;
+  }
+
+  IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
+                                                 IWEDA_DEFAULT_URL_BUF_SIZE);
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle创建失败");
+    return;
+  }
+
+  // 获取公网IP
+  int url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                         GET_IP_ADDRESS_API_URL);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+
+  iweda_init_http_get_request(iweda_handle);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE);
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+  transform_ip_address(iweda_handle);
+
+  // 获取IP归属地
+  if (!ip_address) {
+    ESP_LOGE(TAG, "公网IP为NULL");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                     IP138_IP_POSITION_API_URL, ip_address);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+  iweda_init_http_get_request(iweda_handle);
+  esp_http_client_set_header(iweda_handle->http_client_handle, "token",
+                             CONFIG_IP138_IP_LOOKUP_TOKEN);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+  transform_ip_position_ip138(iweda_handle);
+
+  // 通过IP归属地信息获取经纬度
+  char keywords[512] = {0};
+  char keywords_encoded[512 * 3] = {0};
+  strcpy(keywords, "");
+  if (position_data.country)
+    strcat(keywords, position_data.country);
+  if (position_data.adm1)
+    strcat(keywords, position_data.adm1);
+  if (position_data.adm2)
+    strcat(keywords, position_data.adm2);
+  if (position_data.name)
+    strcat(keywords, position_data.name);
+
+  url_encode(keywords, keywords_encoded, sizeof(keywords_encoded), false);
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                     AMAP_SEARCH_POI_API_URL, keywords_encoded, 1, 1,
+                     CONFIG_AMAP_API_KEY);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+  iweda_init_http_get_request(iweda_handle);
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+  transform_lng_lat_amap(iweda_handle);
+
+  // 通过和风天气GeoAPI进行城市搜索，根据经纬度获取location数据
+  if (position_data.longitude == NULL || position_data.latitude == NULL) {
+    ESP_LOGE(TAG, "经纬度为NULL");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+  url_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                     QWEATHER_GEO_CITY_LOOKUP_API_URL, CONFIG_QWEATHER_API_HOST,
+                     position_data.longitude, position_data.latitude);
+  if (url_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf内存不足");
+    delete_iweda_handle(iweda_handle);
+    return;
+  }
+  iweda_init_http_get_request(iweda_handle);
+  esp_http_client_set_header(iweda_handle->http_client_handle, "Authorization",
+                             get_qweather_jwt_token());
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+  transform_locationID_qweather(iweda_handle);
+
+  delete_iweda_handle(iweda_handle);
+  return;
+}
+
+///@brief 刷新当前天气数据
+/// @note
+/// 从和风天气天气预报-实时天气API获取当前天气数据，保存到全局current_weather_data
+void refresh_current_weather_data() {
+  const char *TAG = "refresh_current_weather_data";
+
+  if (periph_wifi_is_connected(wifi_periph_handle) != PERIPH_WIFI_CONNECTED) {
+    ESP_LOGE(TAG, "网络未连接");
+    return;
+  }
+
+  if (position_data.longitude == NULL || position_data.latitude == NULL) {
+    ESP_LOGE(TAG, "经纬度为NULL");
+    return;
+  }
+
+  IWEDA_handle_t iweda_handle = new_iweda_handle(IWEDA_DEFAULT_OUTPUT_BUF_SIZE,
+                                                 IWEDA_DEFAULT_URL_BUF_SIZE);
+  if (!iweda_handle) {
+    ESP_LOGE(TAG, "iweda_handle创建失败");
+    return;
+  }
+
+  double lng = 0; // 经度
+  double lat = 0; // 纬度
+  sscanf(position_data.longitude, "%lf", &lng);
+  sscanf(position_data.latitude, "%lf", &lat);
+
+  int url_buf_len = snprintf(iweda_handle->url_buf, iweda_handle->url_buf_size,
+                             QWEATHER_CURRENT_WEATHER_API_URL,
+                             CONFIG_QWEATHER_API_HOST, lat, lng);
+  if (url_buf_len >= iweda_handle->url_buf_size) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return;
+  }
+  iweda_init_http_get_request(iweda_handle);
+  esp_http_client_set_header(iweda_handle->http_client_handle, "Authorization",
+                             get_qweather_jwt_token());
+  xTaskCreatePinnedToCore((TaskFunction_t)iweda_http_get_request_send, TAG,
+                          8192, iweda_handle, HTTP_TASK_PRIO, NULL,
+                          HTTP_TASK_CORE); // 启动http传输任务,GET方式
+  while (!iweda_handle->is_completed)
+    vTaskDelay(pdMS_TO_TICKS(200));
+  transform_current_weather_data_qweather(iweda_handle);
+
+  delete_iweda_handle(iweda_handle);
+  return;
+}
+
+///@brief 获取文本情感标签
+/// @param text 文本内容
+/// @param emotion_label 情感标签缓存///
+/// 情绪标签(英语单词),对应不同表情,normal->正常(无特别情绪),happy->愉快,like->喜爱,angry->愤怒,disgusting->厌恶,fearful->恐惧,sad->悲伤
+/// @param label_buf_size 情感标签缓存大小
+/// @param timeout_ms 超时时间,单位毫秒
+/// @return esp_err_t 错误码
+/// @note ESP_OK 成功
+/// @note ESP_ERR_INVALID_ARG 参数错误
+/// @note ESP_ERR_NO_MEM 内存不足
+/// @note ESP_FAIL 请求失败
+/// @note ESP_ERR_INVALID_STATE JSON解析失败
+esp_err_t fetch_text_emotion(const char *text, char *emotion_label,
+                             int label_buf_size, int timeout_ms) {
+  const char *TAG = "fetch_text_emotion";
+  if (text == NULL || emotion_label == NULL) {
+    ESP_LOGE(TAG, "存在为NULL的参数");
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  char response_buf[2048] = {0};
+  char url_buf[2048] = {0};
+  int url_buf_len =
+      snprintf(url_buf, sizeof(url_buf), BAIDU_NLP_EMOTION_API_URL,
+               get_baidu_api_access_token());
+  if (url_buf_len >= sizeof(url_buf)) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  int request_body_size = 1024 * sizeof(char) + strlen(text);
+  char *request_body = malloc(request_body_size);
+  if (!request_body) {
+    ESP_LOGE(TAG, "申请body_buf失败");
+    return ESP_ERR_NO_MEM;
+  }
+  int request_body_len =
+      snprintf(request_body, request_body_size,
+               "{\"scene\":\"talk\",\"text\": \"%s\"}", text);
+  if (request_body_len >= request_body_size) {
+    ESP_LOGE(TAG, "request_body大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  esp_http_client_config_t config = {0};
+  config.url = url_buf;
+  config.method = HTTP_METHOD_POST;
+  esp_http_client_handle_t client_handle = esp_http_client_init(&config);
+  if (!client_handle) {
+    ESP_LOGE(TAG, "esp_http_client_init失败");
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+  esp_http_client_set_header(client_handle, "Content-Type", "application/json");
+  esp_http_client_set_timeout_ms(client_handle, timeout_ms);
+
+  esp_err_t err = esp_http_client_open(client_handle, request_body_len);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  err = esp_http_client_write(client_handle, request_body, request_body_len);
+  if (err == -1) {
+    ESP_LOGE(TAG, "esp_http_client_write失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  esp_http_client_fetch_headers(client_handle);
+  esp_http_client_read_response(client_handle, response_buf,
+                                sizeof(response_buf));
+  ESP_LOGI(TAG, "响应体内容 -> %s", response_buf);
+
+  int status = esp_http_client_get_status_code(client_handle);
+  if (status != 200) {
+    ESP_LOGE(TAG, "校验响应时发现问题 状态码 -> %d", status);
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  cJSON *root_data = NULL;
+  cJSON *cjson_items = NULL;
+  cJSON *cjson_items_item = NULL;
+  cJSON *cjson_subitems = NULL;
+  cJSON *cjson_subitems_item = NULL;
+  cJSON *cjson_label = NULL;
+
+  root_data = cJSON_Parse(response_buf);
+  if (root_data) {
+    cjson_items = cJSON_GetObjectItem(root_data, "items");
+    if (cjson_items) {
+      cjson_items_item = cJSON_GetArrayItem(cjson_items, 0);
+      if (cjson_items_item) {
+        cjson_subitems = cJSON_GetObjectItem(cjson_items_item, "subitems");
+        if (cjson_subitems) {
+          cjson_subitems_item = cJSON_GetArrayItem(cjson_subitems, 0);
+          if (cjson_subitems_item) {
+            cjson_label = cJSON_GetObjectItem(cjson_subitems_item, "label");
+            if (cjson_label && cjson_label->valuestring &&
+                cjson_label->valuestring[0] != '\0') {
+              int label_len = snprintf(emotion_label, label_buf_size, "%s",
+                                       cjson_label->valuestring);
+              if (label_len >= label_buf_size) {
+                ESP_LOGE(TAG, "label_buf_size不足");
+                return ESP_ERR_NO_MEM;
+              }
+              ESP_LOGI(TAG, "获取到情绪标签 -> %s", emotion_label);
+            } else {
+              ESP_LOGE(TAG, "获取情绪标签字段异常");
+            }
+          } else {
+            ESP_LOGI(TAG, "无特别情绪,设置为normal");
+            int label_len = snprintf(emotion_label, label_buf_size, "normal");
+            if (label_len >= label_buf_size) {
+              ESP_LOGE(TAG, "emotion_label内存不足");
+              return ESP_ERR_NO_MEM;
+            }
+          }
+          cJSON_Delete(root_data);
+          esp_http_client_close(client_handle);
+          esp_http_client_cleanup(client_handle);
+          free(request_body);
+          request_body = NULL;
+          return ESP_OK;
+        }
+      }
+    }
+    cJSON_Delete(root_data);
+  }
+
+  esp_http_client_close(client_handle);
+  esp_http_client_cleanup(client_handle);
+  ESP_LOGE(TAG, "JSON解析失败");
+  free(request_body);
+  request_body = NULL;
+  return ESP_ERR_INVALID_STATE;
+}
+
+/// @brief 获取长文本语音合成结果语音URL
+/// @param speech_url 语音URL缓冲区
+/// @param speech_url_size 语音URL缓冲区大小
+/// @param cfg tts配置
+/// @param timeout_ms 超时时间
+/// @return ESP_OK 成功
+/// @return ESP_ERR_INVALID_ARG 参数错误
+/// @return ESP_ERR_NO_MEM 内存不足
+/// @return ESP_FAIL 失败
+esp_err_t fetch_long_tts_speech_url(char *speech_url, int speech_url_size,
+                                    TTS_cfg_t *cfg, int timeout_ms) {
+  const char *TAG = "fetch_long_tts_speech_url";
+
+  if (!speech_url || !cfg || !cfg->tex || speech_url_size <= 0) {
+    ESP_LOGE(TAG, "参数错误");
+    return ESP_ERR_INVALID_ARG;
+  }
+  memset(speech_url, 0, speech_url_size);
+
+  int request_body_size = strlen(cfg->tex) + 2048;
+  char *request_body = malloc(request_body_size);
+  if (!request_body) {
+    ESP_LOGE(TAG, "申请内存request_body失败");
+    return ESP_ERR_NO_MEM;
+  }
+  memset(request_body, 0, request_body_size);
+
+  int request_body_len = 0;
+  if (cfg->long_tts_rate == LONG_TTS_SAMPLING_RATE_16K) {
+    request_body_len = snprintf(
+        request_body, request_body_size,
+        "{\"text\": [\"%s\"],\"format\": \"mp3-16k\",\"voice\": %d,\"lang\": "
+        "\"zh\",\"speed\": %d,\"pitch\": %d,\"volume\": %d}",
+        cfg->tex, cfg->per, cfg->spd, cfg->pit, cfg->vol);
+  } else if (cfg->long_tts_rate == LONG_TTS_SAMPLING_RATE_48K) {
+    request_body_len = snprintf(
+        request_body, request_body_size,
+        "{\"text\": [\"%s\"],\"format\": \"mp3-48k\",\"voice\": %d,\"lang\": "
+        "\"zh\",\"speed\": %d,\"pitch\": %d,\"volume\": %d}",
+        cfg->tex, cfg->per, cfg->spd, cfg->pit, cfg->vol);
+  } else {
+    ESP_LOGE(TAG, "cfg->long_tts_rate参数错误");
+    free(request_body);
+    request_body = NULL;
+    return ESP_ERR_INVALID_ARG;
+  }
+
+  if (request_body_len >= request_body_size) {
+    ESP_LOGE(TAG, "request_body_size不足");
+    free(request_body);
+    request_body = NULL;
+    return ESP_ERR_NO_MEM;
+  }
+
+  char response_buf[2048] = {0};
+  char url_buf[2048] = {0};
+  int url_buf_len =
+      snprintf(url_buf, sizeof(url_buf), BAIDU_LONG_TTS_CREATE_URL,
+               get_baidu_api_access_token());
+  if (url_buf_len >= sizeof(url_buf)) {
+    ESP_LOGE(TAG, "url_buf大小不足");
+    return ESP_ERR_NO_MEM;
+  }
+
+  esp_http_client_config_t config = {0};
+  config.url = url_buf;
+  config.method = HTTP_METHOD_POST;
+  esp_http_client_handle_t client_handle = esp_http_client_init(&config);
+  if (!client_handle) {
+    ESP_LOGE(TAG, "esp_http_client_init失败");
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+  esp_http_client_set_header(client_handle, "Content-Type", "application/json");
+  esp_http_client_set_timeout_ms(client_handle, timeout_ms);
+
+  esp_err_t err = esp_http_client_open(client_handle, request_body_len);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  err = esp_http_client_write(client_handle, request_body, request_body_len);
+  if (err == -1) {
+    ESP_LOGE(TAG, "esp_http_client_write失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  }
+
+  esp_http_client_fetch_headers(client_handle);
+  esp_http_client_read_response(client_handle, response_buf,
+                                sizeof(response_buf));
+  ESP_LOGI(TAG, "申请创建云端语音合成任务完成,响应体内容 -> %s", response_buf);
+
+  char task_id_buf[1024] = {0};
+
+  if (response_buf[0]) {
+    cJSON *root_data = NULL;
+    cJSON *cjson_task_id = NULL;
+    root_data = cJSON_Parse(response_buf);
+    if (root_data) {
+      cjson_task_id = cJSON_GetObjectItem(root_data, "task_id");
+      if (cjson_task_id && cjson_task_id->valuestring) {
+        if (snprintf(NULL, 0, "%s", cjson_task_id->valuestring) >=
+            sizeof(task_id_buf)) {
+          ESP_LOGE(TAG, "task_id_buf大小不足");
+        } else {
+          snprintf(task_id_buf, sizeof(task_id_buf), "%s",
+                   cjson_task_id->valuestring);
+        }
+      }
+      cJSON_Delete(root_data);
+    }
+  }
+
+  if (!task_id_buf[0]) {
+    ESP_LOGE(TAG, "task_id获取失败");
+    esp_http_client_close(client_handle);
+    esp_http_client_cleanup(client_handle);
+    free(request_body);
+    request_body = NULL;
+    return ESP_FAIL;
+  } else {
+    ESP_LOGI(TAG, "task_id -> %s", task_id_buf);
+    esp_http_client_close(client_handle);
+
+    url_buf_len =
+        snprintf(url_buf, sizeof(url_buf), BAIDU_LONG_TTS_TASK_LOOKUP_URL,
+                 get_baidu_api_access_token());
+    request_body_len = snprintf(request_body, request_body_size,
+                                "{\"task_ids\": [\"%s\"]}", task_id_buf);
+
+    if (url_buf_len >= sizeof(url_buf)) {
+      ESP_LOGE(TAG, "url_buf大小不足");
+      free(request_body);
+      request_body = NULL;
+      return ESP_ERR_NO_MEM;
+    }
+    if (request_body_len >= request_body_size) {
+      ESP_LOGE(TAG, "request_body_size不足");
+      free(request_body);
+      request_body = NULL;
+      return ESP_ERR_NO_MEM;
+    }
+
+    esp_http_client_set_url(client_handle, url_buf);
+  }
+
+  int64_t start_time = esp_timer_get_time();
+  while (1) {
+    int64_t current_time = esp_timer_get_time();
+    if (current_time - start_time >= timeout_ms * 1000) {
+      ESP_LOGE(TAG, "等待云端语音合成任务完成超时");
+      break;
+    }
+
+    if (esp_http_client_open(client_handle, request_body_len) != ESP_OK) {
+      ESP_LOGE(TAG, "esp_http_client_open失败 %s", esp_err_to_name(err));
+      break;
+    }
+    if (esp_http_client_write(client_handle, request_body, request_body_len) ==
+        -1) {
+      ESP_LOGE(TAG, "esp_http_client_write失败");
+      esp_http_client_close(client_handle);
+      break;
+    }
+
+    esp_http_client_fetch_headers(client_handle);
+    esp_http_client_read_response(client_handle, response_buf,
+                                  sizeof(response_buf));
+    esp_http_client_close(client_handle);
+
+    ESP_LOGI(TAG,
+             "正在轮询云端语音合成任务状态,已等待%" PRId64
+             "ms,本次轮询响应体内容 -> %s",
+             (current_time - start_time) / 1000, response_buf);
+    if (response_buf[0]) {
+      cJSON *root_data = NULL;
+      cJSON *cjson_tasks_info = NULL;
+      cJSON *cjson_tasks_info_item = NULL;
+      cJSON *cjson_task_status = NULL;
+      cJSON *cjson_task_result = NULL;
+      cJSON *cjson_speech_url = NULL;
+      root_data = cJSON_Parse(response_buf);
+      if (root_data) {
+        cjson_tasks_info = cJSON_GetObjectItem(root_data, "tasks_info");
+        if (cjson_tasks_info) {
+          cjson_tasks_info_item = cJSON_GetArrayItem(cjson_tasks_info, 0);
+          if (cjson_tasks_info_item) {
+            cjson_task_status =
+                cJSON_GetObjectItem(cjson_tasks_info_item, "task_status");
+            if (cjson_task_status && cjson_task_status->valuestring) {
+              if (strcmp(cjson_task_status->valuestring, "Success") == 0) {
+                ESP_LOGI(TAG, "云端语音合成任务完成");
+                cjson_task_result =
+                    cJSON_GetObjectItem(cjson_tasks_info_item, "task_result");
+                if (cjson_task_result) {
+                  cjson_speech_url =
+                      cJSON_GetObjectItem(cjson_task_result, "speech_url");
+                  if (cjson_speech_url && cjson_speech_url->valuestring) {
+                    ESP_LOGI(TAG, "speech_url -> %s",
+                             cjson_speech_url->valuestring);
+                    int speech_url_len =
+                        snprintf(NULL, 0, "%s", cjson_speech_url->valuestring);
+                    if (speech_url_len >= speech_url_size) {
+                      ESP_LOGE(TAG,
+                               "speech_url大小不足,speech_url_size = "
+                               "%d,speech_url_len = %d",
+                               speech_url_size, speech_url_len);
+                    } else {
+                      snprintf(speech_url, speech_url_size, "%s",
+                               cjson_speech_url->valuestring);
+                      cJSON_Delete(root_data);
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
         cJSON_Delete(root_data);
-        return ESP_FAIL;
+      }
     }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+  esp_http_client_cleanup(client_handle);
+  free(request_body);
+  request_body = NULL;
+
+  if (!speech_url[0]) {
+    ESP_LOGE(TAG, "speech_url获取失败");
+    return ESP_FAIL;
+  } else {
+    return ESP_OK;
+  }
 }

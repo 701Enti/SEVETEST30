@@ -22,88 +22,91 @@ config LOCAL_TZ
 
 # NTP时间服务器
 config NTP_SERVER_0
-    string "the first ntp server name"
-    default "time.google.com"
-    help
-        the first ntp server name
-
-config NTP_SERVER_1
-    string "the second ntp server name"
-    default "time.cloudflare.com"
-    help
-        the second ntp server name
-
-config NTP_SERVER_2
-    string "the third ntp server name"
+    string "the first ntp server address"
     default "ntp.aliyun.com"
     help
-        the third ntp server name
+        the first ntp server address
 
+config NTP_SERVER_1
+    string "the second ntp server address"
+    default "time.cloudflare.com"
+    help
+        the second ntp server address
 
-# 百度语音服务的API相关
-config BAIDU_SPEECH_ACCESS_KEY
-    string "Baidu speech access key ID"
+config NTP_SERVER_2
+    string "the third ntp server address"
+    default "time.google.com"
+    help
+        the third ntp server address
+
+# DNS服务器
+config DNS_SERVER
+    string "the dns server address"
+    default "223.5.5.5"
+    help
+        the dns server address
+
+# 百度服务的API相关
+config BAIDU_API_ACCESS_API_KEY
+    string "Baidu API API Key"
     default ""
     help
-        Baidu speech Access key ID
+        Baidu API API Key
 
-config BAIDU_SPEECH_SECRET_KEY
-    string "Baidu speech access secret"
+config BAIDU_API_ACCESS_SECRET_KEY
+    string "Baidu API Secret Key"
     default ""
     help
-        Baidu speech Access secret
+        Baidu API Secret Key
 
 
 
-# GPT的API相关 - 百度文心一言 
-config BAIDU_ERNIE_BOT_ACCESS_KEY
-    string "Baidu ERNIE-Bot access key ID"
+# GPT聊天服务的API相关
+config GPT_CHAT_ACCESS_KEY
+    string "GPT Chat access key"
     default ""
     help
-        Baidu ERNIE-Bot Access key ID
-        
-config BAIDU_ERNIE_BOT_SECRET_KEY
-    string "Baidu ERNIE-Bot access secret"
-    default ""
-    help
-        Baidu ERNIE-Bot Access secret
-
-
-# GPT的API相关 - DeepSeek 
-config DEEPSEEK_ACCESS_KEY
-    string "DeepSeek access key"
-    default ""
-    help
-        DeepSeek access key
+        GPT Chat Access key
 
 
 
-config IP_138_TOKEN
-    string "ip138 position access token"
+config IP138_IP_LOOKUP_TOKEN
+    string "ip138 ip lookup access token"
     default ""
     help
         you could get a free token if you haven't had it , just click "https://user.ip138.com/ip/"
 
-  
-config WEATHER_API_KEY
-    string "weather server access keyID"
+  config QWEATHER_API_HOST
+    string "qweather server access host"
     default ""
     help
-        you could get a free keyID if you haven't had it , just click "https://dev.qweather.com/"
+        you could get one if you haven't had it , just click "https://dev.qweather.com/"
 
-choice WEATHER_API_URL
-        prompt "weather server access keyID"
-        default WEATHER_API_FREE_URL
-        help
-          Need replace the default host name "devapi.qweather.com" with "api.qweather.com" if you pay for a Qweather VIP keyID
-    
-    config WEATHER_API_FREE_URL
-        bool "free_url"
+config QWEATHER_API_JWT_PRIVATE_KEY_WITHOUT_HEADER_FOOTER
+    string "qweather server access private key without header and footer"
+    default ""
+    help
+        you need generate one and copy it without header and footer to this field.
 
-    config WEATHER_API_VIP_URL
-        bool "vip_url"
-    
-endchoice
+config QWEATHER_API_JWT_CREDENTIAL_ID
+    string "qweather server access credentialID"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://dev.qweather.com/"
+
+config QWEATHER_API_JWT_PROJECT_ID
+    string "qweather server access projectID"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://dev.qweather.com/"
+
+config AMAP_API_KEY
+    string "amap server access key"
+    default ""
+    help
+        you could get a free one if you haven't had it , just click "https://lbs.amap.com/"
+
+
 
 config HIGH_TEMP
     int "highest temperature"

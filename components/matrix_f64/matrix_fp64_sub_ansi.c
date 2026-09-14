@@ -21,19 +21,12 @@
 //为了明确原作者信息,此文件API帮助及相关内容不在SEVETEST30文档中显示
 //(修改者: 701Enti)
 
-#include "dsps_sub.h"
 #include "matrix_fp64.h"
 
 esp_err_t matrix_fp64_sub_ansi(const double* input1, const double* input2, double* output, int len, int step1, int step2, int step_out)
 {
-    if (NULL == input1) {
-        return ESP_ERR_DSP_PARAM_OUTOFRANGE;
-    }
-    if (NULL == input2) {
-        return ESP_ERR_DSP_PARAM_OUTOFRANGE;
-    }
-    if (NULL == output) {
-        return ESP_ERR_DSP_PARAM_OUTOFRANGE;
+    if (NULL == input1 || NULL == input2 || NULL == output) {
+        return ESP_ERR_INVALID_ARG;
     }
 
     for (int i = 0; i < len; i++) {
