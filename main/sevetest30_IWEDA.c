@@ -57,7 +57,6 @@
 #include "periph_wifi.h"
 
 #include "esp_timer.h"
-
 #include "mbedtls/base64.h"
 #include "monocypher-ed25519.h"
 
@@ -132,26 +131,14 @@ void delete_iweda_handle(IWEDA_handle_t iweda_handle) {
 /// @param periph_config 网络外设配置
 /// @return ESP_OK / ESP_FAIL
 esp_err_t wifi_init(esp_periph_config_t *periph_config) {
-  esp_err_t ret = nvs_flash_init();
-  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
-      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();
-  }
-  ESP_ERROR_CHECK(ret);
-
   // 初始化TCP/IP协议栈
-#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0))
   ESP_ERROR_CHECK(esp_netif_init());
-#else
-  tcpip_adapter_init();
-#endif
 
   // 初始化网络外设
   se30_periph_set_handle =
       esp_periph_set_init(periph_config); // 获取运行配置句柄
 
-  return ret;
+  return ESP_OK;
 }
 
 /// @brief 通用网络连接函数
@@ -519,25 +506,26 @@ esp_err_t init_time_data_sntp(uint32_t timeout_ms) {
                               CONFIG_NTP_SERVER_2));
   esp_err_t init_ret = esp_netif_sntp_init(&sntp_cfg);
   if (init_ret != ESP_OK) {
-    ESP_LOGE(TAG, "请求初始化SNTP失败 %s", esp_err_to_name(init_ret));
+    ESP_LOGE(TAG, "请求初始化SNTP模块失败 %s", esp_err_to_name(init_ret));
     return init_ret;
   }
 
   esp_err_t sync_ret = esp_netif_sntp_sync_wait(pdMS_TO_TICKS(timeout_ms));
-  if (sync_ret == ESP_ERR_TIMEOUT) {
-    ESP_LOGE(TAG, "初始化系统时间数据失败,NTP服务器响应超时");
-    return ESP_ERR_TIMEOUT;
+  if (sync_ret == ESP_OK) {
+    ESP_LOGI(TAG, "初始化系统时间数据成功");
+    return ESP_OK;
   } else if (sync_ret == ESP_ERR_NOT_FINISHED) {
     ESP_LOGW(TAG,
              "初始化系统时间数据未完成,NTP服务器在超时时间内仍然处于同步中("
              "可能开启了平滑时间过渡模式或超时时间过短)");
     return ESP_ERR_NOT_FINISHED;
-  } else if (sync_ret == ESP_OK) {
-    ESP_LOGI(TAG, "初始化系统时间数据成功");
-    return ESP_OK;
+  } else if (sync_ret == ESP_ERR_TIMEOUT) {
+    ESP_LOGW(TAG, "NTP服务器响应超时,请检查网络环境或稍等响应成功");
+    return ESP_ERR_TIMEOUT;
+  } else {
+    ESP_LOGW(TAG, "初始化系统时间发现:%s", esp_err_to_name(sync_ret));
+    return sync_ret;
   }
-  ESP_LOGE(TAG, "初始化系统时间数据失败 %s", esp_err_to_name(sync_ret));
-  return sync_ret;
 }
 
 /// @brief 检查响应内容是不是可以直接获取资源
@@ -2063,14 +2051,12 @@ esp_err_t GPT_chat_text_exchange(GPT_chat_handle_t chat_handle, int task_prio,
                           chat_handle, task_prio, &chat_handle->task_handle,
                           GPT_CHAT_TASK_CORE);
 
-
-  ESP_LOGW(TAG, "等待GPT回复...");                        
+  ESP_LOGW(TAG, "等待GPT回复...");
   while (!chat_handle->is_completed) {
     if (waiting_cb != NULL) {
       waiting_cb();
-    }
-    else{
-     vTaskDelay(pdMS_TO_TICKS(500)); 
+    } else {
+      vTaskDelay(pdMS_TO_TICKS(500));
     }
   }
 

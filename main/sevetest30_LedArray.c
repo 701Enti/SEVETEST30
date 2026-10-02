@@ -285,7 +285,8 @@ uint32_t matrix_size(uint8_t *matrix_data) {
 /// @return [ESP_OK 成功 / ESP_FAIL 失败 / ESP_ERR_INVALID_ARG
 /// 失败,输入了无法处理的空指针]
 esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
-                          uint32_t byte_number, uint8_t in_color[3], bool is_write_black_when_zero) {
+                          uint32_t byte_number, uint8_t in_color[3],
+                          bool is_write_black_when_zero) {
   const static char *TAG = "separation_draw";
   if (p == NULL) {
     ESP_LOGE(TAG, "输入了无法处理的空指针");
@@ -317,13 +318,11 @@ esp_err_t separation_draw(int x, int y, uint32_t breadth, const uint8_t *p,
 
       if (flag) {
         color_input(sx, y + Dy, color);
-      }
-      else{
-        if(is_write_black_when_zero){
+      } else {
+        if (is_write_black_when_zero) {
           color_input(sx, y + Dy, black);
         }
       }
-        
 
       if (Dx == breadth - 1) {
         Dx = 0; // 横向写入最后一个像素完毕，回车
@@ -504,30 +503,26 @@ void print_number(int x, int y, int8_t figure, uint8_t color[3]) {
     ESP_LOGE(TAG, "输入了0-9之外的数字");
     return;
   }
-  separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_0),
-                  color, false); // 因为，数字字模数据大小一样，随便输入一个字模就可以
+  separation_draw(x, y, FIGURE_BREATH, p, sizeof(matrix_0), color,
+                  false); // 因为，数字字模数据大小一样，随便输入一个字模就可以
 }
 
-/// @brief (12x12大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
-/// @param x
-/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
-/// @param y
-/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
-/// @param color 字符颜色
+/// @brief (12x12大小标准)获取打印结果图像总宽度
 /// @param format 形式同printf的可变参量表
-void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
-  const char static *TAG = "font_raw_print_12x";
+/// @return 打印结果图像总宽度
+int font_total_print_breath_12x(char *format, ...) {
+  const static char *TAG = "font_total_print_breath_12x";
 
   // 申请字符unicode编码缓存
-  uint32_t *buf_unicode = NULL;
-  buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-  while (!buf_unicode) {
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
     vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-    buf_unicode =
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
         (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
   }
-  memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 
   // 申请UTF-8编码缓存
   char *str_buf = NULL;
@@ -546,7 +541,390 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
 
   // 获取所有要显示字符的Unicode,以及字符总个数
   uint32_t total_unit =
-      UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
+
+  int idx = 0;            // 选定操作的为[idx]号字符
+  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+  for (idx = 0; idx < total_unit; idx++) {
+    if (unicode_buf[idx] < 128) {
+      ASCII_num++;
+    }
+  }
+
+  // 释放所有缓存
+  free(unicode_buf);
+  unicode_buf = NULL;
+  free(str_buf);
+  str_buf = NULL;
+
+  return ASCII_num * 6 + (total_unit - ASCII_num) * 12;
+}
+
+/// @brief (16x16大小标准)获取打印结果图像总宽度
+/// @param format 形式同printf的可变参量表
+/// @return 打印结果图像总宽度
+int font_total_print_breath_16x(char *format, ...) {
+  const static char *TAG = "font_total_print_breath_16x";
+
+  // 申请字符unicode编码缓存
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
+        (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  }
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+
+  // 申请UTF-8编码缓存
+  char *str_buf = NULL;
+  str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  while (!str_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+    str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  }
+  memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+  // 获取所有要显示字符的Unicode,以及字符总个数
+  uint32_t total_unit =
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
+
+  int idx = 0;            // 选定操作的为[idx]号字符
+  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+  for (idx = 0; idx < total_unit; idx++) {
+    if (unicode_buf[idx] < 128) {
+      ASCII_num++;
+    }
+  }
+
+  // 释放所有缓存
+  free(unicode_buf);
+  unicode_buf = NULL;
+  free(str_buf);
+  str_buf = NULL;
+
+  return ASCII_num * 8 + (total_unit - ASCII_num) * 16;
+}
+
+/// @brief (16x16大小标准)创建字符静态句柄
+/// @param format 形式同printf的可变参量表
+/// @return 字符静态句柄
+/// @note 字符静态句柄需要在使用后调用delete_font_static_handle()函数释放
+font_static_handle_t new_font_static_handle_16x(char *format, ...) {
+  const static char *TAG = "new_font_static_handle_16x";
+
+  // 申请字符unicode编码缓存
+  uint32_t *unicode_buf = NULL;
+  int unicode_buf_size = FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t);
+  unicode_buf = (uint32_t *)malloc(unicode_buf_size);
+  while (!unicode_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf = (uint32_t *)malloc(unicode_buf_size);
+  }
+  memset(unicode_buf, 0, unicode_buf_size);
+
+  // 申请UTF-8编码缓存
+  char *str_buf = NULL;
+  int str_buf_size = FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char);
+  str_buf = (char *)malloc(str_buf_size);
+  while (!str_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+    str_buf = (char *)malloc(str_buf_size);
+  }
+  memset(str_buf, 0, str_buf_size);
+
+  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+  // 获取所有要显示字符的Unicode,以及字符总个数
+  uint32_t total_unit =
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
+  free(str_buf);
+  str_buf = NULL;
+
+  // 申请字符点阵数据缓存
+  uint8_t *font_buf = NULL;
+  int font_buf_size =
+      total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t);
+  font_buf = (uint8_t *)malloc(font_buf_size);
+  while (!font_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+    font_buf = (uint8_t *)malloc(font_buf_size);
+  }
+  memset(font_buf, 0, font_buf_size);
+
+  int idx = 0;            // 选定操作的为[idx]号字符
+  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+  // 从字库读取所有字符的点阵数据到font_buf
+  for (idx = 0; idx < total_unit; idx++) {
+    if (unicode_buf[idx] >= 128) {
+      fonts_read_zh_CN_16x(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
+    } else { // Unicode小于128兼容ASCII字符集
+      fonts_read_ASCII_8x16(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
+      ASCII_num++;
+    }
+  }
+
+  font_static_handle_t font_handle = NULL;
+  font_handle = (font_static_handle_t)malloc(sizeof(font_static_t));
+  if (!font_handle) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请font_handle资源发现问题 正在重试");
+    font_handle = (font_static_handle_t)malloc(sizeof(font_static_t));
+  }
+  memset(font_handle, 0, sizeof(font_static_t));
+
+  font_handle->font_standard_breath = 16;
+  font_handle->total_breath = ASCII_num * 8 + (total_unit - ASCII_num) * 16;
+  font_handle->total_unit = total_unit;
+  font_handle->ASCII_num = ASCII_num;
+
+  font_handle->unicode_buf = unicode_buf;
+  font_handle->unicode_buf_size = unicode_buf_size;
+
+  font_handle->font_buf = font_buf;
+  font_handle->font_buf_size = font_buf_size;
+
+  return font_handle;
+}
+
+/// @brief (12x12大小标准)创建字符静态句柄
+/// @param format 形式同printf的可变参量表
+/// @return 字符静态句柄
+/// @note 字符静态句柄需要在使用后调用delete_font_static_handle()函数释放
+font_static_handle_t new_font_static_handle_12x(char *format, ...) {
+  const static char *TAG = "new_font_static_handle_12x";
+
+  // 申请字符unicode编码缓存
+  uint32_t *unicode_buf = NULL;
+  int unicode_buf_size = FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t);
+  unicode_buf = (uint32_t *)malloc(unicode_buf_size);
+  while (!unicode_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf = (uint32_t *)malloc(unicode_buf_size);
+  }
+  memset(unicode_buf, 0, unicode_buf_size);
+
+  // 申请UTF-8编码缓存
+  char *str_buf = NULL;
+  int str_buf_size = FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char);
+  str_buf = (char *)malloc(str_buf_size);
+  while (!str_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+    str_buf = (char *)malloc(str_buf_size);
+  }
+  memset(str_buf, 0, str_buf_size);
+
+  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+  // 获取所有要显示字符的Unicode,以及字符总个数
+  uint32_t total_unit =
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
+  free(str_buf);
+  str_buf = NULL;
+
+  // 申请字符点阵数据缓存
+  uint8_t *font_buf = NULL;
+  int font_buf_size =
+      total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES * sizeof(uint8_t);
+  font_buf = (uint8_t *)malloc(font_buf_size);
+  while (!font_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+    font_buf = (uint8_t *)malloc(font_buf_size);
+  }
+  memset(font_buf, 0, font_buf_size);
+
+  int idx = 0;            // 选定操作的为[idx]号字符
+  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+  // 从字库读取所有字符的点阵数据到font_buf
+  for (idx = 0; idx < total_unit; idx++) {
+    if (unicode_buf[idx] >= 128) {
+      fonts_read_zh_CN_12x(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取汉字字符 宽度12
+    } else { // Unicode小于128兼容ASCII字符集
+      fonts_read_ASCII_6x12(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取ASCII字符 宽度6
+      ASCII_num++;
+    }
+  }
+
+  font_static_handle_t font_handle = NULL;
+  font_handle = (font_static_handle_t)malloc(sizeof(font_static_t));
+  if (!font_handle) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请font_handle资源发现问题 正在重试");
+    font_handle = (font_static_handle_t)malloc(sizeof(font_static_t));
+  }
+  memset(font_handle, 0, sizeof(font_static_t));
+
+  font_handle->font_standard_breath = 12;
+  font_handle->total_breath = ASCII_num * 6 + (total_unit - ASCII_num) * 12;
+  font_handle->total_unit = total_unit;
+  font_handle->ASCII_num = ASCII_num;
+
+  font_handle->unicode_buf = unicode_buf;
+  font_handle->unicode_buf_size = unicode_buf_size;
+
+  font_handle->font_buf = font_buf;
+  font_handle->font_buf_size = font_buf_size;
+
+  return font_handle;
+}
+
+/// @brief 释放字符静态句柄
+/// @param handle 字符静态句柄
+void delete_font_static_handle(font_static_handle_t handle) {
+  free(handle->unicode_buf);
+  handle->unicode_buf = NULL;
+  free(handle->font_buf);
+  handle->font_buf = NULL;
+  free(handle);
+  handle = NULL;
+}
+
+/// @brief
+/// (使用静态字符句柄打印)(12x12大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x
+/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y
+/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param handle 字符静态句柄
+void static_font_raw_print_12x(int x, int y, uint8_t color[3],
+                               font_static_handle_t handle) {
+
+  int idx = 0;   // 选定操作的为[idx]号字符
+  int x_buf = 0; // 当前选定的[idx]号字符点阵图像的起始x轴坐标
+  int x_base =
+      0; // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
+
+  // 绘制所有字符
+  for (idx = 0; idx < handle->total_unit; idx++) {
+    x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+    if (handle->unicode_buf[idx] >= 128) {
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 12,
+                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
+                        FONT_CHIP_READ_ZH_CN_12X_BYTES, color, true);
+      x_base += 12;
+    } else { // Unicode小于128兼容ASCII字符集
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 6,
+                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
+                        FONT_CHIP_READ_ASCII_6X12_BYTES, color, true);
+      x_base += 6;
+    }
+  }
+}
+
+/// @brief
+/// (使用静态字符句柄打印)(16x16大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x
+/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y
+/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param handle 字符静态句柄
+void static_font_raw_print_16x(int x, int y, uint8_t color[3],
+                               font_static_handle_t handle) {
+
+  int idx = 0;   // 选定操作的为[idx]号字符
+  int x_buf = 0; // 当前选定的[idx]号字符点阵图像的起始x轴坐标
+  int x_base =
+      0; // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
+
+  // 绘制所有字符
+  for (idx = 0; idx < handle->total_unit; idx++) {
+    x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+    if (handle->unicode_buf[idx] >= 128) {
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 16,
+                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
+                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
+      x_base += 16;
+    } else { // Unicode小于128兼容ASCII字符集
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 8,
+                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
+                        FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
+      x_base += 8;
+    }
+  }
+}
+
+/// @brief (12x12大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x
+/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y
+/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param format 形式同printf的可变参量表
+/// @note 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
+/// @note 这种情况下，请创建字符静态句柄，并使用静态打印函数，这可以实现复用资源
+void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
+  const char static *TAG = "font_raw_print_12x";
+
+  // 申请字符unicode编码缓存
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
+        (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  }
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+
+  // 申请UTF-8编码缓存
+  char *str_buf = NULL;
+  str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  while (!str_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+    str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  }
+  memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+  // 获取所有要显示字符的Unicode,以及字符总个数
+  uint32_t total_unit =
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
 
   // 申请字符点阵数据缓存
   uint8_t *font_buf = NULL;
@@ -566,14 +944,14 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
 
   // 从字库读取所有字符的点阵数据到font_buf
   for (idx = 0; idx < total_unit; idx++) {
-    if (buf_unicode[idx] >= 128) {
+    if (unicode_buf[idx] >= 128) {
       fonts_read_zh_CN_12x(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取汉字字符 宽度12
     } else { // Unicode小于128兼容ASCII字符集
       fonts_read_ASCII_6x12(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取ASCII字符 宽度6
       ASCII_num++;
@@ -587,7 +965,7 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
   // 绘制所有字符
   for (idx = 0; idx < total_unit; idx++) {
     x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
-    if (buf_unicode[idx] >= 128) {
+    if (unicode_buf[idx] >= 128) {
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
         separation_draw(x_buf, y, 12,
                         &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
@@ -602,8 +980,112 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
     }
   }
   // 释放所有缓存
-  free(buf_unicode);
-  buf_unicode = NULL;
+  free(unicode_buf);
+  unicode_buf = NULL;
+  free(str_buf);
+  str_buf = NULL;
+  free(font_buf);
+  font_buf = NULL;
+}
+
+/// @brief (16x16大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
+/// @param x
+/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
+/// @param y
+/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
+/// @param color 字符颜色
+/// @param format 形式同printf的可变参量表
+/// @note 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
+/// @note 这种情况下，请创建字符静态句柄，并使用静态打印函数，这可以实现复用资源
+void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
+  const static char *TAG = "font_raw_print_16x";
+
+  // 申请字符unicode编码缓存
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
+        (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  }
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+
+  // 申请UTF-8编码缓存
+  char *str_buf = NULL;
+  str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  while (!str_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
+    str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+  }
+  memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
+
+  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
+
+  // 获取所有要显示字符的Unicode,以及字符总个数
+  uint32_t total_unit =
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
+
+  // 申请字符点阵数据缓存
+  uint8_t *font_buf = NULL;
+  font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES *
+                               sizeof(uint8_t));
+  while (!font_buf) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
+    font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES *
+                                 sizeof(uint8_t));
+  }
+  memset(font_buf, 0,
+         total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
+
+  int idx = 0;            // 选定操作的为[idx]号字符
+  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
+
+  // 从字库读取所有字符的点阵数据到font_buf
+  for (idx = 0; idx < total_unit; idx++) {
+    if (unicode_buf[idx] >= 128) {
+      fonts_read_zh_CN_16x(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
+    } else { // Unicode小于128兼容ASCII字符集
+      fonts_read_ASCII_8x16(
+          unicode_buf[idx],
+          &font_buf[idx *
+                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
+      ASCII_num++;
+    }
+  }
+
+  int x_buf = 0; // 当前选定的[idx]号字符点阵图像的起始x轴坐标
+  int x_base =
+      0; // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
+
+  // 绘制所有字符
+  for (idx = 0; idx < total_unit; idx++) {
+    x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
+    if (unicode_buf[idx] >= 128) {
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 16,
+                        &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
+                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
+      x_base += 16;
+    } else { // Unicode小于128兼容ASCII字符集
+      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
+        separation_draw(x_buf, y, 8,
+                        &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
+                        FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
+      x_base += 8;
+    }
+  }
+  // 释放所有缓存
+  free(unicode_buf);
+  unicode_buf = NULL;
   free(str_buf);
   str_buf = NULL;
   free(font_buf);
@@ -624,15 +1106,15 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
   const static char *TAG = "font_roll_print_12x";
 
   // 申请字符unicode编码缓存
-  uint32_t *buf_unicode = NULL;
-  buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-  while (!buf_unicode) {
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
     vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-    buf_unicode =
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
         (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
   }
-  memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 
   // 申请UTF-8编码缓存
   char *str_buf = NULL;
@@ -651,7 +1133,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
 
   // 获取所有要显示字符的Unicode,以及字符总个数
   uint32_t total_unit =
-      UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
   // 申请字符点阵数据缓存
   uint8_t *font_buf = NULL;
   font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_12X_BYTES *
@@ -670,14 +1152,14 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
 
   // 从字库读取所有字符的点阵数据到font_buf
   for (idx = 0; idx < total_unit; idx++) {
-    if (buf_unicode[idx] >= 128) {
+    if (unicode_buf[idx] >= 128) {
       fonts_read_zh_CN_12x(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取汉字字符 宽度12
     } else { // Unicode小于128兼容ASCII字符集
       fonts_read_ASCII_6x12(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_12X_BYTES]); // 读取ASCII字符 宽度6
       ASCII_num++;
@@ -708,7 +1190,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
             step; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1为初始坐标的绝对偏移坐标)
         // 仅对可视范围内字符进行绘制
 
-        if (buf_unicode[idx] >= 128) {
+        if (unicode_buf[idx] >= 128) {
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 12,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
@@ -723,6 +1205,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
         }
       }
       vTaskDelay(pdMS_TO_TICKS(50));
+      clean_all_draw_buf();
       x_base = 0; // 重置字符间隔偏移缓存
     }
   }
@@ -754,7 +1237,7 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
                 x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1
                         // cx-1为绝对偏移坐标)
         // 仅对可视范围内字符进行绘制
-        if (buf_unicode[idx] >= 128) {
+        if (unicode_buf[idx] >= 128) {
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 12,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES],
@@ -769,115 +1252,14 @@ void font_roll_print_12x(int x, int y, uint8_t color[3],
         }
       }
       vTaskDelay(pdMS_TO_TICKS(50));
+      clean_all_draw_buf();
       x_base = 0; // 重置字符间隔偏移缓存
     }
   }
 
   // 释放所有缓存
-  free(buf_unicode);
-  buf_unicode = NULL;
-  free(str_buf);
-  str_buf = NULL;
-  free(font_buf);
-  font_buf = NULL;
-}
-
-/// @brief (16x16大小标准)通过字库芯片支持在LED阵列打印任意字符,图像不含运动效果
-/// @param x
-/// 图案横坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由左到右绘制
-/// @param y
-/// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
-/// @param color 字符颜色
-/// @param format 形式同printf的可变参量表
-void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
-  const static char *TAG = "font_raw_print_16x";
-
-  // 申请字符unicode编码缓存
-  uint32_t *buf_unicode = NULL;
-  buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-  while (!buf_unicode) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-    buf_unicode =
-        (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-  }
-  memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-
-  // 申请UTF-8编码缓存
-  char *str_buf = NULL;
-  str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
-  while (!str_buf) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请str_buf资源发现问题 正在重试");
-    str_buf = (char *)malloc(FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
-  }
-  memset(str_buf, 0, FONT_CHIP_PRINT_FMT_BUF_SIZE * sizeof(char));
-
-  // 格式化源字符串(UTF-8编码数据)到UTF-8编码缓存
-  va_list ap;
-  va_start(ap, format);
-  vsnprintf(str_buf, FONT_CHIP_PRINT_FMT_BUF_SIZE, format, ap);
-
-  // 获取所有要显示字符的Unicode,以及字符总个数
-  uint32_t total_unit =
-      UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
-
-  // 申请字符点阵数据缓存
-  uint8_t *font_buf = NULL;
-  font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES *
-                               sizeof(uint8_t));
-  while (!font_buf) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请font_buf资源发现问题 正在重试");
-    font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES *
-                                 sizeof(uint8_t));
-  }
-  memset(font_buf, 0,
-         total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES * sizeof(uint8_t));
-
-  int idx = 0;            // 选定操作的为[idx]号字符
-  uint32_t ASCII_num = 0; // 总共含有的ASCII字符个数
-
-  // 从字库读取所有字符的点阵数据到font_buf
-  for (idx = 0; idx < total_unit; idx++) {
-    if (buf_unicode[idx] >= 128) {
-      fonts_read_zh_CN_16x(
-          buf_unicode[idx],
-          &font_buf[idx *
-                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
-    } else { // Unicode小于128兼容ASCII字符集
-      fonts_read_ASCII_8x16(
-          buf_unicode[idx],
-          &font_buf[idx *
-                    FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
-      ASCII_num++;
-    }
-  }
-
-  int x_buf = 0; // 当前选定的[idx]号字符点阵图像的起始x轴坐标
-  int x_base =
-      0; // 当前选定的[idx]号字符坐标点(字模点阵左上角)与第一个字符即idx=0的水平点阵距离,这在计算[idx-1]号字符时完成累加
-
-  // 绘制所有字符
-  for (idx = 0; idx < total_unit; idx++) {
-    x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
-    if (buf_unicode[idx] >= 128) {
-      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 16,
-                        &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
-      x_base += 16;
-    } else { // Unicode小于128兼容ASCII字符集
-      if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 8,
-                        &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
-                        FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
-      x_base += 8;
-    }
-  }
-  // 释放所有缓存
-  free(buf_unicode);
-  buf_unicode = NULL;
+  free(unicode_buf);
+  unicode_buf = NULL;
   free(str_buf);
   str_buf = NULL;
   free(font_buf);
@@ -898,15 +1280,15 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
   const static char *TAG = "font_roll_print_16x";
 
   // 申请字符unicode编码缓存
-  uint32_t *buf_unicode = NULL;
-  buf_unicode = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
-  while (!buf_unicode) {
+  uint32_t *unicode_buf = NULL;
+  unicode_buf = (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  while (!unicode_buf) {
     vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGE(TAG, "申请buf_unicode资源发现问题 正在重试");
-    buf_unicode =
+    ESP_LOGE(TAG, "申请unicode_buf资源发现问题 正在重试");
+    unicode_buf =
         (uint32_t *)malloc(FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
   }
-  memset(buf_unicode, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
+  memset(unicode_buf, 0, FONT_CHIP_PRINT_NUM_MAX * sizeof(uint32_t));
 
   // 申请UTF-8编码缓存
   char *str_buf = NULL;
@@ -925,7 +1307,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
 
   // 获取所有要显示字符的Unicode,以及字符总个数
   uint32_t total_unit =
-      UTF8_Unicode_get(str_buf, buf_unicode, FONT_CHIP_PRINT_NUM_MAX);
+      UTF8_Unicode_get(str_buf, unicode_buf, FONT_CHIP_PRINT_NUM_MAX);
   // 申请字符点阵数据缓存
   uint8_t *font_buf = NULL;
   font_buf = (uint8_t *)malloc(total_unit * FONT_CHIP_READ_ZH_CN_16X_BYTES *
@@ -944,14 +1326,14 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
 
   // 从字库读取所有字符的点阵数据到font_buf
   for (idx = 0; idx < total_unit; idx++) {
-    if (buf_unicode[idx] >= 128) {
+    if (unicode_buf[idx] >= 128) {
       fonts_read_zh_CN_16x(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取汉字字符 宽度16
     } else { // Unicode小于128兼容ASCII字符集
       fonts_read_ASCII_8x16(
-          buf_unicode[idx],
+          unicode_buf[idx],
           &font_buf[idx *
                     FONT_CHIP_READ_ZH_CN_16X_BYTES]); // 读取ASCII字符 宽度8
       ASCII_num++;
@@ -982,7 +1364,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
             step; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1为初始坐标的绝对偏移坐标)
         // 仅对可视范围内字符进行绘制
 
-        if (buf_unicode[idx] >= 128) {
+        if (unicode_buf[idx] >= 128) {
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, y, 16,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
@@ -997,6 +1379,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
         }
       }
       vTaskDelay(pdMS_TO_TICKS(50));
+      clean_all_draw_buf();
       x_base = 0; // 重置字符间隔偏移缓存
     }
   }
@@ -1028,7 +1411,7 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
                 x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标(x-1
                         // cx-1为绝对偏移坐标)
         // 仅对可视范围内字符进行绘制
-        if (buf_unicode[idx] >= 128) {
+        if (unicode_buf[idx] >= 128) {
           if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
             separation_draw(x_buf, cy + (y - 1), 16,
                             &font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES],
@@ -1043,13 +1426,14 @@ void font_roll_print_16x(int x, int y, uint8_t color[3],
         }
       }
       vTaskDelay(pdMS_TO_TICKS(50));
+      clean_all_draw_buf();
       x_base = 0; // 重置字符间隔偏移缓存
     }
   }
 
   // 释放所有缓存
-  free(buf_unicode);
-  buf_unicode = NULL;
+  free(unicode_buf);
+  unicode_buf = NULL;
   free(str_buf);
   str_buf = NULL;
   free(font_buf);

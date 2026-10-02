@@ -108,6 +108,22 @@ extern const uint8_t matrix_9[7];
 // 更新UI数据互斥锁，用于保护UI数据的安全访问
 extern xSemaphoreHandle update_ui_data_mutex;
 
+typedef struct font_static_t{
+
+  int font_standard_breath;// 字模标准宽度,如12x标准为12，16x标准为16
+  int total_breath;// 打印结果总宽度
+  int total_unit;// 总共含有的字符数
+  int ASCII_num;// 总共含有的ASCII字符个数
+
+  uint32_t *unicode_buf;// Unicode缓存
+  int unicode_buf_size;// Unicode缓存大小
+
+  uint8_t *font_buf;// 字模数据缓存
+  int font_buf_size;// 字模数据缓存大小
+  
+} font_static_t;
+typedef font_static_t* font_static_handle_t;
+
 void ledarray_set_auto_refresh_mode(ledarray_auto_refresh_mode_t mode);
 
 // 以下函数将数据存储到缓冲区，不包含发送
@@ -145,15 +161,29 @@ uint32_t matrix_size(uint8_t *matrix_data);
 
 void print_number(int x, int y, int8_t figure, uint8_t color[3]);
 
+
+
 void font_roll_print_12x(int x, int y, uint8_t color[3],
                          cartoon_handle_t cartoon_handle, char *format, ...);
-
-void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...);
-
 void font_roll_print_16x(int x, int y, uint8_t color[3],
                          cartoon_handle_t cartoon_handle, char *format, ...);
-
+ 
+void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...);
 void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...);
+
+void static_font_raw_print_12x(int x, int y, uint8_t color[3],
+                               font_static_handle_t handle);
+void static_font_raw_print_16x(int x, int y, uint8_t color[3],
+                               font_static_handle_t handle);
+
+int font_total_print_breath_12x(char *format, ...);
+int font_total_print_breath_16x(char *format, ...);
+
+font_static_handle_t new_font_static_handle_12x(char *format, ...);
+font_static_handle_t new_font_static_handle_16x(char *format, ...);
+void delete_font_static_handle(font_static_handle_t font_handle);
+
+
 
 esp_err_t ledarray_init();
 

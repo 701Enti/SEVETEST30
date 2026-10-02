@@ -36,6 +36,8 @@
 #include "MAX17048.h"
 
 
+#define NVS_CONFIG_WIFI_NAMESPACE_NAME "CONFIG_WIFI"
+
 typedef struct systemtime_t {
   int year;
   int month;
@@ -81,6 +83,7 @@ void refresh_systemtime_data();
 void refresh_env_temp_hum_data();
 void refresh_env_TVOC_data(bool crc_flag);
 void refresh_env_lux_data();
-
-
 esp_err_t refresh_IMU_FIFO_data(IMU_reg_mapping_t* FIFO_database, int map_num, int read_num);
+
+esp_err_t nvs_save_string(const char *namespace_name, const char *key, const char *str_val);
+esp_err_t nvs_read_string(const char *namespace_name, const char *key, char *buf, size_t buf_len);

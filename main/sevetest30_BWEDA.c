@@ -51,7 +51,10 @@
 #include "freertos/event_groups.h"
 #include "freertos/task.h"
 #include "sevetest30_LedArray.h"
+#include "sevetest30_SWEDA.h"
 #include "sevetest30_touch.h"
+#include <stdint.h>
+#include <string.h>
 
 #define ESP_APP_ID 0x55
 
@@ -64,9 +67,10 @@ static uint8_t adv_config_done = 0; // 广播状态
 
 // 准备写入事件缓存类型
 typedef struct {
+  uint16_t handle;
   uint8_t *prepare_buf;
   int prepare_len;
-} prepare_type_env_t;
+} prepare_write_env_t;
 
 // GATT服务器用户配置存储类型
 struct gatts_profile_inst {
@@ -84,7 +88,7 @@ struct gatts_profile_inst {
   esp_bt_uuid_t descr_uuid;
 };
 
-static prepare_type_env_t prepare_write_env;
+static prepare_write_env_t prepare_write_env;
 
 ////////////////////////////////////////////////////////////////服务配置///////////////////////////////////////////////////////////////////////////////
 
@@ -134,6 +138,12 @@ static const uint16_t character_client_config_uuid =
 static const uint8_t char_prop_read_write_notify =
     ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ |
     ESP_GATT_CHAR_PROP_BIT_NOTIFY;
+static const uint8_t char_prop_read_write =
+    ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ;
+// static const uint8_t char_prop_read =
+//     ESP_GATT_CHAR_PROP_BIT_READ;
+// static const uint8_t char_prop_write =
+//     ESP_GATT_CHAR_PROP_BIT_WRITE;
 
 /////////////////////自定义UUID//////////////////////////
 typedef enum {
@@ -159,11 +169,9 @@ enum {
   IO_CTRL_SERVICE, // 服务
 
   IO_CTRL_STANDBY_CHAR,
-
   IO_CTRL_STANDBY_VALUE,
 
   IO_CTRL_SHUTDOWN_CHAR,
-
   IO_CTRL_SHUTDOWN_VALUE,
 
   IO_CTRL_IDX_NB,
@@ -199,7 +207,7 @@ static const esp_gatts_attr_db_t io_ctrl_gatt_database[IO_CTRL_IDX_NB] = {
                                (uint8_t *)&character_declaration_uuid,
                                ESP_GATT_PERM_READ, sizeof(uint8_t),
                                sizeof(uint8_t),
-                               (uint8_t *)&char_prop_read_write_notify}},
+                               (uint8_t *)&char_prop_read_write}},
 
     [IO_CTRL_STANDBY_VALUE] = {{ESP_GATT_AUTO_RSP},
                                {ESP_UUID_LEN_16, (uint8_t *)&io_ctrl_uuid_buf_1,
@@ -212,7 +220,7 @@ static const esp_gatts_attr_db_t io_ctrl_gatt_database[IO_CTRL_IDX_NB] = {
                                 (uint8_t *)&character_declaration_uuid,
                                 ESP_GATT_PERM_READ, sizeof(uint8_t),
                                 sizeof(uint8_t),
-                                (uint8_t *)&char_prop_read_write_notify}},
+                                (uint8_t *)&char_prop_read_write}},
 
     [IO_CTRL_SHUTDOWN_VALUE] = {{ESP_GATT_AUTO_RSP},
                                 {ESP_UUID_LEN_16,
@@ -241,7 +249,12 @@ enum {
 
   MEDIA_CTRL_ROLL_PRINT_CHAR,  // 屏幕滚动显示-文字输入
   MEDIA_CTRL_ROLL_PRINT_VALUE, // 屏幕滚动显示-文字输入-值
-  MEDIA_CTRL_ROLL_PRINT_LEDARRAY_CFG,
+
+  MEDIA_CTRL_WIFI_SSID_CHAR,  // wifi-ssid
+  MEDIA_CTRL_WIFI_SSID_VALUE, // wifi-ssid-值
+
+  MEDIA_CTRL_WIFI_PASSWORD_CHAR,  // wifi-密码
+  MEDIA_CTRL_WIFI_PASSWORD_VALUE, // wifi-密码-值
 
   MEDIA_CTRL_IDX_NB,
 };
@@ -255,12 +268,21 @@ static const uint16_t media_ctrl_service_uuid = BLE_SERVICE_MEDIA_CTRL_UUID16;
 static const uint16_t media_ctrl_uuid_buf_1 = SE30_CUSTOM_CHAR_UUID_2;
 static const uint16_t media_ctrl_uuid_buf_2 = SE30_CUSTOM_CHAR_UUID_3;
 static const uint16_t media_ctrl_uuid_buf_3 = SE30_CUSTOM_CHAR_UUID_4;
+static const uint16_t media_ctrl_uuid_buf_4 = SE30_CUSTOM_CHAR_UUID_5;
+static const uint16_t media_ctrl_uuid_buf_5 = SE30_CUSTOM_CHAR_UUID_6;
 
 static uint8_t media_ctrl_amp_vol_buf = 0x00;
 static uint8_t media_ctrl_amp_mute_buf = false;
+
 static uint8_t media_ctrl_roll_print_buf[512] = {0};
 char media_ctrl_roll_print_str[512] = {0};
 xSemaphoreHandle data_mutex_media_ctrl_roll_print = NULL;
+
+static uint8_t media_ctrl_wifi_ssid_buf[128] = {0};
+static char media_ctrl_wifi_ssid_str[128] = {0};
+
+static uint8_t media_ctrl_wifi_password_buf[128] = {0};
+static char media_ctrl_wifi_password_str[128] = {0};
 
 static uint16_t media_ctrl_amp_vol_cfg = 0x0000;
 static uint16_t media_ctrl_amp_mute_cfg = 0x0000;
@@ -319,7 +341,7 @@ static const esp_gatts_attr_db_t media_ctrl_gatt_database[MEDIA_CTRL_IDX_NB] = {
                                      (uint8_t *)&character_declaration_uuid,
                                      ESP_GATT_PERM_READ, sizeof(uint8_t),
                                      sizeof(uint8_t),
-                                     (uint8_t *)&char_prop_read_write_notify}},
+                                     (uint8_t *)&char_prop_read_write}},
 
     [MEDIA_CTRL_ROLL_PRINT_VALUE] = {{ESP_GATT_AUTO_RSP},
                                      {ESP_UUID_LEN_16,
@@ -329,6 +351,35 @@ static const esp_gatts_attr_db_t media_ctrl_gatt_database[MEDIA_CTRL_IDX_NB] = {
                                       sizeof(media_ctrl_roll_print_buf),
                                       media_ctrl_roll_print_buf}},
 
+    [MEDIA_CTRL_WIFI_SSID_CHAR] = {{ESP_GATT_AUTO_RSP},
+                                   {ESP_UUID_LEN_16,
+                                    (uint8_t *)&character_declaration_uuid,
+                                    ESP_GATT_PERM_READ, sizeof(uint8_t),
+                                    sizeof(uint8_t),
+                                    (uint8_t *)&char_prop_read_write}},
+
+    [MEDIA_CTRL_WIFI_SSID_VALUE] = {{ESP_GATT_AUTO_RSP},
+                                    {ESP_UUID_LEN_16,
+                                     (uint8_t *)&media_ctrl_uuid_buf_4,
+                                     ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+                                     sizeof(media_ctrl_wifi_ssid_buf) - 1,
+                                     sizeof(media_ctrl_wifi_ssid_buf) - 1,
+                                     media_ctrl_wifi_ssid_buf}},
+
+    [MEDIA_CTRL_WIFI_PASSWORD_CHAR] = {{ESP_GATT_AUTO_RSP},
+                                       {ESP_UUID_LEN_16,
+                                        (uint8_t *)&character_declaration_uuid,
+                                        ESP_GATT_PERM_READ, sizeof(uint8_t),
+                                        sizeof(uint8_t),
+                                        (uint8_t *)&char_prop_read_write}},
+
+    [MEDIA_CTRL_WIFI_PASSWORD_VALUE] =
+        {{ESP_GATT_AUTO_RSP},
+         {ESP_UUID_LEN_16, (uint8_t *)&media_ctrl_uuid_buf_5,
+          ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+          sizeof(media_ctrl_wifi_password_buf) - 1,
+          sizeof(media_ctrl_wifi_password_buf) - 1,
+          media_ctrl_wifi_password_buf}},
 };
 
 /**********************************************************************************************************************************/
@@ -396,37 +447,43 @@ static esp_ble_adv_params_t adv_params = {
         ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY, // 允许任何设备扫描和连接
 };
 
-/// @brief 准备写入 事件，在回调函数中使用，为写操作缓存数据
+/// @brief 预写分片（标准长写）
 /// @param gatts_if gatts接口类型
-/// @param prepare_write_env 准备写入配置
+/// @param prepare_write_env 配置
 /// @param param 回调参数
 void prepare_write_event(esp_gatt_if_t gatts_if,
-                         prepare_type_env_t *prepare_write_env,
+                         prepare_write_env_t *prepare_write_env,
                          esp_ble_gatts_cb_param_t *param) {
   const char *TAG = "prepare_write_event";
 
-  ESP_LOGI(TAG, "准备写入,数据长度 %d", param->write.len);
+  ESP_LOGI(TAG, "预写分片,数据总长度 %d", param->write.len);
 
   esp_gatt_status_t status = ESP_GATT_OK;
 
+  // 记录当前写入句柄
+  prepare_write_env->handle = param->write.handle;
+
   // 如果缓存区没有被申请，为写入数据申请缓存
   if (!prepare_write_env->prepare_buf) {
-
-    prepare_write_env->prepare_len = 0;
-
     prepare_write_env->prepare_buf =
         (uint8_t *)malloc(BLE_PREPARE_BUF_SIZE_MAX * sizeof(uint8_t));
     if (!prepare_write_env->prepare_buf) {
       ESP_LOGE(TAG, "申请prepare_buf缓存时发现问题");
       status = ESP_GATT_NO_RESOURCES;
+      return;
     }
+    memset(prepare_write_env->prepare_buf, 0, BLE_PREPARE_BUF_SIZE_MAX * sizeof(uint8_t));
+
+    prepare_write_env->prepare_len = 0;
   } else {
     // 如果缓存区已经被申请，判断写入状态
     if (param->write.offset > BLE_PREPARE_BUF_SIZE_MAX) {
       status = ESP_GATT_INVALID_OFFSET;
+      return;
     } else if ((param->write.offset + param->write.len) >
                BLE_PREPARE_BUF_SIZE_MAX) {
       status = ESP_GATT_INVALID_ATTR_LEN;
+      return;
     }
   }
 
@@ -435,7 +492,8 @@ void prepare_write_event(esp_gatt_if_t gatts_if,
     // 申请内存保存gatt参数
     esp_gatt_rsp_t *gatt_rsp = (esp_gatt_rsp_t *)malloc(sizeof(esp_gatt_rsp_t));
     if (gatt_rsp) {
-
+      
+      memset(gatt_rsp, 0, sizeof(esp_gatt_rsp_t));
       gatt_rsp->attr_value.handle = param->write.handle;      // 写入句柄
       gatt_rsp->attr_value.len = param->write.len;            // 写入长度
       gatt_rsp->attr_value.offset = param->write.offset;      // 写入偏移
@@ -467,32 +525,6 @@ void prepare_write_event(esp_gatt_if_t gatts_if,
 
   // 已准备长度累加
   prepare_write_env->prepare_len += param->write.len;
-}
-
-/// @brief 执行写入 事件，在回调函数中使用，为写操作判断是否执行
-/// @param prepare_write_env 准备写入配置
-/// @param param 回调参数
-void execute_write_event(prepare_type_env_t *prepare_write_env,
-                         esp_ble_gatts_cb_param_t *param) {
-
-  const char *TAG = "execute_write_event";
-
-  // 如果写入标识为执行状态，并且准备写入缓存非空
-  if (param->exec_write.exec_write_flag == ESP_GATT_PREP_WRITE_EXEC &&
-      prepare_write_env->prepare_buf) {
-    ESP_LOG_BUFFER_HEX(TAG, prepare_write_env->prepare_buf,
-                       prepare_write_env->prepare_len); // 以16进制打印写入内容
-  } else {
-    ESP_LOGI(TAG, "写入取消");
-  }
-
-  // 清理准备写入缓存
-  if (prepare_write_env->prepare_buf) {
-    free(prepare_write_env->prepare_buf);
-    prepare_write_env->prepare_buf = NULL;
-  }
-
-  prepare_write_env->prepare_len = 0;
 }
 
 /// @brief gap相关事件处理回调函数,GAP与广播活动相关，一般无需个性化的修改
@@ -668,9 +700,11 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
 
   // 服务属性表创建完成
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
-    if (param->add_attr_tab.status != ESP_GATT_OK)
+    if (param->add_attr_tab.status != ESP_GATT_OK) {
       ESP_LOGE(TAG, "创建IO_CTRL_SERVICE的服务属性表时发现问题- 0x%x",
                param->add_attr_tab.status);
+    }
+
     else {
       ESP_LOGI(TAG, "成功创建IO_CTRL_SERVICE的服务属性表 已创建句柄数 %d",
                param->add_attr_tab.num_handle);
@@ -684,19 +718,32 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
       else {
         ESP_LOGI(TAG, "IO_CTRL_SERVICE 服务启动成功");
       }
+
+      // 数据映射到缓存
+      board_ctrl_t *board_ctrl = NULL;
+      board_ctrl = board_status_get();
+      if (board_ctrl) {
+        uint8_t buf = board_ctrl->p_ext_io_value->DISABLE_LED_BOARD;
+        esp_ble_gatts_set_attr_value(
+            io_ctrl_service_handle_table[IO_CTRL_STANDBY_VALUE],
+            sizeof(uint8_t), &buf);
+      }
     }
   } break;
 
   // 读操作
   case ESP_GATTS_READ_EVT:
-    ESP_LOGI(TAG, "读操作");
+    ESP_LOGW(TAG, "ESP_GATTS_READ_EVT");
     break;
 
     // 写操作
   case ESP_GATTS_WRITE_EVT:
+    ESP_LOGW(TAG, "ESP_GATTS_WRITE_EVT");
+
     if (!param->write.is_prep) {
 
-      ESP_LOGI(TAG, "目标句柄 %d - 写入长度 %d,以下以HEX格式展示写入的值",
+      ESP_LOGI(TAG,
+               "[普通写入] 目标句柄 %d - 写入长度 %d,以下以HEX格式展示写入的值",
                param->write.handle, param->write.len);
       ESP_LOG_BUFFER_HEX(TAG, param->write.value, param->write.len);
 
@@ -708,29 +755,19 @@ static void IO_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
               (bool)(param->write.value[0]);
           sevetest30_board_ctrl(board_ctrl, BOARD_CTRL_EXT_IO);
         }
-      } else if (param->write.handle ==
-                 io_ctrl_service_handle_table[IO_CTRL_SHUTDOWN_VALUE]) {
+      }
+
+      if (param->write.handle ==
+          io_ctrl_service_handle_table[IO_CTRL_SHUTDOWN_VALUE]) {
         if ((bool)(param->write.value[0])) {
           vibra_motor_start();
           sevetest30_shutdown();
         }
       }
 
-      // 如果存在响应需求，传输响应信息
-      if (param->write.need_rsp) {
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                    param->write.trans_id, ESP_GATT_OK, NULL);
-      }
     } else {
-      // 准备写操作
-      prepare_write_event(gatts_if, &prepare_write_env, param);
+      ESP_LOGW(TAG, "[长写入,但是该服务不应该发生,不进行处理]");
     }
-    break;
-
-    ////执行写操作
-  case ESP_GATTS_EXEC_WRITE_EVT:
-    ESP_LOGI(TAG, "执行写操作");
-    execute_write_event(&prepare_write_env, param);
     break;
 
     // 连接
@@ -784,10 +821,10 @@ MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
   // 服务属性表创建完成
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
 
-    if (param->add_attr_tab.status != ESP_GATT_OK)
+    if (param->add_attr_tab.status != ESP_GATT_OK) {
       ESP_LOGE(TAG, "创建MEDIA_CTRL_SERVICE的服务属性表时发现问题- 0x%x",
                param->add_attr_tab.status);
-    else {
+    } else {
       ESP_LOGI(TAG, "成功创建MEDIA_CTRL_SERVICE的服务属性表 已创建句柄数 %d",
                param->add_attr_tab.num_handle);
 
@@ -800,29 +837,39 @@ MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
       else {
         ESP_LOGI(TAG, "MEDIA_CTRL_SERVICE 服务启动成功");
       }
-    }
 
-    // 数据映射到缓存
-    board_ctrl_t *board_ctrl = NULL;
-    board_ctrl = board_status_get();
-    if (board_ctrl) {
-      esp_ble_gatts_set_attr_value(
-          media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE],
-          sizeof(uint8_t), (uint8_t *)&(board_ctrl->amplifier_volume));
-      esp_ble_gatts_set_attr_value(
-          media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE],
-          sizeof(uint8_t), (uint8_t *)&(board_ctrl->amplifier_mute));
+      // 数据映射到缓存
+      board_ctrl_t *board_ctrl = NULL;
+      board_ctrl = board_status_get();
+      if (board_ctrl) {
+        uint8_t buf = board_ctrl->amplifier_volume;
+        esp_ble_gatts_set_attr_value(
+            media_ctrl_service_handle_table[MEDIA_CTRL_VOL_AMP_VALUE],
+            sizeof(uint8_t), &buf);
+        buf = board_ctrl->amplifier_mute;
+        esp_ble_gatts_set_attr_value(
+            media_ctrl_service_handle_table[MEDIA_CTRL_MUTE_AMP_VALUE],
+            sizeof(uint8_t), &buf);
+      }
     }
   } break;
 
   // 读操作
   case ESP_GATTS_READ_EVT: {
-    ESP_LOGI(TAG, "读操作");
+    ESP_LOGW(TAG, "ESP_GATTS_READ_EVT");
   } break;
 
   // 写操作
   case ESP_GATTS_WRITE_EVT: {
+    ESP_LOGW(TAG, "ESP_GATTS_WRITE_EVT");
+
     if (!param->write.is_prep) {
+
+      ESP_LOGI(TAG,
+               "[普通写入] 目标句柄 %d - 写入长度 %d,以下以HEX格式展示写入的值",
+               param->write.handle, param->write.len);
+      ESP_LOG_BUFFER_HEX(TAG, param->write.value, param->write.len);
+
       // 特征传输配置，当客户端设定传输方式运行
       uint16_t descr_value = param->write.value[1] << 8 | param->write.value[0];
       media_ctrl_conn_id_buf1 = param->write.conn_id;
@@ -869,42 +916,130 @@ MEDIA_CTRL_SERVICE_profile_handler(esp_gatts_cb_event_t event,
 
       if (param->write.handle ==
           media_ctrl_service_handle_table[MEDIA_CTRL_ROLL_PRINT_VALUE]) {
-            ESP_LOGI(TAG, "准备滚动打印");
         if (xSemaphoreTake(data_mutex_media_ctrl_roll_print, portMAX_DELAY) ==
             pdTRUE) {
           if (param->write.len <= sizeof(media_ctrl_roll_print_str) - 1) {
+            memset(media_ctrl_roll_print_str, 0,
+                   sizeof(media_ctrl_roll_print_str));
             memcpy(media_ctrl_roll_print_str, param->write.value,
                    sizeof(media_ctrl_roll_print_str) - 1);
-            media_ctrl_roll_print_str[sizeof(media_ctrl_roll_print_str) - 1] =
-                '\0';
+            ESP_LOGI(TAG, "记录滚动打印内容:%s", media_ctrl_roll_print_str);
           } else {
             ESP_LOGE(TAG, "写入数据长度超出范围");
           }
           xSemaphoreGive(data_mutex_media_ctrl_roll_print);
-        }
-        else {
+        } else {
           ESP_LOGE(TAG, "获取互斥锁失败");
         }
       }
 
-      // 如果存在响应需求，传输响应信息
-      if (param->write.need_rsp) {
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                    param->write.trans_id, ESP_GATT_OK, NULL);
+      if (param->write.handle ==
+          media_ctrl_service_handle_table[MEDIA_CTRL_WIFI_SSID_VALUE]) {
+        ESP_LOGI(TAG, "准备写入WIFI-SSID字符串");
+        if (param->write.len <= sizeof(media_ctrl_wifi_ssid_str) - 1) {
+          memset(media_ctrl_wifi_ssid_str, 0, sizeof(media_ctrl_wifi_ssid_str));
+          memcpy(media_ctrl_wifi_ssid_str, param->write.value,
+                 sizeof(media_ctrl_wifi_ssid_str) - 1);
+          nvs_save_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "ssid",
+                          media_ctrl_wifi_ssid_str);
+        } else {
+          ESP_LOGE(TAG, "写入数据长度超出范围");
+        }
       }
+
+      if (param->write.handle ==
+          media_ctrl_service_handle_table[MEDIA_CTRL_WIFI_PASSWORD_VALUE]) {
+        ESP_LOGI(TAG, "准备写入WIFI-密码字符串");
+        if (param->write.len <= sizeof(media_ctrl_wifi_password_str) - 1) {
+          memset(media_ctrl_wifi_password_str, 0,
+                 sizeof(media_ctrl_wifi_password_str));
+          memcpy(media_ctrl_wifi_password_str, param->write.value,
+                 sizeof(media_ctrl_wifi_password_str) - 1);
+          nvs_save_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "password",
+                          media_ctrl_wifi_password_str);
+        } else {
+          ESP_LOGE(TAG, "写入数据长度超出范围");
+        }
+      }
+
     } else {
-      // 准备写操作
+      ESP_LOGI(TAG, "[长写入]");
       prepare_write_event(gatts_if, &prepare_write_env, param);
     }
   } break;
 
   ////执行写操作
-  case ESP_GATTS_EXEC_WRITE_EVT:
-    ESP_LOGI(TAG, "执行写操作");
-    execute_write_event(&prepare_write_env, param);
+  case ESP_GATTS_EXEC_WRITE_EVT: {
+    ESP_LOGW(TAG, "ESP_GATTS_EXEC_WRITE_EVT");
 
-    ESP_LOGI(TAG, "%d", media_ctrl_amp_vol_buf);
-    break;
+    if (param->exec_write.exec_write_flag == ESP_GATT_PREP_WRITE_EXEC &&
+        prepare_write_env.prepare_buf) {
+      ESP_LOG_BUFFER_HEX(TAG, prepare_write_env.prepare_buf,
+                         prepare_write_env.prepare_len);
+    } else {
+      ESP_LOGI(TAG, "写入取消");
+      free(prepare_write_env.prepare_buf);
+      prepare_write_env.prepare_buf = NULL;
+      prepare_write_env.prepare_len = 0;
+      break;
+    }
+
+    if (prepare_write_env.handle ==
+        media_ctrl_service_handle_table[MEDIA_CTRL_ROLL_PRINT_VALUE]) {
+      if (xSemaphoreTake(data_mutex_media_ctrl_roll_print, portMAX_DELAY) ==
+          pdTRUE) {
+        if (prepare_write_env.prepare_len <=
+            sizeof(media_ctrl_roll_print_str) - 1) {
+          memset(media_ctrl_roll_print_str, 0,
+                 sizeof(media_ctrl_roll_print_str));
+          memcpy(media_ctrl_roll_print_str, prepare_write_env.prepare_buf,
+                 sizeof(media_ctrl_roll_print_str) - 1);
+          ESP_LOGI(TAG, "记录滚动打印内容:%s", media_ctrl_roll_print_str);       
+        } else {
+          ESP_LOGE(TAG, "写入数据长度超出范围");
+        }
+        xSemaphoreGive(data_mutex_media_ctrl_roll_print);
+      } else {
+        ESP_LOGE(TAG, "获取互斥锁失败");
+      }
+    }
+
+    if (prepare_write_env.handle ==
+        media_ctrl_service_handle_table[MEDIA_CTRL_WIFI_SSID_VALUE]) {
+      ESP_LOGI(TAG, "准备写入WIFI-SSID字符串");
+      if (prepare_write_env.prepare_len <=
+          sizeof(media_ctrl_wifi_ssid_str) - 1) {
+        memset(media_ctrl_wifi_ssid_str, 0, sizeof(media_ctrl_wifi_ssid_str));
+        memcpy(media_ctrl_wifi_ssid_str, prepare_write_env.prepare_buf,
+               sizeof(media_ctrl_wifi_ssid_str) - 1);
+        nvs_save_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "ssid",
+                        media_ctrl_wifi_ssid_str);
+      } else {
+        ESP_LOGE(TAG, "写入数据长度超出范围");
+      }
+    }
+
+    if (prepare_write_env.handle ==
+        media_ctrl_service_handle_table[MEDIA_CTRL_WIFI_PASSWORD_VALUE]) {
+      ESP_LOGI(TAG, "准备写入WIFI-密码字符串");
+      if (prepare_write_env.prepare_len <=
+          sizeof(media_ctrl_wifi_password_str) - 1) {
+        memset(media_ctrl_wifi_password_str, 0,
+               sizeof(media_ctrl_wifi_password_str));
+        memcpy(media_ctrl_wifi_password_str, prepare_write_env.prepare_buf,
+               sizeof(media_ctrl_wifi_password_str) - 1);
+        nvs_save_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "password",
+                        media_ctrl_wifi_password_str);
+      } else {
+        ESP_LOGE(TAG, "写入数据长度超出范围");
+      }
+    }
+
+    free(prepare_write_env.prepare_buf);
+    prepare_write_env.prepare_buf = NULL;
+    prepare_write_env.prepare_len = 0;
+
+  } break;
 
     // 连接
   case ESP_GATTS_CONNECT_EVT:

@@ -58,7 +58,7 @@
 #define BLE_CONNECT_TIMEOUT 400 // 连接超时       400*10ms = 4000ms
 
 #define BLE_GATTS_CHAR_VAL_LEN_MAX 500 // 特征值存储最大长度
-#define BLE_PREPARE_BUF_SIZE_MAX 256   // 写入准备缓存最大大小
+#define BLE_PREPARE_BUF_SIZE_MAX 2048   // 写入准备缓存最大大小
 #define BLE_LOCAL_MTU (SEVETEST30_BLE_LOCAL_MTU) // 本地最大可传输单元MTU限制大小
 
 // 完整服务UUID,包含 基本UUID + 16bits服务UUID

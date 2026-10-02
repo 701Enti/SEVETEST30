@@ -26,6 +26,7 @@
 // 如您发现一些问题，请及时联系我们，我们非常感谢您的支持
 // github: https://github.com/701Enti
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -37,6 +38,7 @@
 #include "esp_sleep.h"
 #include "esp_wifi.h"
 #include "freertos/idf_additions.h"
+#include "freertos/projdefs.h"
 #include "lwip/dns.h"
 #include "nvs_flash.h"
 
@@ -82,6 +84,7 @@ void test(void);
 esp_err_t AI_chat(void);
 
 void app_main(void) {
+  const static char *TAG = "app_main";
 
   init();
 
@@ -182,7 +185,7 @@ void app_main(void) {
 
           esp_err_t ret = AI_chat();
           if (ret != ESP_OK) {
-            ESP_LOGE("main", "AI_chat 失败,错误码：%d", ret);
+            ESP_LOGE(TAG, "AI_chat 失败,错误码：%d", ret);
             if (xSemaphoreTake(update_ui_data_mutex, pdMS_TO_TICKS(100)) ==
                 pdTRUE) {
               clean_all_draw_buf();
@@ -203,7 +206,9 @@ void app_main(void) {
     if (xSemaphoreTake(update_ui_data_mutex, 100) == pdTRUE) {
       switch (UI_switch) {
       case -1: {
+        static int i = 0;
         if (UI_changed) {
+          i = 0;
           clean_all_draw_buf();
           memset(media_ctrl_roll_print_str, 0,
                  sizeof(media_ctrl_roll_print_str));
@@ -212,12 +217,35 @@ void app_main(void) {
           if (media_ctrl_roll_print_str[0] != 0) {
             uint8_t color[3] = {255, 255, 255};
             clean_all_draw_buf();
-            ESP_LOGI("main", "滚动打印：%s", media_ctrl_roll_print_str);
+            ESP_LOGI(TAG, "滚动打印：%s", media_ctrl_roll_print_str);
             font_roll_print_16x(1, 1, color, NULL, "%s",
                                 media_ctrl_roll_print_str);
             memset(media_ctrl_roll_print_str, 0,
                    sizeof(media_ctrl_roll_print_str));
+          } else {
+            vTaskDelay(pdMS_TO_TICKS(100));
             clean_all_draw_buf();
+
+            i++;
+            if (i > 100) {
+              i = 0;
+            }
+
+            char *notice = "[等待文字输入以滚动打印]";
+            uint8_t color[3] = {255, 255, 255};
+
+            static font_static_handle_t font_handle = NULL;
+            if (font_handle == NULL) {
+              font_handle = new_font_static_handle_16x(notice);
+            }
+
+            static int last_pos = 0;
+            if (roundf((i / 100.0f) * (font_total_print_breath_16x(notice) + LINE_LED_NUMBER)) !=
+                last_pos) {
+              last_pos =
+                  roundf((i / 100.0f) * (font_total_print_breath_16x(notice) + LINE_LED_NUMBER));
+              static_font_raw_print_16x(LINE_LED_NUMBER - last_pos, 1, color, font_handle);
+            }
           }
           xSemaphoreGive(data_mutex_media_ctrl_roll_print);
         }
@@ -284,7 +312,7 @@ void app_main(void) {
 }
 
 void init(void) {
-  const char *TAG = "init";
+  const static char *TAG = "init";
 
   static TCA6416A_mode_t ext_io_mode_data = TCA6416A_DEFAULT_CONFIG_MODE;
   static TCA6416A_level_t ext_io_value_data = TCA6416A_DEFAULT_CONFIG_VALUE;
@@ -347,6 +375,7 @@ void init(void) {
       ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
+    ESP_LOGW(TAG, "NVS将被擦除并重新初始化");
   }
   ESP_ERROR_CHECK(ret);
 
@@ -354,16 +383,25 @@ void init(void) {
 
   esp_periph_config_t wifi_periph_config = DEFAULT_ESP_PERIPH_SET_CONFIG();
   wifi_init(&wifi_periph_config);
+
   // 载入wifi信息
-  periph_wifi_cfg_t wifi_cfg = {
+  periph_wifi_cfg_t cfg = {
       .disable_auto_reconnect = false,
+      .reconnect_timeout_ms = 30000,
       .wifi_config.sta.ssid = CONFIG_WIFI_SSID,
       .wifi_config.sta.password = CONFIG_WIFI_PASSWORD,
   };
-  if (wifi_connect(&wifi_cfg) != ESP_OK) {
-    ESP_LOGE(TAG, "网络连接失败");
+  nvs_read_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "ssid",
+                  (char *)cfg.wifi_config.sta.ssid,
+                  sizeof(cfg.wifi_config.sta.ssid));
+  nvs_read_string(NVS_CONFIG_WIFI_NAMESPACE_NAME, "password",
+                  (char *)cfg.wifi_config.sta.password,
+                  sizeof(cfg.wifi_config.sta.password));
+
+  if (wifi_connect(&cfg) != ESP_OK) {
+    ESP_LOGE(TAG, "网络 -> %s 连接失败", cfg.wifi_config.sta.ssid);
   } else {
-    ESP_LOGI(TAG, "已连接到网络 - %s", wifi_cfg.wifi_config.sta.ssid);
+    ESP_LOGI(TAG, "已连接到网络 -> %s", cfg.wifi_config.sta.ssid);
     // // 关闭wifi省电模式
     // esp_wifi_set_ps(WIFI_PS_NONE);
     // 配置DNS服务器
@@ -379,6 +417,8 @@ void init(void) {
 }
 
 void test(void) {
+  // const static char *TAG = "test";
+
   // // 基础屏幕测试,仅测试能否显示变化矩形(启动自动刷新服务后,无需手动刷新)
   // uint8_t color[3] = {255,0,0};
   // while (1)
@@ -455,7 +495,7 @@ void test(void) {
   // /// 歌词获取
   // char lrc[5000] = {0};
   // fetch_music_lyric_by_url("",lrc,5000);
-  // ESP_LOGE("main", "%s",lrc);
+  // ESP_LOGE(TAG, "%s",lrc);
 
   // // LSM6DS3TRC全部使用例子
   // //  (输出XYZ分量总是一致，待优化)FIFO
@@ -465,27 +505,27 @@ void test(void) {
   //   for (int i = 0; i < 3; i++)
   //   {
   //     if ((IMU_XLx_L[i] | IMU_XLx_H[i] << 8) < 0x7FF0){
-  //       ESP_LOGI("main", "X轴加速度:%d", (int16_t)(IMU_XLx_L[i] |
+  //       ESP_LOGI(TAG, "X轴加速度:%d", (int16_t)(IMU_XLx_L[i] |
   //       IMU_XLx_H[i] << 8));
   //     }
   //     else{
-  //       ESP_LOGI("main", "X轴加速度:---");
+  //       ESP_LOGI(TAG, "X轴加速度:---");
   //     }
 
   //     if ((IMU_XLy_L[i] | IMU_XLy_H[i] << 8) < 0x7FF0){
-  //       ESP_LOGI("main", "Y轴加速度:%d", (int16_t)(IMU_XLy_L[i] |
+  //       ESP_LOGI(TAG, "Y轴加速度:%d", (int16_t)(IMU_XLy_L[i] |
   //       IMU_XLy_H[i] << 8));
   //     }
   //     else{
-  //       ESP_LOGI("main", "Y轴加速度:---");
+  //       ESP_LOGI(TAG, "Y轴加速度:---");
   //     }
 
   //     if ((IMU_XLz_L[i] | IMU_XLz_H[i] << 8) < 0x7FF0){
-  //       ESP_LOGI("main", "Z轴加速度:%d", (int16_t)(IMU_XLz_L[i] |
+  //       ESP_LOGI(TAG, "Z轴加速度:%d", (int16_t)(IMU_XLz_L[i] |
   //       IMU_XLz_H[i] << 8));
   //     }
   //     else{
-  //       ESP_LOGI("main", "Z轴加速度:---");
+  //       ESP_LOGI(TAG, "Z轴加速度:---");
   //     }
   //   }
   //   vTaskDelay(pdMS_TO_TICKS(500));
@@ -494,14 +534,14 @@ void test(void) {
   // while (1)
   // {
   //   vTaskDelay(pdMS_TO_TICKS(500));
-  //   ESP_LOGI("main", "---------------------------");
+  //   ESP_LOGI(TAG, "---------------------------");
 
   //   IMU_acceleration_value_t acceleration =
-  //   LSM6DS3TRC_gat_now_acceleration(); ESP_LOGI("main", "加速度 X:%d Y:%d
+  //   LSM6DS3TRC_gat_now_acceleration(); ESP_LOGI(TAG, "加速度 X:%d Y:%d
   //   Z:%d", acceleration.x, acceleration.y, acceleration.z);
 
   //   IMU_angular_rate_value_t angular_rate =
-  //   LSM6DS3TRC_gat_now_angular_rate(); ESP_LOGI("main", "角速度 X:%d Y:%d
+  //   LSM6DS3TRC_gat_now_angular_rate(); ESP_LOGI(TAG, "角速度 X:%d Y:%d
   //   Z:%d", angular_rate.x, angular_rate.y, angular_rate.z);
   // }
   // // (偏移标志位不会自动设置为0，待优化)自动记录
@@ -509,12 +549,12 @@ void test(void) {
   // {
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   //   IMU_D6D_data_value_t value = LSM6DS3TRC_get_D6D_data_value(true);
-  //   ESP_LOGI("main", "D6D反向偏移标识 [%d<-X轴->%d] [%d<-Y轴->%d]
+  //   ESP_LOGI(TAG, "D6D反向偏移标识 [%d<-X轴->%d] [%d<-Y轴->%d]
   //   [%d<-Z轴->%d]", value.XL, value.XH, value.YL, value.YH, value.ZL,
-  //   value.ZH); ESP_LOGI("main", "温度 %.3f ℃",
+  //   value.ZH); ESP_LOGI(TAG, "温度 %.3f ℃",
   //   (double)LSM6DS3TRC_get_now_temperature() / 1000); if
   //   (LSM6DS3TRC_get_free_fall_status())
-  //     ESP_LOGW("main", "自由落体");
+  //     ESP_LOGW(TAG, "自由落体");
   // }
 
   // //(经常出现校准失败，待优化) HSCDTD008A
@@ -522,7 +562,7 @@ void test(void) {
   // HSCDTD008A_mode_set(GS_MODE_ACTIVE);
   // HSCDTD008A_state_set(GS_STATE_NORMAL);
 
-  // ESP_LOGI("main", "5s后开始校准");
+  // ESP_LOGI(TAG, "5s后开始校准");
   // vTaskDelay(pdMS_TO_TICKS(5000));
 
   // GS_calibration_static_model_t static_model;
@@ -539,8 +579,8 @@ void test(void) {
   //     to_magnetic_flux_density_data(&output, &mfd);
   //     calculate_calibrated_GS_only_by_static_model(&static_model, &mfd);
   //     to_angle_data(GS_UNIT_OF_ANGLE_DEGREES, &mfd, &angle);
-  //     ESP_LOGI("main", "方位---[%f]--- 俯仰|%f|", angle.azimuth,
-  //     angle.pitch); ESP_LOGI("main", "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By,
+  //     ESP_LOGI(TAG, "方位---[%f]--- 俯仰|%f|", angle.azimuth,
+  //     angle.pitch); ESP_LOGI(TAG, "x-[%f] y-[%f] z-[%f]", mfd.Bx, mfd.By,
   //     mfd.Bz); vTaskDelay(pdMS_TO_TICKS(1000));
   //   }
   // }
@@ -549,16 +589,16 @@ void test(void) {
   // refresh_env_temp_hum_data(true);
   // if (env_temp_hum_data.valid)
   // {
-  //   ESP_LOGI("main", "环境温度:%.2f ℃, 环境湿度:%.2f%%",
+  //   ESP_LOGI(TAG, "环境温度:%.2f ℃, 环境湿度:%.2f%%",
   //   env_temp_hum_data.temp, env_temp_hum_data.hum);
   // }
   // else
   // {
-  //   ESP_LOGE("main", "环境温度或湿度数据无效");
+  //   ESP_LOGE(TAG, "环境温度或湿度数据无效");
   // }
 
   // // 通过AGS10获取环境TVOC数据
-  // ESP_LOGW("main", "等待预热中(每次完全掉电后上电需要预热,预计两分钟)...");
+  // ESP_LOGW(TAG, "等待预热中(每次完全掉电后上电需要预热,预计两分钟)...");
   // vTaskDelay(pdMS_TO_TICKS(120000));
   // while (1)
   // {
@@ -566,11 +606,11 @@ void test(void) {
   //   refresh_env_TVOC_data(true);
   //   if (env_TVOC_data.valid)
   //   {
-  //     ESP_LOGI("main", "环境TVOC:%" PRIu32 "ppb", env_TVOC_data.TVOC_value);
+  //     ESP_LOGI(TAG, "环境TVOC:%" PRIu32 "ppb", env_TVOC_data.TVOC_value);
   //   }
   //   else
   //   {
-  //     ESP_LOGE("main", "环境TVOC数据无效");
+  //     ESP_LOGE(TAG, "环境TVOC数据无效");
   //   }
   // }
 
@@ -579,9 +619,9 @@ void test(void) {
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   //   refresh_env_lux_data();
   //   if (env_lux_data >= 0.0f) {
-  //     ESP_LOGI("main", "环境光照:%.2f lx", env_lux_data);
+  //     ESP_LOGI(TAG, "环境光照:%.2f lx", env_lux_data);
   //   } else {
-  //     ESP_LOGE("main", "环境光照数据无效");
+  //     ESP_LOGE(TAG, "环境光照数据无效");
   //   }
   // }
 
@@ -590,20 +630,20 @@ void test(void) {
   //   vTaskDelay(pdMS_TO_TICKS(1000));
   //   refresh_battery_data();
   //   if (battery_data.charge_flag) {
-  //     ESP_LOGI("main", "电池充电中");
+  //     ESP_LOGI(TAG, "电池充电中");
   //   } else {
-  //     ESP_LOGI("main", "电池不处于充电状态");
+  //     ESP_LOGI(TAG, "电池不处于充电状态");
   //   }
   //   if (battery_data.result.battery_voltage >= 0.0f) {
-  //     ESP_LOGI("main", "电池电压:%.2fmV",
+  //     ESP_LOGI(TAG, "电池电压:%.2fmV",
   //     battery_data.result.battery_voltage);
   //   } else {
-  //     ESP_LOGE("main", "电池数据无效");
+  //     ESP_LOGE(TAG, "电池数据无效");
   //   }
   //   if (battery_data.result.battery_soc >= 0.0f) {
-  //     ESP_LOGI("main", "电池SOC:%.2f%%", battery_data.result.battery_soc);
+  //     ESP_LOGI(TAG, "电池SOC:%.2f%%", battery_data.result.battery_soc);
   //   } else {
-  //     ESP_LOGE("main", "电池数据无效");
+  //     ESP_LOGE(TAG, "电池数据无效");
   //   }
   // }
 
@@ -616,14 +656,14 @@ void test(void) {
 
   // IWEDA_handle_t music_play_IWEDA_handle = new_iweda_handle(2048, 2048);
   // if (!music_play_IWEDA_handle) {
-  //   ESP_LOGE("main", "music_play_IWEDA_handle 为空,无法绘制任务");
+  //   ESP_LOGE(TAG, "music_play_IWEDA_handle 为空,无法绘制任务");
   //   return;
   // }
 
   // int url_len = snprintf(music_play_IWEDA_handle->url_buf,
   //                        music_play_IWEDA_handle->url_buf_size, "%s", url1);
   // if (url_len >= music_play_IWEDA_handle->url_buf_size) {
-  //   ESP_LOGE("main", "url_len 超出 url_buf_size");
+  //   ESP_LOGE(TAG, "url_len 超出 url_buf_size");
   //   return;
   // }
   // iweda_change_url_if_need_redirect(music_play_IWEDA_handle);
@@ -641,7 +681,7 @@ void test(void) {
 
   //   music_FFT_UI_handle_t handle = music_FFT_UI_start(&FFT_UI_cfg, 1);
   //   if (!handle) {
-  //     ESP_LOGE("main", "handle 为空,无法绘制任务");
+  //     ESP_LOGE(TAG, "handle 为空,无法绘制任务");
   //     return;
   //   }
 
@@ -699,7 +739,7 @@ void test(void) {
   //     if (ext_io_level_service() == ESP_OK)
   //     {
   //       ext_io_ctrl.auto_read_INT = false;
-  //       ESP_LOGW("main", "扩展GPIO自动读取中断触发成功");
+  //       ESP_LOGW(TAG, "扩展GPIO自动读取中断触发成功");
   //       vibra_motor_start();
   //       vTaskDelay(pdMS_TO_TICKS(50));
   //       vibra_motor_stop();
@@ -712,7 +752,7 @@ void test(void) {
   // wifi_ap_record_t ap_info;
   // if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK)
   // {
-  //   ESP_LOGW("main", "当前连接wifi的信号强度(RSSI): %d", ap_info.rssi);
+  //   ESP_LOGW(TAG, "当前连接wifi的信号强度(RSSI): %d", ap_info.rssi);
   // }
 
   // // TTS在线文字转语音
@@ -729,7 +769,7 @@ void test(void) {
   // music_FFT_UI_handle_t FFT_UI_handle = music_FFT_UI_start(&FFT_UI_cfg, 1);
   // if (!FFT_UI_handle)
   // {
-  //   ESP_LOGE("main", "FFT_UI_handle 为空,无法启动绘制任务");
+  //   ESP_LOGE(TAG, "FFT_UI_handle 为空,无法启动绘制任务");
   //   return;
   // }
 
