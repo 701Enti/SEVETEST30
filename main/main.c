@@ -203,6 +203,53 @@ void app_main(void) {
       }
     }
 
+    static int touch_intent_count = 5000;
+    static int data_change_count = 0;
+    if (board_ctrl.p_ext_io_value->QC_TOUCH_L == 1 &&
+        board_ctrl.p_ext_io_value->QC_TOUCH_R == 1) {
+      static int last_count = 5000;
+      if (touch_intent_count > last_count) {
+        ESP_LOGW(TAG, "增加音量");
+        data_change_count = 500;
+        board_ctrl_t *b = board_status_get();
+        if (b->amplifier_volume <= 95) {
+          b->amplifier_volume += 5;
+          sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+        } else {
+          b->amplifier_volume = 100;
+          sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+          ESP_LOGW(TAG, "音量已到最大");
+        }
+      }
+      if (touch_intent_count < last_count) {
+        ESP_LOGW(TAG, "减少音量");
+        data_change_count = 500;
+        board_ctrl_t *b = board_status_get();
+        if (b->amplifier_volume >= 5) {
+          b->amplifier_volume -= 5;
+          sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+        } else {
+          b->amplifier_volume = 0;
+          sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
+          ESP_LOGW(TAG, "音量已到最小");
+        }
+      }
+      last_count = touch_intent_count;
+    } else if (board_ctrl.p_ext_io_value->QC_TOUCH_L == 0 &&
+               board_ctrl.p_ext_io_value->QC_TOUCH_R == 1) {
+      if (touch_intent_count < 10000) {
+        touch_intent_count++;
+      }
+    } else if (board_ctrl.p_ext_io_value->QC_TOUCH_L == 1 &&
+               board_ctrl.p_ext_io_value->QC_TOUCH_R == 0) {
+      if (touch_intent_count > 0) {
+        touch_intent_count--;
+      }
+    } else if (board_ctrl.p_ext_io_value->QC_TOUCH_L == 0 &&
+               board_ctrl.p_ext_io_value->QC_TOUCH_R == 0) {
+      touch_intent_count = 5000;
+    }
+
     if (xSemaphoreTake(update_ui_data_mutex, 100) == pdTRUE) {
       switch (UI_switch) {
       case -1: {
@@ -240,11 +287,13 @@ void app_main(void) {
             }
 
             static int last_pos = 0;
-            if (roundf((i / 100.0f) * (font_total_print_breath_16x(notice) + LINE_LED_NUMBER)) !=
-                last_pos) {
+            if (roundf((i / 100.0f) * (font_total_print_breath_16x(notice) +
+                                       LINE_LED_NUMBER)) != last_pos) {
               last_pos =
-                  roundf((i / 100.0f) * (font_total_print_breath_16x(notice) + LINE_LED_NUMBER));
-              static_font_raw_print_16x(LINE_LED_NUMBER - last_pos, 1, color, font_handle);
+                  roundf((i / 100.0f) * (font_total_print_breath_16x(notice) +
+                                         LINE_LED_NUMBER));
+              static_font_raw_print_16x(LINE_LED_NUMBER - last_pos, 1, color,
+                                        font_handle);
             }
           }
           xSemaphoreGive(data_mutex_media_ctrl_roll_print);
@@ -293,6 +342,38 @@ void app_main(void) {
         UI_switch = 0;
         break;
       }
+
+      // 叠加层
+      // 音量大小显示
+      if (data_change_count > 0) {
+        data_change_count--;
+        board_ctrl_t *b = board_status_get();
+
+        uint8_t color[3] = {0};
+        uint8_t background_color[3] = {255, 255, 255};
+        ui_tool_hsv2rgb((float)(b->amplifier_volume / 100.0f * 180.0f), 1.0f,
+                        1.0f, color);
+
+        static uint8_t
+            rectangle_data[(LINE_LED_NUMBER / 8 + 1) * sizeof(uint8_t) +
+                           sizeof(uint32_t)];
+
+        build_rectangle(6, 1, rectangle_data, sizeof(rectangle_data));
+        separation_draw(1, VERTICAL_LED_NUMBER, 6,
+                        RECTANGLE_MATRIX(rectangle_data),
+                        matrix_size(rectangle_data), background_color, false);
+        separation_draw(LINE_LED_NUMBER - 5, VERTICAL_LED_NUMBER, 6,
+                        RECTANGLE_MATRIX(rectangle_data),
+                        matrix_size(rectangle_data), background_color, false);
+
+        build_rectangle((int)((float)(b->amplifier_volume / 100.0f) * 20), 1,
+                        rectangle_data, sizeof(rectangle_data));
+        separation_draw(7, VERTICAL_LED_NUMBER,
+                        (int)((float)(b->amplifier_volume / 100.0f) * 20),
+                        RECTANGLE_MATRIX(rectangle_data),
+                        matrix_size(rectangle_data), color, true);
+      }
+
       xSemaphoreGive(update_ui_data_mutex);
 
       if (UI_changed) {
@@ -968,7 +1049,7 @@ esp_err_t AI_chat(void) {
         board_ctrl_t *b = board_status_get();
         b->amplifier_mute = false;
         b->amplifier_sd = true;
-        b->amplifier_volume = 60;
+        // b->amplifier_volume = 60;
         sevetest30_board_ctrl(b, BOARD_CTRL_AMPLIFIER);
 
         if (GPT_chat_handle->result != NULL) {

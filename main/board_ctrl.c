@@ -482,7 +482,7 @@ esp_err_t amplifier_vol_dp_set(board_ctrl_t *board_ctrl) {
         ESP_LOGE(TAG, "sevetest30_board_ctrl异常");
         return ESP_FAIL;
       }
-      ESP_LOGI(TAG,
+      ESP_LOGW(TAG,
                "音频功放音量数字电位器配置: [功放音量 %d] [静音 %d] [使能 %d]",
                board_ctrl->amplifier_volume, board_ctrl->amplifier_mute,
                board_ctrl->amplifier_sd);
@@ -494,7 +494,7 @@ esp_err_t amplifier_vol_dp_set(board_ctrl_t *board_ctrl) {
       ESP_LOGE(TAG, "sevetest30_board_ctrl异常");
       return ESP_FAIL;
     }
-    ESP_LOGI(TAG,
+    ESP_LOGW(TAG,
              "音频功放音量数字电位器配置: [功放音量 %d] [静音 %d] [使能 %d]",
              board_ctrl->amplifier_volume, board_ctrl->amplifier_mute,
              board_ctrl->amplifier_sd);
