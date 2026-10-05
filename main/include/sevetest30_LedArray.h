@@ -191,6 +191,15 @@ esp_err_t ledarray_deinit();
 
 esp_err_t ledarray_show_frame();
 
+
+
 void color_input(int x, int y, uint8_t *data);
 
 void color_output(int x, int y, uint8_t *data);
+
+
+
+void color_correct(uint8_t uiR, uint8_t uiG, uint8_t uiB, uint8_t *outR,
+                     uint8_t *outG, uint8_t *outB);
+void hsv_to_rgb(float H, float S, float V, uint8_t color[3]);
+void rgb_to_hsv(uint8_t color[3], float *H, float *S, float *V);

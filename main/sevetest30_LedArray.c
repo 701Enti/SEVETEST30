@@ -56,6 +56,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -93,6 +94,214 @@ const uint8_t matrix_6[7] = {0xF0, 0x80, 0x80, 0xF0, 0x90, 0x90, 0xF0};
 const uint8_t matrix_7[7] = {0xF0, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
 const uint8_t matrix_8[7] = {0xF0, 0x90, 0x90, 0xF0, 0x90, 0x90, 0xF0};
 const uint8_t matrix_9[7] = {0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0};
+
+// Gamma1.8转换表
+const uint8_t gamma18[256] = {
+    0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,
+    15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+    30,  31,  32,  34,  35,  36,  37,  38,  40,  41,  42,  43,  45,  46,  47,
+    49,  50,  51,  53,  54,  56,  57,  59,  60,  62,  63,  65,  66,  68,  70,
+    71,  73,  74,  76,  78,  79,  81,  83,  84,  86,  88,  90,  91,  93,  95,
+    97,  99,  100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124,
+    126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154,
+    156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184,
+    186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 209, 211, 213,
+    215, 217, 219, 220, 222, 224, 226, 227, 229, 231, 232, 234, 236, 237, 239,
+    240, 242, 243, 245, 246, 248, 249, 251, 252, 253, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255};
+/**
+ * @brief RGB 转 HSV
+ * @param color 输入数组: color[0]=R, color[1]=G, color[2]=B，范围0‑255
+ * @param H 输出色相 [0.0f,360.0f)
+ * @param S 输出饱和度 [0.0f,1.0f]
+ * @param V 输出明度 [0.0f,1.0f]
+ */
+void rgb_to_hsv(uint8_t color[3], float *H, float *S, float *V) {
+
+  const char *TAG = "rgb_to_hsv";
+
+  if (color == NULL || H == NULL || S == NULL || V == NULL) {
+    ESP_LOGE(TAG, "参数为空");
+    return;
+  }
+
+  // 归一到0~1
+  float r = color[0] / 255.0f;
+  float g = color[1] / 255.0f;
+  float b = color[2] / 255.0f;
+
+  float cmax = fmaxf(fmaxf(r, g), b);
+  float cmin = fminf(fminf(r, g), b);
+  float delta = cmax - cmin;
+
+  // V:明度
+  *V = cmax;
+
+  // S:饱和度
+  if (cmax < 1e-6f) {
+    *S = 0.0f;
+  } else {
+    *S = delta / cmax;
+  }
+
+  // H:色相
+  if (delta < 1e-6f) {
+    // 灰度，无色相
+    *H = 0.0f;
+  } else {
+    if (cmax == r) {
+      *H = fmodf((g - b) / delta, 6.0f);
+    } else if (cmax == g) {
+      *H = ((b - r) / delta) + 2.0f;
+    } else // cmax == b
+    {
+      *H = ((r - g) / delta) + 4.0f;
+    }
+    *H *= 60.0f;
+    if (*H < 0.0f) {
+      *H += 360.0f;
+    }
+  }
+}
+
+/**
+ * @brief HSV 转 RGB，输出写入传入的 uint8_t color[3] 数组
+ * @param H 色相  [0.0f, 360.0f)
+ * @param S 饱和度 [0.0f, 1.0f]
+ * @param V 明度   [0.0f, 1.0f]
+ * @param color 输出数组: color[0]=R, color[1]=G, color[2]=B，范围0‑255
+ */
+void hsv_to_rgb(float H, float S, float V, uint8_t color[3]) {
+  const char *TAG = "hsv_to_rgb";
+
+  if (color == NULL) {
+    ESP_LOGE(TAG, "参数为空");
+    return;
+  }
+
+  if (H < 0.0f || H >= 360.0f) {
+    ESP_LOGE(TAG, "H 超出范围 [0.0f, 360.0f)");
+    return;
+  }
+  if (S < 0.0f || S > 1.0f) {
+    ESP_LOGE(TAG, "S 超出范围 [0.0f, 1.0f)");
+    return;
+  }
+  if (V < 0.0f || V > 1.0f) {
+    ESP_LOGE(TAG, "V 超出范围 [0.0f, 1.0f)");
+    return;
+  }
+
+  // 饱和度接近0，输出灰度
+  if (S < 1e-6f) {
+    uint8_t val = (uint8_t)(V * 255.0f + 0.5f);
+    color[0] = val;
+    color[1] = val;
+    color[2] = val;
+    return;
+  }
+
+  float h_prime = H / 60.0f;
+  int i = (int)floorf(h_prime);
+  float f = h_prime - (float)i;
+
+  float c = V * S;
+  float x = c * (1.0f - fabsf(f - 1.0f));
+  float m = V - c;
+
+  float r0, g0, b0;
+  switch (i) {
+  case 0:
+    r0 = c;
+    g0 = x;
+    b0 = 0.0f;
+    break;
+  case 1:
+    r0 = x;
+    g0 = c;
+    b0 = 0.0f;
+    break;
+  case 2:
+    r0 = 0.0f;
+    g0 = c;
+    b0 = x;
+    break;
+  case 3:
+    r0 = 0.0f;
+    g0 = x;
+    b0 = c;
+    break;
+  case 4:
+    r0 = x;
+    g0 = 0.0f;
+    b0 = c;
+    break;
+  case 5:
+    r0 = c;
+    g0 = 0.0f;
+    b0 = x;
+    break;
+  default:
+    r0 = 0;
+    g0 = 0;
+    b0 = 0;
+  }
+
+  // 归一化0‑1 → 0‑255
+  float rf = (r0 + m) * 255.0f;
+  float gf = (g0 + m) * 255.0f;
+  float bf = (b0 + m) * 255.0f;
+
+  // 钳位，防止浮点越界
+  if (rf < 0.0f)
+    rf = 0.0f;
+  if (rf > 255.0f)
+    rf = 255.0f;
+  if (gf < 0.0f)
+    gf = 0.0f;
+  if (gf > 255.0f)
+    gf = 255.0f;
+  if (bf < 0.0f)
+    bf = 0.0f;
+  if (bf > 255.0f)
+    bf = 255.0f;
+
+  color[0] = (uint8_t)roundf(rf);
+  color[1] = (uint8_t)roundf(gf);
+  color[2] = (uint8_t)roundf(bf);
+}
+
+/// @brief 校正RGB颜色,使在低亮度下更符合人眼视觉
+/// @param uiR 输入的红色分量,0~255
+/// @param uiG 输入的绿色分量,0~255
+/// @param uiB 输入的蓝色分量,0~255
+/// @param outR 输出的校正后的红色分量,0~255
+/// @param outG 输出的校正后的绿色分量,0~255
+/// @param outB 输出的校正后的蓝色分量,0~255
+void color_correct(uint8_t uiR, uint8_t uiG, uint8_t uiB, uint8_t *outR,
+                   uint8_t *outG, uint8_t *outB) {
+
+  static const char *TAG = "color_correct";
+  if (outR == NULL || outG == NULL || outB == NULL) {
+    ESP_LOGE(TAG, "参数为空");
+    return;
+  }
+
+  // Gamma查表
+  uint8_t gr = gamma18[uiR];
+  uint8_t gg = gamma18[uiG];
+  uint8_t gb = gamma18[uiB];
+
+  *outR = gr;
+  *outG = gg;
+  *outB = gb;
+}
 
 /******************************自动屏幕刷新服务
  * [绘制函数本身不会刷新屏幕,需要手动或自动运行屏幕刷新,才会在屏幕上点亮]
@@ -835,15 +1044,17 @@ void static_font_raw_print_12x(int x, int y, uint8_t color[3],
     x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
     if (handle->unicode_buf[idx] >= 128) {
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 12,
-                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
-                        FONT_CHIP_READ_ZH_CN_12X_BYTES, color, true);
+        separation_draw(
+            x_buf, y, 12,
+            &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
+            FONT_CHIP_READ_ZH_CN_12X_BYTES, color, true);
       x_base += 12;
     } else { // Unicode小于128兼容ASCII字符集
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 6,
-                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
-                        FONT_CHIP_READ_ASCII_6X12_BYTES, color, true);
+        separation_draw(
+            x_buf, y, 6,
+            &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_12X_BYTES]),
+            FONT_CHIP_READ_ASCII_6X12_BYTES, color, true);
       x_base += 6;
     }
   }
@@ -870,15 +1081,17 @@ void static_font_raw_print_16x(int x, int y, uint8_t color[3],
     x_buf = x + x_base; // 获取当前选定的[idx]号字符点阵图像的起始x轴坐标
     if (handle->unicode_buf[idx] >= 128) {
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 16,
-                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
-                        FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
+        separation_draw(
+            x_buf, y, 16,
+            &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
+            FONT_CHIP_READ_ZH_CN_16X_BYTES, color, true);
       x_base += 16;
     } else { // Unicode小于128兼容ASCII字符集
       if (x_buf > -LINE_LED_NUMBER && x_buf <= LINE_LED_NUMBER)
-        separation_draw(x_buf, y, 8,
-                        &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
-                        FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
+        separation_draw(
+            x_buf, y, 8,
+            &(handle->font_buf[idx * FONT_CHIP_READ_ZH_CN_16X_BYTES]),
+            FONT_CHIP_READ_ASCII_8X16_BYTES, color, true);
       x_base += 8;
     }
   }
@@ -891,7 +1104,8 @@ void static_font_raw_print_16x(int x, int y, uint8_t color[3],
 /// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
 /// @param format 形式同printf的可变参量表
-/// @note 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
+/// @note
+/// 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
 /// @note 这种情况下，请创建字符静态句柄，并使用静态打印函数，这可以实现复用资源
 void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
   const char static *TAG = "font_raw_print_12x";
@@ -995,7 +1209,8 @@ void font_raw_print_12x(int x, int y, uint8_t color[3], char *format, ...) {
 /// 图案纵坐标(无范围限制，超出不显示)，灯板左上角设为原点（1，1），由上到下绘制
 /// @param color 字符颜色
 /// @param format 形式同printf的可变参量表
-/// @note 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
+/// @note
+/// 该函数每次调用都会申请内存并硬件读取，资源消耗大，请不要用于多次快速调用场景如动画
 /// @note 这种情况下，请创建字符静态句柄，并使用静态打印函数，这可以实现复用资源
 void font_raw_print_16x(int x, int y, uint8_t color[3], char *format, ...) {
   const static char *TAG = "font_raw_print_16x";
@@ -1662,27 +1877,32 @@ esp_err_t ledarray_show_frame() {
       // 计算行数据
       memset(ledarray_tx_buf, 0, LINE_LED_NUMBER / 8 * 3 * sizeof(uint8_t));
       for (int m = 0; m < LINE_LED_NUMBER; m++) {
+
+        uint8_t red_buf = ledarray_red_layer_buf[n * LINE_LED_NUMBER + m];
+        uint8_t green_buf = ledarray_green_layer_buf[n * LINE_LED_NUMBER + m];
+        uint8_t blue_buf = ledarray_blue_layer_buf[n * LINE_LED_NUMBER + m];
+        uint8_t outR = 0, outG = 0, outB = 0;
+
+        color_correct(red_buf, green_buf, blue_buf, &outR, &outG, &outB);
+
+        // // 测试用,直接输出原始颜色
+        // outR = red_buf;
+        // outG = green_buf;
+        // outB = blue_buf;
+
+        // 发送顺序BRG
         // 级联中，越靠后的芯片数据越先发送,16bits先发高八位,再发低八位,每个字节的位号与引脚对应，如
         // D0(低八位) -> OUT0,D1(低八位) ->
         // OUT1,D0(高八位)->OUT8,D1(高八位)->OUT9
         ledarray_tx_buf[0 * LINE_LED_NUMBER / 8 +
                         (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |=
-            ((ledarray_blue_layer_buf[n * LINE_LED_NUMBER + m] >>
-              bcm_bit_plane_idx) &
-             0x01)
-            << (m - (int)(m / 8) * 8);
+            ((outB >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
         ledarray_tx_buf[1 * LINE_LED_NUMBER / 8 +
                         (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |=
-            ((ledarray_red_layer_buf[n * LINE_LED_NUMBER + m] >>
-              bcm_bit_plane_idx) &
-             0x01)
-            << (m - (int)(m / 8) * 8);
+            ((outR >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
         ledarray_tx_buf[2 * LINE_LED_NUMBER / 8 +
                         (LINE_LED_NUMBER / 8 - 1 - (int)(m / 8))] |=
-            ((ledarray_green_layer_buf[n * LINE_LED_NUMBER + m] >>
-              bcm_bit_plane_idx) &
-             0x01)
-            << (m - (int)(m / 8) * 8);
+            ((outG >> bcm_bit_plane_idx) & 0x01) << (m - (int)(m / 8) * 8);
       }
 
       // 确保灭灯

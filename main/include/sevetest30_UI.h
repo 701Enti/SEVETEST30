@@ -277,5 +277,3 @@ void music_FFT_UI_draw(music_FFT_UI_handle_t handle);
 music_FFT_UI_handle_t music_FFT_UI_start(music_FFT_UI_cfg_t *UI_cfg,
                                          UBaseType_t priority);
 esp_err_t music_FFT_UI_stop(music_FFT_UI_handle_t handle);
-
-void ui_tool_hsv2rgb(float H, float S, float V, uint8_t color[3]);

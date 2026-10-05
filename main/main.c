@@ -351,7 +351,7 @@ void app_main(void) {
 
         uint8_t color[3] = {0};
         uint8_t background_color[3] = {255, 255, 255};
-        ui_tool_hsv2rgb((float)(b->amplifier_volume / 100.0f * 180.0f), 1.0f,
+        hsv_to_rgb((float)(b->amplifier_volume / 100.0f * 180.0f), 1.0f,
                         1.0f, color);
 
         static uint8_t
@@ -884,7 +884,7 @@ void _main_chat_wait_cb(void) {
     if (H >= 360.0f) {
       H = 0.0f;
     }
-    ui_tool_hsv2rgb(H, 1.0f, 1.0f, color);
+    hsv_to_rgb(H, 1.0f, 1.0f, color);
     build_rectangle(LINE_LED_NUMBER, 1, loading_bar, sizeof(loading_bar));
     separation_draw(1, VERTICAL_LED_NUMBER, LINE_LED_NUMBER,
                     RECTANGLE_MATRIX(loading_bar), matrix_size(loading_bar),

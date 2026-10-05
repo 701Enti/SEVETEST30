@@ -509,108 +509,6 @@ void steganography_service(cartoon_handle_t handle, int idx) {
   }
 }
 
-/**
- * @brief HSV 转 RGB，输出写入传入的 uint8_t color[3] 数组
- * @param H 色相  [0.0f, 360.0f)
- * @param S 饱和度 [0.0f, 1.0f]
- * @param V 明度   [0.0f, 1.0f]
- * @param color 输出数组: color[0]=R, color[1]=G, color[2]=B，范围0‑255
- */
-void ui_tool_hsv2rgb(float H, float S, float V, uint8_t color[3]) {
-  const char *TAG = "hsv2rgb";
-
-  if (H < 0.0f || H >= 360.0f) {
-    ESP_LOGE(TAG, "H 超出范围 [0.0f, 360.0f)");
-    return;
-  }
-  if (S < 0.0f || S > 1.0f) {
-    ESP_LOGE(TAG, "S 超出范围 [0.0f, 1.0f)");
-    return;
-  }
-  if (V < 0.0f || V > 1.0f) {
-    ESP_LOGE(TAG, "V 超出范围 [0.0f, 1.0f)");
-    return;
-  }
-
-  // 饱和度接近0，输出灰度
-  if (S < 1e-6f) {
-    uint8_t val = (uint8_t)(V * 255.0f + 0.5f);
-    color[0] = val;
-    color[1] = val;
-    color[2] = val;
-    return;
-  }
-
-  float h_prime = H / 60.0f;
-  int i = (int)floorf(h_prime);
-  float f = h_prime - (float)i;
-
-  float c = V * S;
-  float x = c * (1.0f - fabsf(f - 1.0f));
-  float m = V - c;
-
-  float r0, g0, b0;
-  switch (i) {
-  case 0:
-    r0 = c;
-    g0 = x;
-    b0 = 0.0f;
-    break;
-  case 1:
-    r0 = x;
-    g0 = c;
-    b0 = 0.0f;
-    break;
-  case 2:
-    r0 = 0.0f;
-    g0 = c;
-    b0 = x;
-    break;
-  case 3:
-    r0 = 0.0f;
-    g0 = x;
-    b0 = c;
-    break;
-  case 4:
-    r0 = x;
-    g0 = 0.0f;
-    b0 = c;
-    break;
-  case 5:
-    r0 = c;
-    g0 = 0.0f;
-    b0 = x;
-    break;
-  default:
-    r0 = 0;
-    g0 = 0;
-    b0 = 0;
-  }
-
-  // 归一化0‑1 → 0‑255
-  float rf = (r0 + m) * 255.0f;
-  float gf = (g0 + m) * 255.0f;
-  float bf = (b0 + m) * 255.0f;
-
-  // 钳位，防止浮点越界
-  if (rf < 0.0f)
-    rf = 0.0f;
-  if (rf > 255.0f)
-    rf = 255.0f;
-  if (gf < 0.0f)
-    gf = 0.0f;
-  if (gf > 255.0f)
-    gf = 255.0f;
-  if (bf < 0.0f)
-    bf = 0.0f;
-  if (bf > 255.0f)
-    bf = 255.0f;
-
-  color[0] = (uint8_t)roundf(rf);
-  color[1] = (uint8_t)roundf(gf);
-  color[2] = (uint8_t)roundf(bf);
-}
-
 // 将温度数据体现在颜色上(可以通过Kconfig修改，人体炎热寒热和舒适的对应温度)
 // 摄氏温度值+最大颜色分量大小(一般取255，这不会影响亮度大小)+输出按顺序是 R G
 // B三个分量 0 - (value_max)
@@ -937,8 +835,8 @@ void battery_UI(int x, int y) {
   // // 测试
   // soc_buf = 0;
 
-  ui_tool_hsv2rgb((float)soc_buf / 100.0f * 180.0f, 1.0f, 1.0f, color);
-
+  hsv_to_rgb((float)soc_buf / 100.0f * 180.0f, 1.0f, 1.0f, color);
+  
   // 绘制背景
   static uint8_t background[(LINE_LED_NUMBER / 8 + 1) * VERTICAL_LED_NUMBER] = {
       0};
